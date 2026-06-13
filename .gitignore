@@ -25,5 +25,5 @@ supabase/.temp
 *.sln
 *.sw?
 
-#Arquivos de teste
+#Arquivos de testee
 .playwright-mcp
