@@ -1,4 +1,4 @@
-versão: 2026-06-16
+versão: 2026-06-18
 revisado por: Codex
 próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
 
@@ -33,8 +33,9 @@ Pausar e pedir decisão explícita do usuário antes de:
 - Afetar comportamento de autenticação ou permissão.
 Para alterações documentais, de estilo ou de texto em componente isolado: executar e reportar no resultado final.
 
-## 2. Estado real do projeto em 16 de junho de 2026
-Stack real: Vite 5, React 18, TypeScript, React Router DOM, Tailwind CSS 3, shadcn/ui, Radix UI, Supabase, TanStack Query, Vitest, ESLint e Lovable.
+## 2. Estado real do projeto em 18 de junho de 2026
+Stack principal real: Vite 5, React 18, TypeScript, React Router DOM, Tailwind CSS 3, shadcn/ui, Radix UI, Supabase, TanStack Query, Vitest, ESLint e Lovable.
+Fundação paralela: Next.js 16.2.2 com App Router técnico isolado por arquivos `*.next.tsx`; ainda sem rotas de negócio, providers ou integrações migradas.
 Arquivos e diretórios principais:
 - `src/App.tsx`: roteamento atual com `BrowserRouter`.
 - `src/layouts/AdminLayout.tsx`: shell administrativo/operacional atual.
@@ -48,7 +49,9 @@ Arquivos e diretórios principais:
 - `supabase/functions/**`: Edge Functions.
 - `docs/**`: documentação de Design System, sitemap, roadmap e guias.
 - `handoff_versao_16072026.md`: handoff operacional lido nesta auditoria.
-Importante: o projeto real ainda não é Next.js; a migração para Next.js é objetivo futuro; o handoff e o `AGENTS.md` anterior tinham premissas antigas sobre Next.js, Storybook e ausência de Supabase, substituídas por esta leitura da raiz real.
+- `src/app/**`: fundação técnica paralela do Next.js.
+- `next.config.ts` e `tsconfig.next.json`: isolamento do Next.js em relação ao legado Vite.
+Importante: o produto real ainda roda em Vite; o Next.js existe apenas como fundação paralela. O handoff e o `AGENTS.md` anterior tinham premissas antigas sobre Next.js, Storybook e ausência de Supabase, substituídas por esta leitura da raiz real.
 
 ## 3. Fontes de verdade e ordem de consulta
 ### Prioridade de fontes
@@ -129,8 +132,9 @@ Regras de rota:
 - O menu contextual dentro de `/parceiros/clientes/:id` depende sempre de cliente selecionado.
 
 ## 8. Arquitetura atual e futura migração para Next.js
-Estado atual: Vite com `BrowserRouter`; providers globais em `src/App.tsx` (`QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`); alias `@/*` para `src/*`; Vite na porta `8080`.
-Objetivo futuro: migrar para Next.js com App Router.
+Estado principal: Vite com `BrowserRouter`; providers globais em `src/App.tsx` (`QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`); alias `@/*` para `src/*`; Vite na porta `8080`.
+Fundação Next.js: App Router técnico em `src/app`, Next na porta `3000`, configuração TypeScript isolada e página técnica estática `/`.
+Objetivo futuro: migrar gradualmente o produto para a fundação Next.js.
 Regras:
 - Não migrar tudo de uma vez.
 - Migrar por camadas: fundação visual, providers, layouts, rotas, páginas, dados.
@@ -151,14 +155,14 @@ Riscos: várias policies usam `USING (true)` e `WITH CHECK (true)`; algumas perm
 Regras: nunca expor service role key; nunca mover secrets de Edge Function para client-side; não alterar migrations/policies sem entender impacto em telas existentes; não inventar regras de permissão sem arquivos reais e decisão explícita.
 
 ## 10. Segurança e proteção de informações
-Risco atual confirmado: `.env` existe e está rastreado pelo Git; `.gitignore` não ignora `.env` explicitamente.
+Estado atual: `.env` existe localmente, está ignorado e foi removido do índice Git; `.env.example` contém somente nomes de variáveis.
 Regras obrigatórias:
 - Nunca commitar `.env`, credenciais ou tokens de acesso.
 - Nunca expor segredos em logs, diagnósticos, outputs, documentação ou exemplos de código.
 - Nunca copiar chaves privadas para documentação.
 - Nunca ler ou repetir valores de `.env` em resposta final.
 Quando encontrar segredo real: não repetir o valor; informar apenas o tipo de risco; recomendar rotação quando houver exposição; recomendar mover o valor para ambiente seguro.
-Ação recomendada: adicionar `.env` ao `.gitignore`; criar `.env.example` apenas com nomes de variáveis; remover `.env` do versionamento; avaliar rotação se valores reais já foram expostos no histórico.
+Risco remanescente: avaliar rotação se valores reais já foram expostos no histórico antes da remoção do versionamento.
 
 ## 11. Componentes e regras de uso
 Componentes base atuais: shadcn/ui em `src/components/ui/**`; componentes de domínio em `src/components/**`; layouts em `src/layouts/**`.
@@ -175,7 +179,7 @@ Regras:
 - Usar `cn` de `src/lib/utils.ts`.
 
 ## 12. Qualidade e validação
-Scripts identificados: `npm run dev`, `npm run build`, `npm run build:dev`, `npm run lint`, `npm run preview`, `npm run test`, `npm run test:watch`.
+Scripts identificados: `npm run dev`, `npm run dev:next`, `npm run build`, `npm run build:next`, `npm run build:dev`, `npm run lint`, `npm run preview`, `npm run start:next`, `npm run test`, `npm run test:watch`.
 Não identificado nos arquivos analisados: Storybook local nesta raiz real; script `typecheck` dedicado.
 Regras: para código, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir; para docs, registrar validação por leitura manual; nunca afirmar comando não executado; registrar falha e impacto; TypeScript atual não estrito não equivale a cobertura forte de tipos.
 Checklist final:
@@ -187,15 +191,15 @@ Checklist final:
 - Executou validações disponíveis ou registrou limitação?
 
 ## 13. Inconsistências registradas em 16 de junho de 2026
-- `AGENTS.md` anterior e `handoff_versao_16072026.md` descreviam Next.js/Storybook como stack local, mas a raiz real usa Vite/React Router.
-- `docs/PROJECT.md`, `docs/IMPLEMENTATION_ROADMAP.md` e `docs/README` de Design System falam de Next.js/Storybook, mas Storybook local não foi identificado.
+- `AGENTS.md` anterior e `handoff_versao_16072026.md` descreviam Next.js/Storybook como stack produtiva; o produto real ainda usa Vite/React Router e possui somente uma fundação Next.js paralela.
+- `docs/PROJECT.md`, `docs/IMPLEMENTATION_ROADMAP.md` e `docs/README` de Design System falam de Next.js/Storybook; Next.js agora possui fundação local, mas Storybook continua não identificado.
 - `docs/README.md` aparece no IDE do usuário, mas não foi encontrado no disco durante esta leitura.
 - O Figma atual via MCP mostrou apenas `Design Telas`; `Design System` e `Sitemap` não foram confirmados, embora estejam no handoff.
 - A busca de Design System no Figma não retornou variáveis, estilos ou componentes nesta execução.
 - O sitemap alvo usa `/cliente` e `/parceiros`; o código atual usa `/patient` e concentra operação em `/admin`.
 - O Design System alvo usa `Rethink Sans` e `#0B1720`; o código atual usa `Inter`, `Plus Jakarta Sans` e background preto via HSL.
 - O código e banco ainda usam `patient`/`patients`; o sitemap alvo usa `cliente`/`clientes`.
-- `.env` está rastreado pelo Git e não há regra explícita para ignorá-lo.
+- `.env` não está mais rastreado no estado atual, mas pode permanecer no histórico anterior até tratamento específico.
 - Várias policies Supabase usam regras amplas `true`.
 Essas inconsistências não bloqueiam toda evolução, mas devem ser consideradas em tarefas que toquem rotas, design, segurança, banco ou migração para Next.js.
 
