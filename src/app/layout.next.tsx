@@ -2,6 +2,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { AppProviders } from "./providers.next";
+import "./globals.css";
+
 export const metadata: Metadata = {
   title: "Projeto Leo Barros - Fundação Next.js",
   description: "Base técnica paralela para a migração controlada do projeto.",
@@ -14,7 +17,9 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

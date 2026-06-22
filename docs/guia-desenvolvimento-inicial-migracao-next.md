@@ -100,7 +100,6 @@ src/app/
   globals.css
   (public)/
     page.tsx
-    form/[token]/page.tsx
   cliente/
     layout.tsx
     login/page.tsx
@@ -316,4 +315,3 @@ Criar um plano de execucao da Fase 0 e Fase 1:
 3. Gerar base Next.js.
 4. Migrar providers, Tailwind e componentes UI.
 5. Subir primeira rota `/parceiros/dashboard` em Next.
-

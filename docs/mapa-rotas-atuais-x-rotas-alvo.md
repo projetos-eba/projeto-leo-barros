@@ -30,7 +30,7 @@ Regras:
 | `/` | `Login` | `/cliente/login` | Cliente | Parcial | Login atual autentica CPF/email e redireciona por role. O sitemap pede login por perfil. |
 | `/` | `Login` | `/parceiros/login` | Parceiros | Parcial | Pode reaproveitar UI, mas precisa separar fluxo e copy de parceiro. |
 | `/` | `Login` | `/admin/login` | Admin | Parcial | Admin restrito deve ter rota propria. |
-| `/form/:token` | `FormFill` | Decisao | Publica | Decisao | Rota publica por token nao aparece no sitemap. Recomendo manter como excecao documentada ate decisao. |
+| `/form/:token` | `FormFill` | Fluxo autenticado do Cliente, rota a definir | Cliente | Legada/provisoria | Preservar no Vite por compatibilidade. Nao migrar diretamente para `/form/[token]`; o formulario pertence a um paciente e deve futuramente ser preenchido dentro da area autenticada do Cliente. |
 | Nao existe | Nao existe | `/cliente/cadastro` | Cliente | Nova | Criar quando cadastro de cliente for escopo. |
 | Nao existe | Nao existe | `/cliente/recuperar-senha` | Cliente | Nova | Pode reaproveitar fluxo visual do login. |
 | Nao existe | Nao existe | `/cliente/onboarding` | Cliente | Nova | Depende de campos iniciais e regras de negocio. |
@@ -158,7 +158,6 @@ Regras:
 src/app/
   (public)/
     page.tsx
-    form/[token]/page.tsx
   cliente/
     login/page.tsx
     cadastro/page.tsx
@@ -216,10 +215,9 @@ src/app/
 
 ## 8. Pendencias de decisao
 
-- O que fazer com `/form/:token`: manter publica, mover ou documentar como excecao.
+- Definir a rota autenticada e o modelo de navegacao para formularios atribuidos ao Cliente. A migracao publica `/form/:token` para `/form/[token]` esta suspensa.
 - Onde entram `Prescricoes`, `Fotos` e `Formularios`, pois nao aparecem claramente no sitemap alvo.
 - Se `/admin/diets` vira biblioteca/cadastro, editor contextual ou ambos.
 - Se `AdminDashboard` atual pertence integralmente a Parceiros.
 - Como separar usuario `admin` de `parceiro` no Supabase auth.
 - Quando aplicar `Rethink Sans` e tokens alvo sem perder fidelidade das telas atuais.
-

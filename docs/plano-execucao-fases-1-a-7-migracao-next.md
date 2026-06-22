@@ -175,28 +175,28 @@ Entregue Resumo, Arquivos alterados, Validação, Comandos executados, Limitaç�
 
 ### Objetivo
 
-Migrar login, formulário público por token e página não encontrada.
+Migrar somente os fluxos públicos aprovados e a página não encontrada. O formulário atribuído a paciente não faz parte deste grupo.
 
 ### Análise
 
-A rota `/` concentra login de Cliente e Admin/Parceiro. O sitemap exige logins separados. `/form/:token` não consta no sitemap, mas possui funcionalidade real e deve ser preservada como exceção pública até decisão.
+A rota `/` concentra login de Cliente e Admin/Parceiro. O sitemap exige logins separados. `/form/:token` possui funcionalidade real, mas foi reclassificada como implementação Vite legada/provisória: o formulário pertence ao contexto de um paciente e seu destino correto é um fluxo autenticado do Cliente.
 
 Decisões necessárias:
 
 - Manter login único temporário ou criar três logins.
 - Destino pós-login de Parceiro e Admin.
-- Preservação da rota `/form/:token`.
+- Preservação temporária da rota Vite `/form/:token`, sem tratá-la como alvo público do Next.
 
 ### Escopo sugerido
 
 - Migrar `NotFound` para `not-found.tsx`.
-- Migrar `/form/:token` para `/form/[token]`.
 - Migrar o login apenas após decisão explícita.
 - Preservar o fluxo Supabase atual nesta fase.
+- Planejar o redesenho de formulários em fase própria, envolvendo auth, ownership, Supabase e RLS.
 
 ### Critério de conclusão
 
-- Formulário público mantém comportamento por token.
+- A rota legada `/form/:token` permanece intacta no Vite e nenhuma `/form/[token]` é criada.
 - Login aprovado funciona sem regressão.
 - Rotas legadas continuam disponíveis ou têm redirect aprovado.
 
@@ -213,7 +213,8 @@ Antes de editar, apresente para minha decisão:
 
 Após minha decisão:
 - Migre somente as rotas públicas aprovadas.
-- Preserve /form/:token como fluxo funcional, usando /form/[token] no App Router.
+- Preserve /form/:token somente no Vite como fluxo legado/provisório.
+- Não crie /form/[token]; o fluxo futuro de formulários será autenticado na área Cliente e tratado em fase própria.
 - Crie not-found.tsx.
 - Não altere comportamento de autenticação, Supabase, RLS ou Edge Functions.
 - Não remova rotas Vite e não crie redirects sem aprovação explícita.

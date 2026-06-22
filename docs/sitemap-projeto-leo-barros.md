@@ -63,6 +63,19 @@ Objetivo: concentrar a experiencia do usuario final em rotina diaria, dieta, tre
 - `Treino` abriga Forca Relativa porque a ferramenta depende de exercicios, carga e programa atual.
 - `Detalhes do treino` pode ser acessado por Treino ou Minha Evolucao, mas a URL deve preservar o contexto de origem.
 
+### 3.4 Formularios atribuidos ao Cliente
+
+O fluxo correto de produto para formularios e autenticado e contextual:
+
+1. o profissional/parceiro cria ou seleciona um formulario;
+2. o formulario e atribuido a um cliente especifico;
+3. o cliente recebe a pendencia dentro do proprio perfil autenticado;
+4. o cliente preenche e envia o formulario dentro da area Cliente.
+
+A implementacao Vite atual em `/form/:token` permanece apenas como rota legada/provisoria para compatibilidade. Ela nao e uma rota publica alvo do sitemap e nao deve ser migrada diretamente para `/form/[token]`.
+
+A rota autenticada definitiva ainda nao foi definida. Essa decisao exige fase propria envolvendo navegacao, auth, ownership, Supabase e RLS.
+
 ## 4. Jornada Parceiros
 
 Prefixo: `/parceiros`

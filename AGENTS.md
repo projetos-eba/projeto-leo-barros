@@ -1,4 +1,4 @@
-versão: 2026-06-18
+versão: 2026-06-19
 revisado por: Codex
 próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
 
@@ -33,9 +33,9 @@ Pausar e pedir decisão explícita do usuário antes de:
 - Afetar comportamento de autenticação ou permissão.
 Para alterações documentais, de estilo ou de texto em componente isolado: executar e reportar no resultado final.
 
-## 2. Estado real do projeto em 18 de junho de 2026
+## 2. Estado real do projeto em 19 de junho de 2026
 Stack principal real: Vite 5, React 18, TypeScript, React Router DOM, Tailwind CSS 3, shadcn/ui, Radix UI, Supabase, TanStack Query, Vitest, ESLint e Lovable.
-Fundação paralela: Next.js 16.2.2 com App Router técnico isolado por arquivos `*.next.tsx`; ainda sem rotas de negócio, providers ou integrações migradas.
+Fundação paralela: Next.js 16.2.2 com App Router técnico isolado por arquivos `*.next.tsx`; Fases 2, 3, 3.5, 4.0 e a auditoria 4.1 encerradas, ainda sem telas de negócio ou integrações migradas para o Next.
 Arquivos e diretórios principais:
 - `src/App.tsx`: roteamento atual com `BrowserRouter`.
 - `src/layouts/AdminLayout.tsx`: shell administrativo/operacional atual.
@@ -50,6 +50,20 @@ Arquivos e diretórios principais:
 - `docs/**`: documentação de Design System, sitemap, roadmap e guias.
 - `handoff_versao_16072026.md`: handoff operacional lido nesta auditoria.
 - `src/app/**`: fundação técnica paralela do Next.js.
+- `src/app/providers.next.tsx`: Query Client, Tooltip e toasters no Next.js.
+- `src/app/globals.css`: cópia controlada dos tokens e classes de `src/index.css`.
+- `src/app/foundation-validation.next.tsx`: smoke técnico de Tooltip e toasters na página Next.
+- `src/app/providers.next.test.tsx`: testes mínimos da árvore de providers.
+- `src/test/vite-bootstrap.smoke.test.tsx`: smoke do bootstrap Vite com `App` mockado.
+- `src/test/next-public-shell.smoke.test.tsx`: smoke da página pública Next existente dentro dos providers.
+- `src/test/legacy-form-route.contract.test.ts`: contrato que preserva `/form/:token` apenas como implementação Vite legada e impede tratá-la como rota pública alvo do Next.
+- `docs/estrategia-mocks-supabase-testes.md`: estratégia de mocks sem banco, rede ou ambiente real.
+- `src/components/auth/login-view.tsx`: apresentação controlada do login, desacoplada de Supabase, React Router e Sonner.
+- `src/components/auth/login-view.test.tsx`: testes de renderização, credenciais e loading do login apresentacional.
+- `docs/estrategia-autenticacao-perfis-next.md`: auditoria dos perfis e estratégia recomendada de login único temporário antes da separação Cliente/Parceiro/Admin.
+- `src/components/shells/authenticated-shell.next.tsx`: shell autenticado compartilhado por Cliente, Parceiros e Admin.
+- `src/components/shells/shell-placeholder.next.tsx`: placeholder técnico reutilizável dos shells.
+- `src/app/(public)/**`, `src/app/cliente/**`, `src/app/parceiros/**` e `src/app/admin/**`: layouts e páginas técnicas da Fase 3.
 - `next.config.ts` e `tsconfig.next.json`: isolamento do Next.js em relação ao legado Vite.
 Importante: o produto real ainda roda em Vite; o Next.js existe apenas como fundação paralela. O handoff e o `AGENTS.md` anterior tinham premissas antigas sobre Next.js, Storybook e ausência de Supabase, substituídas por esta leitura da raiz real.
 
@@ -117,7 +131,8 @@ Em código novo, usar sempre os termos da coluna "Perfil" e os prefixos de rota 
 Fonte alvo: `docs/sitemap-projeto-leo-barros.md`.
 Perfis e prefixos oficiais alvo: Cliente `/cliente`; Parceiros `/parceiros`; Admin `/admin`.
 Rotas reais atuais em `src/App.tsx`:
-- Pública: `/`, `/form/:token`.
+- Pública: `/`.
+- Tecnicamente pública, porém legada/provisória: `/form/:token`. O destino correto de produto é um fluxo autenticado do Cliente/Paciente, ainda sem rota alvo definida.
 - Admin atual: `/admin`, `/admin/dashboard`, `/admin/patients`, `/admin/patients/:id`, `/admin/diets`, `/admin/workouts`, `/admin/exams`, `/admin/prescriptions`, `/admin/foods`, `/admin/exercises`, `/admin/techniques`, `/admin/forms`, `/admin/forms/new`, `/admin/forms/:id/edit`, `/admin/materials`, `/admin/agenda`.
 - Paciente atual: `/patient`, `/patient/diet`, `/patient/workout`, `/patient/evolution`, `/patient/exams`, `/patient/prescriptions`.
 Inconsistência principal:
@@ -130,10 +145,11 @@ Regras de rota:
 - Em rotas novas, preferir `/cliente`, `/parceiros` e `/admin`.
 - Não remover rotas antigas sem plano de migração/redirect.
 - O menu contextual dentro de `/parceiros/clientes/:id` depende sempre de cliente selecionado.
+- Não migrar `/form/:token` diretamente para `/form/[token]`. O fluxo futuro deve ser redesenhado em fase própria dentro da experiência autenticada do Cliente, considerando auth, ownership, Supabase e RLS.
 
 ## 8. Arquitetura atual e futura migração para Next.js
 Estado principal: Vite com `BrowserRouter`; providers globais em `src/App.tsx` (`QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`); alias `@/*` para `src/*`; Vite na porta `8080`.
-Fundação Next.js: App Router técnico em `src/app`, Next na porta `3000`, configuração TypeScript isolada e página técnica estática `/`.
+Fundação Next.js: App Router técnico em `src/app`, Next na porta `3000`, configuração TypeScript isolada, providers globais, Tailwind e shells técnicos em `/`, `/cliente/inicio`, `/parceiros/dashboard` e `/admin/dashboard`. As Fases 2 e 3 foram validadas por testes e builds em 18 de junho de 2026.
 Objetivo futuro: migrar gradualmente o produto para a fundação Next.js.
 Regras:
 - Não migrar tudo de uma vez.
@@ -181,6 +197,7 @@ Regras:
 ## 12. Qualidade e validação
 Scripts identificados: `npm run dev`, `npm run dev:next`, `npm run build`, `npm run build:next`, `npm run build:dev`, `npm run lint`, `npm run preview`, `npm run start:next`, `npm run test`, `npm run test:watch`.
 Não identificado nos arquivos analisados: Storybook local nesta raiz real; script `typecheck` dedicado.
+Baseline de testes em 19 de junho de 2026 após a Fase 4.0: `6` arquivos e `13` testes aprovados. Playwright `1.60.0` está instalado, mas não há configuração E2E versionada nem `@playwright/test` instalado diretamente.
 Regras: para código, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir; para docs, registrar validação por leitura manual; nunca afirmar comando não executado; registrar falha e impacto; TypeScript atual não estrito não equivale a cobertura forte de tipos.
 Checklist final:
 - Respeita este `AGENTS.md`, sitemap quando envolve navegação, Design System ou divergência registrada?

@@ -46,7 +46,8 @@ Areas atuais:
 
 - Admin: `/admin`, `/admin/dashboard`, `/admin/patients`, `/admin/patients/:id`, `/admin/diets`, `/admin/foods`, `/admin/exercises`, `/admin/techniques`, `/admin/forms`, `/admin/materials`, `/admin/agenda`.
 - Paciente: `/patient`, `/patient/diet`, `/patient/workout`, `/patient/evolution`, `/patient/exams`, `/patient/prescriptions`.
-- Publica: `/` e `/form/:token`.
+- Publica: `/`.
+- Legada/provisoria com acesso tecnico por token: `/form/:token`. Nao e rota publica alvo do Next; o destino futuro deve estar na area autenticada do Cliente.
 
 Ponto critico: o sitemap alvo informado anteriormente usa `/cliente`, `/parceiros` e `/admin`, enquanto o codigo atual usa `/patient` e `/admin/patients`. Essa diferenca precisa virar um plano de migracao de rotas, nao uma troca silenciosa.
 
@@ -271,4 +272,3 @@ Minha recomendacao para comecar:
 3. Criar um documento de mapa de rotas atual x sitemap alvo.
 4. Preparar uma branch/pasta de migracao Next.js.
 5. Migrar primeiro `/admin/dashboard` para o papel de `/parceiros/dashboard`, porque essa tela valida layout, cards, graficos, filtros, estados vazios e Supabase.
-
