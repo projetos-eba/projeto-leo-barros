@@ -1,1 +1,7 @@
 project_id = "bwyiuwxjzvssbjfzazhe"
+
+[functions.provision-partner]
+verify_jwt = true
+
+[functions.provision-client-for-partner]
+verify_jwt = true
