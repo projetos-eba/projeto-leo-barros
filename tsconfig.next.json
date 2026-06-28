@@ -33,6 +33,9 @@
     "next-env.d.ts",
     "src/app/**/*.ts",
     "src/app/**/*.tsx",
+    "src/lib/**/*.ts",
+    "src/lib/**/*.tsx",
+    "src/proxy.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

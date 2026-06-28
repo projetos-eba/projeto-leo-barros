@@ -10,19 +10,31 @@ type LoginCredentials = {
 };
 
 type LoginViewProps = LoginCredentials & {
+  errorMessage?: string | null;
   isLoading: boolean;
+  loginIdAutoComplete?: string;
+  loginIdLabel?: string;
+  loginIdPlaceholder?: string;
   onLoginIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: (credentials: LoginCredentials) => void;
+  passwordAutoComplete?: string;
+  supportText?: string;
 };
 
 export function LoginView({
+  errorMessage = null,
   isLoading,
   loginId,
+  loginIdAutoComplete = "username",
+  loginIdLabel = "CPF ou E-mail",
+  loginIdPlaceholder = "000.000.000-00 ou seu@email.com",
   onLoginIdChange,
   onPasswordChange,
   onSubmit,
   password,
+  passwordAutoComplete = "current-password",
+  supportText = "Acesso restrito a pacientes cadastrados",
 }: LoginViewProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
@@ -67,14 +79,15 @@ export function LoginView({
                 htmlFor="loginId"
                 className="text-sm text-muted-foreground"
               >
-                CPF ou E-mail
+                {loginIdLabel}
               </Label>
               <div className="relative">
                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="loginId"
                   type="text"
-                  placeholder="000.000.000-00 ou seu@email.com"
+                  autoComplete={loginIdAutoComplete}
+                  placeholder={loginIdPlaceholder}
                   value={loginId}
                   onChange={(event) => onLoginIdChange(event.target.value)}
                   className="pl-10 bg-accent border-border focus:border-primary h-12"
@@ -95,6 +108,7 @@ export function LoginView({
                 <Input
                   id="password"
                   type="password"
+                  autoComplete={passwordAutoComplete}
                   placeholder="••••••••"
                   value={password}
                   onChange={(event) => onPasswordChange(event.target.value)}
@@ -111,10 +125,19 @@ export function LoginView({
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
+
+            {errorMessage ? (
+              <p
+                className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                role="alert"
+              >
+                {errorMessage}
+              </p>
+            ) : null}
           </form>
 
           <p className="text-center text-xs text-muted-foreground mt-6">
-            Acesso restrito a pacientes cadastrados
+            {supportText}
           </p>
         </div>
       </div>
