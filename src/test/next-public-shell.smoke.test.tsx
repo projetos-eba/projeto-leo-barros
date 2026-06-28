@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import NextFoundationPage from "@/app/(public)/page.next";
-import { AppProviders } from "@/app/providers.next";
+import NextFoundationPage from "@/app/(public)/page";
+import { AppProviders } from "@/app/providers";
 
 describe("shell público Next existente", () => {
   it("renderiza a página técnica atual dentro dos providers sem crash", () => {

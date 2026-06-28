@@ -4,6 +4,11 @@ próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
 
 # AGENTS.md
 
+## Atualizacao Fase F.0 - 28 de junho de 2026
+
+O Next.js App Router e a base oficial do produto. A camada Vite/React Router legada foi removida do caminho funcional principal. Se houver conflito entre secoes historicas deste arquivo e a Fase F.0, considerar a Fase F.0 e `docs/fase-f0-next-oficial.md` como estado operacional mais recente.
+
+
 > **NUNCA:**
 > - Inventar stack, rota, componente, integração, regra de negócio ou estrutura do Figma.
 > - Alterar código sem consultar as fontes relevantes listadas neste arquivo.
@@ -77,7 +82,6 @@ Importante: o produto real ainda roda em Vite; o Next.js existe apenas como fund
 | 4 | `docs/sitemap-projeto-leo-barros.md` |
 | 5 | Código real em `src/` e `supabase/` |
 | 6 | Documentação em `docs/` |
-| 7 | `handoff_versao_16072026.md` (somente contexto histórico) |
 
 ### Arquivos por tipo de tarefa
 | Contexto da tarefa | Arquivos a ler primeiro |
