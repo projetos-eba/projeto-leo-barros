@@ -55,6 +55,14 @@ const rawFixture: DashboardRawData = {
       started_at: "2026-05-10T10:00:00.000Z",
       status: "active",
     },
+    {
+      created_at: "2026-06-12T10:00:00.000Z",
+      ended_at: null,
+      partner_id: "partner-4",
+      patient_id: "patient-3",
+      started_at: "2026-06-12T10:00:00.000Z",
+      status: "active",
+    },
   ],
   partners: [
     {
@@ -70,6 +78,20 @@ const rawFixture: DashboardRawData = {
       professional_name: "Parceiro Dois",
       professional_type: "personal_trainer",
       profile_id: "profile-2",
+    },
+    {
+      created_at: "2026-06-01T10:00:00.000Z",
+      id: "partner-3",
+      professional_name: "Parceiro Três",
+      professional_type: "nutricionista",
+      profile_id: "profile-3",
+    },
+    {
+      created_at: "2026-06-02T10:00:00.000Z",
+      id: "partner-4",
+      professional_name: "Parceiro Quatro",
+      professional_type: "medico",
+      profile_id: "profile-4",
     },
   ],
   payments: [
@@ -138,6 +160,22 @@ const rawFixture: DashboardRawData = {
       id: "profile-2",
       role: "parceiro",
       status: "active",
+    },
+    {
+      created_at: "2026-06-01T10:00:00.000Z",
+      display_name: "Parceiro Três",
+      email: "partner-3@example.invalid",
+      id: "profile-3",
+      role: "parceiro",
+      status: "suspended",
+    },
+    {
+      created_at: "2026-06-02T10:00:00.000Z",
+      display_name: "Parceiro Quatro",
+      email: "partner-4@example.invalid",
+      id: "profile-4",
+      role: "parceiro",
+      status: "disabled",
     },
   ],
   subscriptions: [
@@ -216,6 +254,15 @@ describe("dashboard metrics", () => {
       expect.objectContaining({ count: 1, label: "Pro Mensal" }),
       expect.objectContaining({ count: 1, label: "Pro Anual" }),
     ]);
+    expect(dashboard.professionalStatusDistribution).toEqual([
+      expect.objectContaining({ count: 2, id: "active", label: "Ativos" }),
+      expect.objectContaining({ count: 1, id: "suspended", label: "Suspensos" }),
+      expect.objectContaining({ count: 1, id: "inactive", label: "Inativos" }),
+    ]);
+    expect(dashboard.bottomMetrics.find((item) => item.id === "newClients")).toEqual(expect.objectContaining({
+      delta: "+100%",
+      value: "1",
+    }));
     expect(dashboard.approvals[0]).toEqual(expect.objectContaining({ email: "partner-1@example.invalid" }));
     expect(dashboard.movements[0]).toEqual(expect.objectContaining({ title: "Assinatura ativada" }));
   });

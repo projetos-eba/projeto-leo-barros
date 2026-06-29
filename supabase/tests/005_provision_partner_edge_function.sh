@@ -298,8 +298,6 @@ valid_payload="$(
       email: $email,
       phone: "+5511991234567",
       professionalType: "medico",
-      professionalRegistryType: "crm",
-      professionalRegistryNumber: "edge-12345",
       displayName: "Edge Target Partner",
       idempotencyKey: $idempotencyKey
     }'
@@ -353,7 +351,7 @@ select
   profile.phone || '|' ||
   partner.professional_name || '|' ||
   partner.professional_type || '|' ||
-  partner.professional_registry_type || '|' ||
+  coalesce(partner.professional_registry_type, 'sem-registro') || '|' ||
   operation.status || '|' ||
   operation.invite_status
 from public.profiles as profile
@@ -365,7 +363,7 @@ SQL
 )"
 
 if [[ "${stored_tuple}" != \
-  "parceiro|active|+5511991234567|Edge Target Partner|medico|crm|completed|pending_delivery" ]]; then
+  "parceiro|active|+5511991234567|Edge Target Partner|medico|sem-registro|completed|pending_delivery" ]]; then
   echo "FAIL: dados provisionados não correspondem ao contrato."
   exit 1
 fi
@@ -447,6 +445,24 @@ missing_phone_status="$(
 if [[ "${missing_phone_status}" != "400" ]] ||
   [[ "$(jq -r '.error.fields.phone' /tmp/leo-provision-missing-phone.json)" != "required" ]]; then
   echo "FAIL: telefone ausente deveria retornar payload inválido."
+  exit 1
+fi
+
+partial_registry_payload="$(
+  printf '%s' "${valid_payload}" |
+    jq --arg idempotencyKey "a1000000-0000-4000-8000-000000000004" \
+      '.idempotencyKey = $idempotencyKey | .professionalRegistryType = "crm"'
+)"
+partial_registry_status="$(
+  invoke_function \
+    "${admin_token}" \
+    "${partial_registry_payload}" \
+    /tmp/leo-provision-partial-registry.json
+)"
+
+if [[ "${partial_registry_status}" != "400" ]] ||
+  [[ "$(jq -r '.error.fields.professionalRegistryNumber' /tmp/leo-provision-partial-registry.json)" != "required" ]]; then
+  echo "FAIL: registro profissional parcial deveria retornar payload inválido."
   exit 1
 fi
 

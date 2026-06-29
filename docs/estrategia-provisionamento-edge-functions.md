@@ -168,13 +168,11 @@ Chamador permitido: usuário autenticado cujo:
   "displayName": "Nome do parceiro",
   "professionalName": "Nome profissional",
   "professionalType": "nutricionista",
-  "professionalRegistryType": "CRN",
-  "professionalRegistryNumber": "12345",
   "idempotencyKey": "uuid-do-cliente"
 }
 ```
 
-Campos de registro profissional continuam opcionais, mas devem ser enviados em conjunto.
+Campos de registro profissional são opcionais no MVP e, se enviados futuramente, devem ser enviados em conjunto.
 
 ### Sequência
 
@@ -738,4 +736,3 @@ Elas devem ser tratadas como implementação legada e substituídas em fase pró
 - [Supabase — secrets e chaves em Edge Functions](https://supabase.com/docs/guides/functions/secrets)
 - [Supabase Auth Admin — `inviteUserByEmail`](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail)
 - [Supabase Auth Admin — `generateLink`](https://supabase.com/docs/reference/javascript/auth-admin-generatelink)
-

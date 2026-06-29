@@ -9,13 +9,19 @@ select tables_are(
   'public',
   array[
     'admins',
+    'billing_payments',
+    'billing_plans',
     'partner_clients',
+    'partner_documents',
+    'partner_subscriptions',
     'partners',
     'patients',
+    'platform_activity_events',
     'profiles',
-    'provisioning_operations'
+    'provisioning_operations',
+    'support_tickets'
   ],
-  'public contém a fundação limpa e o ledger de provisionamento'
+  'public contém a fundação limpa, o ledger de provisionamento e o domínio operacional aprovado'
 );
 
 select has_column('public', 'profiles', 'user_id', 'profiles.user_id existe');

@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { AdminDashboardView } from "./admin-dashboard-view";
+import { AdminProfessionalsView } from "./admin-professionals-view";
 import { AccessBlocked } from "@/components/auth/access-blocked";
 import { requireShellRole } from "@/lib/auth/next-guards";
-import { fetchAdminDashboardData } from "@/lib/admin/dashboard-data";
+import { fetchAdminProfessionalsData } from "@/lib/admin/professionals-data";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboardPage() {
+export default async function AdminProfessionalsPage() {
   const access = await requireShellRole("admin");
 
   if (!access.allowed && access.action === "redirect") {
@@ -23,7 +23,7 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const dashboard = await fetchAdminDashboardData();
+  const professionals = await fetchAdminProfessionalsData();
 
-  return <AdminDashboardView dashboard={dashboard} />;
+  return <AdminProfessionalsView professionals={professionals} />;
 }

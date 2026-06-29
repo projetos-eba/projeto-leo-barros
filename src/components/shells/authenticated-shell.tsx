@@ -88,7 +88,7 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
     title: "Leonardo Barros",
     navigation: [
       { href: "/admin/dashboard", icon: LayoutDashboard, label: "Visão Geral", implemented: true },
-      { href: "/admin/profissionais", icon: UserRoundCog, label: "Parceiros/Profissionais" },
+      { href: "/admin/profissionais", icon: UserRoundCog, label: "Parceiros/Profissionais", implemented: true },
       { href: "/admin/financeiro", icon: WalletCards, label: "Financeiro & Planos" },
       { href: "/admin/suporte", icon: HelpCircle, label: "Suporte" },
       { href: "/admin/configuracoes", icon: Settings, label: "Configurações" },

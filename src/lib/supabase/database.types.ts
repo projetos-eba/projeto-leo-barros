@@ -38,6 +38,108 @@ export type Database = {
           },
         ]
       }
+      billing_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          due_at: string
+          id: string
+          paid_at: string | null
+          partner_id: string
+          payment_kind: string
+          status: string
+          stripe_payment_intent_id: string | null
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          due_at: string
+          id?: string
+          paid_at?: string | null
+          partner_id: string
+          payment_kind: string
+          status: string
+          stripe_payment_intent_id?: string | null
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          due_at?: string
+          id?: string
+          paid_at?: string | null
+          partner_id?: string
+          payment_kind?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_payments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "partner_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          name: string
+          price_cents: number
+          slug: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_interval: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price_cents: number
+          slug: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          slug?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partner_clients: {
         Row: {
           created_at: string
@@ -85,6 +187,110 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          due_at: string | null
+          id: string
+          partner_id: string
+          reviewed_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          due_at?: string | null
+          id?: string
+          partner_id: string
+          reviewed_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          due_at?: string | null
+          id?: string
+          partner_id?: string
+          reviewed_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_documents_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          partner_id: string
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end: string
+          current_period_start: string
+          id?: string
+          partner_id: string
+          plan_id: string
+          status: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          partner_id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_subscriptions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -167,6 +373,74 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_activity_events: {
+        Row: {
+          actor_profile_id: string | null
+          created_at: string
+          detail: string
+          event_type: string
+          id: string
+          metadata: Json
+          partner_id: string | null
+          patient_id: string | null
+          payment_id: string | null
+          title: string
+        }
+        Insert: {
+          actor_profile_id?: string | null
+          created_at?: string
+          detail: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          partner_id?: string | null
+          patient_id?: string | null
+          payment_id?: string | null
+          title: string
+        }
+        Update: {
+          actor_profile_id?: string | null
+          created_at?: string
+          detail?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          partner_id?: string | null
+          patient_id?: string | null
+          payment_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_activity_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_activity_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_activity_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_activity_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "billing_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -283,6 +557,63 @@ export type Database = {
             columns: ["resource_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          opened_by_profile_id: string | null
+          partner_id: string
+          priority: string
+          resolved_at: string | null
+          sla_due_at: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opened_by_profile_id?: string | null
+          partner_id: string
+          priority?: string
+          resolved_at?: string | null
+          sla_due_at: string
+          status?: string
+          subject: string
+          ticket_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opened_by_profile_id?: string | null
+          partner_id?: string
+          priority?: string
+          resolved_at?: string | null
+          sla_due_at?: string
+          status?: string
+          subject?: string
+          ticket_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_opened_by_profile_id_fkey"
+            columns: ["opened_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]

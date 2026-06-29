@@ -1,3 +1,11 @@
+import {
+  effectiveProfessionalStatus,
+  isSubscriptionActiveAt,
+  latestSubscriptionForPartner,
+} from "./professional-status";
+
+export { isSubscriptionActiveAt } from "./professional-status";
+
 export type BillingPlan = {
   billing_interval: string;
   currency: string;
@@ -127,6 +135,14 @@ export type DashboardPlanSlice = {
   value: number;
 };
 
+export type DashboardProfessionalStatusSlice = {
+  color: string;
+  count: number;
+  id: "active" | "suspended" | "inactive";
+  label: string;
+  value: number;
+};
+
 export type DashboardAlert = {
   action: string;
   body: string;
@@ -171,12 +187,17 @@ export type AdminDashboardData = {
   movements: DashboardMovement[];
   periodLabel: string;
   planDistribution: DashboardPlanSlice[];
+  professionalStatusDistribution: DashboardProfessionalStatusSlice[];
 };
 
-const activeSubscriptionStatuses = new Set(["active", "trialing"]);
 const openTicketStatuses = new Set(["open", "in_progress"]);
 const pendingDocumentStatuses = new Set(["pending", "in_review", "expired"]);
 const planColors = ["#2d9cff", "#15c8c3", "#8d5cf6", "#58d881", "#f0a52b"];
+const professionalStatusColors: Record<DashboardProfessionalStatusSlice["id"], string> = {
+  active: "#58d881",
+  inactive: "#8998a4",
+  suspended: "#f0a52b",
+};
 
 function parseDate(value: string | null) {
   return value ? new Date(value) : null;
@@ -256,21 +277,6 @@ export function monthlyizePlanPrice(plan: BillingPlan | undefined) {
   return plan.billing_interval === "yearly" ? Math.round(plan.price_cents / 12) : plan.price_cents;
 }
 
-export function isSubscriptionActiveAt(subscription: PartnerSubscription, at: Date) {
-  const startsAt = parseDate(subscription.current_period_start);
-  const endsAt = parseDate(subscription.current_period_end);
-  const canceledAt = parseDate(subscription.canceled_at);
-
-  return Boolean(
-    startsAt &&
-      endsAt &&
-      startsAt <= at &&
-      endsAt >= at &&
-      activeSubscriptionStatuses.has(subscription.status) &&
-      (!canceledAt || canceledAt > at),
-  );
-}
-
 function isPartnerProfileActive(partner: PartnerRecord, profilesById: Map<string, PartnerProfile>) {
   const profile = profilesById.get(partner.profile_id);
   return profile?.role === "parceiro" && profile.status === "active";
@@ -307,6 +313,18 @@ function activeClientIdsAt(raw: DashboardRawData, activePartnerIds: Set<string>,
   );
 }
 
+function newClientIdsWithin(raw: DashboardRawData, activePartnerIds: Set<string>, start: Date, end: Date) {
+  return new Set(
+    raw.partnerClients
+      .filter((relationship) => (
+        relationship.status === "active" &&
+        activePartnerIds.has(relationship.partner_id) &&
+        isWithin(parseDate(relationship.started_at), start, end)
+      ))
+      .map((relationship) => relationship.patient_id),
+  );
+}
+
 function renewalRate(payments: BillingPayment[], start: Date, end: Date) {
   const eligible = payments.filter((payment) => {
     const dueAt = parseDate(payment.due_at);
@@ -339,6 +357,11 @@ export function buildAdminDashboardData(raw: DashboardRawData, now = new Date())
   const plansById = new Map(raw.plans.map((plan) => [plan.id, plan]));
   const partnersById = new Map(raw.partners.map((partner) => [partner.id, partner]));
   const profilesById = new Map(raw.profiles.map((profile) => [profile.id, profile]));
+  const subscriptionsByPartnerId = new Map<string, PartnerSubscription[]>();
+
+  raw.subscriptions.forEach((subscription) => {
+    subscriptionsByPartnerId.set(subscription.partner_id, [...(subscriptionsByPartnerId.get(subscription.partner_id) ?? []), subscription]);
+  });
 
   const activePartnerIds = activePartnerIdsAt(raw, now);
   const previousActivePartnerIds = activePartnerIdsAt(raw, previousEnd);
@@ -374,8 +397,8 @@ export function buildAdminDashboardData(raw: DashboardRawData, now = new Date())
       }).length / resolvedTickets.length) * 100;
   const pendingDocuments = raw.documents.filter((document) => pendingDocumentStatuses.has(document.status));
   const failedPayments = raw.payments.filter((payment) => payment.status === "failed" && isWithin(parseDate(payment.due_at), currentStart, currentEnd));
-  const newClients = raw.partnerClients.filter((relationship) => relationship.status === "active" && isWithin(parseDate(relationship.started_at), currentStart, currentEnd));
-  const previousNewClients = raw.partnerClients.filter((relationship) => relationship.status === "active" && isWithin(parseDate(relationship.started_at), previousStart, previousEnd));
+  const newClientIds = newClientIdsWithin(raw, activePartnerIds, currentStart, currentEnd);
+  const previousNewClientIds = newClientIdsWithin(raw, previousActivePartnerIds, previousStart, previousEnd);
   const churn = churnRate(raw.subscriptions, currentStart, currentEnd);
   const previousChurn = churnRate(raw.subscriptions, previousStart, previousEnd);
 
@@ -402,6 +425,38 @@ export function buildAdminDashboardData(raw: DashboardRawData, now = new Date())
       };
     })
     .filter((slice) => slice.count > 0);
+  const professionalStatusCounts = raw.partners.reduce<Record<DashboardProfessionalStatusSlice["id"], number>>(
+    (counts, partner) => {
+      const profile = profilesById.get(partner.profile_id);
+      const subscription = latestSubscriptionForPartner(subscriptionsByPartnerId.get(partner.id) ?? [], now);
+      const status = effectiveProfessionalStatus(profile?.status, subscription, now);
+      return { ...counts, [status]: counts[status] + 1 };
+    },
+    { active: 0, inactive: 0, suspended: 0 },
+  );
+  const professionalStatusDistribution: DashboardProfessionalStatusSlice[] = [
+    {
+      color: professionalStatusColors.active,
+      count: professionalStatusCounts.active,
+      id: "active",
+      label: "Ativos",
+      value: professionalStatusCounts.active,
+    },
+    {
+      color: professionalStatusColors.suspended,
+      count: professionalStatusCounts.suspended,
+      id: "suspended",
+      label: "Suspensos",
+      value: professionalStatusCounts.suspended,
+    },
+    {
+      color: professionalStatusColors.inactive,
+      count: professionalStatusCounts.inactive,
+      id: "inactive",
+      label: "Inativos",
+      value: professionalStatusCounts.inactive,
+    },
+  ];
 
   const alerts: DashboardAlert[] = [
     pendingDocuments.length > 0
@@ -471,11 +526,11 @@ export function buildAdminDashboardData(raw: DashboardRawData, now = new Date())
     approvals,
     bottomMetrics: [
       {
-        delta: formatDelta(newClients.length, previousNewClients.length),
+        delta: formatDelta(newClientIds.size, previousNewClientIds.size),
         id: "newClients",
         label: "Novos clientes (mês)",
         trend: "good",
-        value: formatInteger(new Set(newClients.map((relationship) => relationship.patient_id)).size),
+        value: formatInteger(newClientIds.size),
       },
       {
         delta: formatDelta(churn, previousChurn, "p.p."),
@@ -570,5 +625,6 @@ export function buildAdminDashboardData(raw: DashboardRawData, now = new Date())
     })),
     periodLabel: periodLabel(currentStart, currentEnd),
     planDistribution,
+    professionalStatusDistribution,
   };
 }

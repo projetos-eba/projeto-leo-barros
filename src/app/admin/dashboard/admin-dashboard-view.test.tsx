@@ -7,6 +7,7 @@ import type { AdminDashboardData } from "@/lib/admin/dashboard-metrics";
 vi.mock("./admin-dashboard-charts", () => ({
   GrowthChart: () => <div data-testid="growth-chart" />,
   PlanDistributionChart: () => <div data-testid="plan-chart" />,
+  ProfessionalStatusChart: () => <div data-testid="professional-status-chart" />,
 }));
 
 const dashboard: AdminDashboardData = {
@@ -54,6 +55,11 @@ const dashboard: AdminDashboardData = {
   ],
   periodLabel: "01 jun - 30 jun",
   planDistribution: [{ color: "#2d9cff", count: 4, label: "Pro Mensal", value: 4 }],
+  professionalStatusDistribution: [
+    { color: "#58d881", count: 3, id: "active", label: "Ativos", value: 3 },
+    { color: "#f0a52b", count: 1, id: "suspended", label: "Suspensos", value: 1 },
+    { color: "#8998a4", count: 0, id: "inactive", label: "Inativos", value: 0 },
+  ],
 };
 
 describe("AdminDashboardView", () => {
@@ -68,7 +74,13 @@ describe("AdminDashboardView", () => {
     expect(screen.getByText("Taxa de renovação")).toBeInTheDocument();
     expect(screen.getByTestId("growth-chart")).toBeInTheDocument();
     expect(screen.getByTestId("plan-chart")).toBeInTheDocument();
-    expect(screen.getByText("Profissionais aguardando revisão")).toBeInTheDocument();
+    expect(screen.getByTestId("professional-status-chart")).toBeInTheDocument();
+    expect(screen.getByText("Profissionais por status")).toBeInTheDocument();
+    expect(screen.getByText("Indicadores do mês")).toBeInTheDocument();
+    expect(screen.getByText("Novos clientes (mês)")).toBeInTheDocument();
+    expect(screen.getByText("Churn de assinaturas")).toBeInTheDocument();
+    expect(screen.getByText("Pagamentos falhos")).toBeInTheDocument();
+    expect(screen.queryByText("Profissionais aguardando revisão")).not.toBeInTheDocument();
     expect(screen.queryByText("Profissionais aprovados")).not.toBeInTheDocument();
     expect(screen.queryByText("Faturamento por origem")).not.toBeInTheDocument();
     expect(screen.queryByText("Uptime da plataforma")).not.toBeInTheDocument();

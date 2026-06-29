@@ -19,6 +19,7 @@ import type { ReactNode } from "react";
 import {
   GrowthChart,
   PlanDistributionChart,
+  ProfessionalStatusChart,
 } from "./admin-dashboard-charts";
 import type {
   AdminDashboardData,
@@ -74,7 +75,7 @@ function DashboardPanel({ children, className }: { children: ReactNode; classNam
   return (
     <section
       className={cn(
-        "rounded-[9px] border border-[#2b4a5d]/90 bg-[#0d2635]/80 shadow-[0_18px_60px_rgba(2,10,16,0.24)]",
+        "min-w-0 rounded-[9px] border border-[#2b4a5d]/90 bg-[#0d2635]/80 shadow-[0_18px_60px_rgba(2,10,16,0.24)]",
         className,
       )}
     >
@@ -177,50 +178,6 @@ function AlertsPanel({ alerts }: { alerts: DashboardAlert[] }) {
   );
 }
 
-function ApprovalsTable({ approvals }: { approvals: AdminDashboardData["approvals"] }) {
-  return (
-    <DashboardPanel className="overflow-hidden p-[22px]">
-      <SectionHeader subtitle="Baseada nos documentos pendentes ou expirados dos parceiros." title="Profissionais aguardando revisão" />
-      <div className="mt-5 overflow-x-auto">
-        <table className="w-full min-w-[680px] border-collapse text-left">
-          <thead>
-            <tr className="border-b border-[#294657] text-[12px] uppercase tracking-wide text-[#7f93a3]">
-              <th className="pb-3 font-semibold">Profissional</th>
-              <th className="pb-3 font-semibold">Especialidade</th>
-              <th className="pb-3 font-semibold">Data</th>
-              <th className="pb-3 font-semibold">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#294657]/65">
-            {approvals.length === 0 ? (
-              <tr>
-                <td className="py-6 text-[13px] text-[#91a5b3]" colSpan={4}>Nenhum profissional aguardando revisão.</td>
-              </tr>
-            ) : (
-              approvals.map((professional) => (
-                <tr key={`${professional.email}-${professional.status}`}>
-                  <td className="py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-9 items-center justify-center rounded-full bg-[#153748] text-sm font-bold text-[#d8e8f1]">{professional.initial}</span>
-                      <div>
-                        <p className="text-[14px] font-bold text-[#edf5f8]">{professional.name}</p>
-                        <p className="text-[12px] text-[#8397a6]">{professional.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 text-[13px] capitalize text-[#b7c7d2]">{professional.specialty}</td>
-                  <td className="py-4 text-[13px] text-[#b7c7d2]">{professional.date}</td>
-                  <td className="py-4"><span className="rounded-[5px] border border-[#9a6b1f]/60 bg-[#3b2a12]/70 px-2 py-1 text-[12px] font-bold text-[#ffd287]">{professional.status}</span></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </DashboardPanel>
-  );
-}
-
 function MovementsPanel({ movements }: { movements: DashboardMovement[] }) {
   return (
     <DashboardPanel className="p-[22px]">
@@ -265,6 +222,26 @@ function BottomMetricCard({ metric }: { metric: DashboardBottomMetric }) {
   );
 }
 
+function BottomMetricsGrid({ metrics }: { metrics: DashboardBottomMetric[] }) {
+  const visibleMetrics = metrics.filter((metric) => ["newClients", "churn", "failedPayments"].includes(metric.id));
+
+  return (
+    <section aria-labelledby="monthly-indicators-title">
+      <div className="mb-4">
+        <h2 className="text-[17px] font-bold leading-[22px] text-[#dde7ee]" id="monthly-indicators-title">
+          Indicadores do mês
+        </h2>
+        <p className="mt-2 text-[13px] leading-[18px] text-[#8ca1af]">
+          Clientes novos em profissionais ativos, churn e pagamentos falhos no período atual.
+        </p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {visibleMetrics.map((metric) => <BottomMetricCard key={metric.id} metric={metric} />)}
+      </div>
+    </section>
+  );
+}
+
 export function AdminDashboardView({ dashboard }: AdminDashboardViewProps) {
   return (
     <div className="min-h-screen bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] md:px-8 lg:px-[43px] lg:py-[35px]">
@@ -298,19 +275,23 @@ export function AdminDashboardView({ dashboard }: AdminDashboardViewProps) {
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <DashboardPanel className="p-[22px]">
-          <SectionHeader subtitle="Distribuição de assinaturas ativas por plano comercial." title="Assinaturas por plano" />
-          <div className="mt-5"><PlanDistributionChart data={dashboard.planDistribution} /></div>
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div>
+              <SectionHeader subtitle="Distribuição de assinaturas ativas por plano comercial." title="Assinaturas por plano" />
+              <div className="mt-5"><PlanDistributionChart data={dashboard.planDistribution} /></div>
+            </div>
+            <div>
+              <SectionHeader subtitle="Divisão operacional dos profissionais por status efetivo." title="Profissionais por status" />
+              <div className="mt-5"><ProfessionalStatusChart data={dashboard.professionalStatusDistribution} /></div>
+            </div>
+          </div>
         </DashboardPanel>
         <AlertsPanel alerts={dashboard.alerts} />
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <ApprovalsTable approvals={dashboard.approvals} />
+        <BottomMetricsGrid metrics={dashboard.bottomMetrics} />
         <MovementsPanel movements={dashboard.movements} />
-      </section>
-
-      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboard.bottomMetrics.map((metric) => <BottomMetricCard key={metric.id} metric={metric} />)}
       </section>
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">

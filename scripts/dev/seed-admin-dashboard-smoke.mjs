@@ -2,8 +2,8 @@ import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 
 const LOCAL_SUPABASE_API_URL = "http://127.0.0.1:54321";
-const LOCAL_ADMIN_EMAIL = "admin.local@example.com";
-const LOCAL_ADMIN_PASSWORD = process.env.LEO_LOCAL_ADMIN_PASSWORD ?? "LocalOnlyAdmin123!";
+const LOCAL_ADMIN_EMAIL = "antoniofelipe258@gmail.com";
+const LOCAL_ADMIN_PASSWORD = process.env.LEO_LOCAL_ADMIN_PASSWORD ?? "123456";
 
 const sensitiveKeys = [
   "ANON_KEY",
@@ -140,12 +140,16 @@ async function main() {
   });
 
   const partnerFixtures = [
-    ["f2-admin-dashboard-partner-1@example.invalid", "Parceira Nutri Local", "nutricionista", "crn", "dash-001"],
-    ["f2-admin-dashboard-partner-2@example.invalid", "Parceiro Treino Local", "personal_trainer", "cref", "dash-002"],
-    ["f2-admin-dashboard-partner-3@example.invalid", "Parceiro Médico Local", "medico", "crm", "dash-003"],
-    ["f2-admin-dashboard-partner-4@example.invalid", "Parceira Performance Local", "nutricionista", "crn", "dash-004"],
+    ["f2-admin-dashboard-partner-1@example.invalid", "Parceira Nutri Local", "nutricionista", "active"],
+    ["f2-admin-dashboard-partner-2@example.invalid", "Parceiro Treino Local", "personal_trainer", "active"],
+    ["f2-admin-dashboard-partner-3@example.invalid", "Parceiro Médico Local", "medico", "active"],
+    ["f2-admin-dashboard-partner-4@example.invalid", "Parceira Performance Local", "nutricionista", "disabled"],
+    ["f2-admin-dashboard-partner-5@example.invalid", "Parceira Acesso Suspenso Local", "nutricionista", "suspended"],
+    ["f2-admin-dashboard-partner-6@example.invalid", "Parceiro Pagamento Suspenso Local", "personal_trainer", "suspended"],
+    ["f2-admin-dashboard-partner-7@example.invalid", "Parceiro Inativo Local", "medico", "disabled"],
+    ["f2-admin-dashboard-partner-8@example.invalid", "Parceiro Cardio Local", "personal_trainer", "active"],
   ];
-  const clientFixtures = Array.from({ length: 10 }, (_, index) => [
+  const clientFixtures = Array.from({ length: 14 }, (_, index) => [
     `f2-admin-dashboard-client-${index + 1}@example.invalid`,
     `Cliente Local ${index + 1}`,
   ]);
@@ -164,7 +168,7 @@ async function main() {
   }
 
   const partnerValues = partnerFixtures
-    .map(([email, name, professionalType, registryType, registryNumber], index) => {
+    .map(([email, name, professionalType, status], index) => {
       const n = String(index + 1).padStart(3, "0");
       return `(
         'f2000000-0000-4000-8000-000000000${n}'::uuid,
@@ -173,10 +177,10 @@ async function main() {
         '+55119900000${String(index + 1).padStart(2, "0")}',
         ${sqlLiteral(name)},
         'parceiro',
-        'active',
+        ${sqlLiteral(status)},
         ${sqlLiteral(professionalType)},
-        ${sqlLiteral(registryType)},
-        ${sqlLiteral(registryNumber)}
+        null,
+        null
       )`;
     })
     .join(",\n");
@@ -197,35 +201,50 @@ async function main() {
     .join(",\n");
 
   psqlLocal(`
-insert into public.profiles (
-  id,
-  user_id,
-  email,
-  phone,
-  display_name,
-  role,
-  status
-)
-values (
-  'f2000000-0000-4000-8000-000000000000'::uuid,
-  ${sqlLiteral(adminUser.id)}::uuid,
-  ${sqlLiteral(LOCAL_ADMIN_EMAIL)},
-  '+5511970000000',
-  'Admin Local',
-  'admin',
-  'active'
-)
-on conflict (id) do update set
-  user_id = excluded.user_id,
-  email = excluded.email,
-  phone = excluded.phone,
-  display_name = excluded.display_name,
-  role = excluded.role,
-  status = excluded.status;
+do $$
+declare
+  local_admin_profile_id uuid;
+begin
+  select id
+  into local_admin_profile_id
+  from public.profiles
+  where lower(email) = lower(${sqlLiteral(LOCAL_ADMIN_EMAIL)})
+  limit 1;
 
-insert into public.admins (id, profile_id)
-values ('f2000000-0000-4000-8000-000000000100'::uuid, 'f2000000-0000-4000-8000-000000000000'::uuid)
-on conflict (profile_id) do nothing;
+  if local_admin_profile_id is null then
+    local_admin_profile_id := 'f2000000-0000-4000-8000-000000000000'::uuid;
+  end if;
+
+  insert into public.profiles (
+    id,
+    user_id,
+    email,
+    phone,
+    display_name,
+    role,
+    status
+  )
+  values (
+    local_admin_profile_id,
+    ${sqlLiteral(adminUser.id)}::uuid,
+    ${sqlLiteral(LOCAL_ADMIN_EMAIL)},
+    '+5511970000000',
+    'Admin Local',
+    'admin',
+    'active'
+  )
+  on conflict (id) do update set
+    user_id = excluded.user_id,
+    email = excluded.email,
+    phone = excluded.phone,
+    display_name = excluded.display_name,
+    role = excluded.role,
+    status = excluded.status;
+
+  insert into public.admins (profile_id)
+  values (local_admin_profile_id)
+  on conflict (profile_id) do nothing;
+end $$;
 
 with partner_seed (
   profile_id,
@@ -349,8 +368,12 @@ insert into public.partner_subscriptions (
 values
   ('f2500000-0000-4000-8000-000000000001'::uuid, 'f2200000-0000-4000-8000-000000000001'::uuid, 'f2400000-0000-4000-8000-000000000002'::uuid, 'active', date_trunc('month', now()), date_trunc('month', now()) + interval '1 month', null),
   ('f2500000-0000-4000-8000-000000000002'::uuid, 'f2200000-0000-4000-8000-000000000002'::uuid, 'f2400000-0000-4000-8000-000000000003'::uuid, 'active', date_trunc('month', now()), date_trunc('month', now()) + interval '1 year', null),
-  ('f2500000-0000-4000-8000-000000000003'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'f2400000-0000-4000-8000-000000000001'::uuid, 'trialing', date_trunc('month', now()), date_trunc('month', now()) + interval '14 days', null),
-  ('f2500000-0000-4000-8000-000000000004'::uuid, 'f2200000-0000-4000-8000-000000000004'::uuid, 'f2400000-0000-4000-8000-000000000002'::uuid, 'canceled', date_trunc('month', now()) - interval '1 month', date_trunc('month', now()) + interval '1 month', now() - interval '3 days')
+  ('f2500000-0000-4000-8000-000000000003'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'f2400000-0000-4000-8000-000000000001'::uuid, 'trialing', now() - interval '1 day', now() + interval '14 days', null),
+  ('f2500000-0000-4000-8000-000000000004'::uuid, 'f2200000-0000-4000-8000-000000000004'::uuid, 'f2400000-0000-4000-8000-000000000002'::uuid, 'canceled', date_trunc('month', now()) - interval '1 month', date_trunc('month', now()) + interval '1 month', now() - interval '3 days'),
+  ('f2500000-0000-4000-8000-000000000005'::uuid, 'f2200000-0000-4000-8000-000000000005'::uuid, 'f2400000-0000-4000-8000-000000000001'::uuid, 'past_due', date_trunc('month', now()), date_trunc('month', now()) + interval '1 month', null),
+  ('f2500000-0000-4000-8000-000000000006'::uuid, 'f2200000-0000-4000-8000-000000000006'::uuid, 'f2400000-0000-4000-8000-000000000002'::uuid, 'incomplete', date_trunc('month', now()), date_trunc('month', now()) + interval '1 month', null),
+  ('f2500000-0000-4000-8000-000000000007'::uuid, 'f2200000-0000-4000-8000-000000000007'::uuid, 'f2400000-0000-4000-8000-000000000001'::uuid, 'canceled', date_trunc('month', now()) - interval '2 months', date_trunc('month', now()) - interval '1 month', date_trunc('month', now()) - interval '20 days'),
+  ('f2500000-0000-4000-8000-000000000008'::uuid, 'f2200000-0000-4000-8000-000000000008'::uuid, 'f2400000-0000-4000-8000-000000000002'::uuid, 'active', date_trunc('month', now()), date_trunc('month', now()) + interval '1 month', null)
 on conflict (id) do update set
   plan_id = excluded.plan_id,
   status = excluded.status,
@@ -365,7 +388,11 @@ values
   ('f2600000-0000-4000-8000-000000000003'::uuid, 'f2200000-0000-4000-8000-000000000002'::uuid, 'f2300000-0000-4000-8000-000000000003'::uuid, 'dieta', 'active', now() - interval '18 days'),
   ('f2600000-0000-4000-8000-000000000004'::uuid, 'f2200000-0000-4000-8000-000000000002'::uuid, 'f2300000-0000-4000-8000-000000000004'::uuid, 'saude', 'active', now() - interval '16 days'),
   ('f2600000-0000-4000-8000-000000000005'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'f2300000-0000-4000-8000-000000000005'::uuid, 'cardio', 'active', now() - interval '10 days'),
-  ('f2600000-0000-4000-8000-000000000006'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'f2300000-0000-4000-8000-000000000006'::uuid, 'treino', 'active', now() - interval '8 days')
+  ('f2600000-0000-4000-8000-000000000006'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'f2300000-0000-4000-8000-000000000006'::uuid, 'treino', 'active', now() - interval '8 days'),
+  ('f2600000-0000-4000-8000-000000000007'::uuid, 'f2200000-0000-4000-8000-000000000004'::uuid, 'f2300000-0000-4000-8000-000000000007'::uuid, 'dieta', 'active', now() - interval '7 days'),
+  ('f2600000-0000-4000-8000-000000000008'::uuid, 'f2200000-0000-4000-8000-000000000004'::uuid, 'f2300000-0000-4000-8000-000000000008'::uuid, 'treino', 'active', now() - interval '6 days'),
+  ('f2600000-0000-4000-8000-000000000009'::uuid, 'f2200000-0000-4000-8000-000000000008'::uuid, 'f2300000-0000-4000-8000-000000000009'::uuid, 'cardio', 'active', now() - interval '5 days'),
+  ('f2600000-0000-4000-8000-000000000010'::uuid, 'f2200000-0000-4000-8000-000000000008'::uuid, 'f2300000-0000-4000-8000-000000000010'::uuid, 'saude', 'active', now() - interval '4 days')
 on conflict (id) do update set
   status = excluded.status,
   started_at = excluded.started_at;
@@ -394,25 +421,24 @@ on conflict (id) do update set
   resolved_at = excluded.resolved_at,
   created_at = excluded.created_at;
 
-insert into public.partner_documents (id, partner_id, document_type, status, title, due_at, reviewed_at, created_at)
-values
-  ('f2900000-0000-4000-8000-000000000001'::uuid, 'f2200000-0000-4000-8000-000000000001'::uuid, 'professional_registry', 'pending', 'Registro profissional', now() + interval '7 days', null, now() - interval '2 days'),
-  ('f2900000-0000-4000-8000-000000000002'::uuid, 'f2200000-0000-4000-8000-000000000002'::uuid, 'identity', 'in_review', 'Documento de identidade', now() + interval '7 days', null, now() - interval '3 days'),
-  ('f2900000-0000-4000-8000-000000000003'::uuid, 'f2200000-0000-4000-8000-000000000003'::uuid, 'contract', 'approved', 'Contrato de parceria', null, now() - interval '1 day', now() - interval '4 days')
-on conflict (id) do update set
-  document_type = excluded.document_type,
-  status = excluded.status,
-  title = excluded.title,
-  due_at = excluded.due_at,
-  reviewed_at = excluded.reviewed_at,
-  created_at = excluded.created_at;
+delete from public.partner_documents
+where id in (
+  'f2900000-0000-4000-8000-000000000001'::uuid,
+  'f2900000-0000-4000-8000-000000000002'::uuid,
+  'f2900000-0000-4000-8000-000000000003'::uuid,
+  'f2900000-0000-4000-8000-000000000004'::uuid,
+  'f2900000-0000-4000-8000-000000000005'::uuid,
+  'f2900000-0000-4000-8000-000000000006'::uuid,
+  'f2900000-0000-4000-8000-000000000007'::uuid,
+  'f2900000-0000-4000-8000-000000000008'::uuid
+);
 
 insert into public.platform_activity_events (id, event_type, partner_id, patient_id, payment_id, title, detail, created_at)
 values
   ('f2a00000-0000-4000-8000-000000000001'::uuid, 'subscription_started', 'f2200000-0000-4000-8000-000000000001'::uuid, null, null, 'Assinatura ativada', 'Parceira Nutri Local entrou no plano Pro Mensal', now() - interval '1 hour'),
   ('f2a00000-0000-4000-8000-000000000002'::uuid, 'payment_received', 'f2200000-0000-4000-8000-000000000002'::uuid, null, 'f2700000-0000-4000-8000-000000000002'::uuid, 'Pagamento recebido', 'Plano Pro Anual processado no smoke local', now() - interval '3 hours'),
   ('f2a00000-0000-4000-8000-000000000003'::uuid, 'ticket_resolved', 'f2200000-0000-4000-8000-000000000002'::uuid, null, null, 'Ticket resolvido', 'TKT-F2-002 dentro do SLA', now() - interval '6 hours'),
-  ('f2a00000-0000-4000-8000-000000000004'::uuid, 'document_pending', 'f2200000-0000-4000-8000-000000000001'::uuid, null, null, 'Documento pendente', 'Registro profissional aguardando revisão', now() - interval '1 day')
+  ('f2a00000-0000-4000-8000-000000000004'::uuid, 'payment_failed', 'f2200000-0000-4000-8000-000000000005'::uuid, null, null, 'Pagamento em aberto', 'Assinatura Starter Mensal exige regularização', now() - interval '1 day')
 on conflict (id) do update set
   event_type = excluded.event_type,
   partner_id = excluded.partner_id,

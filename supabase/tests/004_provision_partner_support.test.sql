@@ -186,12 +186,12 @@ select lives_ok(
       'Provision Partner',
       'Dr. Provision Partner',
       'medico',
-      'crm',
-      '12345',
+      null,
+      null,
       'pending_delivery'
     )
   $$,
-  'RPC cria profile e Partner atomicamente'
+  'RPC cria profile e Partner atomicamente sem exigir registro profissional'
 );
 
 set local role service_role;
@@ -209,8 +209,8 @@ select is(
       'Provision Partner',
       'Dr. Provision Partner',
       'medico',
-      'crm',
-      '12345',
+      null,
+      null,
       'pending_delivery'
     )
   ),
@@ -260,8 +260,8 @@ select is(
       where user_id = '91000000-0000-0000-0000-000000000002'
     )
   ),
-  'crm',
-  'tipo de registro é persistido no vocabulário aprovado'
+  null,
+  'tipo de registro pode ficar vazio no MVP'
 );
 
 select throws_ok(
@@ -277,14 +277,37 @@ select throws_ok(
       'Provision Partner',
       'Dr. Provision Partner',
       'medico',
-      'crm',
-      '12345',
+      null,
+      null,
       'pending_delivery'
     )
   $$,
   'P0001',
   'PROVISION_PARTNER_IDEMPOTENCY_KEY_REUSED',
   'mesma chave com payload diferente é rejeitada'
+);
+
+select throws_ok(
+  $$
+    select *
+    from public.provision_partner_records(
+      '92000000-0000-0000-0000-000000000001',
+      '94000000-0000-4000-8000-000000000004',
+      'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+      '91000000-0000-0000-0000-000000000002',
+      'provision-partner@example.invalid',
+      '+5511999999999',
+      'Provision Partner',
+      'Dr. Provision Partner',
+      'medico',
+      'crm',
+      null,
+      'pending_delivery'
+    )
+  $$,
+  'P0001',
+  'PROVISION_PARTNER_INVALID_PAYLOAD',
+  'registro profissional parcial continua rejeitado'
 );
 
 select throws_ok(
@@ -300,8 +323,8 @@ select throws_ok(
       'Provision Client',
       'Provision Client',
       'nutricionista',
-      'crn',
-      '99999',
+      null,
+      null,
       'not_resent'
     )
   $$,

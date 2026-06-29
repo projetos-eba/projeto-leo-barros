@@ -76,7 +76,10 @@ describe("AuthenticatedShell", () => {
       "href",
       "/admin/dashboard",
     );
-    expect(screen.getByRole("button", { name: "Parceiros/Profissionais" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Parceiros/Profissionais" })).toHaveAttribute(
+      "href",
+      "/admin/profissionais",
+    );
     expect(screen.getByRole("button", { name: "Financeiro & Planos" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Suporte" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();

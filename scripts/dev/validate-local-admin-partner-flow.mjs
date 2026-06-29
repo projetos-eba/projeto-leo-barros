@@ -2,7 +2,8 @@ import { randomBytes } from "node:crypto";
 import { execFileSync, spawn } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 
-const ADMIN_EMAIL = "admin.local@example.com";
+const ADMIN_EMAIL = "antoniofelipe258@gmail.com";
+const ADMIN_PASSWORD = process.env.LEO_LOCAL_ADMIN_PASSWORD ?? "123456";
 const PARTNER_EMAIL = "partner.local@example.com";
 const PARTNER_IDEMPOTENCY_KEY = "e0000000-0000-4000-8000-000000000001";
 const LOCAL_NEXT_ORIGIN = "http://localhost:3000";
@@ -12,8 +13,6 @@ const partnerPayload = {
   email: PARTNER_EMAIL,
   phone: "+5511999999999",
   professionalType: "nutricionista",
-  professionalRegistryType: "crn",
-  professionalRegistryNumber: "local-dev-001",
   displayName: "Parceiro Local",
   professionalName: "Parceiro Local Dev",
   idempotencyKey: PARTNER_IDEMPOTENCY_KEY,
@@ -565,12 +564,11 @@ async function main() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const adminPassword = createLocalPassword();
   const partnerPassword = createLocalPassword();
 
   const adminUser = await ensureAuthUser(adminClient, {
     email: ADMIN_EMAIL,
-    password: adminPassword,
+    password: ADMIN_PASSWORD,
   });
   const adminProfile = ensureAdminProfile(adminUser.id);
 
@@ -578,7 +576,7 @@ async function main() {
 
   await cleanupPartnerFixture(adminClient);
 
-  const adminAccessToken = await signIn(anonClient, ADMIN_EMAIL, adminPassword);
+  const adminAccessToken = await signIn(anonClient, ADMIN_EMAIL, ADMIN_PASSWORD);
   await verifyAccessToken({
     apiUrl: localEnv.apiUrl,
     anonKey: localEnv.anonKey,

@@ -71,10 +71,8 @@ Não haverá autorização por:
   "email": "parceiro@example.com",
   "phone": "+5511999999999",
   "professionalType": "nutricionista",
-  "professionalRegistryNumber": "12345",
   "displayName": "Marina Alves",
-  "professionalName": "Dra. Marina Alves",
-  "professionalRegistryType": "CRN",
+  "professionalName": "Marina Alves",
   "idempotencyKey": "26485644-a422-4d99-9f3c-63295c13a970"
 }
 ```
@@ -86,10 +84,10 @@ Não haverá autorização por:
 | `email` | string | obrigatório | e-mail válido, normalizado com `trim` e caixa baixa |
 | `phone` | string | obrigatório | telefone válido; formato canônico recomendado E.164 |
 | `professionalType` | string | obrigatório | `personal_trainer`, `nutricionista` ou `medico` |
-| `professionalRegistryNumber` | string | obrigatório | não vazio após `trim` |
+| `professionalRegistryNumber` | string | opcional | quando enviado, deve acompanhar `professionalRegistryType` |
 | `displayName` | string | obrigatório | nome comum gravado em `profiles.display_name` |
 | `professionalName` | string | opcional | nome profissional; usa fallback para `displayName` |
-| `professionalRegistryType` | string | obrigatório | `crm`, `crn`, `cref` ou `outro` |
+| `professionalRegistryType` | string | opcional | `crm`, `crn`, `cref` ou `outro`; quando enviado, deve acompanhar `professionalRegistryNumber` |
 | `idempotencyKey` | string UUID | opcional, recomendada | identifica uma tentativa lógica e seus retries; a função gera uma chave quando ausente |
 
 ### 3.3 Regras derivadas do schema vigente
@@ -106,7 +104,7 @@ Consequentemente:
 2. `professionalName` é opcional;
 3. quando `professionalName` não vier, `displayName` também será usado como `professional_name`;
 4. quando ambos vierem, cada valor será persistido no campo correspondente;
-5. `professionalRegistryType` e `professionalRegistryNumber` são obrigatórios nesta operação.
+5. `professionalRegistryType` e `professionalRegistryNumber` são opcionais nesta operação e, quando enviados futuramente, devem ser enviados em conjunto.
 
 ### 3.4 Persistência do telefone
 
@@ -182,8 +180,8 @@ Esse campo é classificação cadastral/comercial. Não autoriza módulos e não
 #### `professionalRegistryNumber`
 
 - string;
-- obrigatório;
-- não vazio depois de `trim`;
+- opcional no MVP;
+- quando informado, não vazio depois de `trim`;
 - formato específico por conselho ainda não definido;
 - não é unique no schema atual;
 - não deve ser usado como identidade ou autorização.
@@ -197,7 +195,7 @@ Aceitar inicialmente:
 - `cref`;
 - `outro`.
 
-Com a constraint atual, deve acompanhar `professionalRegistryNumber`.
+Deve acompanhar `professionalRegistryNumber` quando qualquer um dos dois campos for enviado.
 
 Não haverá validação cruzada rígida entre `professionalType` e conselho no MVP. Uma inconsistência pode ser registrada para revisão cadastral futura, mas não deve virar autorização de módulos.
 
@@ -707,7 +705,7 @@ Separar o reenvio evita que retries de `provision-partner` disparem e-mails repe
 - telefone ausente falha;
 - telefone inválido falha;
 - `professionalType` inválido falha;
-- registro profissional ausente falha;
+- registro profissional ausente é aceito;
 - tipo de registro ausente com número presente falha;
 - nomes ausentes falham por incompatibilidade com o schema;
 - fallback entre `displayName` e `professionalName` funciona;

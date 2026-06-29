@@ -18,6 +18,8 @@ Exibir uma visão executiva funcional da plataforma com dados lidos do Supabase 
 - Pagamentos processados: soma de `billing_payments.amount_cents` com `status = 'succeeded'` e `paid_at` no mês.
 - Tickets dentro do SLA: tickets resolvidos no mês com `resolved_at <= sla_due_at`.
 - Documentos pendentes: documentos com `status in ('pending', 'in_review', 'expired')`.
+- Profissionais por status: divisão dos registros em `partners` entre Ativos, Suspensos e Inativos. Ativos têm assinatura atual `active` ou `trialing`; Suspensos têm `profiles.status = 'suspended'` ou assinatura atual `past_due`/`incomplete`; demais entram como Inativos.
+- Indicadores do mês: `Novos clientes (mês)`, `Churn de assinaturas` e `Pagamentos falhos` aparecem no espaço antes ocupado pela revisão de profissionais. `Novos clientes (mês)` conta `patient_id` distinto em vínculos `partner_clients.status = 'active'`, com `started_at` no mês atual e `partner_id` pertencente a profissionais efetivamente ativos.
 
 ## Tabelas usadas
 
@@ -46,7 +48,7 @@ Nenhuma chave, webhook, checkout ou chamada de API Stripe deve ser configurada n
 
 ## Estados esperados
 
-- Com dados locais: cards, gráficos, alertas, revisão de documentos e movimentações aparecem preenchidos.
+- Com dados locais: cards, gráficos, alertas, status de profissionais e movimentações aparecem preenchidos.
 - Sem dados: gráficos e listas mostram estado vazio sem quebrar renderização.
 - Sem sessão: guard redireciona para `/login`.
 - Perfil não Admin: guard redireciona para a área correta ou bloqueia acesso.

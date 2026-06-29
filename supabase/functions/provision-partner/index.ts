@@ -326,6 +326,8 @@ Deno.serve(async (request) => {
     stringValue(rawBody.professionalRegistryType).toLowerCase();
   const professionalRegistryNumber =
     stringValue(rawBody.professionalRegistryNumber);
+  const hasRegistryType = professionalRegistryType.length > 0;
+  const hasRegistryNumber = professionalRegistryNumber.length > 0;
   const suppliedIdempotencyKey = stringValue(rawBody.idempotencyKey);
   const idempotencyKey = suppliedIdempotencyKey || crypto.randomUUID();
   const fields: Record<string, string> = {};
@@ -341,18 +343,15 @@ Deno.serve(async (request) => {
   if (!professionalTypes.has(professionalType)) {
     fields.professionalType = "invalid";
   }
-  if (!professionalRegistryTypes.has(professionalRegistryType)) {
-    fields.professionalRegistryType = professionalRegistryType
-      ? "invalid"
-      : "required";
+  if (hasRegistryType && !professionalRegistryTypes.has(professionalRegistryType)) {
+    fields.professionalRegistryType = "invalid";
   }
-  if (
-    !professionalRegistryNumber ||
-    professionalRegistryNumber.length > 64
-  ) {
-    fields.professionalRegistryNumber = professionalRegistryNumber
-      ? "invalid"
-      : "required";
+  if (hasRegistryType !== hasRegistryNumber) {
+    fields.professionalRegistryType = hasRegistryType ? fields.professionalRegistryType ?? "invalid" : "required";
+    fields.professionalRegistryNumber = hasRegistryNumber ? fields.professionalRegistryNumber ?? "invalid" : "required";
+  }
+  if (professionalRegistryNumber.length > 64) {
+    fields.professionalRegistryNumber = "invalid";
   }
   if (!isUuid(idempotencyKey)) fields.idempotencyKey = "invalid";
 
@@ -375,8 +374,8 @@ Deno.serve(async (request) => {
     displayName,
     professionalName,
     professionalType,
-    professionalRegistryType,
-    professionalRegistryNumber,
+    professionalRegistryType: hasRegistryType ? professionalRegistryType : null,
+    professionalRegistryNumber: hasRegistryNumber ? professionalRegistryNumber : null,
   };
   const requestHash = await sha256(JSON.stringify(normalizedPayload));
 
@@ -463,8 +462,8 @@ Deno.serve(async (request) => {
       p_display_name: displayName,
       p_professional_name: professionalName,
       p_professional_type: professionalType,
-      p_professional_registry_type: professionalRegistryType,
-      p_professional_registry_number: professionalRegistryNumber,
+      p_professional_registry_type: hasRegistryType ? professionalRegistryType : null,
+      p_professional_registry_number: hasRegistryNumber ? professionalRegistryNumber : null,
       p_invite_status: inviteStatus,
     },
   ).single();
