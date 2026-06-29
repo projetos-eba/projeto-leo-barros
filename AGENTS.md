@@ -4,6 +4,13 @@ próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
 
 # AGENTS.md
 
+
+## Atualizacao Fase F.2 - 28 de junho de 2026
+
+Cada tela funcional aprovada deve ter um Page Profile em `docs/page-profiles/` contendo objetivo, rota, perfil, fontes de dados, métricas, estados, validações e pendências. Quando a tela ganhar workflow próprio recorrente, criar ou atualizar uma skill local do Codex em `~/.codex/skills/` apontando para o Page Profile e para as fontes obrigatórias.
+
+Para `/admin/dashboard`, a fonte operacional é `docs/page-profiles/admin-dashboard.md`; a tela deve ler dados do Supabase local via camada server-side e nunca usar service role no browser. Stripe é o gateway futuro, mas permanece sem configuração, webhook, checkout ou secrets nesta fase.
+
 ## Atualizacao Fase F.0 - 28 de junho de 2026
 
 O Next.js App Router e a base oficial do produto. A camada Vite/React Router legada foi removida do caminho funcional principal. Se houver conflito entre secoes historicas deste arquivo e a Fase F.0, considerar a Fase F.0 e `docs/fase-f0-next-oficial.md` como estado operacional mais recente.

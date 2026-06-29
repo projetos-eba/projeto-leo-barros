@@ -72,8 +72,16 @@ describe("AuthenticatedShell", () => {
       </AuthenticatedShell>,
     );
 
-    expect(screen.getByText("Gestão executiva e operacional da plataforma.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Profissionais" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Visão Geral" })).toHaveAttribute(
+      "href",
+      "/admin/dashboard",
+    );
+    expect(screen.getByRole("button", { name: "Parceiros/Profissionais" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Financeiro & Planos" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Suporte" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();
+    expect(screen.queryByText("Clientes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Relatórios")).not.toBeInTheDocument();
     expect(screen.queryByText("Agenda")).not.toBeInTheDocument();
     expect(screen.queryByText("Materiais")).not.toBeInTheDocument();
   });
