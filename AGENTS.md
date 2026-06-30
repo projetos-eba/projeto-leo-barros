@@ -9,6 +9,8 @@ próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
 
 Cada tela funcional aprovada deve ter um Page Profile em `docs/page-profiles/` contendo objetivo, rota, perfil, fontes de dados, métricas, estados, validações e pendências. Quando a tela ganhar workflow próprio recorrente, criar ou atualizar uma skill local do Codex em `~/.codex/skills/` apontando para o Page Profile e para as fontes obrigatórias.
 
+Estrutura de banco deve ficar em migrations versionadas (`supabase/migrations`): tabelas, colunas, constraints, índices, RLS, grants, triggers e funções/RPCs. Dados de sistema, fixtures e dados de smoke local devem ficar em `supabase/seed.sql`; não inserir dados operacionais em migrations novas, exceto metadados estruturais indispensáveis ao próprio schema.
+
 Para `/admin/dashboard`, a fonte operacional é `docs/page-profiles/admin-dashboard.md`; a tela deve ler dados do Supabase local via camada server-side e nunca usar service role no browser. Stripe é o gateway futuro, mas permanece sem configuração, webhook, checkout ou secrets nesta fase.
 
 ## Atualizacao Fase F.0 - 28 de junho de 2026

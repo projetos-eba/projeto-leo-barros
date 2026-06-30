@@ -38,6 +38,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 type ShellProfile = "cliente" | "parceiros" | "admin";
 
@@ -74,11 +75,11 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
     description: "Operação profissional e acompanhamento de clientes.",
     title: "Leonardo Barros",
     navigation: [
-      { href: "/parceiros/dashboard", icon: LayoutDashboard, label: "Dashboard", implemented: true },
-      { href: "/parceiros/clientes", icon: Users, label: "Clientes" },
+      { href: "/parceiros/dashboard", icon: Activity, label: "Visão Geral", implemented: true },
+      { href: "/parceiros/clientes", icon: Users, label: "Clientes", implemented: true },
       { href: "/parceiros/agenda", icon: CalendarDays, label: "Agenda" },
       { href: "/parceiros/materiais", icon: Library, label: "Materiais" },
-      { href: "/parceiros/cadastros", icon: FileText, label: "Cadastros" },
+      { href: "/parceiros/cadastros", icon: FileText, label: "Cadastro" },
       { href: "/parceiros/configuracoes", icon: Settings, label: "Configurações" },
     ],
   },
@@ -106,20 +107,26 @@ export function AuthenticatedShell({ children, profile }: AuthenticatedShellProp
   const pathname = usePathname() ?? "";
   const definition = shellDefinitions[profile];
 
-  if (profile === "admin") {
+  if (profile === "admin" || profile === "parceiros") {
+    const isPartner = profile === "parceiros";
+    const sidebarWidth = isPartner ? "lg:pl-[193px]" : "lg:pl-[235px]";
+    const asideWidth = isPartner ? "w-[193px]" : "w-[235px]";
+    const navTopClass = isPartner ? "mt-8 space-y-2" : "mt-10 space-y-[15px]";
+    const logoSizeClass = isPartner ? "size-[37px] rounded-[6px]" : "size-[37px] rounded-[6px]";
+
     return (
       <div className="min-h-screen bg-[#0b1720] text-[#f1f6fa]">
-        <aside className="fixed inset-y-0 left-0 z-40 hidden w-[235px] border-r border-[#1d3a49]/70 bg-[#071923]/95 lg:block">
-          <div className="flex h-full flex-col px-[14px] py-8">
-            <div className="flex items-center gap-2.5 px-5">
-              <div className="flex size-[37px] items-center justify-center rounded-[6px] bg-[#f4f7fa] text-[18px] font-bold leading-none text-[#092333]">
+        <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-[#000a1c]/60 lg:block", asideWidth, isPartner ? "bg-[#0e151a]" : "bg-[#071923]/95")}>
+          <div className={cn("flex h-full flex-col", isPartner ? "px-3 py-[33px]" : "px-[14px] py-8")}>
+            <div className={cn("flex items-center gap-2.5", isPartner ? "px-[15px]" : "px-5")}>
+              <div className={cn("flex items-center justify-center bg-[#f4f7fa] text-[18px] font-bold leading-none text-[#092333]", logoSizeClass)}>
                 lß
               </div>
               <div className="min-w-0">
-                <p className="text-[18px] font-bold leading-[18px] text-[#eaf2f7]">
+                <p className={cn("font-bold text-[#eaf2f7]", isPartner ? "text-[17px] leading-[17px]" : "text-[18px] leading-[18px]")}>
                   Leonardo
                 </p>
-                <p className="text-[18px] font-bold leading-[18px] text-[#eaf2f7]">
+                <p className={cn("font-bold text-[#eaf2f7]", isPartner ? "text-[17px] leading-[17px]" : "text-[18px] leading-[18px]")}>
                   Barros
                 </p>
                 <p className="mt-0.5 text-[7px] font-medium uppercase leading-[8px] text-[#7c93a3]">
@@ -128,8 +135,10 @@ export function AuthenticatedShell({ children, profile }: AuthenticatedShellProp
               </div>
             </div>
 
-            <nav className="mt-10 space-y-[15px]">
-              {definition.navigation.map((item) => {
+            <nav className={navTopClass}>
+              {definition.navigation
+                .filter((item) => !(isPartner && item.href === "/parceiros/configuracoes"))
+                .map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 const content = (
@@ -145,8 +154,14 @@ export function AuthenticatedShell({ children, profile }: AuthenticatedShellProp
                       aria-current={isActive ? "page" : undefined}
                       className={
                         isActive
-                          ? "flex h-[52px] items-center gap-3 rounded-[8px] bg-[#0f6fb5]/45 px-4 text-[15px] font-semibold text-[#cfddea]"
-                          : "flex h-[52px] items-center gap-3 rounded-[8px] px-4 text-[15px] font-semibold text-[#8a99a6] transition-colors hover:bg-[#102a36]/60 hover:text-[#cfddea]"
+                          ? cn(
+                              "flex items-center gap-3 rounded-[8px] font-semibold text-[#cfddea]",
+                              isPartner ? "h-10 bg-[#0a2c48] px-3 text-[14px]" : "h-[52px] bg-[#0f6fb5]/45 px-4 text-[15px]",
+                            )
+                          : cn(
+                              "flex items-center gap-3 rounded-[8px] font-semibold text-[#8a99a6] transition-colors hover:bg-[#102a36]/60 hover:text-[#cfddea]",
+                              isPartner ? "h-10 px-3 text-[14px]" : "h-[52px] px-4 text-[15px]",
+                            )
                       }
                       href={item.href}
                       key={item.href}
@@ -159,7 +174,10 @@ export function AuthenticatedShell({ children, profile }: AuthenticatedShellProp
                 return (
                   <button
                     aria-disabled="true"
-                    className="flex h-[52px] w-full items-center gap-3 rounded-[8px] px-4 text-left text-[15px] font-semibold text-[#8a99a6]"
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-[8px] text-left font-semibold text-[#8a99a6]",
+                      isPartner ? "h-10 px-3 text-[14px]" : "h-[52px] px-4 text-[15px]",
+                    )}
                     disabled
                     key={item.href}
                     type="button"
@@ -169,10 +187,22 @@ export function AuthenticatedShell({ children, profile }: AuthenticatedShellProp
                 );
               })}
             </nav>
+
+            {isPartner ? (
+              <div className="mt-auto pb-5">
+                <Link
+                  className="flex h-10 items-center gap-3 rounded-[8px] px-3 text-[14px] font-semibold text-[#8a99a6] transition-colors hover:bg-[#102a36]/60 hover:text-[#cfddea]"
+                  href="/parceiros/configuracoes"
+                >
+                  <Settings className="size-5 shrink-0" />
+                  <span>Configurações</span>
+                </Link>
+              </div>
+            ) : null}
           </div>
         </aside>
 
-        <main className="min-h-screen lg:pl-[235px]">{children}</main>
+        <main className={cn("min-h-screen", sidebarWidth)}>{children}</main>
       </div>
     );
   }

@@ -140,6 +140,77 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_client_plan_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          custom_plan_id: string
+          id: string
+          partner_id: string
+          patient_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end: string
+          current_period_start: string
+          custom_plan_id: string
+          id?: string
+          partner_id: string
+          patient_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          custom_plan_id?: string
+          id?: string
+          partner_id?: string
+          patient_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_plan_subscriptions_custom_plan_id_fkey"
+            columns: ["custom_plan_id"]
+            isOneToOne: false
+            referencedRelation: "partner_custom_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_plan_subscriptions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_plan_subscriptions_partner_plan_match"
+            columns: ["partner_id", "custom_plan_id"]
+            isOneToOne: false
+            referencedRelation: "partner_custom_plans"
+            referencedColumns: ["partner_id", "id"]
+          },
+          {
+            foreignKeyName: "partner_client_plan_subscriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_clients: {
         Row: {
           created_at: string
@@ -187,6 +258,53 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_custom_plans: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          partner_id: string
+          price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          partner_id: string
+          price_cents: number
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          partner_id?: string
+          price_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_custom_plans_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
@@ -445,6 +563,118 @@ export type Database = {
           },
         ]
       }
+      platform_integrations: {
+        Row: {
+          category: string
+          config: Json
+          created_at: string
+          id: string
+          integration_key: string
+          last_test_message: string | null
+          last_test_status: string | null
+          last_tested_at: string | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          config?: Json
+          created_at?: string
+          id?: string
+          integration_key: string
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          integration_key?: string
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          updated_by_profile_id: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings_activity: {
+        Row: {
+          action: string
+          actor_profile_id: string | null
+          created_at: string
+          detail: string
+          id: string
+          metadata: Json
+          title: string
+        }
+        Insert: {
+          action: string
+          actor_profile_id?: string | null
+          created_at?: string
+          detail: string
+          id?: string
+          metadata?: Json
+          title: string
+        }
+        Update: {
+          action?: string
+          actor_profile_id?: string | null
+          created_at?: string
+          detail?: string
+          id?: string
+          metadata?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_settings_activity_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -630,6 +860,22 @@ export type Database = {
       current_partner_has_active_patient_link: {
         Args: { target_patient_id: string }
         Returns: boolean
+      }
+      partner_clients_list: {
+        Args: never
+        Returns: {
+          age_years: number
+          display_name: string
+          email: string
+          last_update_at: string
+          objective: string
+          patient_id: string
+          phone: string
+          profile_id: string
+          relationship_status: string
+          service_scopes: string[]
+          started_at: string
+        }[]
       }
       provision_client_for_partner_records: {
         Args: {

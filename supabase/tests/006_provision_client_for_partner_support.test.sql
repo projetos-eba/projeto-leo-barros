@@ -428,6 +428,7 @@ select is(
     from public.provisioning_operations
     where operation_type = 'provision_client_for_partner'
       and status = 'completed'
+      and idempotency_key = 'a5000000-0000-4000-8000-000000000001'
   ),
   1,
   'somente a operação concluída permanece no ledger durante a transação'

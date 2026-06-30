@@ -12,6 +12,8 @@ select tables_are(
     'billing_payments',
     'billing_plans',
     'partner_clients',
+    'partner_client_plan_subscriptions',
+    'partner_custom_plans',
     'partner_documents',
     'partner_subscriptions',
     'partners',

@@ -46,8 +46,8 @@ describe("AuthenticatedShell", () => {
     expect(screen.getByRole("button", { name: "Dieta" })).toBeDisabled();
   });
 
-  it("renderiza a navegação de Parceiros sem habilitar rotas futuras", () => {
-    mockedUsePathname.mockReturnValue("/parceiros/dashboard");
+  it("renderiza a navegação de Parceiros com Clientes habilitado", () => {
+    mockedUsePathname.mockReturnValue("/parceiros/clientes");
 
     render(
       <AuthenticatedShell profile="parceiros">
@@ -55,12 +55,18 @@ describe("AuthenticatedShell", () => {
       </AuthenticatedShell>,
     );
 
-    expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Visão Geral" })).toHaveAttribute(
       "href",
       "/parceiros/dashboard",
     );
-    expect(screen.getByRole("button", { name: "Clientes" })).toBeDisabled();
-    expect(screen.queryByRole("link", { name: "Clientes" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
+      "href",
+      "/parceiros/clientes",
+    );
+    expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("mantém o Admin separado da operação de Parceiros", () => {

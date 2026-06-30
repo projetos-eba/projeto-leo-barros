@@ -290,14 +290,50 @@ set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '71000000-0000-0000-0000-000000000001', true);
 
-select is((select count(*)::integer from public.profiles), 5, 'Super Admin lê todos os profiles');
-select is((select count(*)::integer from public.admins), 1, 'Super Admin lê todos os admins');
-select is((select count(*)::integer from public.patients), 3, 'Super Admin lê todos os patients');
-select is((select count(*)::integer from public.partners), 1, 'Super Admin lê todos os partners');
 select is(
-  (select count(*)::integer from public.partner_clients),
+  (
+    select count(*)::integer
+    from public.profiles
+    where id between '72000000-0000-0000-0000-000000000001' and '72000000-0000-0000-0000-000000000005'
+  ),
+  5,
+  'Super Admin lê todos os profiles do fixture RLS'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.admins
+    where id = '73000000-0000-0000-0000-000000000001'
+  ),
+  1,
+  'Super Admin lê todos os admins do fixture RLS'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.patients
+    where id between '75000000-0000-0000-0000-000000000001' and '75000000-0000-0000-0000-000000000003'
+  ),
+  3,
+  'Super Admin lê todos os patients do fixture RLS'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.partners
+    where id = '74000000-0000-0000-0000-000000000001'
+  ),
+  1,
+  'Super Admin lê todos os partners do fixture RLS'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.partner_clients
+    where id between '76000000-0000-0000-0000-000000000001' and '76000000-0000-0000-0000-000000000002'
+  ),
   2,
-  'Super Admin lê todos os partner_clients'
+  'Super Admin lê todos os partner_clients do fixture RLS'
 );
 
 reset role;
