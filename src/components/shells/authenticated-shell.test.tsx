@@ -80,10 +80,22 @@ describe("AuthenticatedShell", () => {
       "href",
       "/admin/profissionais",
     );
-    expect(screen.getByRole("button", { name: "Financeiro & Planos" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Suporte" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();
-    expect(screen.queryByText("Clientes")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
+      "href",
+      "/admin/clientes",
+    );
+    expect(screen.getByRole("link", { name: "Financeiro & Planos" })).toHaveAttribute(
+      "href",
+      "/admin/financeiro",
+    );
+    expect(screen.getByRole("link", { name: "Suporte" })).toHaveAttribute(
+      "href",
+      "/admin/suporte",
+    );
+    expect(screen.getByRole("link", { name: "Configurações" })).toHaveAttribute(
+      "href",
+      "/admin/configuracoes",
+    );
     expect(screen.queryByText("Relatórios")).not.toBeInTheDocument();
     expect(screen.queryByText("Agenda")).not.toBeInTheDocument();
     expect(screen.queryByText("Materiais")).not.toBeInTheDocument();

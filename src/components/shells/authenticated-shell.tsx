@@ -89,9 +89,10 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
     navigation: [
       { href: "/admin/dashboard", icon: LayoutDashboard, label: "Visão Geral", implemented: true },
       { href: "/admin/profissionais", icon: UserRoundCog, label: "Parceiros/Profissionais", implemented: true },
-      { href: "/admin/financeiro", icon: WalletCards, label: "Financeiro & Planos" },
-      { href: "/admin/suporte", icon: HelpCircle, label: "Suporte" },
-      { href: "/admin/configuracoes", icon: Settings, label: "Configurações" },
+      { href: "/admin/clientes", icon: Users, label: "Clientes", implemented: true },
+      { href: "/admin/financeiro", icon: WalletCards, label: "Financeiro & Planos", implemented: true },
+      { href: "/admin/suporte", icon: HelpCircle, label: "Suporte", implemented: true },
+      { href: "/admin/configuracoes", icon: Settings, label: "Configurações", implemented: true },
     ],
   },
 };

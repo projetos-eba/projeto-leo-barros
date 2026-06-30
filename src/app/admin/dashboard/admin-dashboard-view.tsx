@@ -21,6 +21,7 @@ import {
   PlanDistributionChart,
   ProfessionalStatusChart,
 } from "./admin-dashboard-charts";
+import { InfoHint } from "@/components/ui/info-hint";
 import type {
   AdminDashboardData,
   DashboardAlert,
@@ -84,12 +85,12 @@ function DashboardPanel({ children, className }: { children: ReactNode; classNam
   );
 }
 
-function SectionHeader({ subtitle, title }: { subtitle?: string; title: string }) {
+function SectionHeader({ info, subtitle, title }: { info: string; subtitle?: string; title: string }) {
   return (
     <div>
       <div className="flex items-center gap-2">
         <h2 className="text-[17px] font-bold leading-[22px] text-[#dde7ee]">{title}</h2>
-        <span className="text-sm text-[#718795]">ⓘ</span>
+        <InfoHint label={info} />
       </div>
       {subtitle ? <p className="mt-2 text-[13px] leading-[18px] text-[#8ca1af]">{subtitle}</p> : null}
     </div>
@@ -133,7 +134,10 @@ function KpiCard({ metric }: { metric: DashboardKpi }) {
 function HealthPanel({ items }: { items: DashboardHealthItem[] }) {
   return (
     <DashboardPanel className="p-[22px]">
-      <SectionHeader title="Saúde operacional" />
+      <SectionHeader
+        info="Reúne pagamentos processados no mês, percentual de tickets resolvidos dentro do SLA e documentos pendentes."
+        title="Saúde operacional"
+      />
       <div className="mt-4 divide-y divide-[#294657]/60 border-t border-[#294657]/60">
         {items.map((item) => {
           const Icon = healthIcons[item.id];
@@ -159,7 +163,11 @@ function HealthPanel({ items }: { items: DashboardHealthItem[] }) {
 function AlertsPanel({ alerts }: { alerts: DashboardAlert[] }) {
   return (
     <DashboardPanel className="p-[22px]">
-      <SectionHeader subtitle="Sinais gerados a partir de documentos, pagamentos e suporte." title="Alertas e ações rápidas" />
+      <SectionHeader
+        info="Gera alertas a partir de documentos pendentes, pagamentos falhos no mês e tickets abertos da operação."
+        subtitle="Sinais gerados a partir de documentos, pagamentos e suporte."
+        title="Alertas e ações rápidas"
+      />
       <div className="mt-5 grid gap-3">
         {alerts.map((alert) => (
           <div className={cn("rounded-[8px] border p-4", alertToneClasses[alert.tone])} key={alert.id}>
@@ -181,7 +189,10 @@ function AlertsPanel({ alerts }: { alerts: DashboardAlert[] }) {
 function MovementsPanel({ movements }: { movements: DashboardMovement[] }) {
   return (
     <DashboardPanel className="p-[22px]">
-      <SectionHeader title="Últimas movimentações" />
+      <SectionHeader
+        info="Mostra os eventos mais recentes registrados na plataforma, como assinaturas, pagamentos, documentos e suporte."
+        title="Últimas movimentações"
+      />
       <div className="mt-4 space-y-4">
         {movements.length === 0 ? (
           <p className="text-[13px] text-[#91a5b3]">Nenhuma movimentação registrada.</p>
@@ -228,9 +239,12 @@ function BottomMetricsGrid({ metrics }: { metrics: DashboardBottomMetric[] }) {
   return (
     <section aria-labelledby="monthly-indicators-title">
       <div className="mb-4">
-        <h2 className="text-[17px] font-bold leading-[22px] text-[#dde7ee]" id="monthly-indicators-title">
-          Indicadores do mês
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-[17px] font-bold leading-[22px] text-[#dde7ee]" id="monthly-indicators-title">
+            Indicadores do mês
+          </h2>
+          <InfoHint label="Novos clientes conta pacientes distintos iniciados no mês em profissionais ativos. Churn usa cancelamentos do mês sobre assinaturas ativas no início do mês. Pagamentos falhos conta cobranças failed no período." />
+        </div>
         <p className="mt-2 text-[13px] leading-[18px] text-[#8ca1af]">
           Clientes novos em profissionais ativos, churn e pagamentos falhos no período atual.
         </p>
@@ -261,37 +275,50 @@ export function AdminDashboardView({ dashboard }: AdminDashboardViewProps) {
         {dashboard.kpis.map((metric) => <KpiCard key={metric.id} metric={metric} />)}
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <DashboardPanel className="p-[22px]">
-          <SectionHeader subtitle="Evolução mensal de parceiros com assinatura ativa e clientes vinculados." title="Crescimento da plataforma" />
-          <div className="mt-7 flex items-center gap-6 text-[13px] text-[#a1b0bb]">
-            <span className="inline-flex items-center gap-2"><span className="h-1 w-5 rounded-full bg-[#2d9cff]" /> Parceiros</span>
-            <span className="inline-flex items-center gap-2"><span className="h-1 w-5 rounded-full bg-[#15c8c3]" /> Clientes</span>
-          </div>
-          <div className="mt-4"><GrowthChart data={dashboard.growth} /></div>
-        </DashboardPanel>
-        <HealthPanel items={dashboard.health} />
-      </section>
-
-      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <DashboardPanel className="p-[22px]">
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div>
-              <SectionHeader subtitle="Distribuição de assinaturas ativas por plano comercial." title="Assinaturas por plano" />
-              <div className="mt-5"><PlanDistributionChart data={dashboard.planDistribution} /></div>
+      <section className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 gap-6">
+          <DashboardPanel className="p-[22px]">
+            <SectionHeader
+              info="Conta, mês a mês, parceiros com assinatura ativa e clientes ativos vinculados a esses parceiros."
+              subtitle="Evolução mensal de parceiros com assinatura ativa e clientes vinculados."
+              title="Crescimento da plataforma"
+            />
+            <div className="mt-7 flex items-center gap-6 text-[13px] text-[#a1b0bb]">
+              <span className="inline-flex items-center gap-2"><span className="h-1 w-5 rounded-full bg-[#2d9cff]" /> Parceiros</span>
+              <span className="inline-flex items-center gap-2"><span className="h-1 w-5 rounded-full bg-[#15c8c3]" /> Clientes</span>
             </div>
-            <div>
-              <SectionHeader subtitle="Divisão operacional dos profissionais por status efetivo." title="Profissionais por status" />
-              <div className="mt-5"><ProfessionalStatusChart data={dashboard.professionalStatusDistribution} /></div>
-            </div>
-          </div>
-        </DashboardPanel>
-        <AlertsPanel alerts={dashboard.alerts} />
-      </section>
+            <div className="mt-4"><GrowthChart data={dashboard.growth} /></div>
+          </DashboardPanel>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <BottomMetricsGrid metrics={dashboard.bottomMetrics} />
-        <MovementsPanel movements={dashboard.movements} />
+          <DashboardPanel className="p-[22px]">
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div>
+                <SectionHeader
+                  info="Conta assinaturas ativas agrupadas pelo plano comercial vigente."
+                  subtitle="Distribuição de assinaturas ativas por plano comercial."
+                  title="Assinaturas por plano"
+                />
+                <div className="mt-5"><PlanDistributionChart data={dashboard.planDistribution} /></div>
+              </div>
+              <div>
+                <SectionHeader
+                  info="Classifica profissionais em ativos, suspensos e inativos pela regra efetiva de perfil e assinatura."
+                  subtitle="Divisão operacional dos profissionais por status efetivo."
+                  title="Profissionais por status"
+                />
+                <div className="mt-5"><ProfessionalStatusChart data={dashboard.professionalStatusDistribution} /></div>
+              </div>
+            </div>
+          </DashboardPanel>
+
+          <BottomMetricsGrid metrics={dashboard.bottomMetrics} />
+        </div>
+
+        <aside className="grid min-w-0 gap-6">
+          <HealthPanel items={dashboard.health} />
+          <AlertsPanel alerts={dashboard.alerts} />
+          <MovementsPanel movements={dashboard.movements} />
+        </aside>
       </section>
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">

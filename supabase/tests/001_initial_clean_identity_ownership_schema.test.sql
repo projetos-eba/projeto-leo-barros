@@ -17,6 +17,9 @@ select tables_are(
     'partners',
     'patients',
     'platform_activity_events',
+    'platform_integrations',
+    'platform_settings',
+    'platform_settings_activity',
     'profiles',
     'provisioning_operations',
     'support_tickets'

@@ -38,6 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { InfoHint } from "@/components/ui/info-hint";
 import type {
   AdminProfessionalsData,
   ProfessionalBottomMetric,
@@ -349,6 +350,7 @@ function RecentSubscriptions({ data, onShowAll }: { data: AdminProfessionalsData
     <AdminPanel className="p-5">
       <div className="flex items-center gap-3">
         <h2 className="text-[18px] font-bold text-[#dde7ee]">Assinaturas recentes</h2>
+        <InfoHint label="Lista as assinaturas mais recentes da base de profissionais, com plano, data e status financeiro atual." />
         <span className="rounded-full bg-[#243b4a] px-2.5 py-1 text-[12px] font-bold text-[#ccd6dc]">
           {data.recentSubscriptions.length}
         </span>
@@ -687,10 +689,13 @@ export function AdminProfessionalsView({ professionals }: AdminProfessionalsView
         {professionals.bottomMetrics.map((metric) => <BottomMetricCard key={metric.id} metric={metric} />)}
       </section>
 
-      <section className="mt-6 grid gap-5 xl:grid-cols-[1fr_1fr_1fr]">
+      <section className="mt-6 grid items-start gap-5 xl:grid-cols-[1fr_1fr_1fr]">
         <RecentSubscriptions data={professionals} onShowAll={showAllRows} />
         <AdminPanel className="p-5">
-          <h2 className="text-[18px] font-bold text-[#dde7ee]">Distribuição por tipo profissional</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[18px] font-bold text-[#dde7ee]">Distribuição por tipo profissional</h2>
+            <InfoHint label="Agrupa os profissionais cadastrados pelo tipo de atuação registrado no perfil de parceiro." />
+          </div>
           <ProfessionalsDonutChart
             data={professionals.specialtyDistribution}
             testId="specialty-chart"
@@ -699,7 +704,10 @@ export function AdminProfessionalsView({ professionals }: AdminProfessionalsView
           <button className="mt-2 text-[14px] text-[#1f9bff]" type="button" onClick={() => setAdvancedOpen(true)}>Ver relatório completo</button>
         </AdminPanel>
         <AdminPanel className="p-5">
-          <h2 className="text-[18px] font-bold text-[#dde7ee]">Profissionais por status</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[18px] font-bold text-[#dde7ee]">Profissionais por status</h2>
+            <InfoHint label="Classifica profissionais em ativos, suspensos e inativos usando a regra efetiva de perfil e assinatura." />
+          </div>
           <ProfessionalsDonutChart
             data={professionals.statusDistribution}
             testId="status-chart"

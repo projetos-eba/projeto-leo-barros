@@ -65,6 +65,9 @@ O status cadastral original do profile continua disponível no modal `Ver perfil
 - Menu `Ações` permite abrir perfil, copiar e-mail, filtrar por plano e filtrar por status.
 - Status principais na UI: `Ativo`, `Suspenso`, `Inativo`.
 - Não há aprovação manual de documentos no MVP.
+- Sequências de KPIs e métricas do mesmo grupo mantêm cards com altura alinhada.
+- Painéis analíticos de naturezas diferentes alinham pelo topo; um painel não deve herdar a altura do painel mais alto ao lado.
+- Títulos de seções analíticas usam tooltip funcional para explicar a função ou cálculo exibido.
 
 ## Seed local
 

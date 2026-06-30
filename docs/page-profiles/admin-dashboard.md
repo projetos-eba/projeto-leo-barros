@@ -52,6 +52,9 @@ Nenhuma chave, webhook, checkout ou chamada de API Stripe deve ser configurada n
 - Sem dados: gráficos e listas mostram estado vazio sem quebrar renderização.
 - Sem sessão: guard redireciona para `/login`.
 - Perfil não Admin: guard redireciona para a área correta ou bloqueia acesso.
+- Sequências de KPIs e indicadores do mês mantêm cards com altura alinhada.
+- Desktop usa colunas independentes; painéis laterais não herdam a altura dos gráficos da coluna principal.
+- Títulos com ícone de informação têm tooltip funcional com explicação de uso/cálculo da seção.
 
 ## Checklist de manutenção
 

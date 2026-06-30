@@ -823,8 +823,9 @@ O convite permanece `pending_delivery` até a escolha de um provedor de e-mail.
 ## 18. Referências relacionadas
 
 - `AGENTS.md`
-- `docs/estrategia-provisionamento-edge-functions.md`
-- `docs/schema-limpo-inicial-supabase-next.md`
+- `docs/identidade-supabase-atual.md`
+- `docs/archive/2026-06-docs-cleanup/estrategia-provisionamento-edge-functions.md`
+- `docs/archive/2026-06-docs-cleanup/schema-limpo-inicial-supabase-next.md`
 - `supabase/migrations/20260622102406_initial_clean_identity_ownership.sql`
 - `supabase/tests/001_initial_clean_identity_ownership_schema.test.sql`
 - `supabase/tests/002_initial_clean_identity_ownership_rls.test.sql`
@@ -835,25 +836,14 @@ O convite permanece `pending_delivery` até a escolha de um provedor de e-mail.
 - [Supabase Auth Admin — gerar links](https://supabase.com/docs/reference/javascript/auth-admin-generatelink)
 - [Supabase Auth Admin — convite por e-mail](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail)
 
-## 19. Validação via MCP Supabase
+## 19. Observacao sobre validacoes antigas
 
-A conexão MCP local confirmou:
+A validacao MCP registrada originalmente neste contrato foi feita antes das migrations do dominio operacional do Admin. Ela confirmava apenas o nucleo inicial de identidade e nao representa mais o schema completo atual.
 
-- somente `profiles`, `admins`, `patients`, `partners` e `partner_clients` no schema `public`;
-- RLS habilitada nas cinco tabelas;
-- migration `20260622102406_initial_clean_identity_ownership` registrada;
-- `profiles.display_name` obrigatório;
-- `partners.professional_name` obrigatório;
-- `partners.professional_type` restrito aos três valores oficiais;
-- `partners` sem coluna de telefone;
-- `profiles.phone` passou a existir após a migration complementar da Fase A;
-- `professional_registry_type` e `professional_registry_number` presentes;
-- ausência de dados nas cinco tabelas no momento da inspeção.
+Para o estado atual de tabelas, migrations e Edge Functions, use `docs/identidade-supabase-atual.md`.
 
-A documentação oficial consultada via MCP confirmou:
+A documentacao oficial consultada na fase de desenho confirmou que:
 
-- `inviteUserByEmail` envia convite para um endereço de e-mail;
-- `generateLink` suporta link de tipo `invite` para envio por provedor próprio;
-- templates de convite servem para o usuário aceitar o convite e concluir a criação da conta.
-
-A API Auth Admin definitiva para criação, reconciliação e reenvio ainda deverá ser validada por testes locais antes da implementação, especialmente para usuários já existentes.
+- `inviteUserByEmail` envia convite para um endereco de e-mail;
+- `generateLink` suporta link de tipo `invite` para envio por provedor proprio;
+- templates de convite servem para o usuario aceitar o convite e concluir a criacao da conta.

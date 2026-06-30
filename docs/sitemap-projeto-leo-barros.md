@@ -2,7 +2,21 @@
 
 Documentacao da arquitetura da informacao refinada e simplificada do Projeto Leo Barros.
 
-Data de referencia: 11 de junho de 2026.
+Data de referencia: 29 de junho de 2026.
+
+## Estado de implementacao
+
+Este sitemap descreve a arquitetura alvo. Ele nao significa que todas as rotas ja existem.
+
+Rotas implementadas hoje no app Next:
+
+- `/login`;
+- `/admin/dashboard`;
+- `/admin/profissionais`;
+- `/parceiros/dashboard`;
+- `/cliente/inicio`.
+
+As demais rotas continuam como direcao de produto. Para telas ja implementadas, os documentos em `docs/page-profiles` e o codigo em `src/app` prevalecem sobre qualquer detalhe antigo deste mapa.
 
 ## 1. Principio da reorganizacao
 

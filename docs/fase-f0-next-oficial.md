@@ -1,30 +1,29 @@
 # Fase F.0 - Next.js como app oficial
 
-Data de referencia: 28 de junho de 2026.
+Data de referencia: 29 de junho de 2026.
 
 ## Decisao
 
-O Next.js App Router passa a ser a base oficial do produto Leo Barros. A camada Vite/React Router foi removida do caminho funcional principal para evitar divergencia de rotas, autenticacao, nomenclatura e schema.
+O Next.js App Router e a base oficial do produto Leo Barros. A camada Vite/React Router nao e mais o caminho funcional principal para novas telas, regras de autenticacao, nomenclatura ou schema.
 
-## Base preservada
+## Base atual
 
-- Rotas Next oficiais ja validadas: /login, /admin/dashboard, /parceiros/dashboard e /cliente/inicio.
-- Autenticacao Next com @supabase/ssr e cookies.
-- Autorizacao baseada em profiles.role e profiles.status.
-- Clients Supabase em src/lib/supabase.
-- Componentes compartilhados em src/components/ui, src/components/auth e src/components/shells.
-- Edge Functions oficiais: provision-partner e provision-client-for-partner.
-- Migrations limpas em supabase/migrations.
+- Rotas Next validadas: `/login`, `/admin/dashboard`, `/admin/profissionais`, `/parceiros/dashboard` e `/cliente/inicio`.
+- Autenticacao Next com `@supabase/ssr` e cookies.
+- Autorizacao baseada em `profiles.role` e `profiles.status`.
+- Clients Supabase em `src/lib/supabase`.
+- Componentes compartilhados em `src/components/ui`, `src/components/auth` e `src/components/shells`.
+- Edge Functions oficiais: `provision-partner` e `provision-client-for-partner`.
+- Migrations limpas em `supabase/migrations`.
 
-## Fora do escopo
+## Fora do escopo atual
 
 - Supabase remoto.
 - Deploy.
 - Envio real de e-mail ou Resend.
-- Novas telas ou ajuste visual do Admin.
-- Implementacao de /admin/profissionais.
-- Migrar a antiga rota publica /form/:token.
+- Billing real e webhooks.
+- Migrar a antiga rota publica `/form/:token`.
 
-## Observacao
+## Regra de leitura
 
-Documentos historicos que descrevem Vite como aplicacao principal devem ser lidos como contexto de migracao, nao como fonte atual de runtime.
+Documentos historicos que descrevem Vite como aplicacao principal, Next como paralelo, ou entidades canonicas como "a criar" devem ser lidos apenas como contexto de migracao.

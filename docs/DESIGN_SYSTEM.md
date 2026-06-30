@@ -1,21 +1,23 @@
 # Design System
 
+Data de referencia: 29 de junho de 2026.
+
 ## Visão geral
 
-Este documento consolida a fundação do Design System do projeto Leo Barros com base na auditoria do arquivo Figma `Projeto Leo Barros Atualizado` e no pacote local em `outputs/leo-design-system`.
+Este documento consolida a fundacao visual do projeto Leo Barros para o app Next.js atual. Auditorias antigas do Figma e do pacote experimental de design system foram preservadas no arquivo historico, mas este documento passa a ser a fonte viva para novas telas.
 
 Princípios-base:
 
-- O Figma é a fonte de verdade visual.
+- O Figma orienta a direcao visual, mas o codigo em `src/app`, `src/components` e `src/index.css` precisa ser validado antes de qualquer mudanca estrutural.
 - A arquitetura segue a lógica de composição do `shadcn/ui`, mas sem herdar seu visual padrão.
 - Componentes novos devem nascer por variante, não por duplicação.
 - Toda tela nova deve priorizar tokens semânticos, instâncias e padrões documentados.
 
 ## Estado visual atual do código
 
-O código real em `src/index.css` ainda não está totalmente alinhado ao alvo documentado:
+O codigo real ainda nao esta totalmente alinhado ao alvo documentado:
 
-- Importa `Inter` e `Plus Jakarta Sans`; a tipografia alvo documentada é `Rethink Sans`.
+- Importa `Inter` e `Plus Jakarta Sans`; a tipografia alvo documentada e `Rethink Sans`.
 - Usa variáveis shadcn em HSL como `--background`, `--foreground`, `--card`, `--primary` e `--border`.
 - O background atual é preto via HSL (`0 0% 0%`), diferente do alvo `#0B1720`.
 - Mantém classes utilitárias customizadas como `glass-card`, `glass-card-hover`, `bento-grid`, `btn-primary`, `page-enter` e `stagger-fade-in`.
@@ -167,7 +169,7 @@ Escala oficial em `4px`:
 ### Organisms
 
 - `Organisms/Sidebar`
-  Variantes: `role=professional|patient`, `collapsed=true|false`
+  Variantes: `role=professional|client`, `collapsed=true|false`
 - `Organisms/Header`
 - `Organisms/Table`
   Variantes: `state=default|loading|empty`
@@ -205,6 +207,10 @@ Essas famílias preservam a aparência das telas reais e funcionam como ponte de
 - Header no topo da área de conteúdo para título, subtítulo e ações.
 - Conteúdo principal organizado em bandas e grids, não em cartões empilhados arbitrariamente.
 - Regra geral: evitar `card dentro de card`.
+- Sequências de 3 ou mais cards equivalentes, como KPIs e indicadores do mesmo grupo, devem manter altura alinhada entre si para formar uma fileira coesa.
+- Painéis de natureza diferente no mesmo grid devem alinhar pelo topo (`items-start`) e preservar a altura natural de cada conteúdo.
+- Layouts com coluna principal e coluna lateral devem usar colunas independentes, cada uma com sua própria pilha vertical, para evitar que gráfico, tabela ou lista force a altura do painel vizinho.
+- Títulos de seções com ícone de informação devem usar tooltip funcional com explicação curta da função e, quando aplicável, do cálculo da métrica. O tooltip deve funcionar em hover, foco por teclado e clique/toque.
 
 ### Hierarquia visual
 

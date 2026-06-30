@@ -1,65 +1,56 @@
-# Integração local entre Next.js e Supabase
+# Integracao local entre Next.js e Supabase
 
-## 1. Estado atual
+Data de referencia: 29 de junho de 2026.
 
-O produto ainda roda principalmente em Vite, React 18 e React Router. O
-Next.js 16 existe em paralelo como fundação técnica no App Router, isolada em
-arquivos `*.next.tsx`.
+## Estado atual
 
-O Supabase local limpo contém a nova identidade canônica:
+O produto roda oficialmente em Next.js App Router. O ambiente local esperado usa:
 
-- `profiles`;
-- `admins`;
-- `patients`;
-- `partners`;
-- `partner_clients`;
-- `provisioning_operations`.
+- app web em `localhost:3000`;
+- Supabase local;
+- autenticacao com `@supabase/ssr`;
+- sessao baseada em cookies;
+- autorizacao por `profiles.role` e `profiles.status`;
+- Edge Functions locais para provisionamento.
 
-As Edge Functions locais disponíveis para a integração futura são:
+Rotas Next ja implementadas:
 
-- `provision-partner`;
-- `provision-client-for-partner`.
+- `/login`;
+- `/admin/dashboard`;
+- `/admin/profissionais`;
+- `/parceiros/dashboard`;
+- `/cliente/inicio`.
 
-Após a Fase D, o front-end Next possui client Supabase separado do legado Vite,
-sessão baseada em cookies, Proxy de renovação, rota `/login` e guards mínimos
-nos shells técnicos.
+## Limites atuais
 
-## 2. Limites desta preparação
+Ainda estao fora do escopo:
 
-Esta preparação não:
+- Supabase remoto;
+- deploy;
+- envio real de e-mail;
+- Resend;
+- billing real;
+- webhooks de pagamento;
+- migracao da rota publica legada `/form/:token`.
 
-- conecta projeto remoto;
-- usa o project ref antigo como destino remoto;
-- altera o login Vite;
-- conecta UI de painel aos dados reais;
-- expõe publishable key, service role, JWT ou senha;
-- conecta UI às Edge Functions.
+## Variaveis locais
 
-O `project_id` atual do `supabase/config.toml` é uma identificação herdada do
-stack local. Ele não deve ser usado para vincular ou selecionar projeto remoto.
-A troca desse identificador local exige atualização coordenada dos scripts de
-teste que usam o nome dos containers e deve ocorrer em uma etapa própria.
+O arquivo `.env.local` fica fora do Git.
 
-## 3. Variáveis locais
-
-Criar um `.env.local` ignorado pelo Git e preencher localmente:
+Variaveis usadas pelo Next:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-No ambiente local:
+Regras:
 
-- `NEXT_PUBLIC_SUPABASE_URL` recebe a URL local da API;
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` recebe a chave pública local destinada
-  ao client;
-- nenhuma variável `SUPABASE_SERVICE_ROLE_KEY` deve ser exposta ao Next.js
-  client-side;
-- valores devem ser obtidos diretamente da CLI local, sem copiá-los para
-  documentação, logs, commits ou respostas.
+- usar somente a URL e a chave publica local destinadas ao browser;
+- nunca expor `SUPABASE_SERVICE_ROLE_KEY` no client;
+- nao registrar chaves, JWTs, senhas ou links em documentacao, logs ou commits.
 
-As Edge Functions usam, no ambiente server-side local:
+Variaveis server-side usadas pelas Edge Functions:
 
 ```dotenv
 SUPABASE_URL=
@@ -68,12 +59,11 @@ SUPABASE_SERVICE_ROLE_KEY=
 PROVISIONING_ALLOWED_ORIGINS=
 ```
 
-Essas variáveis não devem ser prefixadas com `NEXT_PUBLIC_`, exceto a URL e a
-publishable key destinadas explicitamente ao browser.
+`PROVISIONING_ALLOWED_ORIGINS` deve incluir somente origens locais realmente usadas, como `http://localhost:3000`.
 
-## 4. Estrutura recomendada para o client Next
+## Estrutura Supabase no Next
 
-A Fase D criou:
+Arquivos principais:
 
 ```txt
 src/lib/supabase/
@@ -85,63 +75,45 @@ src/lib/supabase/
 
 Responsabilidades:
 
-- `database.types.ts`: tipos gerados exclusivamente da base limpa local;
+- `database.types.ts`: tipos gerados da base local;
 - `client.ts`: client para Client Components;
 - `server.ts`: client cookie-aware para Server Components;
-- `proxy.ts`: renovação segura da sessão e sincronização dos cookies.
+- `proxy.ts`: renovacao segura de sessao e sincronizacao dos cookies.
 
-O arquivo legado `src/integrations/supabase/client.ts` deve permanecer
-inalterado enquanto o Vite ainda depender dele.
+## Fluxo de autenticacao
 
-Os tipos atuais em `src/integrations/supabase/types.ts` descrevem o banco
-legado e não contêm `profiles`, `admins`, `partners`, `partner_clients`,
-`provisioning_operations` ou as RPCs novas. Eles não devem tipar a integração
-Next com a base limpa.
+O login deve:
 
-Para SSR, a abordagem oficial do Supabase usa `@supabase/ssr`. Essa dependência
-foi aprovada e instalada na Fase D.
+1. autenticar e-mail e senha no Supabase Auth;
+2. validar a identidade no servidor;
+3. buscar o profile por `user_id`;
+4. usar somente `profiles.role` e `profiles.status` para decidir acesso;
+5. negar role desconhecido ou conta sem status ativo;
+6. redirecionar apenas depois da validacao canonica.
 
-## 5. Estratégia de sessão e autenticação
+Destinos atuais:
 
-O fluxo recomendado para o login único futuro é:
-
-1. autenticar e-mail e senha com Supabase Auth;
-2. validar a identidade autenticada no servidor;
-3. consultar o próprio registro em `profiles` por `user_id`;
-4. usar somente `profiles.role` e `profiles.status` para autorização;
-5. rejeitar role desconhecida ou conta diferente de `active`;
-6. redirecionar apenas depois da validação canônica.
-
-Não usar:
-
-- `user_metadata.role`;
-- fallback automático para Admin;
-- consulta pública de CPF para descobrir e-mail;
-- `getSession()` como prova de identidade no servidor;
-- service role no browser.
-
-O contrato puro existente em `src/lib/auth/identity-contracts.ts` deve ser
-reutilizado para resolver o destino após o carregamento do profile.
-
-## 6. Role e redirecionamento
-
-| Role canônica | Status exigido | Destino |
-|---|---|---|
+| Role | Status exigido | Destino |
+| --- | --- | --- |
 | `admin` | `active` | `/admin/dashboard` |
 | `parceiro` | `active` | `/parceiros/dashboard` |
 | `cliente` | `active` | `/cliente/inicio` |
 
-Uma conta `pending`, `suspended` ou `disabled` não recebe destino autenticado.
-A experiência de conta inativa ainda precisa de decisão: mensagem no login com
-encerramento da sessão ou página própria de acesso indisponível.
+Nao usar:
 
-Os shells Next existentes ainda são placeholders, mas agora possuem proteção
-mínima baseada em sessão, `profiles.role` e `profiles.status`.
+- `user_metadata.role` para autorizacao sensivel;
+- fallback automatico para Admin;
+- service role no browser;
+- `getSession()` como prova unica de identidade no servidor.
 
-## 7. Chamada das Edge Functions locais
+## Edge Functions locais
 
-Depois do login, o browser poderá chamar as funções pelo client Supabase
-autenticado:
+Functions atuais:
+
+- `provision-partner`;
+- `provision-client-for-partner`.
+
+O browser chama as funcoes com sessao autenticada:
 
 ```ts
 const { data, error } = await supabase.functions.invoke("provision-partner", {
@@ -149,97 +121,36 @@ const { data, error } = await supabase.functions.invoke("provision-partner", {
 });
 ```
 
-ou:
+A Edge Function deve:
 
-```ts
-const { data, error } = await supabase.functions.invoke(
-  "provision-client-for-partner",
-  { body: payload },
-);
-```
-
-O SDK envia o JWT da sessão. A Edge Function continua responsável por:
-
-- validar o JWT;
+- validar JWT;
 - carregar `profiles`;
-- conferir role, status e extensão;
-- executar a RPC com service role no ambiente seguro;
-- aplicar idempotência;
-- retornar resposta sem link de convite, token ou segredo.
+- conferir role, status e extensao do chamador;
+- usar service role somente depois da autorizacao;
+- aplicar idempotencia;
+- retornar resposta sem senha, token, link de convite ou segredo.
 
-O front-end deve gerar e preservar uma `idempotencyKey` por tentativa lógica.
-Retries da mesma ação reutilizam a mesma chave; uma nova ação usa outra chave.
+## Validacao local Admin -> Parceiro
 
-Para desenvolvimento, `PROVISIONING_ALLOWED_ORIGINS` deve incluir somente as
-origens locais realmente usadas, como o Next na porta `3000`. CORS não substitui
-JWT, RLS ou autorização canônica.
-
-## 8. Status da Fase D: `/login`
-
-Implementado:
-
-1. instalação de `@supabase/ssr`;
-2. Supabase local usado sem vínculo remoto;
-3. tipos da base limpa gerados em `src/lib/supabase/database.types.ts`;
-4. clients browser e server cookie-aware;
-5. Proxy do Next 16 para renovação da sessão;
-6. `/login` reutilizando `LoginView`;
-7. autenticação apenas por e-mail e senha;
-8. consulta de `profiles.role` e `profiles.status`;
-9. reutilização de `resolvePostLoginDestination`;
-10. proteção mínima dos shells `/admin`, `/parceiros` e `/cliente`;
-11. testes de contrato de login, guard e formulário;
-12. login e rotas Vite preservados.
-
-## 9. Riscos conhecidos
-
-- O login Vite ainda consulta o schema legado e usa `user_metadata.role`.
-- Os tipos Supabase atuais são incompatíveis com a base limpa.
-- O identificador local do `config.toml` ainda tem o valor herdado usado pelos
-  scripts de teste; isso não equivale a vínculo remoto.
-- O fluxo para conta inativa e a rota de conclusão de convite permanecem
-  decisões pendentes.
-- O login Next depende de variáveis locais em `.env.local`; valores reais não
-  devem ser versionados nem documentados.
-
-## 10. Validação local Admin → Parceiro
-
-A Fase E criou um script local/dev para validar o primeiro fluxo real:
+Script de validacao:
 
 ```bash
 npm run dev:validate-admin-partner-flow
 ```
 
-O script:
+O script usa somente Supabase local, cria fixtures de desenvolvimento, valida login Auth, chama `provision-partner`, testa idempotencia e confirma guards entre Admin e Parceiro.
 
-1. usa somente o Supabase local;
-2. lê as chaves locais a partir do container local em memória;
-3. não imprime senha, JWT, service role ou link de convite;
-4. cria/atualiza um Super Admin fictício;
-5. valida login Auth do Admin;
-6. chama `provision-partner` com contexto autorizado;
-7. valida idempotência da function;
-8. valida `profiles.role = 'parceiro'`, `profiles.status = 'active'` e extensão `partners`;
-9. confirma convite `pending_delivery`;
-10. define senha efêmera local/dev para o Parceiro fictício somente para teste;
-11. testa login real no Next com navegador headless;
-12. valida guards entre Admin e Parceiro.
-
-Dados fictícios usados:
+Dados ficticios usados:
 
 ```txt
 ADMIN_LOCAL_EMAIL=admin.local@example.com
 PARTNER_LOCAL_EMAIL=partner.local@example.com
 ```
 
-As senhas são geradas em memória a cada execução. Esse mecanismo é exclusivo
-de desenvolvimento local e não representa fluxo de produção.
+Senhas sao geradas em memoria a cada execucao. Esse mecanismo e exclusivo de desenvolvimento local.
 
-## 11. Referências técnicas
+## Referencias
 
-- Supabase: criação de clients SSR para Next.js:
-  <https://supabase.com/docs/guides/auth/server-side/nextjs>
-- Next.js: autenticação no App Router:
-  <https://nextjs.org/docs/app/guides/authentication>
-- Supabase CLI local:
-  <https://supabase.com/docs/guides/local-development/cli/getting-started>
+- Supabase SSR para Next.js: <https://supabase.com/docs/guides/auth/server-side/nextjs>
+- Next.js App Router auth: <https://nextjs.org/docs/app/guides/authentication>
+- Supabase CLI local: <https://supabase.com/docs/guides/local-development/cli/getting-started>
