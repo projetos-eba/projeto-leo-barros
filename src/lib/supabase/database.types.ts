@@ -140,6 +140,913 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_calendar_blocks: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          partner_id: string
+          reason: string | null
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          partner_id: string
+          reason?: string | null
+          starts_at: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          partner_id?: string
+          reason?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_calendar_blocks_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_adherence_snapshots: {
+        Row: {
+          created_at: string
+          diet_percentage: number | null
+          id: string
+          partner_id: string
+          patient_id: string
+          period_end: string
+          period_start: string
+          training_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diet_percentage?: number | null
+          id?: string
+          partner_id: string
+          patient_id: string
+          period_end: string
+          period_start: string
+          training_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diet_percentage?: number | null
+          id?: string
+          partner_id?: string
+          patient_id?: string
+          period_end?: string
+          period_start?: string
+          training_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_adherence_snapshots_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_adherence_snapshots_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_appointments: {
+        Row: {
+          appointment_type: string
+          created_at: string
+          ends_at: string
+          id: string
+          location_text: string | null
+          modality: string
+          notes: string | null
+          partner_id: string
+          patient_id: string
+          reminder_minutes: number
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_type?: string
+          created_at?: string
+          ends_at: string
+          id?: string
+          location_text?: string | null
+          modality?: string
+          notes?: string | null
+          partner_id: string
+          patient_id: string
+          reminder_minutes?: number
+          starts_at: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_type?: string
+          created_at?: string
+          ends_at?: string
+          id?: string
+          location_text?: string | null
+          modality?: string
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string
+          reminder_minutes?: number
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_appointments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_assessment_circumferences: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          id: string
+          metric_key: string
+          partner_id: string
+          patient_id: string
+          updated_at: string
+          value_cm: number
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          id?: string
+          metric_key: string
+          partner_id: string
+          patient_id: string
+          updated_at?: string
+          value_cm: number
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          metric_key?: string
+          partner_id?: string
+          patient_id?: string
+          updated_at?: string
+          value_cm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_assessment_circumferences_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_assessment_circumferences_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_assessment_circumferences_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_assessment_skinfolds: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          id: string
+          metric_key: string
+          partner_id: string
+          patient_id: string
+          updated_at: string
+          value_mm: number
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          id?: string
+          metric_key: string
+          partner_id: string
+          patient_id: string
+          updated_at?: string
+          value_mm: number
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          metric_key?: string
+          partner_id?: string
+          patient_id?: string
+          updated_at?: string
+          value_mm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_assessment_skinfolds_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_assessment_skinfolds_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_assessment_skinfolds_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_assessments: {
+        Row: {
+          activity_level: string
+          assessed_at: string
+          assessment_method: string
+          body_fat_percentage: number | null
+          created_at: string
+          height_cm: number
+          id: string
+          muscle_mass_kg: number | null
+          notes: string | null
+          partner_id: string
+          patient_id: string
+          target_days: number
+          target_weight_kg: number | null
+          title: string
+          updated_at: string
+          weight_kg: number
+        }
+        Insert: {
+          activity_level?: string
+          assessed_at: string
+          assessment_method?: string
+          body_fat_percentage?: number | null
+          created_at?: string
+          height_cm: number
+          id?: string
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          partner_id: string
+          patient_id: string
+          target_days?: number
+          target_weight_kg?: number | null
+          title?: string
+          updated_at?: string
+          weight_kg: number
+        }
+        Update: {
+          activity_level?: string
+          assessed_at?: string
+          assessment_method?: string
+          body_fat_percentage?: number | null
+          created_at?: string
+          height_cm?: number
+          id?: string
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string
+          target_days?: number
+          target_weight_kg?: number | null
+          title?: string
+          updated_at?: string
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_assessments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_assessments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_body_measurements: {
+        Row: {
+          body_fat_percentage: number | null
+          created_at: string
+          id: string
+          measured_at: string
+          notes: string | null
+          partner_id: string
+          patient_id: string
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          body_fat_percentage?: number | null
+          created_at?: string
+          id?: string
+          measured_at: string
+          notes?: string | null
+          partner_id: string
+          patient_id: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          body_fat_percentage?: number | null
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_body_measurements_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_body_measurements_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_calorie_calculations: {
+        Row: {
+          activity_factor: number
+          assessment_id: string | null
+          bmr_kcal: number
+          created_at: string
+          daily_energy_delta_kcal: number
+          formula: string
+          id: string
+          inputs: Json
+          partner_id: string
+          patient_id: string
+          projected_weight_delta_kg: number
+          status: string
+          target_days: number
+          target_kcal: number
+          target_weight_kg: number | null
+          tdee_kcal: number
+          updated_at: string
+          weekly_energy_delta_kcal: number
+        }
+        Insert: {
+          activity_factor: number
+          assessment_id?: string | null
+          bmr_kcal: number
+          created_at?: string
+          daily_energy_delta_kcal: number
+          formula: string
+          id?: string
+          inputs?: Json
+          partner_id: string
+          patient_id: string
+          projected_weight_delta_kg: number
+          status?: string
+          target_days: number
+          target_kcal: number
+          target_weight_kg?: number | null
+          tdee_kcal: number
+          updated_at?: string
+          weekly_energy_delta_kcal: number
+        }
+        Update: {
+          activity_factor?: number
+          assessment_id?: string | null
+          bmr_kcal?: number
+          created_at?: string
+          daily_energy_delta_kcal?: number
+          formula?: string
+          id?: string
+          inputs?: Json
+          partner_id?: string
+          patient_id?: string
+          projected_weight_delta_kg?: number
+          status?: string
+          target_days?: number
+          target_kcal?: number
+          target_weight_kg?: number | null
+          tdee_kcal?: number
+          updated_at?: string
+          weekly_energy_delta_kcal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_calorie_calculations_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_calorie_calculations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_calorie_calculations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_diet_events: {
+        Row: {
+          actor_name: string | null
+          created_at: string
+          detail: string
+          details: Json
+          event_type: string
+          id: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          version: number
+        }
+        Insert: {
+          actor_name?: string | null
+          created_at?: string
+          detail: string
+          details?: Json
+          event_type: string
+          id?: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          version?: number
+        }
+        Update: {
+          actor_name?: string | null
+          created_at?: string
+          detail?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          partner_id?: string
+          patient_id?: string
+          plan_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_diet_events_plan_match_fkey"
+            columns: ["plan_id", "partner_id", "patient_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_diet_plans"
+            referencedColumns: ["id", "partner_id", "patient_id"]
+          },
+        ]
+      }
+      partner_client_diet_meal_items: {
+        Row: {
+          created_at: string
+          food_id: string | null
+          household_measure: string | null
+          id: string
+          meal_id: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          quantity: number
+          quantity_unit: string
+          snapshot_carbs_g: number
+          snapshot_fat_g: number
+          snapshot_fiber_g: number
+          snapshot_kcal: number
+          snapshot_name: string
+          snapshot_protein_g: number
+          snapshot_serving_size: number
+          snapshot_serving_unit: string
+          snapshot_sodium_mg: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          food_id?: string | null
+          household_measure?: string | null
+          id?: string
+          meal_id: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          quantity: number
+          quantity_unit: string
+          snapshot_carbs_g: number
+          snapshot_fat_g: number
+          snapshot_fiber_g?: number
+          snapshot_kcal: number
+          snapshot_name: string
+          snapshot_protein_g: number
+          snapshot_serving_size: number
+          snapshot_serving_unit: string
+          snapshot_sodium_mg?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string | null
+          household_measure?: string | null
+          id?: string
+          meal_id?: string
+          partner_id?: string
+          patient_id?: string
+          plan_id?: string
+          quantity?: number
+          quantity_unit?: string
+          snapshot_carbs_g?: number
+          snapshot_fat_g?: number
+          snapshot_fiber_g?: number
+          snapshot_kcal?: number
+          snapshot_name?: string
+          snapshot_protein_g?: number
+          snapshot_serving_size?: number
+          snapshot_serving_unit?: string
+          snapshot_sodium_mg?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_diet_items_food_partner_fkey"
+            columns: ["food_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_foods"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_client_diet_items_meal_match_fkey"
+            columns: ["meal_id", "plan_id", "partner_id", "patient_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_diet_meals"
+            referencedColumns: ["id", "plan_id", "partner_id", "patient_id"]
+          },
+        ]
+      }
+      partner_client_diet_meals: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          meal_time: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          meal_time: string
+          partner_id: string
+          patient_id: string
+          plan_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          meal_time?: string
+          partner_id?: string
+          patient_id?: string
+          plan_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_diet_meals_plan_match_fkey"
+            columns: ["plan_id", "partner_id", "patient_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_diet_plans"
+            referencedColumns: ["id", "partner_id", "patient_id"]
+          },
+        ]
+      }
+      partner_client_diet_plans: {
+        Row: {
+          calorie_strategy: string
+          created_at: string
+          id: string
+          notes: string | null
+          partner_id: string
+          patient_id: string
+          published_at: string | null
+          sent_at: string | null
+          status: string
+          target_carbs_g: number
+          target_fat_g: number
+          target_kcal: number
+          target_protein_g: number
+          title: string
+          updated_at: string
+          version: number
+          water_liters: number
+        }
+        Insert: {
+          calorie_strategy?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id: string
+          patient_id: string
+          published_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_carbs_g?: number
+          target_fat_g?: number
+          target_kcal?: number
+          target_protein_g?: number
+          title: string
+          updated_at?: string
+          version?: number
+          water_liters?: number
+        }
+        Update: {
+          calorie_strategy?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string
+          published_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_carbs_g?: number
+          target_fat_g?: number
+          target_kcal?: number
+          target_protein_g?: number
+          title?: string
+          updated_at?: string
+          version?: number
+          water_liters?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_diet_plans_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_diet_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_goals: {
+        Row: {
+          adherence_target_pct: number
+          created_at: string
+          id: string
+          partner_id: string
+          patient_id: string
+          target_body_fat_max_pct: number | null
+          target_body_fat_min_pct: number | null
+          target_weight_kg: number | null
+          updated_at: string
+        }
+        Insert: {
+          adherence_target_pct?: number
+          created_at?: string
+          id?: string
+          partner_id: string
+          patient_id: string
+          target_body_fat_max_pct?: number | null
+          target_body_fat_min_pct?: number | null
+          target_weight_kg?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adherence_target_pct?: number
+          created_at?: string
+          id?: string
+          partner_id?: string
+          patient_id?: string
+          target_body_fat_max_pct?: number | null
+          target_body_fat_min_pct?: number | null
+          target_weight_kg?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_goals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_goals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_observations: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          metadata: Json
+          observation_type: string
+          occurred_at: string
+          partner_id: string
+          patient_id: string
+          severity: string
+          title: string
+          updated_at: string
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          observation_type: string
+          occurred_at: string
+          partner_id: string
+          patient_id: string
+          severity?: string
+          title: string
+          updated_at?: string
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          observation_type?: string
+          occurred_at?: string
+          partner_id?: string
+          patient_id?: string
+          severity?: string
+          title?: string
+          updated_at?: string
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_observations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_observations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_plan_modules: {
+        Row: {
+          created_at: string
+          id: string
+          module_type: string
+          partner_id: string
+          patient_id: string
+          primary_summary: string
+          secondary_summary: string | null
+          subscription_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_type: string
+          partner_id: string
+          patient_id: string
+          primary_summary: string
+          secondary_summary?: string | null
+          subscription_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_type?: string
+          partner_id?: string
+          patient_id?: string
+          primary_summary?: string
+          secondary_summary?: string | null
+          subscription_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_plan_modules_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_plan_modules_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_plan_modules_subscription_match_fkey"
+            columns: ["partner_id", "patient_id", "subscription_id"]
+            isOneToOne: false
+            referencedRelation: "partner_client_plan_subscriptions"
+            referencedColumns: ["partner_id", "patient_id", "id"]
+          },
+        ]
+      }
       partner_client_plan_subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -204,6 +1111,60 @@ export type Database = {
           },
           {
             foreignKeyName: "partner_client_plan_subscriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_client_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          partner_id: string
+          patient_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          partner_id: string
+          patient_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          partner_id?: string
+          patient_id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_client_tasks_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_client_tasks_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
@@ -353,6 +1314,462 @@ export type Database = {
           },
         ]
       }
+      partner_material_events: {
+        Row: {
+          details: Json
+          event_type: string
+          id: string
+          material_id: string
+          occurred_at: string
+          partner_id: string
+          patient_id: string | null
+        }
+        Insert: {
+          details?: Json
+          event_type: string
+          id?: string
+          material_id: string
+          occurred_at?: string
+          partner_id: string
+          patient_id?: string | null
+        }
+        Update: {
+          details?: Json
+          event_type?: string
+          id?: string
+          material_id?: string
+          occurred_at?: string
+          partner_id?: string
+          patient_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_material_events_material_partner_fkey"
+            columns: ["material_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_materials"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_material_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_material_shares: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          message: string | null
+          partner_id: string
+          patient_id: string
+          revoked_at: string | null
+          shared_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          message?: string | null
+          partner_id: string
+          patient_id: string
+          revoked_at?: string | null
+          shared_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          message?: string | null
+          partner_id?: string
+          patient_id?: string
+          revoked_at?: string | null
+          shared_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_material_shares_material_partner_fkey"
+            columns: ["material_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_materials"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_material_shares_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_materials: {
+        Row: {
+          category: string
+          cover_storage_path: string | null
+          created_at: string
+          description: string | null
+          external_url: string | null
+          file_type: string
+          id: string
+          is_favorite: boolean
+          material_kind: string
+          mime_type: string | null
+          original_filename: string | null
+          partner_id: string
+          size_bytes: number | null
+          status: string
+          storage_path: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          cover_storage_path?: string | null
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          file_type: string
+          id?: string
+          is_favorite?: boolean
+          material_kind: string
+          mime_type?: string | null
+          original_filename?: string | null
+          partner_id: string
+          size_bytes?: number | null
+          status?: string
+          storage_path?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_storage_path?: string | null
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          file_type?: string
+          id?: string
+          is_favorite?: boolean
+          material_kind?: string
+          mime_type?: string | null
+          original_filename?: string | null
+          partner_id?: string
+          size_bytes?: number | null
+          status?: string
+          storage_path?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_materials_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_protocol_events: {
+        Row: {
+          details: Json
+          event_type: string
+          exercise_id: string | null
+          food_id: string | null
+          id: string
+          item_type: string
+          occurred_at: string
+          partner_id: string
+        }
+        Insert: {
+          details?: Json
+          event_type: string
+          exercise_id?: string | null
+          food_id?: string | null
+          id?: string
+          item_type: string
+          occurred_at?: string
+          partner_id: string
+        }
+        Update: {
+          details?: Json
+          event_type?: string
+          exercise_id?: string | null
+          food_id?: string | null
+          id?: string
+          item_type?: string
+          occurred_at?: string
+          partner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_protocol_events_exercise_partner_fkey"
+            columns: ["exercise_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_exercises"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_events_food_partner_fkey"
+            columns: ["food_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_foods"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_protocol_exercises: {
+        Row: {
+          cadence: string | null
+          created_at: string
+          default_reps: string
+          default_sets: number
+          equipment: string
+          id: string
+          instructions: string | null
+          level: string
+          muscle_group: string
+          name: string
+          objective: string
+          partner_id: string
+          rest_seconds: number
+          secondary_muscle_groups: string[]
+          status: string
+          tags: string[]
+          thumbnail_url: string | null
+          updated_at: string
+          usage_count: number
+          variations: string[]
+          video_url: string | null
+        }
+        Insert: {
+          cadence?: string | null
+          created_at?: string
+          default_reps?: string
+          default_sets?: number
+          equipment?: string
+          id?: string
+          instructions?: string | null
+          level?: string
+          muscle_group: string
+          name: string
+          objective?: string
+          partner_id: string
+          rest_seconds?: number
+          secondary_muscle_groups?: string[]
+          status?: string
+          tags?: string[]
+          thumbnail_url?: string | null
+          updated_at?: string
+          usage_count?: number
+          variations?: string[]
+          video_url?: string | null
+        }
+        Update: {
+          cadence?: string | null
+          created_at?: string
+          default_reps?: string
+          default_sets?: number
+          equipment?: string
+          id?: string
+          instructions?: string | null
+          level?: string
+          muscle_group?: string
+          name?: string
+          objective?: string
+          partner_id?: string
+          rest_seconds?: number
+          secondary_muscle_groups?: string[]
+          status?: string
+          tags?: string[]
+          thumbnail_url?: string | null
+          updated_at?: string
+          usage_count?: number
+          variations?: string[]
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_protocol_exercises_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_protocol_foods: {
+        Row: {
+          carbs_g: number
+          category: string
+          created_at: string
+          fat_g: number
+          fiber_g: number
+          household_measure: string | null
+          id: string
+          kcal: number
+          name: string
+          notes: string | null
+          partner_id: string
+          protein_g: number
+          serving_size: number
+          serving_unit: string
+          sodium_mg: number
+          source: string
+          status: string
+          suggested_uses: string[]
+          tags: string[]
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          carbs_g?: number
+          category?: string
+          created_at?: string
+          fat_g?: number
+          fiber_g?: number
+          household_measure?: string | null
+          id?: string
+          kcal?: number
+          name: string
+          notes?: string | null
+          partner_id: string
+          protein_g?: number
+          serving_size?: number
+          serving_unit?: string
+          sodium_mg?: number
+          source?: string
+          status?: string
+          suggested_uses?: string[]
+          tags?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          carbs_g?: number
+          category?: string
+          created_at?: string
+          fat_g?: number
+          fiber_g?: number
+          household_measure?: string | null
+          id?: string
+          kcal?: number
+          name?: string
+          notes?: string | null
+          partner_id?: string
+          protein_g?: number
+          serving_size?: number
+          serving_unit?: string
+          sodium_mg?: number
+          source?: string
+          status?: string
+          suggested_uses?: string[]
+          tags?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_protocol_foods_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_protocol_use_drafts: {
+        Row: {
+          created_at: string
+          exercise_id: string | null
+          food_id: string | null
+          id: string
+          item_type: string
+          notes: string | null
+          partner_id: string
+          patient_id: string | null
+          plan_context: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id?: string | null
+          food_id?: string | null
+          id?: string
+          item_type: string
+          notes?: string | null
+          partner_id: string
+          patient_id?: string | null
+          plan_context?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string | null
+          food_id?: string | null
+          id?: string
+          item_type?: string
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string | null
+          plan_context?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_protocol_use_drafts_exercise_partner_fkey"
+            columns: ["exercise_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_exercises"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_use_drafts_food_partner_fkey"
+            columns: ["food_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_foods"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_use_drafts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_use_drafts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -413,6 +1830,324 @@ export type Database = {
           },
         ]
       }
+      partner_workout_events: {
+        Row: {
+          actor_name: string | null
+          created_at: string
+          detail: string
+          details: Json
+          event_type: string
+          id: string
+          partner_id: string
+          patient_id: string | null
+          program_id: string
+          version: number
+        }
+        Insert: {
+          actor_name?: string | null
+          created_at?: string
+          detail: string
+          details?: Json
+          event_type: string
+          id?: string
+          partner_id: string
+          patient_id?: string | null
+          program_id: string
+          version?: number
+        }
+        Update: {
+          actor_name?: string | null
+          created_at?: string
+          detail?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          partner_id?: string
+          patient_id?: string | null
+          program_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_events_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_workout_exercises: {
+        Row: {
+          biset_group_id: string | null
+          biset_position: number | null
+          cadence: string | null
+          created_at: string
+          exercise_id: string
+          id: string
+          notes: string | null
+          partner_id: string
+          rest_seconds: number
+          session_id: string
+          snapshot_muscle_group: string
+          snapshot_name: string
+          snapshot_secondary_muscle_groups: string[]
+          snapshot_thumbnail_url: string | null
+          sort_order: number
+          technique: string
+          updated_at: string
+          variation_name: string | null
+        }
+        Insert: {
+          biset_group_id?: string | null
+          biset_position?: number | null
+          cadence?: string | null
+          created_at?: string
+          exercise_id: string
+          id?: string
+          notes?: string | null
+          partner_id: string
+          rest_seconds?: number
+          session_id: string
+          snapshot_muscle_group: string
+          snapshot_name: string
+          snapshot_secondary_muscle_groups?: string[]
+          snapshot_thumbnail_url?: string | null
+          sort_order?: number
+          technique?: string
+          updated_at?: string
+          variation_name?: string | null
+        }
+        Update: {
+          biset_group_id?: string | null
+          biset_position?: number | null
+          cadence?: string | null
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          rest_seconds?: number
+          session_id?: string
+          snapshot_muscle_group?: string
+          snapshot_name?: string
+          snapshot_secondary_muscle_groups?: string[]
+          snapshot_thumbnail_url?: string | null
+          sort_order?: number
+          technique?: string
+          updated_at?: string
+          variation_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_exercises_library_partner_fkey"
+            columns: ["exercise_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_exercises"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_workout_exercises_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_exercises_session_partner_fkey"
+            columns: ["session_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_sessions"
+            referencedColumns: ["id", "partner_id"]
+          },
+        ]
+      }
+      partner_workout_programs: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          partner_id: string
+          patient_id: string | null
+          program_kind: string
+          published_at: string | null
+          sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id: string
+          patient_id?: string | null
+          program_kind?: string
+          published_at?: string | null
+          sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          patient_id?: string | null
+          program_kind?: string
+          published_at?: string | null
+          sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_programs_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_programs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_workout_sessions: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          frequency_per_week: number
+          id: string
+          objective: string
+          partner_id: string
+          program_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          frequency_per_week?: number
+          id?: string
+          objective?: string
+          partner_id: string
+          program_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          frequency_per_week?: number
+          id?: string
+          objective?: string
+          partner_id?: string
+          program_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_sessions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_sessions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_sessions_program_partner_fkey"
+            columns: ["program_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_programs"
+            referencedColumns: ["id", "partner_id"]
+          },
+        ]
+      }
+      partner_workout_sets: {
+        Row: {
+          created_at: string
+          id: string
+          intensity: string
+          load_kg: number | null
+          partner_id: string
+          prescribed_exercise_id: string
+          reps: number | null
+          set_number: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intensity?: string
+          load_kg?: number | null
+          partner_id: string
+          prescribed_exercise_id: string
+          reps?: number | null
+          set_number: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intensity?: string
+          load_kg?: number | null
+          partner_id?: string
+          prescribed_exercise_id?: string
+          reps?: number | null
+          set_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_sets_exercise_partner_fkey"
+            columns: ["prescribed_exercise_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_exercises"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_workout_sets_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           created_at: string
@@ -456,9 +2191,11 @@ export type Database = {
       }
       patients: {
         Row: {
+          avatar_url: string | null
           birth_date: string | null
           cpf: string | null
           created_at: string
+          gender: string | null
           id: string
           objective: string | null
           phone: string | null
@@ -466,9 +2203,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
           objective?: string | null
           phone?: string | null
@@ -476,9 +2215,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
           objective?: string | null
           phone?: string | null
@@ -861,6 +2602,17 @@ export type Database = {
         Args: { target_patient_id: string }
         Returns: boolean
       }
+      current_partner_has_patient_link: {
+        Args: { target_patient_id: string }
+        Returns: boolean
+      }
+      partner_client_assessments: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
+      partner_client_diet: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_overview: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_workouts: { Args: { p_patient_id: string }; Returns: Json }
       partner_clients_list: {
         Args: never
         Returns: {
@@ -876,6 +2628,14 @@ export type Database = {
           service_scopes: string[]
           started_at: string
         }[]
+      }
+      partner_clone_workout_program: {
+        Args: {
+          p_as_template?: boolean
+          p_patient_id: string
+          p_source_program_id: string
+        }
+        Returns: string
       }
       provision_client_for_partner_records: {
         Args: {

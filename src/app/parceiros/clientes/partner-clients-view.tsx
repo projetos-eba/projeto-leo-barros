@@ -228,61 +228,6 @@ function ScopeIcon({ scope }: { scope: string }) {
   );
 }
 
-function ClientDetailsDrawer({
-  client,
-  onOpenChange,
-}: {
-  client: PartnerClientRow | null;
-  onOpenChange: (open: boolean) => void;
-}) {
-  return (
-    <Sheet open={Boolean(client)} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-l border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[460px]" side="right">
-        {client ? (
-          <>
-            <SheetHeader className="border-b border-[#303746] px-6 py-5 text-left">
-              <SheetTitle className="text-[22px] font-bold text-[#f3f4f7]">Cliente selecionado</SheetTitle>
-              <SheetDescription className="text-[13px] text-[#8b92a3]">
-                Dados operacionais mínimos para acompanhamento.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-6 px-6 py-5">
-              <section className="flex items-center gap-4">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#fce4e7] text-[18px] font-bold text-[#121722]">
-                  {client.initial}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="truncate text-[20px] font-bold">{client.name}</h3>
-                  <p className="truncate text-[13px] text-[#bac1ce]">{client.email}</p>
-                  <p className="mt-1 text-[12px] text-[#8b92a3]">{client.phoneLabel}</p>
-                </div>
-              </section>
-
-              <section className="grid grid-cols-2 gap-3">
-                {[
-                  ["Status", client.statusLabel],
-                  ["Objetivo", client.objectiveLabel],
-                  ["Idade", client.ageLabel],
-                  ["Escopos", client.serviceScopeLabel],
-                  ["Plano", client.planSummaryLabel],
-                  ["Renovação", client.renewalLabel],
-                  ["Início", client.startedAtLabel],
-                  ["Atualização", client.lastUpdateLabel],
-                ].map(([label, value]) => (
-                  <div className="rounded-[8px] border border-[#303746] bg-[#161a22] p-3" key={label}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">{label}</p>
-                    <p className="mt-1 text-[13px] font-semibold text-[#f3f4f7]">{value}</p>
-                  </div>
-                ))}
-              </section>
-            </div>
-          </>
-        ) : null}
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 function validateNewClient(fields: NewClientFields): FieldErrors {
   const errors: FieldErrors = {};
 
@@ -527,10 +472,10 @@ function Field({
 }
 
 export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<PartnerClientRow | null>(null);
   const [newClientOpen, setNewClientOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -690,7 +635,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                             <button
                               className="block truncate text-left text-[14px] font-semibold leading-5 text-[#f3f4f7] hover:text-[#68afe9]"
                               type="button"
-                              onClick={() => setSelectedClient(row)}
+                              onClick={() => router.push(`/parceiros/clientes/${row.id}`)}
                             >
                               {row.name}
                             </button>
@@ -728,7 +673,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                           <span className="hidden lg:inline-flex">
                             <StatusBadge label={row.statusLabel} status={row.status} />
                           </span>
-                          <button className="rounded-[8px] p-2 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => setSelectedClient(row)}>
+                          <button className="rounded-[8px] p-2 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => router.push(`/parceiros/clientes/${row.id}`)}>
                             <Eye className="size-4" />
                             <span className="sr-only">Ver Cliente</span>
                           </button>
@@ -801,7 +746,6 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
         </div>
       </div>
 
-      <ClientDetailsDrawer client={selectedClient} onOpenChange={(open) => !open && setSelectedClient(null)} />
       <NewClientDrawer
         open={newClientOpen}
         onCreated={setActionMessage}

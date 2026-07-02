@@ -6,10 +6,11 @@ import type { PartnerClientsData } from "@/lib/partners/clients-metrics";
 import { createClient } from "@/lib/supabase/client";
 
 const refresh = vi.fn();
+const push = vi.fn();
 const invoke = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh }),
+  useRouter: () => ({ push, refresh }),
 }));
 
 vi.mock("@/lib/supabase/client", () => ({
@@ -82,6 +83,7 @@ describe("PartnerClientsView", () => {
       },
     } as unknown as ReturnType<typeof createClient>);
     invoke.mockReset();
+    push.mockReset();
     refresh.mockReset();
   });
 
@@ -92,7 +94,7 @@ describe("PartnerClientsView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renderiza lista, filtra, abre detalhe e exporta sem CPF", () => {
+  it("renderiza lista, filtra, navega para detalhe e exporta sem CPF", () => {
     const createObjectURL = vi.fn(() => "blob:clientes");
     const revokeObjectURL = vi.fn();
     Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectURL });
@@ -119,9 +121,7 @@ describe("PartnerClientsView", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:clientes");
 
     fireEvent.click(screen.getByRole("button", { name: "Mariana Costa" }));
-    expect(screen.getByRole("heading", { name: "Cliente selecionado" })).toBeInTheDocument();
-    expect(screen.getAllByText("Sem plano").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(push).toHaveBeenCalledWith("/parceiros/clientes/patient-2");
   });
 
   it("valida e cria Cliente pela Edge Function", async () => {

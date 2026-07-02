@@ -1,0 +1,4 @@
+interface:
+  display_name: "Parceiros - Materiais"
+  short_description: "Manter biblioteca e compartilhamentos"
+  default_prompt: "Use $leo-parceiros-materiais para evoluir a biblioteca de materiais do perfil Parceiros."

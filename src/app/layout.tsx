@@ -16,8 +16,8 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="pt-BR">
-      <body>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
