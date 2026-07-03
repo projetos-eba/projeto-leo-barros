@@ -276,6 +276,30 @@ begin
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
 
+  delete from public.client_health_events
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.client_health_action_logs
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.client_health_pressure_logs
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.client_health_medication_logs
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.client_health_medications
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.client_health_daily_logs
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
   delete from public.partner_client_tasks
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
@@ -522,6 +546,7 @@ begin
   values
     (target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'treino', 'active', now() - interval '6 months', null, now() - interval '6 months', now() - interval '2 days'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'dieta', 'active', now() - interval '6 months', null, now() - interval '6 months', now() - interval '2 days'),
+    (target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'saude', 'active', now() - interval '6 months', null, now() - interval '6 months', now() - interval '2 days'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'treino', 'active', now() - interval '5 months', null, now() - interval '5 months', now() - interval '5 days'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000303', 'treino', 'active', now() - interval '4 months', null, now() - interval '4 months', now() - interval '10 days'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000304', 'dieta', 'active', now() - interval '3 months', null, now() - interval '3 months', now() - interval '35 days'),
@@ -1014,7 +1039,12 @@ begin
     ('d1000000-0000-4000-8000-000000000104', target_partner_id, 'Whey protein concentrado', 'suplemento', 'custom', 30, 'g', '1 scoop', 120, 3, 24, 1.5, 0, 60, 'Ajustar conforme tolerância e rotina do Cliente.', array['suplemento', 'proteína'], array['pos_treino'], 107, 'active', now() - interval '44 days', now() - interval '2 days'),
     ('d1000000-0000-4000-8000-000000000105', target_partner_id, 'Azeite de oliva extra virgem', 'gordura', 'tbca', 13, 'ml', '1 colher de sopa', 108, 0, 0, 12, 0, 0, null, array['gordura boa'], array['refeicao_principal'], 35, 'active', now() - interval '40 days', now() - interval '6 days'),
     ('d1000000-0000-4000-8000-000000000106', target_partner_id, 'Maçã fuji com casca', 'fruta', 'taco', 130, 'g', '1 unidade média', 73, 19, 0.4, 0.2, 2.7, 1, null, array['fruta', 'lanche'], array['lanche'], 29, 'active', now() - interval '39 days', now() - interval '8 days'),
-    ('d1000000-0000-4000-8000-000000000107', target_partner_id, 'Alimento importado sem categoria', 'outros', 'imported', 100, 'g', null, 90, 15, 4, 1, 2, 20, 'Fixture para pendência de categoria.', array['importado'], array['outro'], 2, 'active', now() - interval '1 day', now() - interval '1 day');
+    ('d1000000-0000-4000-8000-000000000107', target_partner_id, 'Alimento importado sem categoria', 'outros', 'imported', 100, 'g', null, 90, 15, 4, 1, 2, 20, 'Fixture para pendência de categoria.', array['importado'], array['outro'], 2, 'active', now() - interval '1 day', now() - interval '1 day'),
+    ('d1000000-0000-4000-8000-000000000108', target_partner_id, 'Batata-doce cozida', 'cereal', 'taco', 100, 'g', '1 unidade pequena', 86, 20.1, 0.6, 0.1, 3, 27, 'Boa alternativa ao arroz em refeições principais.', array['carboidrato', 'troca'], array['refeicao_principal', 'pre_treino'], 21, 'active', now() - interval '30 days', now() - interval '1 day'),
+    ('d1000000-0000-4000-8000-000000000109', target_partner_id, 'Patinho moído grelhado', 'carne', 'tbca', 100, 'g', '1 porção média', 219, 0, 26, 12, 0, 67, 'Alternativa proteica para almoço e jantar.', array['proteína', 'troca'], array['refeicao_principal'], 19, 'active', now() - interval '29 days', now() - interval '1 day'),
+    ('d1000000-0000-4000-8000-000000000110', target_partner_id, 'Iogurte natural desnatado', 'laticinio', 'custom', 170, 'g', '1 pote', 89, 12, 9, 0.4, 0, 110, 'Opção prática para lanches e ceia.', array['proteína', 'lanche'], array['lanche', 'ceia'], 18, 'active', now() - interval '25 days', now() - interval '1 day'),
+    ('d1000000-0000-4000-8000-000000000111', target_partner_id, 'Banana prata', 'fruta', 'taco', 80, 'g', '1 unidade', 71, 18.5, 1, 0.1, 1.4, 1, 'Carboidrato simples para café e pré-treino.', array['fruta', 'pre-treino'], array['lanche', 'pre_treino'], 25, 'active', now() - interval '24 days', now() - interval '1 day'),
+    ('d1000000-0000-4000-8000-000000000112', target_partner_id, 'Castanhas', 'gordura', 'custom', 15, 'g', '1 punhado pequeno', 92, 3, 3, 8, 1.2, 1, 'Fonte de gordura boa para lanches.', array['gordura boa', 'lanche'], array['lanche', 'ceia'], 16, 'active', now() - interval '23 days', now() - interval '1 day');
 
   insert into public.partner_protocol_exercises (
     id,
@@ -1098,6 +1128,92 @@ begin
     ('e2000000-0000-4000-8000-000000000501', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'created', 'Criou o programa de treinos.', 1, now() - interval '30 days'),
     ('e2000000-0000-4000-8000-000000000502', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'updated', 'Combinou Supino reto e Desenvolvimento em Bi-set.', 2, now() - interval '3 days'),
     ('e2000000-0000-4000-8000-000000000503', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'published', 'Publicou o plano de treinos v2.', 2, now() - interval '2 days');
+
+  insert into public.client_workout_sessions (
+    id,
+    partner_id,
+    patient_id,
+    program_id,
+    prescribed_session_id,
+    workout_date,
+    status,
+    started_at,
+    completed_at,
+    duration_minutes,
+    total_volume_kg,
+    notes,
+    created_at,
+    updated_at
+  )
+  values
+    ('e3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000201', current_date - 1, 'completed', now() - interval '1 day 2 hours', now() - interval '1 day 1 hour', 58, 2940, 'Boa execução geral.', now() - interval '1 day 2 hours', now() - interval '1 day 1 hour'),
+    ('e3000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000202', current_date - 3, 'completed', now() - interval '3 days 2 hours', now() - interval '3 days 1 hour 5 minutes', 55, 2200, 'Carga subiu bem no agachamento.', now() - interval '3 days 2 hours', now() - interval '3 days 1 hour 5 minutes'),
+    ('e3000000-0000-4000-8000-000000000103', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000203', current_date - 5, 'skipped', now() - interval '5 days 2 hours', now() - interval '5 days 2 hours', 0, 0, 'Pulou por agenda apertada.', now() - interval '5 days 2 hours', now() - interval '5 days 2 hours');
+
+  insert into public.client_workout_exercise_logs (
+    id,
+    client_session_id,
+    partner_id,
+    patient_id,
+    prescribed_exercise_id,
+    status,
+    started_at,
+    completed_at,
+    created_at,
+    updated_at
+  )
+  values
+    ('e3000000-0000-4000-8000-000000000201', 'e3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000301', 'completed', now() - interval '1 day 2 hours', now() - interval '1 day 1 hour 42 minutes', now() - interval '1 day 2 hours', now() - interval '1 day 1 hour 42 minutes'),
+    ('e3000000-0000-4000-8000-000000000202', 'e3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000302', 'completed', now() - interval '1 day 1 hour 42 minutes', now() - interval '1 day 1 hour 25 minutes', now() - interval '1 day 1 hour 42 minutes', now() - interval '1 day 1 hour 25 minutes'),
+    ('e3000000-0000-4000-8000-000000000203', 'e3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000303', 'completed', now() - interval '1 day 1 hour 25 minutes', now() - interval '1 day 1 hour', now() - interval '1 day 1 hour 25 minutes', now() - interval '1 day 1 hour'),
+    ('e3000000-0000-4000-8000-000000000204', 'e3000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000304', 'completed', now() - interval '3 days 2 hours', now() - interval '3 days 1 hour 5 minutes', now() - interval '3 days 2 hours', now() - interval '3 days 1 hour 5 minutes');
+
+  insert into public.client_workout_set_logs (
+    id,
+    client_session_id,
+    exercise_log_id,
+    partner_id,
+    patient_id,
+    prescribed_exercise_id,
+    prescribed_set_id,
+    set_number,
+    load_kg,
+    reps,
+    status,
+    completed_at,
+    created_at,
+    updated_at
+  )
+  values
+    ('e3000000-0000-4000-8000-000000000301', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000201', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000401', 1, 40, 12, 'completed', now() - interval '1 day 1 hour 54 minutes', now() - interval '1 day 1 hour 55 minutes', now() - interval '1 day 1 hour 54 minutes'),
+    ('e3000000-0000-4000-8000-000000000302', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000201', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000402', 2, 60, 10, 'completed', now() - interval '1 day 1 hour 49 minutes', now() - interval '1 day 1 hour 50 minutes', now() - interval '1 day 1 hour 49 minutes'),
+    ('e3000000-0000-4000-8000-000000000303', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000201', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000403', 3, 70, 8, 'completed', now() - interval '1 day 1 hour 43 minutes', now() - interval '1 day 1 hour 44 minutes', now() - interval '1 day 1 hour 43 minutes'),
+    ('e3000000-0000-4000-8000-000000000304', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000302', 'e2000000-0000-4000-8000-000000000404', 1, 14, 12, 'completed', now() - interval '1 day 1 hour 36 minutes', now() - interval '1 day 1 hour 37 minutes', now() - interval '1 day 1 hour 36 minutes'),
+    ('e3000000-0000-4000-8000-000000000305', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000302', 'e2000000-0000-4000-8000-000000000405', 2, 18, 10, 'completed', now() - interval '1 day 1 hour 31 minutes', now() - interval '1 day 1 hour 32 minutes', now() - interval '1 day 1 hour 31 minutes'),
+    ('e3000000-0000-4000-8000-000000000306', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000302', 'e2000000-0000-4000-8000-000000000410', 3, 22, 10, 'completed', now() - interval '1 day 1 hour 26 minutes', now() - interval '1 day 1 hour 27 minutes', now() - interval '1 day 1 hour 26 minutes'),
+    ('e3000000-0000-4000-8000-000000000307', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000303', 'e2000000-0000-4000-8000-000000000406', 1, 20, 15, 'completed', now() - interval '1 day 1 hour 19 minutes', now() - interval '1 day 1 hour 20 minutes', now() - interval '1 day 1 hour 19 minutes'),
+    ('e3000000-0000-4000-8000-000000000308', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000303', 'e2000000-0000-4000-8000-000000000407', 2, 25, 12, 'completed', now() - interval '1 day 1 hour 12 minutes', now() - interval '1 day 1 hour 13 minutes', now() - interval '1 day 1 hour 12 minutes'),
+    ('e3000000-0000-4000-8000-000000000309', 'e3000000-0000-4000-8000-000000000101', 'e3000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000303', 'e2000000-0000-4000-8000-000000000411', 3, 30, 10, 'completed', now() - interval '1 day 1 hour 6 minutes', now() - interval '1 day 1 hour 7 minutes', now() - interval '1 day 1 hour 6 minutes'),
+    ('e3000000-0000-4000-8000-000000000310', 'e3000000-0000-4000-8000-000000000102', 'e3000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000304', 'e2000000-0000-4000-8000-000000000408', 1, 60, 10, 'completed', now() - interval '3 days 1 hour 45 minutes', now() - interval '3 days 1 hour 46 minutes', now() - interval '3 days 1 hour 45 minutes'),
+    ('e3000000-0000-4000-8000-000000000311', 'e3000000-0000-4000-8000-000000000102', 'e3000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000304', 'e2000000-0000-4000-8000-000000000409', 2, 90, 8, 'completed', now() - interval '3 days 1 hour 26 minutes', now() - interval '3 days 1 hour 27 minutes', now() - interval '3 days 1 hour 26 minutes'),
+    ('e3000000-0000-4000-8000-000000000312', 'e3000000-0000-4000-8000-000000000102', 'e3000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000304', 'e2000000-0000-4000-8000-000000000412', 3, 110, 8, 'completed', now() - interval '3 days 1 hour 8 minutes', now() - interval '3 days 1 hour 9 minutes', now() - interval '3 days 1 hour 8 minutes');
+
+  insert into public.client_workout_events (
+    id,
+    partner_id,
+    patient_id,
+    program_id,
+    prescribed_session_id,
+    client_session_id,
+    event_type,
+    detail,
+    details,
+    created_at
+  )
+  values
+    ('e3000000-0000-4000-8000-000000000401', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000201', 'e3000000-0000-4000-8000-000000000101', 'session_finished', 'Treino A concluido no smoke.', '{"fixture": true}'::jsonb, now() - interval '1 day 1 hour'),
+    ('e3000000-0000-4000-8000-000000000402', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000202', 'e3000000-0000-4000-8000-000000000102', 'session_finished', 'Treino B concluido no smoke.', '{"fixture": true}'::jsonb, now() - interval '3 days 1 hour'),
+    ('e3000000-0000-4000-8000-000000000403', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'e2000000-0000-4000-8000-000000000203', 'e3000000-0000-4000-8000-000000000103', 'exercise_skipped', 'Treino pulado no smoke.', '{"fixture": true}'::jsonb, now() - interval '5 days 2 hours');
 
   insert into public.partner_client_cardio_plans (
     id,
@@ -1653,9 +1769,31 @@ Evitar ultraprocessados e altas fontes de açúcar.',
   values
     ('e1000000-0000-4000-8000-000000000201', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Café da manhã', '07:00', 0, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000202', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Almoço', '12:30', 1, now() - interval '12 days', now() - interval '2 days'),
-    ('e1000000-0000-4000-8000-000000000203', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Lanche da tarde', '16:30', 2, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000203', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Lanche', '16:30', 2, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000204', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Jantar', '19:30', 3, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000205', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 2, 'Café da manhã', '07:15', 0, now() - interval '12 days', now() - interval '2 days');
+
+  insert into public.partner_client_diet_meals (
+    id,
+    plan_id,
+    partner_id,
+    patient_id,
+    day_of_week,
+    title,
+    meal_time,
+    menu_option,
+    option_label,
+    sort_order,
+    created_at,
+    updated_at
+  )
+  values
+    ('e1000000-0000-4000-8000-000000000206', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Ceia', '22:00', 1, 'Cardápio 1', 4, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000211', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Café da manhã', '07:00', 2, 'Cardápio 2', 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000212', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Almoço', '12:30', 2, 'Cardápio 2', 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000213', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Lanche', '16:30', 2, 'Cardápio 2', 2, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000214', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Jantar', '19:30', 2, 'Cardápio 2', 3, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000215', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Ceia', '22:00', 2, 'Cardápio 2', 4, now() - interval '12 days', now() - interval '2 days');
 
   insert into public.partner_client_diet_meal_items (
     id,
@@ -1689,7 +1827,61 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('e1000000-0000-4000-8000-000000000306', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000105', 13, 'ml', '1 colher de sopa', 'Azeite de oliva extra virgem', 13, 'ml', 108, 0, 0, 12, 0, 0, 2, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000307', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000104', 30, 'g', '1 scoop', 'Whey protein concentrado', 30, 'g', 120, 3, 24, 1.5, 0, 60, 0, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000308', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000102', 120, 'g', '1 filé médio', 'Peito de frango grelhado', 100, 'g', 165, 0, 31, 3.6, 0, 74, 0, now() - interval '12 days', now() - interval '2 days'),
-    ('e1000000-0000-4000-8000-000000000309', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000101', 100, 'g', '4 colheres de sopa', 'Arroz branco cozido', 100, 'g', 130, 28.1, 2.5, 0.2, 1.6, 1, 1, now() - interval '12 days', now() - interval '2 days');
+    ('e1000000-0000-4000-8000-000000000309', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000204', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000101', 100, 'g', '4 colheres de sopa', 'Arroz branco cozido', 100, 'g', 130, 28.1, 2.5, 0.2, 1.6, 1, 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000310', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000206', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000110', 170, 'g', '1 pote', 'Iogurte natural desnatado', 170, 'g', 89, 12, 9, 0.4, 0, 110, 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000311', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000206', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000112', 15, 'g', '1 punhado pequeno', 'Castanhas', 15, 'g', 92, 3, 3, 8, 1.2, 1, 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000321', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000211', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000103', 45, 'g', '3 colheres de sopa', 'Aveia em flocos', 30, 'g', 118, 20, 4.3, 2.2, 3, 1, 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000322', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000211', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000111', 80, 'g', '1 unidade', 'Banana prata', 80, 'g', 71, 18.5, 1, 0.1, 1.4, 1, 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000323', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000212', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000109', 130, 'g', '1 porção média', 'Patinho moído grelhado', 100, 'g', 219, 0, 26, 12, 0, 67, 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000324', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000212', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000108', 180, 'g', '1 unidade pequena', 'Batata-doce cozida', 100, 'g', 86, 20.1, 0.6, 0.1, 3, 27, 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000325', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000213', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000110', 170, 'g', '1 pote', 'Iogurte natural desnatado', 170, 'g', 89, 12, 9, 0.4, 0, 110, 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000326', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000214', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000102', 130, 'g', '1 filé médio', 'Peito de frango grelhado', 100, 'g', 165, 0, 31, 3.6, 0, 74, 0, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000327', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000214', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000108', 160, 'g', '1 unidade pequena', 'Batata-doce cozida', 100, 'g', 86, 20.1, 0.6, 0.1, 3, 27, 1, now() - interval '12 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000328', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000215', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'd1000000-0000-4000-8000-000000000104', 30, 'g', '1 scoop', 'Whey protein concentrado', 30, 'g', 120, 3, 24, 1.5, 0, 60, 0, now() - interval '12 days', now() - interval '2 days');
+
+  insert into public.client_diet_daily_logs (
+    id,
+    partner_id,
+    patient_id,
+    plan_id,
+    log_date,
+    water_ml,
+    created_at,
+    updated_at
+  )
+  values
+    ('e1000000-0000-4000-8000-000000000501', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 6, 2250, now() - interval '6 days', now() - interval '6 days'),
+    ('e1000000-0000-4000-8000-000000000502', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 5, 2500, now() - interval '5 days', now() - interval '5 days'),
+    ('e1000000-0000-4000-8000-000000000503', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 4, 1750, now() - interval '4 days', now() - interval '4 days'),
+    ('e1000000-0000-4000-8000-000000000504', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 3, 1500, now() - interval '3 days', now() - interval '3 days'),
+    ('e1000000-0000-4000-8000-000000000505', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 2, 2000, now() - interval '2 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000506', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date - 1, 2750, now() - interval '1 day', now() - interval '1 day'),
+    ('e1000000-0000-4000-8000-000000000507', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', current_date, 750, now() - interval '2 hours', now() - interval '2 hours');
+
+  insert into public.client_diet_meal_logs (
+    id,
+    partner_id,
+    patient_id,
+    plan_id,
+    meal_id,
+    log_date,
+    status,
+    completed_at,
+    notes,
+    created_at,
+    updated_at
+  )
+  values
+    ('e1000000-0000-4000-8000-000000000601', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000201', current_date, 'completed', date_trunc('day', now()) + interval '7 hours 18 minutes', 'Boa adesão no café da manhã.', now() - interval '2 hours', now() - interval '2 hours'),
+    ('e1000000-0000-4000-8000-000000000602', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000201', current_date - 1, 'completed', date_trunc('day', now() - interval '1 day') + interval '7 hours 10 minutes', null, now() - interval '1 day', now() - interval '1 day'),
+    ('e1000000-0000-4000-8000-000000000603', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000202', current_date - 1, 'completed', date_trunc('day', now() - interval '1 day') + interval '12 hours 40 minutes', null, now() - interval '1 day', now() - interval '1 day'),
+    ('e1000000-0000-4000-8000-000000000604', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000201', current_date - 2, 'completed', date_trunc('day', now() - interval '2 days') + interval '7 hours 25 minutes', null, now() - interval '2 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000605', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000202', current_date - 2, 'completed', date_trunc('day', now() - interval '2 days') + interval '12 hours 30 minutes', null, now() - interval '2 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000606', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000203', current_date - 2, 'completed', date_trunc('day', now() - interval '2 days') + interval '16 hours 40 minutes', null, now() - interval '2 days', now() - interval '2 days'),
+    ('e1000000-0000-4000-8000-000000000607', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000201', current_date - 3, 'completed', date_trunc('day', now() - interval '3 days') + interval '7 hours 5 minutes', null, now() - interval '3 days', now() - interval '3 days'),
+    ('e1000000-0000-4000-8000-000000000608', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000201', current_date - 4, 'completed', date_trunc('day', now() - interval '4 days') + interval '7 hours 12 minutes', null, now() - interval '4 days', now() - interval '4 days'),
+    ('e1000000-0000-4000-8000-000000000609', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000202', current_date - 5, 'completed', date_trunc('day', now() - interval '5 days') + interval '12 hours 20 minutes', null, now() - interval '5 days', now() - interval '5 days'),
+    ('e1000000-0000-4000-8000-000000000610', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e1000000-0000-4000-8000-000000000101', 'e1000000-0000-4000-8000-000000000204', current_date - 6, 'completed', date_trunc('day', now() - interval '6 days') + interval '19 hours 40 minutes', null, now() - interval '6 days', now() - interval '6 days');
 
   insert into public.partner_client_diet_events (
     id,
@@ -1723,6 +1915,73 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('b1000000-0000-4000-8000-000000000402', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'sleep', 'Sono', '6h 12m', 'Duração abaixo da meta semanal.', 'attention', now() - interval '3 days'),
     ('b1000000-0000-4000-8000-000000000403', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'exam', 'Exame de sangue', 'Sem alterações', 'Registro resumido; detalhes ficam na futura aba Exames.', 'normal', now() - interval '12 days');
 
+  insert into public.client_health_daily_logs (
+    id,
+    partner_id,
+    patient_id,
+    log_date,
+    sleep_minutes,
+    sleep_deep_minutes,
+    sleep_latency_minutes,
+    sleep_efficiency_pct,
+    hydration_ml,
+    created_at,
+    updated_at
+  )
+  values
+    ('b2000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date, 462, 72, 12, 84, 2100, now() - interval '3 hours', now() - interval '1 hour'),
+    ('b2000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date - 1, 438, 66, 15, 88, 2250, now() - interval '1 day', now() - interval '1 day'),
+    ('b2000000-0000-4000-8000-000000000103', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date - 2, 421, 61, 18, 81, 2000, now() - interval '2 days', now() - interval '2 days');
+
+  insert into public.client_health_medications (
+    id,
+    partner_id,
+    patient_id,
+    name,
+    dosage,
+    schedule_time,
+    status,
+    sort_order,
+    created_at,
+    updated_at
+  )
+  values
+    ('b2000000-0000-4000-8000-000000000201', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Vitamina D', '2000 UI • 1 cápsula', '08:00', 'active', 0, now() - interval '12 days', now() - interval '2 days'),
+    ('b2000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Ômega 3', '1000 mg • 1 cápsula', '20:30', 'active', 1, now() - interval '12 days', now() - interval '2 days'),
+    ('b2000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Magnésio', '200 mg • 1 comprimido', '22:00', 'active', 2, now() - interval '12 days', now() - interval '2 days');
+
+  insert into public.client_health_medication_logs (
+    id,
+    partner_id,
+    patient_id,
+    medication_id,
+    log_date,
+    status,
+    taken_at,
+    created_at,
+    updated_at
+  )
+  values
+    ('b2000000-0000-4000-8000-000000000301', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'b2000000-0000-4000-8000-000000000201', current_date, 'completed', date_trunc('day', now()) + interval '8 hours 4 minutes', now() - interval '3 hours', now() - interval '3 hours'),
+    ('b2000000-0000-4000-8000-000000000302', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'b2000000-0000-4000-8000-000000000202', current_date, 'completed', date_trunc('day', now()) + interval '20 hours 35 minutes', now() - interval '2 hours', now() - interval '2 hours'),
+    ('b2000000-0000-4000-8000-000000000303', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'b2000000-0000-4000-8000-000000000201', current_date - 1, 'completed', date_trunc('day', now() - interval '1 day') + interval '8 hours', now() - interval '1 day', now() - interval '1 day');
+
+  insert into public.client_health_pressure_logs (
+    id,
+    partner_id,
+    patient_id,
+    measured_at,
+    systolic,
+    diastolic,
+    notes,
+    created_at,
+    updated_at
+  )
+  values
+    ('b2000000-0000-4000-8000-000000000401', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now()) + interval '8 hours 45 minutes', 124, 80, 'Manhã em repouso.', now() - interval '4 hours', now() - interval '4 hours'),
+    ('b2000000-0000-4000-8000-000000000402', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '1 day') + interval '21 hours 15 minutes', 118, 74, 'Noite.', now() - interval '1 day', now() - interval '1 day'),
+    ('b2000000-0000-4000-8000-000000000403', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '2 days') + interval '11 hours 30 minutes', 122, 78, 'Manhã.', now() - interval '2 days', now() - interval '2 days');
+
   insert into public.partner_client_tasks (
     id,
     partner_id,
@@ -1749,7 +2008,8 @@ Evitar ultraprocessados e altas fontes de açúcar.',
   )
   values
     ('b1000000-0000-4000-8000-000000000601', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'dieta', 'Dieta', 'Hipercalórica controlada', '2.800 kcal/dia'),
-    ('b1000000-0000-4000-8000-000000000602', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'treino', 'Treino', 'Hipertrofia 5x/semana', 'Divisão Upper/Lower');
+    ('b1000000-0000-4000-8000-000000000602', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'treino', 'Treino', 'Hipertrofia 5x/semana', 'Divisão Upper/Lower'),
+    ('b1000000-0000-4000-8000-000000000603', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'saude', 'Saúde', 'Indicadores e check-ins', 'Sono, pressão e exames');
 
   insert into public.support_tickets (
     id,

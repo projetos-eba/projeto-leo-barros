@@ -1748,6 +1748,8 @@ const dietNotesSchema = z.object({
 const dietMealSchema = z.object({
   dayOfWeek: z.number().int().min(1).max(7),
   mealTime: z.string().regex(/^\d{2}:\d{2}$/),
+  menuOption: z.number().int().min(1).max(4).default(1),
+  optionLabel: z.string().trim().min(2).max(40).default("Cardápio 1"),
   patientId: patientIdSchema,
   planId: z.string().uuid(),
   title: z.string().trim().min(2).max(80),
@@ -1903,10 +1905,11 @@ export async function createClientDietPlan(
   if (error || !data) return { error: "Não foi possível criar a dieta.", ok: false };
 
   const starterMeals = [
-    { day_of_week: 1, meal_time: "07:00", sort_order: 0, title: "Café da manhã" },
-    { day_of_week: 1, meal_time: "12:30", sort_order: 1, title: "Almoço" },
-    { day_of_week: 1, meal_time: "16:30", sort_order: 2, title: "Lanche da tarde" },
-    { day_of_week: 1, meal_time: "19:30", sort_order: 3, title: "Jantar" },
+    { day_of_week: 1, meal_time: "07:00", option_label: "Cardápio 1", menu_option: 1, sort_order: 0, title: "Café da manhã" },
+    { day_of_week: 1, meal_time: "12:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 1, title: "Almoço" },
+    { day_of_week: 1, meal_time: "16:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 2, title: "Lanche" },
+    { day_of_week: 1, meal_time: "19:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 3, title: "Jantar" },
+    { day_of_week: 1, meal_time: "22:00", option_label: "Cardápio 1", menu_option: 1, sort_order: 4, title: "Ceia" },
   ];
 
   const { error: mealError } = await context.supabase.from("partner_client_diet_meals").insert(
@@ -2013,13 +2016,16 @@ export async function createClientDietMeal(
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId)
     .eq("plan_id", parsed.data.planId)
-    .eq("day_of_week", parsed.data.dayOfWeek);
+    .eq("day_of_week", parsed.data.dayOfWeek)
+    .eq("menu_option", parsed.data.menuOption);
 
   const { data, error } = await context.supabase
     .from("partner_client_diet_meals")
     .insert({
       day_of_week: parsed.data.dayOfWeek,
       meal_time: parsed.data.mealTime,
+      menu_option: parsed.data.menuOption,
+      option_label: parsed.data.optionLabel,
       partner_id: context.partnerId,
       patient_id: parsed.data.patientId,
       plan_id: parsed.data.planId,

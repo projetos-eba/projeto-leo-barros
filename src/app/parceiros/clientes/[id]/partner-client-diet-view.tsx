@@ -342,6 +342,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selectedDay, setSelectedDay] = useState(() => diet.plan?.weekDays.find((day) => day.meals.length > 0)?.dayOfWeek ?? 1);
+  const [selectedMenuOption, setSelectedMenuOption] = useState(1);
   const [foodTab, setFoodTab] = useState<DietFoodTab>("suggestions");
   const [foodQuery, setFoodQuery] = useState("");
   const [foodCategory, setFoodCategory] = useState("all");
@@ -362,6 +363,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   }));
   const [quantityEdits, setQuantityEdits] = useState<Record<string, string>>({});
   const currentDay = diet.plan?.weekDays.find((day) => day.dayOfWeek === selectedDay) ?? null;
+  const currentMeals = (currentDay?.meals ?? []).filter((meal) => meal.menuOption === selectedMenuOption);
   const categories = useMemo(() => Array.from(new Set(diet.foods.map((food) => food.category))), [diet.foods]);
   const draftByFoodId = useMemo(() => new Map(diet.drafts.map((draft) => [draft.food.id, draft.id])), [diet.drafts]);
   const visibleFoods = useMemo(() => {
@@ -406,6 +408,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
       const result = await createClientDietMeal({
         dayOfWeek: selectedDay,
         mealTime: newMeal.mealTime,
+        menuOption: selectedMenuOption,
+        optionLabel: `Cardápio ${selectedMenuOption}`,
         patientId: overview.client.id,
         planId: plan.id,
         title: newMeal.title,
@@ -486,10 +490,25 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
               <div className="min-w-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[28px] font-bold uppercase tracking-[0.01em] text-white">Plano alimentar</h2>
-                  <GhostButton disabled={pending} onClick={() => setMealDialogOpen(true)}><Plus className="size-4" /> Adicionar refeição</GhostButton>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[1, 2].map((option) => (
+                      <button
+                        className={cn("h-10 rounded-[8px] border px-4 text-[13px] font-semibold transition", selectedMenuOption === option ? "border-[#3b97e3] bg-[#0a2c48] text-white" : "border-[#303746] bg-[#101923]/65 text-[#8b92a3] hover:text-white")}
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          setSelectedMenuOption(option);
+                          setTargetMealId((currentDay?.meals ?? []).find((meal) => meal.menuOption === option)?.id ?? null);
+                        }}
+                      >
+                        Cardápio {option}
+                      </button>
+                    ))}
+                    <GhostButton disabled={pending} onClick={() => setMealDialogOpen(true)}><Plus className="size-4" /> Adicionar refeição</GhostButton>
+                  </div>
                 </div>
                 <div className="grid gap-4">
-                  {currentDay?.meals.length ? currentDay.meals.map((meal) => (
+                  {currentMeals.length ? currentMeals.map((meal) => (
                     <MealCard
                       key={meal.id}
                       meal={meal}
@@ -501,7 +520,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                       onRemoveItem={(itemId) => diet.plan && runAction(() => removeClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id }))}
                       onUpdateItem={(itemId, quantity) => diet.plan && runAction(() => updateClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id, quantity }))}
                     />
-                  )) : <Panel className="p-6 text-[13px] text-[#8b92a3]">Nenhuma refeição cadastrada para este dia.</Panel>}
+                  )) : <Panel className="p-6 text-[13px] text-[#8b92a3]">Nenhuma refeição cadastrada para este dia neste cardápio.</Panel>}
                 </div>
               </div>
 
@@ -510,7 +529,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Adicionar alimentos</h2>
                     <select className={inputClass("w-[210px]")} value={targetMealId ?? ""} onChange={(event) => setTargetMealId(event.target.value)}>
-                      {(currentDay?.meals ?? []).map((meal) => <option key={meal.id} value={meal.id}>{meal.title}</option>)}
+                      {currentMeals.map((meal) => <option key={meal.id} value={meal.id}>{meal.title}</option>)}
                     </select>
                   </div>
                   <div className="relative mt-4">

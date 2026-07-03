@@ -71,6 +71,8 @@ create table public.partner_client_diet_meals (
   day_of_week smallint not null default 1,
   title text not null,
   meal_time time not null,
+  menu_option smallint not null default 1,
+  option_label text not null default 'Cardápio 1',
   sort_order smallint not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -85,6 +87,10 @@ create table public.partner_client_diet_meals (
     check (day_of_week between 1 and 7),
   constraint partner_client_diet_meals_title_not_blank
     check (length(btrim(title)) between 2 and 80),
+  constraint partner_client_diet_meals_menu_option_check
+    check (menu_option between 1 and 4),
+  constraint partner_client_diet_meals_option_label_not_blank
+    check (length(btrim(option_label)) between 2 and 40),
   constraint partner_client_diet_meals_sort_check
     check (sort_order >= 0)
 );
@@ -174,6 +180,8 @@ create index partner_client_diet_plans_patient_status_idx
   on public.partner_client_diet_plans (partner_id, patient_id, status, updated_at desc);
 create index partner_client_diet_meals_plan_day_idx
   on public.partner_client_diet_meals (partner_id, patient_id, plan_id, day_of_week, sort_order);
+create index partner_client_diet_meals_plan_day_option_idx
+  on public.partner_client_diet_meals (partner_id, patient_id, plan_id, day_of_week, menu_option, sort_order);
 create index partner_client_diet_items_meal_sort_idx
   on public.partner_client_diet_meal_items (partner_id, patient_id, meal_id, sort_order);
 create index partner_client_diet_items_food_idx
@@ -309,6 +317,8 @@ begin
           'dayOfWeek', meal.day_of_week,
           'title', meal.title,
           'mealTime', to_char(meal.meal_time, 'HH24:MI'),
+          'menuOption', meal.menu_option,
+          'optionLabel', meal.option_label,
           'sortOrder', meal.sort_order,
           'items', coalesce((
             select jsonb_agg(jsonb_build_object(
@@ -333,7 +343,7 @@ begin
               and item.patient_id = p_patient_id
               and item.meal_id = meal.id
           ), '[]'::jsonb)
-        ) order by meal.day_of_week, meal.sort_order, meal.meal_time)
+        ) order by meal.day_of_week, meal.menu_option, meal.sort_order, meal.meal_time)
         from public.partner_client_diet_meals as meal
         where meal.partner_id = current_partner_id
           and meal.patient_id = p_patient_id

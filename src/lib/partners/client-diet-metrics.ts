@@ -66,6 +66,8 @@ export type PartnerClientDietRawData = {
         sortOrder: number;
       }>;
       mealTime: string;
+      menuOption?: number;
+      optionLabel?: string;
       sortOrder: number;
       title: string;
     }>;
@@ -127,6 +129,8 @@ export type PartnerClientDietMeal = {
   id: string;
   items: PartnerClientDietItem[];
   mealTime: string;
+  menuOption: number;
+  optionLabel: string;
   sortOrder: number;
   title: string;
   totals: DietNutritionTotals;
@@ -385,6 +389,8 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
       id: meal.id,
       items,
       mealTime: meal.mealTime,
+      menuOption: Math.max(1, Math.round(numberValue(meal.menuOption ?? 1))),
+      optionLabel: meal.optionLabel || `Cardápio ${Math.max(1, Math.round(numberValue(meal.menuOption ?? 1)))}`,
       sortOrder: numberValue(meal.sortOrder),
       title: meal.title,
       totals: sumTotals(items),

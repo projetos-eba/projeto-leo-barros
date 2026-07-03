@@ -50,7 +50,10 @@ export type ClientHomeData = {
   } | null;
   subscription: {
     daysUntilRenewal: number | null;
+    renewalDayLabel: string;
     renewalDateLabel: string;
+    renewalMonthLabel: string;
+    renewalYearLabel: string;
     statusLabel: string;
   } | null;
 };
@@ -62,6 +65,8 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", { month: "short" });
+const dayFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit" });
+const yearFormatter = new Intl.DateTimeFormat("pt-BR", { year: "numeric" });
 
 const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   hour: "2-digit",
@@ -144,11 +149,17 @@ export function buildClientHome(raw: ClientHomeRawData, now = new Date()): Clien
         }
       : null,
     subscription: raw.subscription
-      ? {
+      ? (() => {
+          const renewalDate = new Date(raw.subscription.currentPeriodEnd);
+          return {
           daysUntilRenewal: daysUntil(raw.subscription.currentPeriodEnd, now),
-          renewalDateLabel: dateFormatter.format(new Date(raw.subscription.currentPeriodEnd)),
+          renewalDayLabel: dayFormatter.format(renewalDate),
+          renewalDateLabel: dateFormatter.format(renewalDate),
+          renewalMonthLabel: monthFormatter.format(renewalDate).replace(".", ""),
+          renewalYearLabel: yearFormatter.format(renewalDate),
           statusLabel: statusLabel(raw.subscription.status),
-        }
+          };
+        })()
       : null,
   };
 }

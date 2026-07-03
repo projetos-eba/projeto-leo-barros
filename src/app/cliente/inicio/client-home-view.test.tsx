@@ -59,8 +59,15 @@ describe("ClientHomeView", () => {
     expect(screen.getByRole("heading", { name: "Treino" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Saúde" })).toBeInTheDocument();
     expect(screen.getByText("Plano vence em")).toBeInTheDocument();
+    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText("jul")).toBeInTheDocument();
+    expect(screen.getByText("2026")).toBeInTheDocument();
     expect(screen.getByText("Próxima atualização")).toBeInTheDocument();
+    expect(screen.getByText("Calorias do dia")).toBeInTheDocument();
+    expect(screen.getByText("Água")).toBeInTheDocument();
     expect(screen.getByText("Treino do dia")).toBeInTheDocument();
+    expect(screen.queryByText(/3 módulos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Jornada integrada/i)).not.toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: /Acessar painel de dieta/i })).toHaveAttribute("href", "/cliente/dieta");
     expect(screen.getByRole("link", { name: /Acessar painel de treino/i })).toHaveAttribute("href", "/cliente/treino");

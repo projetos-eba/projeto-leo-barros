@@ -759,6 +759,8 @@ export type Database = {
           day_of_week: number
           id: string
           meal_time: string
+          menu_option: number
+          option_label: string
           partner_id: string
           patient_id: string
           plan_id: string
@@ -771,6 +773,8 @@ export type Database = {
           day_of_week?: number
           id?: string
           meal_time: string
+          menu_option?: number
+          option_label?: string
           partner_id: string
           patient_id: string
           plan_id: string
@@ -783,6 +787,8 @@ export type Database = {
           day_of_week?: number
           id?: string
           meal_time?: string
+          menu_option?: number
+          option_label?: string
           partner_id?: string
           patient_id?: string
           plan_id?: string
@@ -2814,4 +2820,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

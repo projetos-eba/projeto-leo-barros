@@ -215,11 +215,37 @@
   }
 
   .client-module-reveal {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(16px);
+    transition:
+      opacity 500ms ease,
+      transform 500ms ease;
+  }
+
+  .client-module-chrome {
     opacity: 1;
+    pointer-events: auto;
     transform: translateY(0);
     transition:
       opacity 500ms ease,
       transform 500ms ease;
+  }
+
+  .client-module-content {
+    margin-top: auto;
+    transform: translateY(-34%);
+    transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @media (max-width: 1023px) {
+    .client-module-reveal {
+      display: none;
+    }
+
+    .client-module-content {
+      transform: translateY(-18%);
+    }
   }
 
   @media (min-width: 1024px) {
@@ -234,6 +260,7 @@
       transition:
         flex 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
         border-color 500ms ease,
+        filter 500ms ease,
         box-shadow 500ms ease,
         transform 500ms ease;
     }
@@ -241,6 +268,11 @@
     .client-module-grid:has(.client-module-card:hover) .client-module-card,
     .client-module-grid:has(.client-module-card:focus-within) .client-module-card {
       flex: 0.82 1 0%;
+    }
+
+    .client-module-grid:has(.client-module-card:hover) .client-module-card:not(:hover),
+    .client-module-grid:has(.client-module-card:focus-within) .client-module-card:not(:focus-within) {
+      filter: brightness(0.72) saturate(0.9);
     }
 
     .client-module-grid:has(.client-module-card:hover) .client-module-card:hover,
@@ -253,15 +285,15 @@
       transform: translateY(-2px);
     }
 
-    .client-module-grid:has(.client-module-card:hover) .client-module-card:not(:hover) .client-module-reveal,
-    .client-module-grid:has(.client-module-card:focus-within) .client-module-card:not(:focus-within) .client-module-reveal {
-      opacity: 0.48;
-    }
-
     .client-module-grid .client-module-card:hover .client-module-reveal,
     .client-module-grid .client-module-card:focus-within .client-module-reveal {
       opacity: 1;
       pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .client-module-grid .client-module-card:hover .client-module-content,
+    .client-module-grid .client-module-card:focus-within .client-module-content {
       transform: translateY(0);
     }
   }
