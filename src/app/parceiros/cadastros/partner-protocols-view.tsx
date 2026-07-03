@@ -7,6 +7,7 @@ import {
   Database,
   Dumbbell,
   Eye,
+  Flame,
   FileUp,
   Grid2X2,
   LayoutList,
@@ -16,6 +17,7 @@ import {
   Search,
   UploadCloud,
   Utensils,
+  Wheat,
 } from "lucide-react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
@@ -230,6 +232,25 @@ function MetricCard({ icon: Icon, label, value, tone }: { icon: typeof Database;
         <p className="mt-2 text-[12px] text-[#8797a6]">{label}</p>
       </div>
     </Panel>
+  );
+}
+
+function FoodMacroChips({ food }: { food: PartnerProtocolFood }) {
+  const macros = [
+    { Icon: Dumbbell, label: "P", tone: "bg-[#0e2c1e] text-[#62d98b]", value: `${formatNumber(food.protein)}g` },
+    { Icon: Wheat, label: "C", tone: "bg-[#302813] text-[#f2c84b]", value: `${formatNumber(food.carbs)}g` },
+    { Icon: Flame, label: "G", tone: "bg-[#32171b] text-[#f27882]", value: `${formatNumber(food.fat)}g` },
+    { Icon: Database, label: "Kcal", tone: "bg-[#0b2a45] text-[#58b8ff]", value: formatNumber(food.kcal) },
+  ];
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {macros.map(({ Icon, label, tone, value }) => (
+        <span className={cn("inline-flex h-7 items-center gap-1.5 rounded-[7px] px-2 text-[11px] font-bold", tone)} key={label}>
+          <Icon className="size-3.5" />
+          {label} {value}
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -760,7 +781,8 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[16px] font-semibold text-white">{food.name}</p>
                 <p className="mt-1 text-[12px] text-[#8fa0ad]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
-                <p className="mt-2 text-[12px] text-[#aebbc6]">{food.servingLabel} · {formatNumber(food.kcal)} kcal · C {formatNumber(food.carbs)}g · P {formatNumber(food.protein)}g · G {formatNumber(food.fat)}g</p>
+                <p className="mt-2 text-[12px] text-[#aebbc6]">{food.servingLabel}</p>
+                <FoodMacroChips food={food} />
               </div>
             </div>
             <ItemActions archived={food.status === "archived"} onArchive={() => onArchive("food", food.id, food.status === "archived")} onEdit={() => onEdit(food)} onUse={() => onUse(food, "food")} sourceLabel={food.sourceLabel} />
@@ -778,7 +800,8 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
           <div className="min-w-0">
             <p className="truncate text-[16px] font-semibold text-white">{food.name}</p>
             <p className="mt-1 text-[12px] text-[#8fa0ad]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
-            <p className="mt-2 text-[13px] text-[#aebbc6]">{food.servingLabel} · {formatNumber(food.kcal)} kcal · C {formatNumber(food.carbs)}g · P {formatNumber(food.protein)}g · G {formatNumber(food.fat)}g</p>
+            <p className="mt-2 text-[13px] text-[#aebbc6]">{food.servingLabel}</p>
+            <FoodMacroChips food={food} />
           </div>
           <Badge tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
           <IconAction label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>

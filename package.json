@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "dev:seed-admin-dashboard-smoke": "node scripts/dev/seed-admin-dashboard-smoke.mjs",
     "dev:seed-admin-profissionais-smoke": "node scripts/dev/seed-admin-dashboard-smoke.mjs",
-    "dev:seed-partner-materials-storage": "node scripts/dev/seed-partner-materials-storage.mjs"
+    "dev:seed-partner-materials-storage": "node scripts/dev/seed-partner-materials-storage.mjs",
+    "dev:seed-client-photos-storage": "node scripts/dev/seed-client-photos-storage.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

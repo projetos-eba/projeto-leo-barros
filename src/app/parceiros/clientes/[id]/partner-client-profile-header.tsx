@@ -1,29 +1,34 @@
 "use client";
 
-import { CalendarPlus, Dumbbell, Lock, Phone, Target, Utensils, Users } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Dumbbell, HeartPulse, Lock, Phone, Target, Utensils, Users } from "lucide-react";
 import Link from "next/link";
 
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
 
-type ClientTab = "avaliacoes" | "dietas" | "treinos" | "visao-geral";
+type ClientTab = "avaliacoes" | "cardio" | "dietas" | "exames" | "fotos" | "treinos" | "visao-geral";
 
 const tabs: Array<{ id: ClientTab; label: string }> = [
   { id: "visao-geral", label: "Visão Geral" },
   { id: "avaliacoes", label: "Avaliações" },
   { id: "dietas", label: "Dietas" },
   { id: "treinos", label: "Treinos" },
+  { id: "cardio", label: "Cardio" },
+  { id: "exames", label: "Exames" },
+  { id: "fotos", label: "Fotos" },
 ];
 
-const futureTabs = ["Anamnese", "Exames", "Prescrições", "Fotos", "Formulários"];
+const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
 
 const moduleIcons = {
+  cardio: HeartPulse,
   dieta: Utensils,
   saude: Target,
   treino: Dumbbell,
 };
 
 const moduleLabels: Record<string, string> = {
+  cardio: "Cardio",
   dieta: "Dieta",
   saude: "Saúde",
   treino: "Treino",
@@ -65,6 +70,11 @@ export function PartnerClientProfileHeader({
 
   return (
     <>
+      <Link className="inline-flex h-10 items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white" href="/parceiros/clientes">
+        <ArrowLeft className="size-4" />
+        Voltar para Clientes
+      </Link>
+
       <header className="client-overview-print-panel mt-6 grid gap-6 lg:mt-2 lg:grid-cols-[120px_minmax(0,1fr)_280px] lg:items-start">
         {overview.client.avatarUrl ? (
           <img alt="" className="size-[120px] rounded-full border-2 border-[#1d7ece]/70 object-cover" src={overview.client.avatarUrl} />

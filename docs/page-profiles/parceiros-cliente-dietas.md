@@ -32,7 +32,7 @@ Aba técnica de plano alimentar do Cliente no perfil Parceiros, baseada no Figma
 
 - Interface Parceiros usa `Clientes`, nunca `Pacientes`.
 - Não exibir CPF.
-- Não exibir `Cardio`.
+- `Cardio` é uma aba própria do perfil do Cliente; Dietas não exibe dados de Cardio dentro do plano alimentar.
 - `Enviar ao Cliente` é registro interno nesta fase; não cria portal nem envio externo.
 - `Gerar com IA` do Figma não aparece na v1 para evitar ação falsa.
 

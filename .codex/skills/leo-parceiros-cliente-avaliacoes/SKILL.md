@@ -6,7 +6,7 @@ Use esta skill ao trabalhar na aba Avaliações do Cliente individual em `/parce
 
 - A tela segue o Figma `1:9498`, adaptado às regras do perfil Parceiros.
 - A linguagem visível é sempre `Clientes`.
-- `Cardio` não aparece como aba ou módulo separado.
+- `Cardio` é uma aba própria do perfil do Cliente; Avaliações não mistura dados de Cardio.
 - A aba é técnica: avaliações corporais, dobras cutâneas, circunferências, cálculo calórico, gráficos e histórico.
 
 ## Fontes

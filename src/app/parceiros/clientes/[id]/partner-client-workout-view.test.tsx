@@ -8,6 +8,7 @@ import {
   addClientWorkoutExercise,
   addClientWorkoutSet,
   combineClientWorkoutBiset,
+  reorderClientWorkoutExercises,
 } from "./actions";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
 
@@ -95,6 +96,7 @@ describe("PartnerClientWorkoutView", () => {
     vi.mocked(addClientWorkoutExercise).mockResolvedValue({ ok: true });
     vi.mocked(addClientWorkoutSet).mockResolvedValue({ ok: true });
     vi.mocked(combineClientWorkoutBiset).mockResolvedValue({ ok: true });
+    vi.mocked(reorderClientWorkoutExercises).mockResolvedValue({ ok: true });
   });
   afterEach(() => {
     cleanup();
@@ -105,9 +107,12 @@ describe("PartnerClientWorkoutView", () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
     expect(screen.getByText("Prescrição de Treinos")).toBeInTheDocument();
     expect(screen.getByText("Biblioteca de exercícios")).toBeInTheDocument();
+    expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Peito e Tríceps").length).toBeGreaterThan(0);
     expect(screen.getByLabelText("Mapa muscular anterior")).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: /Selecionar Supino reto/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
-    expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
   });
 
   it("adiciona exercício, sugere nova série e combina Bi-set", async () => {
@@ -115,14 +120,25 @@ describe("PartnerClientWorkoutView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Adicionar Remada curvada" }));
     await waitFor(() => expect(addClientWorkoutExercise).toHaveBeenCalled());
 
-    fireEvent.click(screen.getByRole("button", { name: "Adicionar série a Supino reto" }));
+    fireEvent.click(screen.getByRole("button", { name: "Criar série 2 para Supino reto" }));
     await waitFor(() => expect(addClientWorkoutSet).toHaveBeenCalledWith(expect.objectContaining({
       exerciseId: "e2000000-0000-4000-8000-000000000301",
     })));
 
-    fireEvent.click(screen.getByLabelText("Selecionar Supino reto"));
-    fireEvent.click(screen.getByLabelText("Selecionar Desenvolvimento"));
+    fireEvent.click(screen.getByRole("button", { name: "Selecionar Supino reto para Bi-set" }));
+    fireEvent.click(screen.getByRole("button", { name: "Selecionar Desenvolvimento para Bi-set" }));
     fireEvent.click(screen.getByRole("button", { name: /Combinar Bi-set/i }));
     await waitFor(() => expect(combineClientWorkoutBiset).toHaveBeenCalled());
+  });
+
+  it("reordena exercícios pelos controles de subir e descer", async () => {
+    render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
+    fireEvent.click(screen.getByRole("button", { name: "Subir Desenvolvimento" }));
+    await waitFor(() => expect(reorderClientWorkoutExercises).toHaveBeenCalledWith(expect.objectContaining({
+      exerciseIds: [
+        "e2000000-0000-4000-8000-000000000302",
+        "e2000000-0000-4000-8000-000000000301",
+      ],
+    })));
   });
 });

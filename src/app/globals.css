@@ -206,6 +206,65 @@
   .list-item-hover:hover {
     background: hsl(0 0% 8%);
   }
+
+  .client-module-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .client-module-reveal {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 500ms ease,
+      transform 500ms ease;
+  }
+
+  @media (min-width: 1024px) {
+    .client-module-grid {
+      flex-direction: row;
+      min-height: 600px;
+    }
+
+    .client-module-card {
+      flex: 1 1 0%;
+      min-width: 0;
+      transition:
+        flex 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        border-color 500ms ease,
+        box-shadow 500ms ease,
+        transform 500ms ease;
+    }
+
+    .client-module-grid:has(.client-module-card:hover) .client-module-card,
+    .client-module-grid:has(.client-module-card:focus-within) .client-module-card {
+      flex: 0.82 1 0%;
+    }
+
+    .client-module-grid:has(.client-module-card:hover) .client-module-card:hover,
+    .client-module-grid:has(.client-module-card:focus-within) .client-module-card:focus-within {
+      flex: 1.45 1 0%;
+      border-color: hsl(207 75% 56% / 0.45);
+      box-shadow:
+        0 28px 70px hsl(0 0% 0% / 0.38),
+        0 0 34px hsl(207 75% 56% / 0.12);
+      transform: translateY(-2px);
+    }
+
+    .client-module-grid:has(.client-module-card:hover) .client-module-card:not(:hover) .client-module-reveal,
+    .client-module-grid:has(.client-module-card:focus-within) .client-module-card:not(:focus-within) .client-module-reveal {
+      opacity: 0.48;
+    }
+
+    .client-module-grid .client-module-card:hover .client-module-reveal,
+    .client-module-grid .client-module-card:focus-within .client-module-reveal {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer utilities {

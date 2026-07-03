@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { normalizeEmailPasswordLogin } from "@/lib/auth/login-contracts";
 import { resolvePostLoginDestination } from "@/lib/auth/identity-contracts";
 import { createClient } from "@/lib/supabase/server";
@@ -73,3 +75,8 @@ export async function loginWithPassword(credentials: {
   };
 }
 
+export async function logout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}

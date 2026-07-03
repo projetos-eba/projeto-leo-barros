@@ -167,14 +167,14 @@ describe("PartnerClientOverviewView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renderiza Visão Geral com abas futuras bloqueadas e sem Cardio", () => {
+  it("renderiza Visão Geral com abas futuras bloqueadas e Cardio implementado", () => {
     render(<PartnerClientOverviewView overview={overview} />);
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Visão Geral" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ver plano" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Anamnese/ })).toBeDisabled();
-    expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByTestId("mock-client-overview-chart")).toHaveTextContent("chart:2");
     expect(screen.getByRole("link", { name: "Mensagem" })).toHaveAttribute(
       "href",

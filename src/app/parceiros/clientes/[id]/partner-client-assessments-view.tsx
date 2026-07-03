@@ -2,7 +2,6 @@
 
 import {
   Activity,
-  ArrowLeft,
   Calculator,
   Check,
   ClipboardPlus,
@@ -88,7 +87,7 @@ const implementedTabs = [
   { href: "dietas", label: "Dietas" },
 ];
 
-const futureTabs = ["Anamnese", "Treinos", "Exames", "Prescrições", "Fotos", "Formulários"];
+const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
 
 const circumferenceKeys = [
   "chest",
@@ -848,9 +847,6 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <div className="flex flex-wrap items-center justify-between gap-3 lg:absolute lg:inset-x-0 lg:top-0 lg:z-10">
-          <Link className="inline-flex h-10 items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white lg:hidden" href="/parceiros/clientes">
-            <ArrowLeft className="size-4" /> Voltar para Clientes
-          </Link>
           <div className="flex flex-wrap gap-2 lg:ml-auto">
             <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]" type="button" onClick={() => window.print()}>
               <FileDown className="size-[18px]" /> Exportar PDF

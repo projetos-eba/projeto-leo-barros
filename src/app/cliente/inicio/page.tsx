@@ -1,11 +1,22 @@
-import { ShellPlaceholder } from "@/components/shells/shell-placeholder";
+import { ClientHomeView } from "./client-home-view";
+import { fetchClientHome } from "@/lib/clients/home-data";
+import { buildClientHome } from "@/lib/clients/home-metrics";
 
-export default function ClienteInicioPage() {
-  return (
-    <ShellPlaceholder
-      eyebrow="Cliente"
-      title="Shell Cliente"
-      description="Estrutura técnica do perfil Cliente em /cliente. O portal Cliente agora usa a base oficial Next em /cliente, sem reativar rotas legadas Vite."
-    />
-  );
+export default async function ClienteInicioPage() {
+  const home =
+    (await fetchClientHome()) ??
+    buildClientHome({
+      appointments: [],
+      client: {
+        avatarUrl: null,
+        displayName: "Cliente",
+        objective: "Jornada integrada",
+        patientId: "cliente",
+      },
+      measurements: [],
+      serviceScopes: [],
+      subscription: null,
+    });
+
+  return <ClientHomeView home={home} />;
 }

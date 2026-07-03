@@ -1,6 +1,6 @@
 ---
 name: leo-parceiros-cliente-visao-geral
-description: Maintain and evolve the Projeto Leo Barros partner individual Client overview page at /parceiros/clientes/[id], including its Figma contract, partner-scoped overview RPC, clinical privacy rules, overview metrics, drawers, scheduling, tasks, print export, and cardio-to-treino presentation rule.
+description: Maintain and evolve the Projeto Leo Barros partner individual Client overview page at /parceiros/clientes/[id], including its Figma contract, partner-scoped overview RPC, clinical privacy rules, overview metrics, drawers, scheduling, tasks, print export, and shared Client profile header.
 ---
 
 # Leo Parceiros Cliente Visao Geral
@@ -28,7 +28,7 @@ Before editing or validating the page, read:
 - Use `partner_client_overview(patient_id)` for overview reads; do not query clinical tables directly from browser components.
 - Mutations for appointments and tasks must use server actions plus Supabase RLS.
 - Keep future tabs disabled until each tab is implemented deliberately.
-- Do not show `Cardio` as a separate visible scope. Treat legacy `cardio` as `Treino`.
+- `Cardio` and `Exames` are now deliberate Client profile tabs. Outside Cardio, keep legacy `cardio` scopes grouped as `Treino`.
 - Store database structure, RLS, indexes, functions and constraints in migrations. Store smoke/system data in `supabase/seed.sql`.
 
 ## Validation

@@ -1,7 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { forwardRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { logout } from "@/app/login/actions";
 
 import { AuthenticatedShell } from "./authenticated-shell";
 
@@ -22,28 +24,43 @@ vi.mock("next/link", () => ({
   }),
 }));
 
+vi.mock("@/app/login/actions", () => ({
+  logout: vi.fn(),
+}));
+
 const mockedUsePathname = vi.mocked(usePathname);
+const mockedLogout = vi.mocked(logout);
 
 describe("AuthenticatedShell", () => {
   beforeEach(() => {
     mockedUsePathname.mockReset();
+    mockedLogout.mockReset();
   });
 
   it("renderiza children e marca a rota Cliente como ativa", () => {
     mockedUsePathname.mockReturnValue("/cliente/inicio");
 
     render(
-      <AuthenticatedShell profile="cliente">
+      <AuthenticatedShell
+        clientIdentity={{
+          avatarUrl: "/avatars/ana-ribeiro-seed.png",
+          initial: "A",
+          name: "Ana Ribeiro",
+        }}
+        profile="cliente"
+      >
         <p>Conteúdo Cliente</p>
       </AuthenticatedShell>,
     );
 
     expect(screen.getByText("Conteúdo Cliente")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Início" })).toHaveAttribute(
-      "data-active",
-      "true",
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page",
     );
-    expect(screen.getByRole("button", { name: "Dieta" })).toBeDisabled();
+    expect(screen.getByText("Ana Ribeiro")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Minha Evolução" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();
   });
 
   it("renderiza a navegação de Parceiros com Clientes habilitado", () => {
@@ -67,6 +84,10 @@ describe("AuthenticatedShell", () => {
       "aria-current",
       "page",
     );
+    const logoutButton = screen.getByRole("button", { name: "Sair" });
+    expect(logoutButton).toHaveAttribute("type", "button");
+    fireEvent.click(logoutButton);
+    expect(mockedLogout).toHaveBeenCalledTimes(1);
   });
 
   it("mantém o Admin separado da operação de Parceiros", () => {
@@ -102,6 +123,7 @@ describe("AuthenticatedShell", () => {
       "href",
       "/admin/configuracoes",
     );
+    expect(screen.getByRole("button", { name: "Sair" })).toHaveAttribute("type", "button");
     expect(screen.queryByText("Relatórios")).not.toBeInTheDocument();
     expect(screen.queryByText("Agenda")).not.toBeInTheDocument();
     expect(screen.queryByText("Materiais")).not.toBeInTheDocument();

@@ -6,7 +6,7 @@ Use esta skill ao trabalhar na aba `Dietas` do Cliente em `/parceiros/clientes/[
 
 - Visual principal: Figma `1:10828` (`Paciente Dieta`), adaptado para Parceiros.
 - A interface deve dizer `Clientes`, nunca `Pacientes`.
-- Não exibir `Cardio` como aba/módulo.
+- `Cardio` é uma aba própria do perfil do Cliente; Dietas não exibe dados de Cardio dentro do plano alimentar.
 - A base de alimentos oficial é `partner_protocol_foods`, criada em `/parceiros/cadastros`.
 
 ## Banco

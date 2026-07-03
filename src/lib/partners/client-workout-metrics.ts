@@ -122,6 +122,13 @@ export const workoutObjectiveLabels: Record<WorkoutObjective, string> = {
   resistencia: "Resistência",
 };
 
+const workoutTrainingTypeFallbacks = [
+  "Peito e Tríceps",
+  "Costas e Bíceps",
+  "Pernas / Inferiores",
+  "Ombros e Braços",
+] as const;
+
 export const workoutTechniqueLabels: Record<WorkoutTechnique, string> = {
   biset: "Bi-set",
   cluster: "Cluster",
@@ -149,19 +156,41 @@ export function workoutVolume(exercises: PartnerClientWorkoutExercise[]) {
       sum + (set.reps !== null && set.loadKg !== null ? set.reps * set.loadKg : 0), 0), 0);
 }
 
+export function workoutTrainingTypeLabel(session: Pick<PartnerClientWorkoutSession, "exercises" | "sortOrder" | "title">) {
+  const explicitTitle = session.title.trim();
+  if (explicitTitle && !/^treino\s+[a-z]$/i.test(explicitTitle)) return explicitTitle;
+
+  const scores = new Map<string, number>();
+  session.exercises.forEach((exercise) => {
+    const groups = new Set([exercise.muscleGroup, ...exercise.secondaryMuscleGroups]);
+    groups.forEach((group) => scores.set(group, (scores.get(group) ?? 0) + 1));
+  });
+
+  const pushScore = (scores.get("peito") ?? 0) + (scores.get("triceps") ?? 0);
+  const pullScore = (scores.get("costas") ?? 0) + (scores.get("biceps") ?? 0);
+  const lowerScore = (scores.get("pernas") ?? 0) + (scores.get("gluteos") ?? 0);
+  const shoulderScore = scores.get("ombros") ?? 0;
+  const maxScore = Math.max(pushScore, pullScore, lowerScore, shoulderScore);
+
+  if (maxScore > 0) {
+    if (lowerScore === maxScore) return "Pernas / Inferiores";
+    if (pullScore === maxScore) return "Costas e Bíceps";
+    if (pushScore === maxScore) return "Peito e Tríceps";
+    return "Ombros e Braços";
+  }
+
+  return workoutTrainingTypeFallbacks[session.sortOrder % workoutTrainingTypeFallbacks.length];
+}
+
 export function workoutMuscleHeat(exercises: PartnerClientWorkoutExercise[]): MuscleHeat[] {
   const scores = new Map<string, number>();
   exercises.forEach((exercise) => {
-    const setWeight = Math.max(1, exercise.sets.length);
-    scores.set(exercise.muscleGroup, (scores.get(exercise.muscleGroup) ?? 0) + setWeight);
-    exercise.secondaryMuscleGroups.forEach((group) => {
-      scores.set(group, (scores.get(group) ?? 0) + setWeight * 0.5);
-    });
+    const groups = new Set([exercise.muscleGroup, ...exercise.secondaryMuscleGroups]);
+    groups.forEach((group) => scores.set(group, (scores.get(group) ?? 0) + 1));
   });
-  const maximum = Math.max(1, ...scores.values());
   return Array.from(scores, ([group, score]) => ({
     group,
-    level: (score / maximum > 0.66 ? 3 : score / maximum > 0.33 ? 2 : 1) as 1 | 2 | 3,
+    level: (score >= 5 ? 3 : score >= 2 ? 2 : 1) as 1 | 2 | 3,
     score,
   })).sort((left, right) => right.score - left.score);
 }

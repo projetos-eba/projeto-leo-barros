@@ -625,7 +625,7 @@ async function main() {
   log("Login Auth do Parceiro local validado.");
 
   await startNextDev(localEnv);
-  await validateNextLoginWithPlaywright({ adminPassword, partnerPassword });
+  await validateNextLoginWithPlaywright({ adminPassword: ADMIN_PASSWORD, partnerPassword });
 
   log("Login real no Next e guards Admin/Parceiro validados no navegador headless.");
   log(`Fluxo local validado para ${ADMIN_EMAIL} e ${PARTNER_EMAIL}.`);

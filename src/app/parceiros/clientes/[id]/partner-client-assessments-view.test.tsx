@@ -242,7 +242,7 @@ describe("PartnerClientAssessmentsView", () => {
     expect(screen.getByText("Análise Gráfica da Avaliação")).toBeInTheDocument();
     expect(screen.getByText("Histórico de Avaliações")).toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
-    expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
   });
 
   it("salva e aplica cálculo calórico", async () => {

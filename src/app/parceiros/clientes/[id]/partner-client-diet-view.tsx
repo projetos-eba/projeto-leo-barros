@@ -2,14 +2,12 @@
 
 import {
   Activity,
-  ArrowLeft,
   Check,
   ChevronDown,
   Clock,
   Copy,
   Droplets,
   Ellipsis,
-  FileDown,
   Flame,
   History,
   Lock,
@@ -74,7 +72,7 @@ type NewMealForm = {
   title: string;
 };
 
-const futureTabs = ["Anamnese", "Treinos", "Exames", "Prescrições", "Fotos", "Formulários"];
+const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
 const foodTabs: Array<{ id: DietFoodTab; label: string }> = [
   { id: "suggestions", label: "Sugestões" },
   { id: "favorites", label: "Favoritos" },
@@ -180,6 +178,10 @@ function HeaderTabs({ clientId }: { clientId: string }) {
       <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}`}>Visão Geral</Link>
       <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}?tab=avaliacoes`}>Avaliações</Link>
       <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] bg-[#101923]/70 px-4 text-[14px] font-semibold text-white after:absolute after:inset-x-3 after:bottom-0 after:h-[2px] after:bg-[#3b97e3]" href={`/parceiros/clientes/${clientId}?tab=dietas`}>Dietas</Link>
+      <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}?tab=treinos`}>Treinos</Link>
+      <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}?tab=cardio`}>Cardio</Link>
+      <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}?tab=exames`}>Exames</Link>
+      <Link className="relative inline-flex h-[48px] shrink-0 items-center rounded-t-[10px] px-4 text-[14px] font-semibold text-[#8fcfff] transition hover:bg-[#101923]/45" href={`/parceiros/clientes/${clientId}?tab=fotos`}>Fotos</Link>
       {futureTabs.map((tab) => (
         <button className="inline-flex h-[48px] shrink-0 cursor-not-allowed items-center gap-2 rounded-t-[10px] px-4 text-[14px] font-semibold text-[#6f7c89]" disabled key={tab} type="button">
           <Lock className="size-3.5" /> {tab}
@@ -255,7 +257,7 @@ function MacroMetric({ color, icon, label, value }: { color: "green" | "red" | "
     <div className="flex items-center gap-3">
       <span className={cn("flex size-9 items-center justify-center rounded-[9px]", colorClass)}>{icon}</span>
       <div>
-        <p className={cn("text-[18px] font-bold leading-5", valueClass)}>{macroText(value)}</p>
+        <p className={cn("text-[16px] font-bold leading-5", valueClass)}>{macroText(value)}</p>
         <p className="mt-1 text-[12px] text-[#8b92a3]">{label}</p>
       </div>
     </div>
@@ -443,15 +445,6 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
-        <div className="flex flex-wrap items-center justify-between gap-3 lg:absolute lg:inset-x-0 lg:top-0 lg:z-10">
-          <Link className="inline-flex h-10 items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white lg:hidden" href="/parceiros/clientes">
-            <ArrowLeft className="size-4" /> Voltar para Clientes
-          </Link>
-          <button className="ml-auto inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]" type="button" onClick={() => window.print()}>
-            <FileDown className="size-[18px]" /> Exportar PDF
-          </button>
-        </div>
-
         <PartnerClientProfileHeader activeTab="dietas" overview={overview} />
 
         {diet.plan ? (

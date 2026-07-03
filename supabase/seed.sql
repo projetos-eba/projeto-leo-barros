@@ -296,6 +296,18 @@ begin
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
 
+  delete from public.partner_client_photo_comparison_notes
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_client_photo_events
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_client_photo_sessions
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
   delete from public.partner_client_calorie_calculations
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
@@ -337,6 +349,18 @@ begin
   where partner_id = target_partner_id;
 
   delete from public.partner_client_diet_plans
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_cardio_plans
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_exam_collections
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_exam_events
+  where partner_id = target_partner_id;
+
+  delete from public.partner_exam_categories
   where partner_id = target_partner_id;
 
   delete from public.partner_workout_programs
@@ -401,7 +425,7 @@ begin
     'authenticated',
     'authenticated',
     email,
-    '',
+    crypt(target_password, gen_salt('bf')),
     now(),
     '',
     '',
@@ -710,6 +734,102 @@ begin
     '{"source":"seed","heightCm":174,"weightKg":78.4,"bodyFatPercentage":14.7,"activityLevel":"moderate"}'::jsonb
   );
 
+  insert into public.partner_client_photo_sessions (
+    id,
+    partner_id,
+    patient_id,
+    captured_at,
+    title,
+    status,
+    notes,
+    created_at,
+    updated_at
+  )
+  values
+    (
+      'f4000000-0000-4000-8000-000000000101',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      date_trunc('day', now() - interval '90 days') + interval '9 hours 47 minutes',
+      '6ª sessão',
+      'complete',
+      'Registro inicial para comparação de evolução corporal.',
+      now() - interval '90 days',
+      now() - interval '90 days'
+    ),
+    (
+      'f4000000-0000-4000-8000-000000000102',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      date_trunc('day', now() - interval '5 days') + interval '11 hours 34 minutes',
+      '8ª sessão',
+      'complete',
+      'Boa evolução visual de definição e postura.',
+      now() - interval '5 days',
+      now() - interval '5 days'
+    );
+
+  insert into public.partner_client_photo_items (
+    id,
+    session_id,
+    partner_id,
+    patient_id,
+    angle,
+    storage_path,
+    original_filename,
+    mime_type,
+    size_bytes,
+    width_px,
+    height_px,
+    created_at,
+    updated_at
+  )
+  values
+    ('f4000000-0000-4000-8000-000000000201', 'f4000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'front', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000101/frente-1.png', 'Frente 1.png', 'image/png', 1200000, 1086, 1448, now() - interval '90 days', now() - interval '90 days'),
+    ('f4000000-0000-4000-8000-000000000202', 'f4000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'back', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000101/costas-1.png', 'Costas 1.png', 'image/png', 1200000, 1086, 1448, now() - interval '90 days', now() - interval '90 days'),
+    ('f4000000-0000-4000-8000-000000000203', 'f4000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'left', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000101/esquerdo-1.png', 'Esquerdo 1.png', 'image/png', 1200000, 1086, 1448, now() - interval '90 days', now() - interval '90 days'),
+    ('f4000000-0000-4000-8000-000000000204', 'f4000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'right', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000101/direito-1.png', 'Direito 1.png', 'image/png', 1200000, 1086, 1448, now() - interval '90 days', now() - interval '90 days'),
+    ('f4000000-0000-4000-8000-000000000205', 'f4000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'front', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000102/frente-2.png', 'Frente 2.png', 'image/png', 1200000, 1086, 1448, now() - interval '5 days', now() - interval '5 days'),
+    ('f4000000-0000-4000-8000-000000000206', 'f4000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'back', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000102/costas-2.png', 'Costas 2.png', 'image/png', 1200000, 1086, 1448, now() - interval '5 days', now() - interval '5 days'),
+    ('f4000000-0000-4000-8000-000000000207', 'f4000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'left', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000102/esquerdo-2.png', 'Esquerdo 2.png', 'image/png', 1200000, 1086, 1448, now() - interval '5 days', now() - interval '5 days'),
+    ('f4000000-0000-4000-8000-000000000208', 'f4000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'right', target_partner_id::text || '/a1000000-0000-4000-8000-000000000301/f4000000-0000-4000-8000-000000000102/direito-2.png', 'Direito 2.png', 'image/png', 1200000, 1086, 1448, now() - interval '5 days', now() - interval '5 days');
+
+  insert into public.partner_client_photo_comparison_notes (
+    id,
+    partner_id,
+    patient_id,
+    before_session_id,
+    after_session_id,
+    notes,
+    created_at,
+    updated_at
+  )
+  values (
+    'f4000000-0000-4000-8000-000000000301',
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000301',
+    'f4000000-0000-4000-8000-000000000101',
+    'f4000000-0000-4000-8000-000000000102',
+    'Ótima evolução visual e redução de medidas. Manter foco em definição e estabilidade de core.',
+    now() - interval '5 days',
+    now() - interval '5 days'
+  );
+
+  insert into public.partner_client_photo_events (
+    id,
+    partner_id,
+    patient_id,
+    session_id,
+    actor_name,
+    event_type,
+    detail,
+    details,
+    created_at
+  )
+  values
+    ('f4000000-0000-4000-8000-000000000401', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'f4000000-0000-4000-8000-000000000101', 'Dr. Leo', 'session_created', 'Sessão inicial de Fotos criada.', '{"fixture": true}'::jsonb, now() - interval '90 days'),
+    ('f4000000-0000-4000-8000-000000000402', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'f4000000-0000-4000-8000-000000000102', 'Dr. Leo', 'session_created', 'Sessão de Fotos de evolução criada.', '{"fixture": true}'::jsonb, now() - interval '5 days');
+
   insert into public.partner_client_adherence_snapshots (
     id,
     partner_id,
@@ -966,7 +1086,10 @@ begin
     ('e2000000-0000-4000-8000-000000000406', target_partner_id, 'e2000000-0000-4000-8000-000000000303', 1, 15, 20, 'warmup'),
     ('e2000000-0000-4000-8000-000000000407', target_partner_id, 'e2000000-0000-4000-8000-000000000303', 2, 12, 25, 'moderate'),
     ('e2000000-0000-4000-8000-000000000408', target_partner_id, 'e2000000-0000-4000-8000-000000000304', 1, 10, 60, 'warmup'),
-    ('e2000000-0000-4000-8000-000000000409', target_partner_id, 'e2000000-0000-4000-8000-000000000304', 2, 8, 90, 'maximum');
+    ('e2000000-0000-4000-8000-000000000409', target_partner_id, 'e2000000-0000-4000-8000-000000000304', 2, 8, 90, 'moderate'),
+    ('e2000000-0000-4000-8000-000000000410', target_partner_id, 'e2000000-0000-4000-8000-000000000302', 3, 10, 22, 'maximum'),
+    ('e2000000-0000-4000-8000-000000000411', target_partner_id, 'e2000000-0000-4000-8000-000000000303', 3, 10, 30, 'maximum'),
+    ('e2000000-0000-4000-8000-000000000412', target_partner_id, 'e2000000-0000-4000-8000-000000000304', 3, 8, 100, 'maximum');
 
   insert into public.partner_workout_events (
     id, partner_id, patient_id, program_id, actor_name, event_type, detail, version, created_at
@@ -975,6 +1098,116 @@ begin
     ('e2000000-0000-4000-8000-000000000501', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'created', 'Criou o programa de treinos.', 1, now() - interval '30 days'),
     ('e2000000-0000-4000-8000-000000000502', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'updated', 'Combinou Supino reto e Desenvolvimento em Bi-set.', 2, now() - interval '3 days'),
     ('e2000000-0000-4000-8000-000000000503', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'e2000000-0000-4000-8000-000000000101', 'Dr. Leo', 'published', 'Publicou o plano de treinos v2.', 2, now() - interval '2 days');
+
+  insert into public.partner_client_cardio_plans (
+    id,
+    partner_id,
+    patient_id,
+    title,
+    status,
+    weekly_target_minutes,
+    weight_kg,
+    primary_activity_key,
+    comparison_activity_key,
+    target_zone,
+    notes,
+    version,
+    published_at,
+    created_at,
+    updated_at
+  )
+  values (
+    'c3000000-0000-4000-8000-000000000101',
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000301',
+    'Cardio base aeróbica',
+    'published',
+    180,
+    70,
+    'caminhada_leve',
+    'corrida_moderada',
+    'z2',
+    'Manter intensidade conversacional na maior parte da semana.',
+    2,
+    now() - interval '2 days',
+    now() - interval '12 days',
+    now() - interval '2 hours'
+  );
+
+  insert into public.partner_client_cardio_calculations (
+    id,
+    plan_id,
+    partner_id,
+    patient_id,
+    weight_kg,
+    duration_minutes,
+    activity_key,
+    comparison_activity_key,
+    met,
+    comparison_met,
+    kcal_estimate,
+    comparison_kcal_estimate,
+    kcal_per_min,
+    comparison_kcal_per_min,
+    target_zone,
+    parameters,
+    created_at
+  )
+  values (
+    'c3000000-0000-4000-8000-000000000201',
+    'c3000000-0000-4000-8000-000000000101',
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000301',
+    70,
+    30,
+    'caminhada_leve',
+    'corrida_moderada',
+    2.5,
+    5.0,
+    92,
+    184,
+    3.1,
+    6.1,
+    'z2',
+    '{"weeklyTargetMinutes": 180, "fixture": true}'::jsonb,
+    now() - interval '2 days'
+  );
+
+  insert into public.partner_client_cardio_sessions (
+    id,
+    plan_id,
+    partner_id,
+    patient_id,
+    performed_at,
+    duration_minutes,
+    activity_key,
+    met,
+    kcal_estimate,
+    target_zone,
+    notes,
+    created_at
+  )
+  values
+    ('c3000000-0000-4000-8000-000000000301', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '1 day 7 hours', 60, 'corrida_moderada', 5.0, 368, 'z2', 'Ritmo confortável.', now() - interval '2 days'),
+    ('c3000000-0000-4000-8000-000000000302', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '3 days 7 hours', 52, 'eliptico', 5.0, 319, 'z2', 'Sem dor articular.', now() - interval '1 day'),
+    ('c3000000-0000-4000-8000-000000000303', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '2 days 8 hours', 50, 'bicicleta_leve', 4.0, 245, 'z2', 'Pedal leve pós-treino.', now() - interval '6 hours');
+
+  insert into public.partner_client_cardio_events (
+    id,
+    plan_id,
+    partner_id,
+    patient_id,
+    actor_name,
+    event_type,
+    detail,
+    version,
+    details,
+    created_at
+  )
+  values
+    ('c3000000-0000-4000-8000-000000000401', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Dr. Leo', 'created', 'Plano de Cardio criado.', 1, '{"fixture": true}'::jsonb, now() - interval '12 days'),
+    ('c3000000-0000-4000-8000-000000000402', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Dr. Leo', 'calculation_saved', 'Cálculo inicial salvo.', 2, '{"calculationId": "c3000000-0000-4000-8000-000000000201"}'::jsonb, now() - interval '2 days'),
+    ('c3000000-0000-4000-8000-000000000403', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'Dr. Leo', 'session_logged', 'Sessões da semana registradas.', 2, '{"fixture": true}'::jsonb, now() - interval '6 hours');
 
   insert into public.partner_protocol_use_drafts (
     id,
@@ -1008,6 +1241,357 @@ begin
     ('d1000000-0000-4000-8000-000000000404', target_partner_id, 'exercise', null, 'd1000000-0000-4000-8000-000000000203', 'created', '{"fixture": true}'::jsonb, now() - interval '48 days'),
     ('d1000000-0000-4000-8000-000000000405', target_partner_id, 'food', 'd1000000-0000-4000-8000-000000000102', null, 'used', '{"fixture": true}'::jsonb, now() - interval '2 days'),
     ('d1000000-0000-4000-8000-000000000406', target_partner_id, 'exercise', null, 'd1000000-0000-4000-8000-000000000201', 'used', '{"fixture": true}'::jsonb, now() - interval '2 days');
+
+  drop table if exists pg_temp.tmp_partner_exam_seed;
+  create temporary table tmp_partner_exam_seed (
+    category_slug text,
+    category_name text,
+    category_icon text,
+    category_order integer,
+    exam_slug text,
+    exam_name text,
+    default_unit text,
+    exam_order integer,
+    refs jsonb,
+    units jsonb
+  ) on commit drop;
+
+  insert into tmp_partner_exam_seed (
+    category_slug,
+    category_name,
+    category_icon,
+    category_order,
+    exam_slug,
+    exam_name,
+    default_unit,
+    exam_order,
+    refs,
+    units
+  )
+  values
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'colesterol_total', 'Colesterol total', 'mg/dL', 10, '[{"sex":"unisex","low":0,"high":200}]', '[{"unit":"mmol/L","factor":0.02586}]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'ldl_colesterol', 'LDL-colesterol', 'mg/dL', 20, '[{"sex":"unisex","low":0,"high":100}]', '[{"unit":"mmol/L","factor":0.02586}]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'hdl_colesterol', 'HDL-colesterol', 'mg/dL', 30, '[{"sex":"male","low":40,"high":100},{"sex":"female","low":50,"high":100}]', '[{"unit":"mmol/L","factor":0.02586}]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'vldl_colesterol', 'VLDL-colesterol', 'mg/dL', 40, '[{"sex":"unisex","low":0,"high":30}]', '[]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'triglicerideos', 'Triglicerídeos', 'mg/dL', 50, '[{"sex":"unisex","low":0,"high":150}]', '[{"unit":"mmol/L","factor":0.01129}]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'apolipoproteina_a1', 'Apolipoproteína A1 (ApoA1)', 'mg/dL', 60, '[{"sex":"male","low":120,"high":160},{"sex":"female","low":140,"high":180}]', '[]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'apolipoproteina_b', 'Apolipoproteína B (ApoB)', 'mg/dL', 70, '[{"sex":"unisex","low":0,"high":90}]', '[]'),
+    ('perfil_lipidico', 'Perfil lipídico', 'droplet', 10, 'lipoproteina_a', 'Lipoproteína(a) - Lp(a)', 'mg/dL', 80, '[{"sex":"unisex","low":0,"high":30}]', '[{"unit":"nmol/L","factor":2.4}]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'hemoglobina', 'Hemoglobina', 'g/dL', 10, '[{"sex":"male","low":13.5,"high":17.5},{"sex":"female","low":12,"high":15.5}]', '[{"unit":"mmol/L","factor":0.6206}]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'hematocrito', 'Hematócrito', '%', 20, '[{"sex":"male","low":40,"high":52},{"sex":"female","low":36,"high":46}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'leucocitos', 'Leucócitos', '/μL', 30, '[{"sex":"unisex","low":4000,"high":11000}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'plaquetas', 'Plaquetas', '/μL', 40, '[{"sex":"unisex","low":150000,"high":400000}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'ferritina', 'Ferritina', 'ng/mL', 50, '[{"sex":"male","low":30,"high":300},{"sex":"female","low":15,"high":150}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'ferro_serico', 'Ferro sérico', 'μg/dL', 60, '[{"sex":"male","low":65,"high":175},{"sex":"female","low":50,"high":170}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'transferrina', 'Transferrina', 'mg/dL', 70, '[{"sex":"unisex","low":200,"high":360}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'saturacao_transferrina', 'Saturação de transferrina', '%', 80, '[{"sex":"unisex","low":20,"high":50}]', '[]'),
+    ('hematologia', 'Hematologia', 'syringe', 20, 'tibc', 'TIBC (capacidade total de ligação do ferro)', 'μg/dL', 90, '[{"sex":"unisex","low":250,"high":450}]', '[]'),
+    ('metabolismo_da_glicose', 'Metabolismo da glicose', 'activity', 30, 'glicemia_jejum', 'Glicemia de jejum', 'mg/dL', 10, '[{"sex":"unisex","low":70,"high":99}]', '[{"unit":"mmol/L","factor":0.0555}]'),
+    ('metabolismo_da_glicose', 'Metabolismo da glicose', 'activity', 30, 'hemoglobina_glicada', 'Hemoglobina glicada (HbA1c)', '%', 20, '[{"sex":"unisex","low":4,"high":5.7}]', '[]'),
+    ('metabolismo_da_glicose', 'Metabolismo da glicose', 'activity', 30, 'insulina_jejum', 'Insulina de jejum', 'μU/mL', 30, '[{"sex":"unisex","low":2,"high":25}]', '[]'),
+    ('metabolismo_da_glicose', 'Metabolismo da glicose', 'activity', 30, 'peptideo_c', 'Peptídeo C', 'ng/mL', 40, '[{"sex":"unisex","low":0.8,"high":3.1}]', '[]'),
+    ('metabolismo_da_glicose', 'Metabolismo da glicose', 'activity', 30, 'totg_2h', 'TOTG (2h)', 'mg/dL', 50, '[{"sex":"unisex","low":0,"high":140}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'tgo_ast', 'TGO (AST)', 'U/L', 10, '[{"sex":"male","low":0,"high":40},{"sex":"female","low":0,"high":32}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'tgp_alt', 'TGP (ALT)', 'U/L', 20, '[{"sex":"male","low":0,"high":40},{"sex":"female","low":0,"high":32}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'ggt', 'GGT', 'U/L', 30, '[{"sex":"unisex","low":0,"high":75}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'fosfatase_alcalina', 'Fosfatase alcalina', 'U/L', 40, '[{"sex":"unisex","low":30,"high":120}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'bilirrubina_total', 'Bilirrubina total', 'mg/dL', 50, '[{"sex":"unisex","low":0.3,"high":1.2}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'bilirrubina_direta', 'Bilirrubina direta', 'mg/dL', 60, '[{"sex":"unisex","low":0,"high":0.3}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'bilirrubina_indireta', 'Bilirrubina indireta', 'mg/dL', 70, '[{"sex":"unisex","low":0.2,"high":0.9}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'albumina', 'Albumina', 'g/dL', 80, '[{"sex":"unisex","low":3.5,"high":5}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'proteinas_totais', 'Proteínas totais', 'g/dL', 90, '[{"sex":"unisex","low":6,"high":8.3}]', '[]'),
+    ('funcao_hepatica', 'Função hepática', 'flask', 40, 'inr', 'INR', '—', 100, '[{"sex":"unisex","low":0.8,"high":1.2}]', '[]'),
+    ('funcao_renal', 'Função renal', 'droplet', 50, 'creatinina', 'Creatinina', 'mg/dL', 10, '[{"sex":"male","low":0.7,"high":1.2},{"sex":"female","low":0.6,"high":1}]', '[{"unit":"μmol/L","factor":88.4}]'),
+    ('funcao_renal', 'Função renal', 'droplet', 50, 'ureia', 'Ureia', 'mg/dL', 20, '[{"sex":"unisex","low":15,"high":40}]', '[]'),
+    ('funcao_renal', 'Função renal', 'droplet', 50, 'acido_urico', 'Ácido úrico', 'mg/dL', 30, '[{"sex":"male","low":3.4,"high":7},{"sex":"female","low":2.4,"high":6}]', '[]'),
+    ('funcao_renal', 'Função renal', 'droplet', 50, 'cistatina_c', 'Cistatina C', 'mg/L', 40, '[{"sex":"male","low":0.56,"high":1.25},{"sex":"female","low":0.49,"high":0.98}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'sodio', 'Sódio', 'mmol/L', 10, '[{"sex":"unisex","low":135,"high":145}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'potassio', 'Potássio', 'mmol/L', 20, '[{"sex":"unisex","low":3.5,"high":5}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'cloro', 'Cloro', 'mmol/L', 30, '[{"sex":"unisex","low":98,"high":107}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'calcio_total', 'Cálcio total', 'mg/dL', 40, '[{"sex":"unisex","low":8.5,"high":10.5}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'magnesio', 'Magnésio', 'mg/dL', 50, '[{"sex":"unisex","low":1.7,"high":2.2}]', '[]'),
+    ('eletrolitos', 'Eletrólitos', 'activity', 60, 'fosforo', 'Fósforo', 'mg/dL', 60, '[{"sex":"unisex","low":2.5,"high":4.5}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'tsh', 'TSH', 'mIU/L', 10, '[{"sex":"unisex","low":0.4,"high":5}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 't4_livre', 'T4 livre', 'ng/dL', 20, '[{"sex":"unisex","low":0.9,"high":1.7}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 't3_livre', 'T3 livre', 'pg/mL', 30, '[{"sex":"unisex","low":2.3,"high":4.2}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'anti_tpo', 'Anti-TPO', 'IU/mL', 40, '[{"sex":"unisex","low":0,"high":35}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'anti_tireoglobulina', 'Anti-tireoglobulina', 'IU/mL', 50, '[{"sex":"unisex","low":0,"high":40}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'trab', 'TRAb', 'IU/L', 60, '[{"sex":"unisex","low":0,"high":1.75}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'testosterona_total', 'Testosterona total', 'ng/dL', 70, '[{"sex":"male","low":300,"high":1000},{"sex":"female","low":15,"high":70}]', '[{"unit":"ng/mL","factor":0.01}]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'testosterona_livre', 'Testosterona livre', 'pg/mL', 80, '[{"sex":"male","low":50,"high":210},{"sex":"female","low":1,"high":8.5}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'shbg', 'SHBG', 'nmol/L', 90, '[{"sex":"male","low":10,"high":57},{"sex":"female","low":18,"high":114}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'estradiol', 'Estradiol', 'pg/mL', 100, '[{"sex":"male","low":10,"high":40},{"sex":"female","low":30,"high":400}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'progesterona', 'Progesterona', 'ng/mL', 110, '[{"sex":"male","low":0,"high":1},{"sex":"female","low":0,"high":20}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'lh', 'LH', 'mIU/mL', 120, '[{"sex":"male","low":1.5,"high":9.3},{"sex":"female","low":0.5,"high":76.3}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'fsh', 'FSH', 'mIU/mL', 130, '[{"sex":"male","low":1.4,"high":18.1},{"sex":"female","low":1.5,"high":116.3}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'prolactina', 'Prolactina', 'ng/mL', 140, '[{"sex":"male","low":2,"high":18},{"sex":"female","low":2,"high":29}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'dhea_s', 'DHEA-S', 'μg/dL', 150, '[{"sex":"male","low":80,"high":560},{"sex":"female","low":35,"high":430}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'igf_1', 'IGF-1', 'ng/mL', 160, '[{"sex":"unisex","low":115,"high":358}]', '[]'),
+    ('painel_hormonal', 'Painel hormonal', 'flask', 70, 'gh', 'GH', 'ng/mL', 170, '[{"sex":"unisex","low":0,"high":5}]', '[]'),
+    ('vitaminas', 'Vitaminas', 'pill', 80, 'vitamina_d', 'Vitamina D', 'ng/mL', 10, '[{"sex":"unisex","low":30,"high":100}]', '[]'),
+    ('vitaminas', 'Vitaminas', 'pill', 80, 'vitamina_b12', 'Vitamina B12', 'pg/mL', 20, '[{"sex":"unisex","low":300,"high":900}]', '[]'),
+    ('vitaminas', 'Vitaminas', 'pill', 80, 'acido_folico', 'Ácido fólico (vitamina B9)', 'ng/mL', 30, '[{"sex":"unisex","low":3,"high":20}]', '[]'),
+    ('vitaminas', 'Vitaminas', 'pill', 80, 'vitamina_a', 'Vitamina A', 'μmol/L', 40, '[{"sex":"unisex","low":0.7,"high":3}]', '[]'),
+    ('vitaminas', 'Vitaminas', 'pill', 80, 'vitamina_c', 'Vitamina C', 'mg/dL', 50, '[{"sex":"unisex","low":0.4,"high":2}]', '[]'),
+    ('minerais_e_oligoelementos', 'Minerais e oligoelementos', 'bone', 90, 'zinco', 'Zinco', 'μg/dL', 10, '[{"sex":"unisex","low":65,"high":120}]', '[]'),
+    ('minerais_e_oligoelementos', 'Minerais e oligoelementos', 'bone', 90, 'cobre', 'Cobre', 'μg/dL', 20, '[{"sex":"unisex","low":75,"high":155}]', '[]'),
+    ('minerais_e_oligoelementos', 'Minerais e oligoelementos', 'bone', 90, 'selenio', 'Selênio', 'μg/L', 30, '[{"sex":"unisex","low":60,"high":95}]', '[]'),
+    ('marcadores_inflamatorios', 'Marcadores inflamatórios', 'heartPulse', 100, 'pcr_us', 'PCR-us', 'mg/L', 10, '[{"sex":"unisex","low":0,"high":1}]', '[]'),
+    ('marcadores_inflamatorios', 'Marcadores inflamatórios', 'heartPulse', 100, 'vhs', 'Velocidade de hemossedimentação (VHS)', 'mm/h', 20, '[{"sex":"male","low":0,"high":15},{"sex":"female","low":0,"high":20}]', '[]'),
+    ('marcadores_inflamatorios', 'Marcadores inflamatórios', 'heartPulse', 100, 'homocisteina', 'Homocisteína', 'μmol/L', 30, '[{"sex":"unisex","low":0,"high":15}]', '[]'),
+    ('marcadores_inflamatorios', 'Marcadores inflamatórios', 'heartPulse', 100, 'fibrinogenio', 'Fibrinogênio', 'mg/dL', 40, '[{"sex":"unisex","low":200,"high":400}]', '[]'),
+    ('marcadores_musculares', 'Marcadores musculares', 'activity', 110, 'cpk', 'CPK', 'U/L', 10, '[{"sex":"male","low":38,"high":174},{"sex":"female","low":26,"high":140}]', '[]');
+
+  insert into public.partner_exam_categories (
+    partner_id,
+    slug,
+    name,
+    icon_key,
+    sort_order,
+    status
+  )
+  select distinct on (category_slug)
+    target_partner_id,
+    category_slug,
+    category_name,
+    category_icon,
+    category_order,
+    'active'
+  from tmp_partner_exam_seed
+  order by category_slug, category_order
+  on conflict (partner_id, slug) do update
+  set
+    name = excluded.name,
+    icon_key = excluded.icon_key,
+    sort_order = excluded.sort_order,
+    status = 'active';
+
+  insert into public.partner_exam_definitions (
+    partner_id,
+    category_id,
+    slug,
+    name,
+    default_unit,
+    sort_order,
+    status
+  )
+  select
+    target_partner_id,
+    category.id,
+    seed.exam_slug,
+    seed.exam_name,
+    seed.default_unit,
+    seed.exam_order,
+    'active'
+  from tmp_partner_exam_seed seed
+  join public.partner_exam_categories category
+    on category.partner_id = target_partner_id
+   and category.slug = seed.category_slug
+  on conflict (partner_id, slug) do update
+  set
+    category_id = excluded.category_id,
+    name = excluded.name,
+    default_unit = excluded.default_unit,
+    sort_order = excluded.sort_order,
+    status = 'active';
+
+  insert into public.partner_exam_reference_ranges (
+    partner_id,
+    exam_id,
+    sex,
+    low_value,
+    high_value,
+    sort_order,
+    status
+  )
+  select
+    target_partner_id,
+    definition.id,
+    reference.sex,
+    reference.low,
+    reference.high,
+    row_number() over (partition by definition.id order by reference.sex)::integer,
+    'active'
+  from tmp_partner_exam_seed seed
+  join public.partner_exam_definitions definition
+    on definition.partner_id = target_partner_id
+   and definition.slug = seed.exam_slug
+  cross join lateral jsonb_to_recordset(seed.refs) as reference(sex text, low numeric, high numeric)
+  on conflict (partner_id, exam_id, sex) where status = 'active' do update
+  set
+    low_value = excluded.low_value,
+    high_value = excluded.high_value,
+    sort_order = excluded.sort_order;
+
+  insert into public.partner_exam_alternative_units (
+    partner_id,
+    exam_id,
+    unit,
+    factor_from_default,
+    status
+  )
+  select
+    target_partner_id,
+    definition.id,
+    unit.unit,
+    unit.factor,
+    'active'
+  from tmp_partner_exam_seed seed
+  join public.partner_exam_definitions definition
+    on definition.partner_id = target_partner_id
+   and definition.slug = seed.exam_slug
+  cross join lateral jsonb_to_recordset(seed.units) as unit(unit text, factor numeric)
+  on conflict (partner_id, exam_id, (lower(unit))) where status = 'active' do update
+  set factor_from_default = excluded.factor_from_default;
+
+  insert into public.partner_client_exam_collections (
+    id,
+    partner_id,
+    patient_id,
+    collected_at,
+    title,
+    notes,
+    status,
+    created_at,
+    updated_at
+  )
+  values
+    ('f3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date - interval '62 days', 'Coleta basal', 'Exames iniciais para comparação.', 'saved', now() - interval '62 days', now() - interval '62 days'),
+    ('f3000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date - interval '30 days', 'Coleta de acompanhamento', 'Ajuste de dieta e treino em andamento.', 'saved', now() - interval '30 days', now() - interval '30 days'),
+    ('f3000000-0000-4000-8000-000000000103', target_partner_id, 'a1000000-0000-4000-8000-000000000301', current_date - interval '1 day', 'Coleta mais recente', 'Revisão pré-consulta.', 'saved', now() - interval '1 day', now() - interval '1 day');
+
+  with result_seed(collection_id, exam_slug, input_value, input_unit, notes) as (
+    values
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'colesterol_total', 232::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'ldl_colesterol', 136::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'hdl_colesterol', 43::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'triglicerideos', 176::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'glicemia_jejum', 108::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'hemoglobina_glicada', 5.9::numeric, '%', null),
+      ('f3000000-0000-4000-8000-000000000101'::uuid, 'vitamina_d', 22::numeric, 'ng/mL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'colesterol_total', 218::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'ldl_colesterol', 122::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'hdl_colesterol', 46::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'triglicerideos', 158::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'glicemia_jejum', 104::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'hemoglobina_glicada', 5.7::numeric, '%', null),
+      ('f3000000-0000-4000-8000-000000000102'::uuid, 'vitamina_d', 25::numeric, 'ng/mL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'colesterol_total', 198::numeric, 'mg/dL', 'Melhora global.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'ldl_colesterol', 108::numeric, 'mg/dL', 'Ainda acima da meta.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'hdl_colesterol', 48::numeric, 'mg/dL', 'Abaixo da referência feminina.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'triglicerideos', 142::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'apolipoproteina_b', 88::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'lipoproteina_a', 22::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'glicemia_jejum', 103::numeric, 'mg/dL', 'Reavaliar rotina pré-coleta.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'hemoglobina_glicada', 5.6::numeric, '%', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'insulina_jejum', 18::numeric, 'μU/mL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'tgo_ast', 28::numeric, 'U/L', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'tgp_alt', 34::numeric, 'U/L', 'Levemente acima.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'ggt', 42::numeric, 'U/L', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'creatinina', 0.92::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'ureia', 32::numeric, 'mg/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'hemoglobina', 13.1::numeric, 'g/dL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'ferritina', 24::numeric, 'ng/mL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'plaquetas', 310000::numeric, '/μL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'vitamina_d', 28::numeric, 'ng/mL', 'Suplementação em revisão.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'vitamina_b12', 520::numeric, 'pg/mL', null),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'pcr_us', 1.4::numeric, 'mg/L', 'Atenção a carga inflamatória.'),
+      ('f3000000-0000-4000-8000-000000000103'::uuid, 'cpk', 118::numeric, 'U/L', null)
+  )
+  insert into public.partner_client_exam_results (
+    collection_id,
+    partner_id,
+    patient_id,
+    exam_id,
+    input_value,
+    input_unit,
+    value_default,
+    default_unit,
+    conversion_factor_from_default,
+    reference_low,
+    reference_high,
+    reference_sex,
+    status,
+    snapshot_exam_name,
+    snapshot_exam_slug,
+    snapshot_category_name,
+    snapshot_category_slug,
+    notes,
+    created_at,
+    updated_at
+  )
+  select
+    seed.collection_id,
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000301',
+    definition.id,
+    seed.input_value,
+    seed.input_unit,
+    case
+      when lower(seed.input_unit) = lower(definition.default_unit) then seed.input_value
+      else seed.input_value / alternative.factor_from_default
+    end as value_default,
+    definition.default_unit,
+    alternative.factor_from_default,
+    reference.low_value,
+    reference.high_value,
+    coalesce(reference.sex, 'unisex'),
+    case
+      when reference.id is null then 'unknown'
+      when reference.low_value is not null and (case when lower(seed.input_unit) = lower(definition.default_unit) then seed.input_value else seed.input_value / alternative.factor_from_default end) < reference.low_value then 'low'
+      when reference.high_value is not null and (case when lower(seed.input_unit) = lower(definition.default_unit) then seed.input_value else seed.input_value / alternative.factor_from_default end) > reference.high_value then 'high'
+      else 'normal'
+    end,
+    definition.name,
+    definition.slug,
+    category.name,
+    category.slug,
+    seed.notes,
+    collection.created_at,
+    collection.updated_at
+  from result_seed seed
+  join public.partner_client_exam_collections collection
+    on collection.id = seed.collection_id
+   and collection.partner_id = target_partner_id
+  join public.partner_exam_definitions definition
+    on definition.partner_id = target_partner_id
+   and definition.slug = seed.exam_slug
+  join public.partner_exam_categories category
+    on category.id = definition.category_id
+   and category.partner_id = target_partner_id
+  join public.patients patient
+    on patient.id = 'a1000000-0000-4000-8000-000000000301'
+  left join public.partner_exam_alternative_units alternative
+    on alternative.partner_id = target_partner_id
+   and alternative.exam_id = definition.id
+   and lower(alternative.unit) = lower(seed.input_unit)
+   and alternative.status = 'active'
+  left join lateral (
+    select reference_row.*
+    from public.partner_exam_reference_ranges reference_row
+    where reference_row.partner_id = target_partner_id
+      and reference_row.exam_id = definition.id
+      and reference_row.status = 'active'
+      and reference_row.sex in (coalesce(patient.gender, 'unisex'), 'unisex')
+    order by case when reference_row.sex = patient.gender then 0 else 1 end
+    limit 1
+  ) reference on true;
+
+  insert into public.partner_client_exam_events (
+    id,
+    partner_id,
+    patient_id,
+    collection_id,
+    actor_name,
+    event_type,
+    detail,
+    details,
+    created_at
+  )
+  values
+    ('f3000000-0000-4000-8000-000000000201', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'f3000000-0000-4000-8000-000000000101', 'Dr. Leo', 'collection_saved', 'Coleta basal salva.', '{"fixture": true}'::jsonb, now() - interval '62 days'),
+    ('f3000000-0000-4000-8000-000000000202', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'f3000000-0000-4000-8000-000000000102', 'Dr. Leo', 'collection_saved', 'Coleta de acompanhamento salva.', '{"fixture": true}'::jsonb, now() - interval '30 days'),
+    ('f3000000-0000-4000-8000-000000000203', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'f3000000-0000-4000-8000-000000000103', 'Dr. Leo', 'collection_saved', 'Coleta mais recente salva.', '{"fixture": true}'::jsonb, now() - interval '1 day');
 
 
 
@@ -1215,4 +1799,150 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('a1000000-0000-4000-8000-000000000902', 'subscription_renewed', target_profile_id, target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'Renovação confirmada', 'Bruno Carvalho renovou Performance Mensal.', '{}'::jsonb, now() - interval '1 day'),
     ('a1000000-0000-4000-8000-000000000903', 'payment_failed', target_profile_id, target_partner_id, 'a1000000-0000-4000-8000-000000000304', 'Pagamento pendente', 'Daniel Rocha passou da data de renovação.', '{}'::jsonb, now() - interval '3 days'),
     ('a1000000-0000-4000-8000-000000000904', 'ticket_opened', target_profile_id, target_partner_id, null, 'Ticket aberto', 'Suporte acompanha renovação atrasada.', '{}'::jsonb, now() - interval '4 days');
+end $$;
+
+-- Super Admin local persistente entre resets do Supabase.
+do $$
+declare
+  admin_email text := 'antoniofelipe258@gmail.com';
+  admin_password text := '123456';
+  admin_user_id uuid;
+  admin_profile_id uuid;
+begin
+  select id into admin_user_id
+  from auth.users
+  where lower(email) = lower(admin_email)
+  order by created_at nulls last
+  limit 1;
+
+  if admin_user_id is null then
+    admin_user_id := 'a2000000-0000-4000-8000-000000000001';
+    insert into auth.users (
+      instance_id,
+      id,
+      aud,
+      role,
+      email,
+      encrypted_password,
+      email_confirmed_at,
+      confirmation_token,
+      recovery_token,
+      email_change_token_new,
+      email_change,
+      phone,
+      phone_change,
+      phone_change_token,
+      email_change_token_current,
+      reauthentication_token,
+      raw_app_meta_data,
+      raw_user_meta_data,
+      created_at,
+      updated_at
+    )
+    values (
+      '00000000-0000-0000-0000-000000000000',
+      admin_user_id,
+      'authenticated',
+      'authenticated',
+      admin_email,
+      crypt(admin_password, gen_salt('bf')),
+      now(),
+      '',
+      '',
+      '',
+      '',
+      null,
+      '',
+      '',
+      '',
+      '',
+      '{"provider":"email","providers":["email"]}'::jsonb,
+      '{}'::jsonb,
+      now(),
+      now()
+    );
+  else
+    update auth.users
+    set
+      encrypted_password = crypt(admin_password, gen_salt('bf')),
+      email_confirmed_at = coalesce(email_confirmed_at, now()),
+      raw_app_meta_data = '{"provider":"email","providers":["email"]}'::jsonb,
+      updated_at = now()
+    where id = admin_user_id;
+  end if;
+
+  insert into auth.identities (
+    provider_id,
+    user_id,
+    identity_data,
+    provider,
+    last_sign_in_at,
+    created_at,
+    updated_at
+  )
+  values (
+    admin_user_id::text,
+    admin_user_id,
+    jsonb_build_object(
+      'sub', admin_user_id::text,
+      'email', admin_email,
+      'email_verified', true,
+      'phone_verified', false
+    ),
+    'email',
+    now(),
+    now(),
+    now()
+  )
+  on conflict (provider_id, provider)
+  do update set
+    user_id = excluded.user_id,
+    identity_data = excluded.identity_data,
+    updated_at = now();
+
+  select id into admin_profile_id
+  from public.profiles
+  where user_id = admin_user_id or lower(email) = lower(admin_email)
+  order by created_at nulls last
+  limit 1;
+
+  if admin_profile_id is null then
+    admin_profile_id := 'a2000000-0000-4000-8000-000000000101';
+    insert into public.profiles (
+      id,
+      user_id,
+      email,
+      phone,
+      display_name,
+      role,
+      status,
+      created_at,
+      updated_at
+    )
+    values (
+      admin_profile_id,
+      admin_user_id,
+      admin_email,
+      '+5511970000000',
+      'Admin Local',
+      'admin',
+      'active',
+      now(),
+      now()
+    );
+  else
+    update public.profiles
+    set
+      user_id = admin_user_id,
+      email = admin_email,
+      display_name = 'Admin Local',
+      role = 'admin',
+      status = 'active',
+      updated_at = now()
+    where id = admin_profile_id;
+  end if;
+
+  insert into public.admins (profile_id)
+  values (admin_profile_id)
+  on conflict (profile_id) do nothing;
 end $$;

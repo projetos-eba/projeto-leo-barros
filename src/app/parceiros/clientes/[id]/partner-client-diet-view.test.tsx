@@ -197,7 +197,7 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByText("Adicionar alimentos")).toBeInTheDocument();
     expect(screen.getAllByText("Considerações sobre a dieta").length).toBeGreaterThan(0);
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
-    expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
   });
 
   it("adiciona alimento sugerido e consome rascunho do Cadastro", async () => {
@@ -216,9 +216,6 @@ describe("PartnerClientDietView", () => {
   });
 
   it("edita porção, salva considerações e executa ações do plano", async () => {
-    const print = vi.fn();
-    Object.defineProperty(window, "print", { configurable: true, value: print });
-
     render(<PartnerClientDietView diet={diet} overview={overview} />);
 
     fireEvent.change(screen.getByLabelText("Quantidade de Arroz branco cozido"), { target: { value: "180" } });
@@ -238,8 +235,7 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Enviar ao Cliente/i }));
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
 
-    fireEvent.click(screen.getByRole("button", { name: /Exportar PDF/i }));
-    expect(print).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /Exportar PDF/i })).not.toBeInTheDocument();
   });
 
   it("configura e salva o objetivo calórico do plano atual", async () => {

@@ -11,8 +11,8 @@
 ## Regras de Produto
 
 - A interface usa sempre `Clientes`; `patients` permanece apenas como nome técnico do schema.
-- `Cardio` não aparece como aba, filtro ou módulo separado.
-- As demais abas profundas continuam bloqueadas até implementação específica.
+- `Cardio` é uma aba própria do perfil do Cliente; esta aba de Avaliações não mistura dados de Cardio.
+- `Cardio`, `Exames` e `Fotos` agora são abas implementadas; Anamnese, Prescrições e Formulários continuam bloqueadas até implementação específica.
 - `Aplicar ao plano` salva um snapshot aplicado como referência do plano atual; não cria editor de dieta nesta etapa.
 
 ## Dados

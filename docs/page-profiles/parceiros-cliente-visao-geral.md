@@ -9,7 +9,7 @@
 
 ## Objetivo
 
-Entregar ao parceiro uma visao operacional individual do Cliente, com dados de acompanhamento, plano atual, tarefas, alertas, historico e agendamento. As abas futuras aparecem bloqueadas para evolucao uma a uma.
+Entregar ao parceiro uma visao operacional individual do Cliente, com dados de acompanhamento, plano atual, tarefas, alertas, historico e agendamento. Abas profundas aparecem bloqueadas apenas ate serem implementadas uma a uma.
 
 ## Figma
 
@@ -36,7 +36,7 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 
 - CPF, `user_id` e dados de outros parceiros nao aparecem na RPC, tela, drawers ou PDF.
 - Admin nao possui leitura global das tabelas clinicas criadas nesta entrega.
-- Dados legados de `cardio` sao exibidos dentro de `Treino`; `Cardio` nao aparece como aba, filtro ou modulo separado.
+- `Cardio` e `Exames` sao abas próprias implementadas no perfil do Cliente. Em demais telas parceiras, dados legados de `cardio` continuam agrupados como `Treino`.
 - PDF usa `window.print()` e oculta controles interativos.
 
 ## Experiencia

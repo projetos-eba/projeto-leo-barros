@@ -4,6 +4,7 @@ import {
   buildPartnerClientWorkout,
   parseDefaultReps,
   workoutMuscleHeat,
+  workoutTrainingTypeLabel,
   workoutVolume,
   type PartnerClientWorkoutExercise,
 } from "./client-workout-metrics";
@@ -37,10 +38,40 @@ describe("client workout metrics", () => {
     expect(workoutVolume([{ ...exercises[0], sets: [{ ...exercises[0].sets[0], loadKg: null }] }])).toBe(0);
   });
 
-  it("atribui intensidade maior ao músculo principal", () => {
-    const heat = workoutMuscleHeat(exercises);
-    expect(heat.find((item) => item.group === "peito")?.level).toBe(3);
-    expect(heat.find((item) => item.group === "triceps")?.score).toBeLessThan(heat[0].score);
+  it("conta exercícios por músculo e usa níveis fixos de azul", () => {
+    const heat = workoutMuscleHeat([
+      exercises[0],
+      { ...exercises[0], id: "prescribed-2", muscleGroup: "peito", secondaryMuscleGroups: ["triceps"] },
+      { ...exercises[0], id: "prescribed-3", muscleGroup: "peito", secondaryMuscleGroups: [] },
+      { ...exercises[0], id: "prescribed-4", muscleGroup: "peito", secondaryMuscleGroups: [] },
+      { ...exercises[0], id: "prescribed-5", muscleGroup: "peito", secondaryMuscleGroups: [] },
+    ]);
+    expect(heat.find((item) => item.group === "ombros")).toMatchObject({ level: 1, score: 1 });
+    expect(heat.find((item) => item.group === "triceps")).toMatchObject({ level: 2, score: 2 });
+    expect(heat.find((item) => item.group === "peito")).toMatchObject({ level: 3, score: 5 });
+  });
+
+  it("deriva tipo de treino pelos grupos musculares", () => {
+    expect(workoutTrainingTypeLabel({
+      durationMinutes: 60,
+      exercises,
+      frequencyPerWeek: 2,
+      id: "session-1",
+      objective: "hipertrofia",
+      sortOrder: 0,
+      title: "Treino A",
+      volumeKg: 980,
+    })).toBe("Peito e Tríceps");
+    expect(workoutTrainingTypeLabel({
+      durationMinutes: 60,
+      exercises: [],
+      frequencyPerWeek: 2,
+      id: "session-2",
+      objective: "hipertrofia",
+      sortOrder: 1,
+      title: "Treino B",
+      volumeKg: 0,
+    })).toBe("Costas e Bíceps");
   });
 
   it("seleciona programa publicado e normaliza reps padrão", () => {

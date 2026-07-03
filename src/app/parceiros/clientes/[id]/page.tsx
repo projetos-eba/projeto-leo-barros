@@ -1,13 +1,19 @@
 import { notFound } from "next/navigation";
 
 import { fetchPartnerClientAssessments } from "@/lib/partners/client-assessments-data";
+import { fetchPartnerClientCardio } from "@/lib/partners/client-cardio-data";
 import { fetchPartnerClientDiet } from "@/lib/partners/client-diet-data";
+import { fetchPartnerClientExams } from "@/lib/partners/client-exams-data";
 import { fetchPartnerClientOverview } from "@/lib/partners/client-overview-data";
+import { fetchPartnerClientPhotos } from "@/lib/partners/client-photos-data";
 import { fetchPartnerClientWorkout } from "@/lib/partners/client-workout-data";
 
 import { PartnerClientAssessmentsView } from "./partner-client-assessments-view";
+import { PartnerClientCardioView } from "./partner-client-cardio-view";
 import { PartnerClientDietView } from "./partner-client-diet-view";
+import { PartnerClientExamsView } from "./partner-client-exams-view";
 import { PartnerClientOverviewView } from "./partner-client-overview-view";
+import { PartnerClientPhotosView } from "./partner-client-photos-view";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
 
 type ClienteOverviewPageProps = {
@@ -63,6 +69,33 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
     }
 
     return <PartnerClientWorkoutView overview={overview} workout={workout} />;
+  }
+
+  if (tab === "cardio") {
+    const cardio = await fetchPartnerClientCardio(id);
+    if (!cardio) {
+      notFound();
+    }
+
+    return <PartnerClientCardioView cardio={cardio} overview={overview} />;
+  }
+
+  if (tab === "exames") {
+    const exams = await fetchPartnerClientExams(id);
+    if (!exams) {
+      notFound();
+    }
+
+    return <PartnerClientExamsView exams={exams} overview={overview} />;
+  }
+
+  if (tab === "fotos") {
+    const photos = await fetchPartnerClientPhotos(id);
+    if (!photos) {
+      notFound();
+    }
+
+    return <PartnerClientPhotosView overview={overview} photos={photos} />;
   }
 
   return <PartnerClientOverviewView overview={overview} />;

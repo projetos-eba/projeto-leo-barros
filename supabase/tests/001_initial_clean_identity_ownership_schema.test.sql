@@ -19,18 +19,33 @@ select tables_are(
     'partner_client_appointments',
     'partner_client_body_measurements',
     'partner_client_calorie_calculations',
+    'partner_client_cardio_calculations',
+    'partner_client_cardio_events',
+    'partner_client_cardio_plans',
+    'partner_client_cardio_sessions',
     'partner_client_diet_events',
     'partner_client_diet_meal_items',
     'partner_client_diet_meals',
     'partner_client_diet_plans',
+    'partner_client_exam_collections',
+    'partner_client_exam_events',
+    'partner_client_exam_results',
     'partner_client_goals',
     'partner_client_observations',
     'partner_clients',
     'partner_client_plan_subscriptions',
     'partner_client_plan_modules',
+    'partner_client_photo_comparison_notes',
+    'partner_client_photo_events',
+    'partner_client_photo_items',
+    'partner_client_photo_sessions',
     'partner_client_tasks',
     'partner_custom_plans',
     'partner_documents',
+    'partner_exam_alternative_units',
+    'partner_exam_categories',
+    'partner_exam_definitions',
+    'partner_exam_reference_ranges',
     'partner_material_events',
     'partner_material_shares',
     'partner_materials',
@@ -252,7 +267,14 @@ values
   ('30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002');
 
 select is(
-  (select count(*)::integer from public.admins),
+  (
+    select count(*)::integer
+    from public.admins
+    where id in (
+      '30000000-0000-0000-0000-000000000001',
+      '30000000-0000-0000-0000-000000000002'
+    )
+  ),
   2,
   'múltiplos Admins são tecnicamente permitidos'
 );

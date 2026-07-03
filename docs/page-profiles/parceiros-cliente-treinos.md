@@ -12,12 +12,14 @@ Permitir que o Parceiro monte, edite, organize, publique e envie programas de tr
 
 - O perfil superior e as abas são compartilhados com Visão Geral, Avaliações e Dietas.
 - A interface usa `Clientes`; `patients` permanece apenas no schema.
-- `Cardio` não é uma aba ou módulo separado.
+- `Cardio` agora é aba própria do perfil do Cliente. Treinos não mistura o domínio novo de Cardio, mas dados legados `cardio` fora desta aba continuam agrupados como `Treino`.
 - Exercícios prescritos referenciam `partner_protocol_exercises` e preservam snapshot de nome, imagem e grupos musculares.
 - Um Bi-set contém exatamente dois exercícios adjacentes da mesma divisão.
-- Uma nova série copia reps, carga e intensidade da série anterior como valor editável.
+- A grade mostra 5 colunas de séries: séries existentes ficam editáveis, e colunas vazias aparecem como placeholders opacos clicáveis.
+- Novos exercícios entram com pelo menos 3 séries; séries adicionais copiam reps, carga e intensidade da série anterior como valor editável.
 - O volume considera apenas séries com reps e carga preenchidas.
-- O mapa muscular soma grupo principal e grupos secundários, com peso menor para os secundários.
+- O mapa muscular usa somente tons de azul e conta quantos exercícios trabalham cada grupo, considerando grupo principal e secundários uma vez por exercício: 1 exercício = nível claro, 2 a 4 = nível médio, 5 ou mais = nível forte.
+- A ordenação de exercícios é feita por setas de subir/descer no fim da linha; não há checkbox de execução do profissional.
 - Templates pertencem ao Parceiro, não a um Cliente, e são clonados ao aplicar.
 - Apenas um programa publicado ou enviado permanece ativo por Cliente.
 
