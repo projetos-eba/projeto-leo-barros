@@ -72,7 +72,7 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
       { href: "/cliente/dieta", icon: Utensils, label: "Dieta" },
       { href: "/cliente/treino", icon: Dumbbell, label: "Treino" },
       { href: "/cliente/saude", icon: HeartPulse, label: "Saúde" },
-      { href: "/cliente/evolucao", icon: TrendingUp, label: "Minha Evolução" },
+      { href: "/cliente/evolucao", icon: TrendingUp, label: "Minha Evolução", implemented: true },
       { href: "/cliente/configuracoes", icon: Settings, label: "Configurações" },
     ],
   },
@@ -152,14 +152,18 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
               >
                 Home
               </Link>
-              <button
-                aria-disabled="true"
-                className="rounded-[10px] px-4 py-2 text-[14px] font-medium text-[#b9c0d0]/45"
-                disabled
-                type="button"
+              <Link
+                aria-current={pathname === "/cliente/evolucao" ? "page" : undefined}
+                className={cn(
+                  "rounded-[10px] px-4 py-2 text-[14px] font-medium transition-colors",
+                  pathname === "/cliente/evolucao"
+                    ? "text-white"
+                    : "text-[#b9c0d0]/70 hover:bg-white/[0.04] hover:text-white",
+                )}
+                href="/cliente/evolucao"
               >
                 Minha Evolução
-              </button>
+              </Link>
               <button
                 aria-disabled="true"
                 className="rounded-[10px] px-4 py-2 text-[14px] font-medium text-[#b9c0d0]/45"

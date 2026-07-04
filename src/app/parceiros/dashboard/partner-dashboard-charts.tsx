@@ -17,7 +17,6 @@ import type {
   PartnerDashboardGrowthPoint,
   PartnerPerformanceMetric,
 } from "@/lib/partners/dashboard-metrics";
-import { cn } from "@/lib/utils";
 
 type ClientGrowthChartProps = {
   data: PartnerDashboardGrowthPoint[];
@@ -202,9 +201,12 @@ export function AdherenceRings({ data }: AdherenceRingsProps) {
   return (
     <div className="grid grid-cols-2 divide-x divide-[#15293a]" data-testid="partner-adherence-rings">
       {data.map((item) => {
+        const value = Math.max(0, Math.min(100, Number.isFinite(item.value) ? item.value : 0));
         const stroke = item.tone === "green" ? "#61c95f" : "#c7e6ff";
-        const background = item.tone === "green" ? "#15472d" : "#143b61";
-        const gradient = `conic-gradient(${stroke} ${item.value * 3.6}deg, ${background} 0deg)`;
+        const track = item.tone === "green" ? "#15472d" : "#143b61";
+        const radius = 31;
+        const circumference = 2 * Math.PI * radius;
+        const dashOffset = circumference - (value / 100) * circumference;
 
         return (
           <div className="px-3 text-center sm:px-4" key={item.id}>
@@ -212,13 +214,33 @@ export function AdherenceRings({ data }: AdherenceRingsProps) {
               {item.label}
             </p>
             <div
-              aria-label={`${item.label}: ${item.value}%`}
-              className="relative mx-auto mt-5 flex size-[132px] items-center justify-center rounded-full shadow-[inset_0_0_20px_rgba(0,0,0,0.22)]"
-              style={{ background: gradient }}
+              aria-label={`${item.label}: ${value}%`}
+              className="relative mx-auto mt-1 flex size-[84px] items-center justify-center"
             >
-              <div className={cn("absolute inset-[8px] rounded-full", item.tone === "green" ? "bg-[#103e28]" : "bg-[#123d63]")} />
-              <div className="absolute inset-[18px] rounded-full bg-[#071b28]" />
-              <span className="relative text-[28px] font-bold leading-9 text-white">{item.value}%</span>
+              <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 84 84" role="presentation">
+                <circle
+                  cx="42"
+                  cy="42"
+                  fill="none"
+                  r={radius}
+                  stroke={track}
+                  strokeWidth="12"
+                />
+                <circle
+                  cx="42"
+                  cy="42"
+                  fill="none"
+                  r={radius}
+                  stroke={stroke}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
+                  strokeLinecap="round"
+                  strokeWidth="12"
+                  style={{ transition: "stroke-dashoffset 360ms ease" }}
+                />
+              </svg>
+              <div className="absolute inset-[17px] rounded-full bg-[#071b28]" />
+              <span className="relative text-[20px] font-bold leading-7 text-white">{value}%</span>
             </div>
           </div>
         );

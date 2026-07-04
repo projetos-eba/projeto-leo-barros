@@ -335,7 +335,7 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
   }
 
   return (
-    <main className="min-h-screen bg-[#07131c] pb-12 text-white">
+    <main className="min-h-screen bg-[#0b1720] pb-12 text-white">
       <div className="mx-auto w-full max-w-[1240px] px-6 py-6">
       <PartnerClientProfileHeader activeTab="fotos" overview={overview} />
 

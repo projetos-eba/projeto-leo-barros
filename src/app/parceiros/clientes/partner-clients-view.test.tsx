@@ -133,6 +133,7 @@ describe("PartnerClientsView", () => {
     render(<PartnerClientsView clients={clients} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Novo Cliente" }));
+    expect(screen.queryByText("Saúde")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Criar Cliente" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Revise os campos destacados");
@@ -146,6 +147,12 @@ describe("PartnerClientsView", () => {
     fireEvent.change(screen.getByLabelText("Telefone"), {
       target: { value: "+5511988887777" },
     });
+    expect(screen.getByLabelText("Telefone")).toHaveValue("(11) 98888-7777");
+    fireEvent.change(screen.getByLabelText("CPF opcional"), {
+      target: { value: "49261729843" },
+    });
+    expect(screen.getByLabelText("CPF opcional")).toHaveValue("492.617.298-43");
+    fireEvent.click(screen.getByRole("button", { name: "Hipertrofia" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Criar Cliente" }));
 
@@ -155,6 +162,8 @@ describe("PartnerClientsView", () => {
         displayName: "Novo Cliente",
         email: "novo@example.invalid",
         phone: "+5511988887777",
+        cpf: "49261729843",
+        objective: "Hipertrofia",
         serviceScopes: ["treino"],
       }),
     });

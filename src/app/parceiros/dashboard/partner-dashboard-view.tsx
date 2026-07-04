@@ -262,12 +262,12 @@ function NewPatientsPanel({ dashboard }: { dashboard: PartnerDashboardData }) {
 
 function AdherencePanel({ dashboard }: { dashboard: PartnerDashboardData }) {
   return (
-    <PartnerPanel className="border-[#2d4658] bg-[#04111b] p-6 lg:h-[282px]">
+    <PartnerPanel className="overflow-hidden border-[#2d4658] bg-[#04111b] p-5 lg:h-[242px]">
       <div className="flex items-start justify-between gap-3">
         <h2 className="max-w-[220px] text-[20px] font-bold leading-[30px] text-white">Distribuição de adesão por módulo</h2>
         <InfoHint label="Percentuais derivados de clientes ativos com plano personalizado e assinaturas ainda vigentes." />
       </div>
-      <div className="mt-7">
+      <div className="mt-4">
         <AdherenceRings data={dashboard.adherence} />
       </div>
     </PartnerPanel>

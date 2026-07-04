@@ -287,7 +287,7 @@ describe("PartnerClientAssessmentsView", () => {
   it("abre drawer de nova avaliação e salva dados", async () => {
     render(<PartnerClientAssessmentsView assessments={assessments} overview={overview} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Nova avaliação" }));
+    fireEvent.click(screen.getByRole("button", { name: "Registrar dados" }));
     fireEvent.change(screen.getByLabelText("Peso (kg)"), { target: { value: "79" } });
     fireEvent.change(screen.getByLabelText("Abdominal (mm)"), { target: { value: "14" } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar avaliação" }));

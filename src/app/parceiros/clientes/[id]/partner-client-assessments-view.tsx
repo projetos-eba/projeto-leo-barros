@@ -7,12 +7,10 @@ import {
   ClipboardPlus,
   Download,
   Dumbbell,
-  FileDown,
   Flame,
   Layers3,
   Loader2,
   Lock,
-  MessageCircle,
   Plus,
   Ruler,
   Save,
@@ -752,9 +750,6 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
       weightKg: savedNumber("weightKg", latest?.weightKg ?? null),
     };
   });
-  const whatsappHref = overview.client.phoneDigits
-    ? `https://wa.me/${overview.client.phoneDigits}?text=${encodeURIComponent(`Olá, ${overview.client.name}! Vamos revisar sua avaliação.`)}`
-    : null;
   const calorieComparison = useMemo(() => {
     if (!assessments.latestAssessment || !assessments.client.age || calorieInputs.heightCm === null || calorieInputs.weightKg === null) return [];
     const age = assessments.client.age;
@@ -846,22 +841,6 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
-        <div className="flex flex-wrap items-center justify-between gap-3 lg:absolute lg:inset-x-0 lg:top-0 lg:z-10">
-          <div className="flex flex-wrap gap-2 lg:ml-auto">
-            <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]" type="button" onClick={() => window.print()}>
-              <FileDown className="size-[18px]" /> Exportar PDF
-            </button>
-            {whatsappHref ? (
-              <a className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#1f5f38] bg-[#0c2b1d] px-4 text-[14px] font-medium text-[#58d881]" href={whatsappHref} rel="noreferrer" target="_blank">
-                <MessageCircle className="size-[18px]" /> Mensagem
-              </a>
-            ) : null}
-            <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-4 text-[14px] font-medium text-white" type="button" onClick={() => setAssessmentOpen(true)}>
-              <ClipboardPlus className="size-[18px]" /> Nova avaliação
-            </button>
-          </div>
-        </div>
-
         <PartnerClientProfileHeader activeTab="avaliacoes" overview={overview} />
 
         <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">

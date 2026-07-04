@@ -16,7 +16,7 @@ export default async function ClienteTreinoExecutarPage({ params }: ClienteTrein
 
   if (!result) {
     return (
-      <div className="min-h-[calc(100vh-81px)] bg-[#06111a] px-5 py-10 text-white">
+      <div className="min-h-[calc(100vh-81px)] bg-[#0b1720] px-5 py-10 text-white">
         <div className="mx-auto max-w-[780px] rounded-[14px] border border-[#213444] bg-[#101a25] p-8 text-center">
           <h1 className="text-[28px] font-bold">Sessão de treino não encontrada</h1>
           <p className="mx-auto mt-3 max-w-lg text-[15px] leading-6 text-[#9fb1c0]">

@@ -12,6 +12,7 @@ const allowedFields = new Set([
   "serviceScopes",
   "cpf",
   "birthDate",
+  "objective",
   "idempotencyKey",
 ]);
 
@@ -122,6 +123,12 @@ function normalizeBirthDate(value: unknown) {
 
   const today = new Date().toISOString().slice(0, 10);
   return value <= today ? value : "";
+}
+
+function normalizeObjective(value: unknown) {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string") return "";
+  return value.trim();
 }
 
 async function sha256(value: string) {
@@ -350,6 +357,7 @@ Deno.serve(async (request) => {
   const displayName = stringValue(rawBody.displayName);
   const cpf = normalizeCpf(rawBody.cpf);
   const birthDate = normalizeBirthDate(rawBody.birthDate);
+  const objective = normalizeObjective(rawBody.objective);
   const suppliedIdempotencyKey = stringValue(rawBody.idempotencyKey);
   const idempotencyKey = suppliedIdempotencyKey || crypto.randomUUID();
   const fields: Record<string, string> = {};
@@ -379,6 +387,9 @@ Deno.serve(async (request) => {
     fields.cpf = "invalid";
   }
   if (birthDate === "") fields.birthDate = "invalid";
+  if (objective === "" || (objective !== null && objective.length > 120)) {
+    fields.objective = "invalid";
+  }
   if (!isUuid(idempotencyKey)) fields.idempotencyKey = "invalid";
 
   if (Object.keys(fields).length > 0) {
@@ -402,6 +413,7 @@ Deno.serve(async (request) => {
     serviceScopes: sortedScopes,
     cpf,
     birthDate,
+    objective,
   };
   const requestHash = await sha256(JSON.stringify(normalizedPayload));
 
@@ -488,6 +500,7 @@ Deno.serve(async (request) => {
       p_display_name: displayName,
       p_cpf: cpf,
       p_birth_date: birthDate,
+      p_objective: objective,
       p_service_scopes: sortedScopes,
       p_invite_status: inviteStatus,
     },

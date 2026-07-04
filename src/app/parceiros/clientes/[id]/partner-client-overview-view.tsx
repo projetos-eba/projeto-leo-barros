@@ -7,21 +7,14 @@ import {
   ClipboardList,
   Clock3,
   Dumbbell,
-  FileDown,
   HeartPulse,
-  History,
   Loader2,
-  Lock,
-  MessageCircle,
-  Phone,
   Plus,
   Scale,
   Target,
   TrendingUp,
   Utensils,
-  Users,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -49,6 +42,7 @@ import { cn } from "@/lib/utils";
 
 import { createClientAppointment, createClientTask, setClientTaskCompleted } from "./actions";
 import { ClientOverviewChart } from "./client-overview-chart";
+import { PartnerClientProfileHeader } from "./partner-client-profile-header";
 
 type PartnerClientOverviewViewProps = {
   overview: PartnerClientOverviewData;
@@ -62,8 +56,6 @@ const chartPeriodLabels: Record<ChartPeriod, string> = {
   "6m": "6 meses",
   all: "Tudo",
 };
-
-const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
 
 const moduleIcons: Record<string, typeof Dumbbell> = {
   cardio: HeartPulse,
@@ -133,17 +125,6 @@ function deltaIsGood(value: number | null, inverse = false) {
 function activeScopeLabel(scopes: string[]) {
   if (scopes.length === 0) return "Sem módulo ativo";
   return scopes.map((scope) => moduleLabels[scope] ?? scope).join(" + ");
-}
-
-function HeaderModule({ scope }: { scope: string }) {
-  const Icon = moduleIcons[scope] ?? Target;
-
-  return (
-    <span className="inline-flex h-[42px] items-center gap-2 rounded-[10px] border border-[#2f82bf]/45 bg-[rgba(10,44,72,0.35)] px-3 text-[12px] font-semibold text-[#c5e7ff]">
-      <Icon className="size-3.5" />
-      {moduleLabels[scope] ?? scope}
-    </span>
-  );
 }
 
 function MetricCard({
@@ -222,28 +203,6 @@ function MetricCard({
         ) : null}
       </div>
     </Panel>
-  );
-}
-
-function InfoItem({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-3">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[#0a2c48]/70 text-[#68afe9]">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-[12px] font-medium leading-4 text-[#9aa5b6]">{label}</p>
-        <p className="truncate text-[14px] font-semibold leading-5 text-white">{value}</p>
-      </div>
-    </div>
   );
 }
 
@@ -506,46 +465,6 @@ function TaskDialog({
   );
 }
 
-function HistoryDrawer({
-  data,
-  onOpenChange,
-  open,
-}: {
-  data: PartnerClientOverviewData["history"];
-  onOpenChange: (open: boolean) => void;
-  open: boolean;
-}) {
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-l border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[520px]" side="right">
-        <SheetHeader className="border-b border-[#303746] px-6 py-5 text-left">
-          <SheetTitle className="text-[22px] font-bold text-[#f3f4f7]">Histórico completo</SheetTitle>
-          <SheetDescription className="text-[13px] text-[#8b92a3]">
-            Eventos, registros, consultas, tarefas e renovações em ordem cronológica.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="grid gap-3 px-6 py-5">
-          {data.length === 0 ? (
-            <p className="rounded-[10px] border border-[#303746] bg-[#161a22] p-4 text-[13px] text-[#8b92a3]">
-              Ainda não há histórico para este Cliente.
-            </p>
-          ) : (
-            data.map((item) => (
-              <article className="rounded-[10px] border border-[#303746] bg-[#161a22] p-4" key={item.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-[14px] font-semibold text-[#f3f4f7]">{item.title}</h3>
-                  <span className="shrink-0 text-[12px] text-[#8b92a3]">{item.dateLabel}</span>
-                </div>
-                <p className="mt-2 text-[13px] leading-5 text-[#bac1ce]">{item.detail}</p>
-              </article>
-            ))
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 function AlertsDrawer({
   alerts,
   onOpenChange,
@@ -590,7 +509,6 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
   const router = useRouter();
   const [appointmentOpen, setAppointmentOpen] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("6m");
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [taskPendingId, setTaskPendingId] = useState<string | null>(null);
@@ -609,9 +527,6 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
     overview.adherenceWeeks.find((week) => week.id === weekId) ??
     overview.adherenceWeeks.at(-1) ??
     null;
-  const whatsappHref = overview.client.phoneDigits
-    ? `https://wa.me/${overview.client.phoneDigits}?text=${encodeURIComponent(`Olá, ${overview.client.name}! Passando para acompanhar seu plano.`)}`
-    : null;
   const weeklyRows = [
     {
       deltaValue: selectedWeek?.dietDelta ?? null,
@@ -669,153 +584,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
       `}</style>
 
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
-        <div className="client-overview-actions flex flex-wrap items-center justify-between gap-3 lg:absolute lg:inset-x-0 lg:top-0 lg:z-10">
-          <div className="flex flex-wrap gap-2 lg:ml-auto">
-            <button
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]"
-              type="button"
-              onClick={() => setHistoryOpen(true)}
-            >
-              <History className="size-[18px]" />
-              Histórico completo
-            </button>
-            <button
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]"
-              type="button"
-              onClick={() => window.print()}
-            >
-              <FileDown className="size-[18px]" />
-              Exportar PDF
-            </button>
-            {whatsappHref ? (
-              <a
-                className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#1f5f38] bg-[#0c2b1d] px-4 text-[14px] font-medium text-[#58d881]"
-                href={whatsappHref}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <MessageCircle className="size-[18px]" />
-                Mensagem
-              </a>
-            ) : (
-              <button className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#6f7c89]" disabled type="button">
-                <MessageCircle className="size-[18px]" />
-                Mensagem
-              </button>
-            )}
-            <button
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-4 text-[14px] font-medium text-white"
-              type="button"
-              onClick={() => setAppointmentOpen(true)}
-            >
-              <CalendarPlus className="size-[18px]" />
-              Agendar consulta
-            </button>
-          </div>
-        </div>
-
-        <header className="client-overview-print-panel mt-6 grid gap-6 lg:mt-2 lg:grid-cols-[120px_minmax(0,1fr)_280px] lg:items-start">
-          {overview.client.avatarUrl ? (
-            <img
-              alt=""
-              className="size-[120px] rounded-full border-2 border-[#1d7ece]/70 object-cover"
-              src={overview.client.avatarUrl}
-            />
-          ) : (
-            <span className="flex size-[120px] items-center justify-center rounded-full border-2 border-[#1d7ece]/70 bg-[#fce4e7] text-[40px] font-bold text-[#121722]">
-              {overview.client.initial}
-            </span>
-          )}
-
-          <div className="min-w-0 pt-1">
-            <div className="flex flex-wrap items-center gap-4">
-              <h1 className="truncate text-[30px] font-bold leading-8 text-white">{overview.client.name}</h1>
-              <span className="inline-flex h-[26px] items-center gap-2 rounded-[13px] bg-[#0c2b1d] px-4 text-[12px] font-medium text-[#58d881]">
-                <span className="size-2 rounded-full bg-[#58d881]" />
-                {overview.client.statusLabel}
-              </span>
-            </div>
-            <p className="mt-2 truncate text-[14px] leading-5 text-[#9aa5b6]">{overview.client.email}</p>
-
-            <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              <InfoItem icon={<CalendarPlus className="size-4" />} label="Idade" value={overview.client.ageLabel} />
-              <InfoItem icon={<Users className="size-4" />} label="Gênero" value={overview.client.genderLabel} />
-              <InfoItem icon={<CalendarPlus className="size-4" />} label="Nascimento" value={overview.client.birthDateLabel} />
-              <InfoItem icon={<Phone className="size-4" />} label="Telefone" value={overview.client.phoneLabel} />
-              <InfoItem icon={<Target className="size-4" />} label="Período do plano" value={overview.client.planPeriodLabel} />
-              <InfoItem icon={<Target className="size-4" />} label="Objetivo principal" value={overview.client.objectiveLabel} />
-            </div>
-          </div>
-
-          <div className="lg:pt-0">
-            <p className="text-[11px] font-semibold uppercase leading-[14px] tracking-[0.05em] text-[#9aa5b6]">
-              Módulos ativos
-            </p>
-            <div className="mt-[107px] flex flex-wrap gap-2 lg:justify-end">
-              {overview.client.serviceScopes.map((scope) => (
-                <HeaderModule key={scope} scope={scope} />
-              ))}
-              {overview.client.serviceScopes.length === 0 ? (
-                <span className="inline-flex h-[42px] items-center rounded-[10px] border border-[#303746] px-3 text-[12px] text-[#8b92a3]">
-                  Sem módulo ativo
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </header>
-
-        <div className="client-overview-tabs mt-7 flex min-w-0 gap-7 overflow-x-auto border-b border-[#303746]">
-          <button className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-white after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[#3b97e3]" type="button">
-            Visão Geral
-          </button>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=avaliacoes`}
-          >
-            Avaliações
-          </Link>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=dietas`}
-          >
-            Dietas
-          </Link>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=treinos`}
-          >
-            Treinos
-          </Link>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=cardio`}
-          >
-            Cardio
-          </Link>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=exames`}
-          >
-            Exames
-          </Link>
-          <Link
-            className="relative inline-flex h-[47px] shrink-0 items-center px-4 text-[14px] font-semibold text-[#8fcfff] hover:text-white"
-            href={`/parceiros/clientes/${overview.client.id}?tab=fotos`}
-          >
-            Fotos
-          </Link>
-          {futureTabs.map((tab) => (
-            <button
-              className="inline-flex h-[47px] shrink-0 cursor-not-allowed items-center gap-2 text-[14px] font-semibold text-[#6f7c89]"
-              disabled
-              key={tab}
-              type="button"
-            >
-              <Lock className="size-3.5" />
-              {tab}
-            </button>
-          ))}
-        </div>
+        <PartnerClientProfileHeader activeTab="visao-geral" overview={overview} onScheduleAppointment={() => setAppointmentOpen(true)} />
 
         <section className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.99fr_1.22fr_0.78fr]">
           <MetricCard
@@ -1055,7 +824,6 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
 
       <AppointmentDialog open={appointmentOpen} patientId={overview.client.id} onOpenChange={setAppointmentOpen} />
       <TaskDialog open={taskOpen} patientId={overview.client.id} onOpenChange={setTaskOpen} />
-      <HistoryDrawer data={overview.history} open={historyOpen} onOpenChange={setHistoryOpen} />
       <AlertsDrawer alerts={overview.alerts} open={alertsOpen} onOpenChange={setAlertsOpen} />
     </div>
   );

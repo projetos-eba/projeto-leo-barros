@@ -1,7 +1,8 @@
 "use client";
 
-import { ArrowLeft, CalendarPlus, Dumbbell, HeartPulse, Lock, Phone, Target, Utensils, Users } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Dumbbell, FileDown, HeartPulse, Lock, MessageCircle, Phone, Target, Utensils, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
@@ -58,22 +59,55 @@ function Module({ scope }: { scope: string }) {
 
 export function PartnerClientProfileHeader({
   activeTab,
+  onScheduleAppointment,
   overview,
 }: {
   activeTab: ClientTab;
+  onScheduleAppointment?: () => void;
   overview: PartnerClientOverviewData;
 }) {
+  const router = useRouter();
   const tabHref = (tab: ClientTab) =>
     tab === "visao-geral"
       ? `/parceiros/clientes/${overview.client.id}`
       : `/parceiros/clientes/${overview.client.id}?tab=${tab}`;
+  const whatsappHref = overview.client.phoneDigits
+    ? `https://wa.me/${overview.client.phoneDigits}?text=${encodeURIComponent(`Olá, ${overview.client.name}! Passando para acompanhar seu plano.`)}`
+    : null;
+  const scheduleAppointment = () => {
+    if (onScheduleAppointment) {
+      onScheduleAppointment();
+      return;
+    }
+
+    router.push(`/parceiros/agenda?clientId=${overview.client.id}`);
+  };
 
   return (
     <>
-      <Link className="inline-flex h-10 items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white" href="/parceiros/clientes">
-        <ArrowLeft className="size-4" />
-        Voltar para Clientes
-      </Link>
+      <div className="client-overview-actions flex flex-wrap items-center justify-between gap-3">
+        <Link className="inline-flex h-10 items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white" href="/parceiros/clientes">
+          <ArrowLeft className="size-4" />
+          Voltar para Clientes
+        </Link>
+        <div className="flex flex-wrap gap-3 lg:ml-auto">
+          <button className="inline-flex h-12 items-center gap-3 rounded-[12px] border border-[#303746] bg-[#161a22] px-5 text-[15px] font-semibold text-[#f3f4f7]" type="button" onClick={() => window.print()}>
+            <FileDown className="size-5" /> Exportar PDF
+          </button>
+          {whatsappHref ? (
+            <a className="inline-flex h-12 items-center gap-3 rounded-[12px] border border-[#1f5f38] bg-[#0c2b1d] px-5 text-[15px] font-semibold text-[#58d881]" href={whatsappHref} rel="noreferrer" target="_blank">
+              <MessageCircle className="size-5" /> Mensagem
+            </a>
+          ) : (
+            <button className="inline-flex h-12 cursor-not-allowed items-center gap-3 rounded-[12px] border border-[#303746] bg-[#161a22] px-5 text-[15px] font-semibold text-[#6f7c89]" disabled type="button">
+              <MessageCircle className="size-5" /> Mensagem
+            </button>
+          )}
+          <button className="inline-flex h-12 items-center gap-3 rounded-[12px] bg-[#3b97e3] px-5 text-[15px] font-semibold text-white" type="button" onClick={scheduleAppointment}>
+            <CalendarPlus className="size-5" /> Agendar consulta
+          </button>
+        </div>
+      </div>
 
       <header className="client-overview-print-panel mt-6 grid gap-6 lg:mt-2 lg:grid-cols-[120px_minmax(0,1fr)_280px] lg:items-start">
         {overview.client.avatarUrl ? (

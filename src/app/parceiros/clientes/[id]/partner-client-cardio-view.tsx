@@ -241,7 +241,7 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
   }
 
   return (
-    <main className="min-h-screen bg-[#07131c] pb-12 text-white">
+    <main className="min-h-screen bg-[#0b1720] pb-12 text-white">
       <div className="mx-auto w-full max-w-[1240px] px-6 py-6">
         <PartnerClientProfileHeader activeTab="cardio" overview={overview} />
 

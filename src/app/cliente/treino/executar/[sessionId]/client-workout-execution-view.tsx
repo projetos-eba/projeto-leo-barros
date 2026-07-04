@@ -72,7 +72,7 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
 
   if (!exercise) {
     return (
-      <div className="min-h-[calc(100vh-81px)] bg-[#06111a] px-5 py-10 text-white">
+      <div className="min-h-[calc(100vh-81px)] bg-[#0b1720] px-5 py-10 text-white">
         <div className="mx-auto max-w-[780px] rounded-[14px] border border-[#213444] bg-[#101a25] p-8 text-center">
           <h1 className="text-[28px] font-bold">Treino sem exercícios</h1>
           <Link className="mt-6 inline-flex h-11 items-center rounded-[10px] bg-[#1f8dff] px-5 text-[14px] font-bold" href="/cliente/treino">

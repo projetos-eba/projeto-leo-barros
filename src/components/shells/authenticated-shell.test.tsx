@@ -59,7 +59,10 @@ describe("AuthenticatedShell", () => {
       "page",
     );
     expect(screen.getByText("Ana Ribeiro")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Minha Evolução" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Minha Evolução" })).toHaveAttribute(
+      "href",
+      "/cliente/evolucao",
+    );
     expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();
   });
 

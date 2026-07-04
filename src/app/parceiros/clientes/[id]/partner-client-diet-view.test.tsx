@@ -235,7 +235,7 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Enviar ao Cliente/i }));
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
 
-    expect(screen.queryByRole("button", { name: /Exportar PDF/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Exportar PDF/i })).toBeInTheDocument();
   });
 
   it("configura e salva o objetivo calórico do plano atual", async () => {

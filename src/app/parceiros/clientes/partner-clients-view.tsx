@@ -42,13 +42,24 @@ type PartnerClientsViewProps = {
 
 type StatusFilter = "all" | PartnerClientStatus;
 type ServiceScope = "dieta" | "treino" | "saude";
+type PhoneCountryCode = "AR" | "BR" | "PT" | "US";
+
+type PhoneCountry = {
+  code: PhoneCountryCode;
+  dialCode: string;
+  flag: string;
+  label: string;
+  placeholder: string;
+};
 
 type NewClientFields = {
   birthDate: string;
   cpf: string;
   displayName: string;
   email: string;
+  objective: string;
   phone: string;
+  phoneCountry: PhoneCountryCode;
   serviceScopes: ServiceScope[];
 };
 
@@ -72,9 +83,26 @@ const initialNewClientFields: NewClientFields = {
   cpf: "",
   displayName: "",
   email: "",
+  objective: "",
   phone: "",
+  phoneCountry: "BR",
   serviceScopes: ["treino"],
 };
+
+const phoneCountries: PhoneCountry[] = [
+  { code: "BR", dialCode: "+55", flag: "🇧🇷", label: "Brasil", placeholder: "(11) 99999-9999" },
+  { code: "PT", dialCode: "+351", flag: "🇵🇹", label: "Portugal", placeholder: "912 345 678" },
+  { code: "US", dialCode: "+1", flag: "🇺🇸", label: "Estados Unidos", placeholder: "(555) 123-4567" },
+  { code: "AR", dialCode: "+54", flag: "🇦🇷", label: "Argentina", placeholder: "11 1234-5678" },
+];
+
+const objectiveSuggestions = [
+  "Hipertrofia",
+  "Performance",
+  "Emagrecimento",
+  "Condicionamento",
+  "Reabilitação",
+];
 
 const statusLabels: Record<StatusFilter, string> = {
   active: "Ativos",
@@ -95,6 +123,9 @@ const scopeIcons: Record<string, typeof Activity> = {
   saude: HeartPulse,
   treino: Dumbbell,
 };
+
+const creatableScopes: Array<Extract<ServiceScope, "dieta" | "treino">> = ["dieta", "treino"];
+const visiblePlanScopes: Array<Extract<ServiceScope, "dieta" | "treino">> = ["dieta", "treino"];
 
 const renewalToneClasses: Record<PartnerClientRow["renewalTone"], string> = {
   amber: "border-[#5a4420] bg-[#2b2417] text-[#f0c76a]",
@@ -161,6 +192,79 @@ function mapFunctionError(code?: string) {
   return messages[code ?? ""] ?? "Não foi possível criar o Cliente agora.";
 }
 
+function digitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function getPhoneCountry(code: PhoneCountryCode) {
+  return phoneCountries.find((country) => country.code === code) ?? phoneCountries[0];
+}
+
+function nationalPhoneDigits(value: string, countryCode: PhoneCountryCode) {
+  const digits = digitsOnly(value);
+  const dialDigits = digitsOnly(getPhoneCountry(countryCode).dialCode);
+
+  if (digits.startsWith(dialDigits) && digits.length > dialDigits.length + 5) {
+    return digits.slice(dialDigits.length);
+  }
+
+  return digits;
+}
+
+function formatBrazilPhone(value: string) {
+  const digits = digitsOnly(value).slice(0, 11);
+  const area = digits.slice(0, 2);
+  const prefix = digits.slice(2, 7);
+  const suffix = digits.slice(7, 11);
+
+  if (digits.length <= 2) return area ? `(${area}` : "";
+  if (digits.length <= 7) return `(${area}) ${prefix}`;
+  return `(${area}) ${prefix}-${suffix}`;
+}
+
+function formatUsPhone(value: string) {
+  const digits = digitsOnly(value).slice(0, 10);
+  const area = digits.slice(0, 3);
+  const prefix = digits.slice(3, 6);
+  const suffix = digits.slice(6, 10);
+
+  if (digits.length <= 3) return area ? `(${area}` : "";
+  if (digits.length <= 6) return `(${area}) ${prefix}`;
+  return `(${area}) ${prefix}-${suffix}`;
+}
+
+function formatGenericPhone(value: string) {
+  const digits = digitsOnly(value).slice(0, 14);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+  return `${digits.slice(0, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function formatPhone(value: string, countryCode: PhoneCountryCode) {
+  const nationalDigits = nationalPhoneDigits(value, countryCode);
+  if (countryCode === "BR") return formatBrazilPhone(nationalDigits);
+  if (countryCode === "US") return formatUsPhone(nationalDigits);
+  return formatGenericPhone(nationalDigits);
+}
+
+function formatCpf(value: string) {
+  const digits = digitsOnly(value).slice(0, 11);
+  const first = digits.slice(0, 3);
+  const second = digits.slice(3, 6);
+  const third = digits.slice(6, 9);
+  const check = digits.slice(9, 11);
+
+  if (digits.length <= 3) return first;
+  if (digits.length <= 6) return `${first}.${second}`;
+  if (digits.length <= 9) return `${first}.${second}.${third}`;
+  return `${first}.${second}.${third}-${check}`;
+}
+
+function phoneToE164(fields: NewClientFields) {
+  const country = getPhoneCountry(fields.phoneCountry);
+  return `${country.dialCode}${digitsOnly(fields.phone)}`;
+}
+
 async function readFunctionError(error: unknown) {
   if (
     error &&
@@ -209,9 +313,8 @@ function StatusBadge({ status, label }: { label: string; status: PartnerClientSt
   );
 }
 
-function ScopeIcon({ scope }: { scope: string }) {
+function ScopeIcon({ active, scope }: { active: boolean; scope: ServiceScope }) {
   const Icon = scopeIcons[scope] ?? Activity;
-  const active = scope === "treino" || scope === "dieta";
 
   return (
     <span
@@ -221,7 +324,7 @@ function ScopeIcon({ scope }: { scope: string }) {
           ? "border-[#3b97e3]/60 bg-[#12375a] text-[#68afe9]"
           : "border-[#303746] bg-[#1d212b]/50 text-[#6f7c89]",
       )}
-      title={scopeLabels[scope as ServiceScope] ?? scope}
+      title={scopeLabels[scope]}
     >
       <Icon className="size-4" />
     </span>
@@ -230,6 +333,7 @@ function ScopeIcon({ scope }: { scope: string }) {
 
 function validateNewClient(fields: NewClientFields): FieldErrors {
   const errors: FieldErrors = {};
+  const phoneDigits = digitsOnly(fields.phone);
 
   if (!fields.displayName.trim()) {
     errors.displayName = "Informe o nome do Cliente.";
@@ -239,11 +343,13 @@ function validateNewClient(fields: NewClientFields): FieldErrors {
     errors.email = "Informe um e-mail válido.";
   }
 
-  if (!/^\+[1-9][0-9]{7,14}$/.test(fields.phone.trim())) {
-    errors.phone = "Use telefone em E.164, como +5511999999999.";
+  if (fields.phoneCountry === "BR" && phoneDigits.length !== 11) {
+    errors.phone = "Use telefone brasileiro com DDD, como (11) 99999-9999.";
+  } else if (fields.phoneCountry !== "BR" && (phoneDigits.length < 6 || phoneDigits.length > 14)) {
+    errors.phone = "Informe um telefone válido para o país selecionado.";
   }
 
-  if (fields.cpf.trim() && !/^[0-9]{11}$/.test(fields.cpf.trim())) {
+  if (fields.phoneCountry === "BR" && fields.cpf.trim() && digitsOnly(fields.cpf).length !== 11) {
     errors.cpf = "CPF deve conter 11 dígitos.";
   }
 
@@ -279,6 +385,25 @@ function NewClientDrawer({
     setSubmitMessage(null);
   }
 
+  function updatePhoneCountry(countryCode: PhoneCountryCode) {
+    setFields((current) => ({
+      ...current,
+      cpf: countryCode === "BR" ? current.cpf : "",
+      phone: formatPhone(current.phone, countryCode),
+      phoneCountry: countryCode,
+    }));
+    setFieldErrors((current) => ({ ...current, cpf: undefined, phone: undefined, phoneCountry: undefined }));
+    setSubmitMessage(null);
+  }
+
+  function updatePhone(value: string) {
+    updateField("phone", formatPhone(value, fields.phoneCountry));
+  }
+
+  function updateCpf(value: string) {
+    updateField("cpf", formatCpf(value));
+  }
+
   function toggleScope(scope: ServiceScope) {
     updateField(
       "serviceScopes",
@@ -306,10 +431,11 @@ function NewClientDrawer({
       displayName: fields.displayName.trim(),
       email: fields.email.trim().toLowerCase(),
       idempotencyKey: createIdempotencyKey(),
-      phone: fields.phone.trim(),
+      phone: phoneToE164(fields),
       serviceScopes: [...fields.serviceScopes].sort(),
       ...(fields.birthDate ? { birthDate: fields.birthDate } : {}),
-      ...(fields.cpf.trim() ? { cpf: fields.cpf.trim() } : {}),
+      ...(fields.objective.trim() ? { objective: fields.objective.trim() } : {}),
+      ...(fields.phoneCountry === "BR" && fields.cpf.trim() ? { cpf: digitsOnly(fields.cpf) } : {}),
     };
 
     try {
@@ -369,13 +495,50 @@ function NewClientDrawer({
           </Field>
 
           <Field label="Telefone" error={fieldErrors.phone} htmlFor="client-phone">
+            <div className="grid grid-cols-[132px_minmax(0,1fr)] gap-2">
+              <select
+                aria-label="País do telefone"
+                className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors focus:border-[#3b97e3]"
+                value={fields.phoneCountry}
+                onChange={(event) => updatePhoneCountry(event.target.value as PhoneCountryCode)}
+              >
+                {phoneCountries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.dialCode}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="h-10 min-w-0 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors placeholder:text-[#6f7c89] focus:border-[#3b97e3]"
+                id="client-phone"
+                inputMode="tel"
+                value={fields.phone}
+                onChange={(event) => updatePhone(event.target.value)}
+                placeholder={getPhoneCountry(fields.phoneCountry).placeholder}
+              />
+            </div>
+          </Field>
+
+          <Field label="Objetivo" error={fieldErrors.objective} htmlFor="client-objective">
             <input
               className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors placeholder:text-[#6f7c89] focus:border-[#3b97e3]"
-              id="client-phone"
-              value={fields.phone}
-              onChange={(event) => updateField("phone", event.target.value)}
-              placeholder="+5511999999999"
+              id="client-objective"
+              value={fields.objective}
+              onChange={(event) => updateField("objective", event.target.value)}
+              placeholder="Digite ou escolha uma sugestão"
             />
+            <div className="flex flex-wrap gap-1.5">
+              {objectiveSuggestions.map((objective) => (
+                <button
+                  className="rounded-full border border-[#303746] bg-[#161a22] px-2 py-1 text-[11px] font-medium text-[#8b92a3] transition-colors hover:border-[#3b97e3] hover:text-[#d7dae0]"
+                  key={objective}
+                  type="button"
+                  onClick={() => updateField("objective", objective)}
+                >
+                  {objective}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -388,22 +551,24 @@ function NewClientDrawer({
                 onChange={(event) => updateField("birthDate", event.target.value)}
               />
             </Field>
-            <Field label="CPF opcional" error={fieldErrors.cpf} htmlFor="client-cpf">
-              <input
-                className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors placeholder:text-[#6f7c89] focus:border-[#3b97e3]"
-                id="client-cpf"
-                inputMode="numeric"
-                value={fields.cpf}
-                onChange={(event) => updateField("cpf", event.target.value)}
-                placeholder="Somente números"
-              />
-            </Field>
+            {fields.phoneCountry === "BR" ? (
+              <Field label="CPF opcional" error={fieldErrors.cpf} htmlFor="client-cpf">
+                <input
+                  className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors placeholder:text-[#6f7c89] focus:border-[#3b97e3]"
+                  id="client-cpf"
+                  inputMode="numeric"
+                  value={fields.cpf}
+                  onChange={(event) => updateCpf(event.target.value)}
+                  placeholder="000.000.000-00"
+                />
+              </Field>
+            ) : null}
           </div>
 
           <div>
             <p className="text-[13px] font-semibold text-[#d7dae0]">Escopos</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {(Object.keys(scopeLabels) as ServiceScope[]).map((scope) => (
+              {creatableScopes.map((scope) => (
                 <label
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-[10px] border px-3 py-2 text-[13px]",
@@ -419,7 +584,7 @@ function NewClientDrawer({
                     type="checkbox"
                     onChange={() => toggleScope(scope)}
                   />
-                  <ScopeIcon scope={scope} />
+                  <ScopeIcon active={fields.serviceScopes.includes(scope)} scope={scope} />
                   {scopeLabels[scope]}
                 </label>
               ))}
@@ -655,12 +820,9 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                       <td className="hidden px-4 py-4 text-[#bac1ce] md:table-cell">{row.lastUpdateLabel}</td>
                       <td className="hidden px-4 py-4 md:table-cell">
                         <div className="flex items-center justify-center gap-2">
-                          {row.serviceScopes.slice(0, 4).map((scope) => (
-                            <ScopeIcon key={scope} scope={scope} />
+                          {visiblePlanScopes.map((scope) => (
+                            <ScopeIcon active={row.serviceScopes.includes(scope)} key={scope} scope={scope} />
                           ))}
-                          {row.serviceScopes.length === 0 ? (
-                            <span className="text-[12px] text-[#8b92a3]">Sem escopo</span>
-                          ) : null}
                         </div>
                       </td>
                       <td className="px-2 py-4 md:px-4">

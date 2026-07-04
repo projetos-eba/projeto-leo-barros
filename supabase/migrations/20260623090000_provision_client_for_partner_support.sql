@@ -40,6 +40,7 @@ create function public.provision_client_for_partner_records(
   p_display_name text,
   p_cpf text,
   p_birth_date date,
+  p_objective text,
   p_service_scopes text[],
   p_invite_status text
 )
@@ -65,6 +66,7 @@ declare
   normalized_email text := lower(btrim(p_email));
   normalized_display_name text := btrim(p_display_name);
   normalized_cpf text := nullif(btrim(p_cpf), '');
+  normalized_objective text := nullif(btrim(p_objective), '');
   normalized_scopes text[];
   existing_scope_count integer := 0;
   inserted_scope_count integer := 0;
@@ -114,6 +116,7 @@ begin
     )
     or (normalized_cpf is not null and normalized_cpf !~ '^[0-9]{11}$')
     or (p_birth_date is not null and p_birth_date > current_date)
+    or (normalized_objective is not null and length(normalized_objective) > 120)
     or p_invite_status not in ('pending_delivery', 'not_resent')
   then
     raise exception using
@@ -289,16 +292,19 @@ begin
     insert into public.patients (
       profile_id,
       cpf,
-      birth_date
+      birth_date,
+      objective
     )
     values (
       target_profile.id,
       normalized_cpf,
-      p_birth_date
+      p_birth_date,
+      normalized_objective
     )
     returning * into target_patient;
   elsif target_patient.cpf is distinct from normalized_cpf
     or target_patient.birth_date is distinct from p_birth_date
+    or target_patient.objective is distinct from normalized_objective
   then
     raise exception using
       errcode = 'P0001',
@@ -397,6 +403,7 @@ comment on function public.provision_client_for_partner_records(
   text,
   text,
   date,
+  text,
   text[],
   text
 )
@@ -412,6 +419,7 @@ revoke all on function public.provision_client_for_partner_records(
   text,
   text,
   date,
+  text,
   text[],
   text
 ) from public, anon, authenticated;
@@ -426,6 +434,7 @@ grant execute on function public.provision_client_for_partner_records(
   text,
   text,
   date,
+  text,
   text[],
   text
 ) to service_role;

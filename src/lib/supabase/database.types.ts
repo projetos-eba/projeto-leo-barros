@@ -2653,6 +2653,7 @@ export type Database = {
           p_email: string
           p_idempotency_key: string
           p_invite_status: string
+          p_objective: string
           p_phone: string
           p_request_hash: string
           p_service_scopes: string[]

@@ -240,11 +240,11 @@ export function buildAngleAvailability(
   }));
 }
 
-function photoUrl(photoId: string) {
-  return `/parceiros/clientes/fotos/${photoId}/arquivo`;
+function photoUrl(photoId: string, routeBase = "/parceiros/clientes/fotos") {
+  return `${routeBase}/${photoId}/arquivo`;
 }
 
-function buildSession(session: PartnerClientPhotoRawSession): PartnerClientPhotoSession {
+function buildSession(session: PartnerClientPhotoRawSession, routeBase?: string): PartnerClientPhotoSession {
   const photosByAngle = Object.fromEntries(photoAngles.map((angle) => [angle.value, null])) as Record<PhotoAngle, PartnerClientPhotoItem | null>;
   const photos = session.photos.flatMap((photo) => {
     const angle = asAngle(photo.angle);
@@ -255,7 +255,7 @@ function buildSession(session: PartnerClientPhotoRawSession): PartnerClientPhoto
       cropData: photo.cropData ?? {},
       heightPx: photo.heightPx === null ? null : Number(photo.heightPx),
       id: photo.id,
-      imageUrl: photoUrl(photo.id),
+      imageUrl: photoUrl(photo.id, routeBase),
       mimeType: photo.mimeType,
       originalFilename: photo.originalFilename,
       sizeBytes: Number(photo.sizeBytes),
@@ -289,9 +289,9 @@ function buildSession(session: PartnerClientPhotoRawSession): PartnerClientPhoto
   };
 }
 
-export function buildPartnerClientPhotos(raw: PartnerClientPhotosRawData): PartnerClientPhotosData {
+export function buildPartnerClientPhotos(raw: PartnerClientPhotosRawData, options?: { photoRouteBase?: string }): PartnerClientPhotosData {
   const sessions = raw.sessions
-    .map(buildSession)
+    .map((session) => buildSession(session, options?.photoRouteBase))
     .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
   const completeSessions = sessions.filter((session) => session.completed);
   const after = completeSessions[0] ?? sessions[0] ?? null;

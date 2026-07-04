@@ -171,7 +171,7 @@ describe("PartnerClientOverviewView", () => {
     render(<PartnerClientOverviewView overview={overview} />);
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Visão Geral" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Visão Geral" })).toHaveAttribute("href", `/parceiros/clientes/${overview.client.id}`);
     expect(screen.queryByRole("button", { name: "Ver plano" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Anamnese/ })).toBeDisabled();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
@@ -182,15 +182,10 @@ describe("PartnerClientOverviewView", () => {
     );
   });
 
-  it("abre histórico e alertas e aciona impressão", () => {
+  it("abre alertas e aciona impressão", () => {
     const print = vi.fn();
     Object.defineProperty(window, "print", { configurable: true, value: print });
 
-    render(<PartnerClientOverviewView overview={overview} />);
-    fireEvent.click(screen.getByRole("button", { name: "Histórico completo" }));
-    expect(screen.getByRole("heading", { name: "Histórico completo" })).toBeInTheDocument();
-
-    cleanup();
     render(<PartnerClientOverviewView overview={overview} />);
     fireEvent.click(screen.getByRole("button", { name: /Alertas/i }));
     expect(screen.getByRole("heading", { name: "Alertas do Cliente" })).toBeInTheDocument();
