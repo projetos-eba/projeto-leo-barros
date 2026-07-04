@@ -106,13 +106,13 @@ function MetricCard({
   value: number;
 }) {
   return (
-    <Panel className="flex min-h-[96px] items-center gap-4 px-5 py-4">
-      <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-[8px]", tone)}>
-        <Icon className="size-6" />
+    <Panel className="flex min-h-[72px] items-center gap-3 px-3 py-3 sm:min-h-[96px] sm:gap-4 sm:px-5 sm:py-4">
+      <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-[7px] sm:size-12 sm:rounded-[8px]", tone)}>
+        <Icon className="size-4 sm:size-6" />
       </div>
       <div>
-        <p className="text-[25px] font-bold leading-none text-[#edf4f8]">{value}</p>
-        <p className="mt-2 text-[12px] text-[#8797a6]">{label}</p>
+        <p className="text-[21px] font-bold leading-none text-[#edf4f8] sm:text-[25px]">{value}</p>
+        <p className="mt-1 text-[11px] leading-3 text-[#8797a6] sm:mt-2 sm:text-[12px]">{label}</p>
       </div>
     </Panel>
   );
@@ -200,8 +200,8 @@ function MaterialCard({
   }
 
   return (
-    <Panel className="relative flex min-h-[354px] min-w-0 flex-col overflow-hidden">
-      <div className="relative h-[126px] overflow-hidden border-b border-[#293b49]">
+    <Panel className="relative flex min-h-[282px] min-w-0 flex-col overflow-hidden sm:min-h-[354px]">
+      <div className="relative h-[96px] overflow-hidden border-b border-[#293b49] sm:h-[126px]">
         <MaterialVisual material={material} />
         <span className="absolute left-3 top-3 rounded-[5px] border border-[#3c4d5a] bg-[#0b1620]/90 px-2 py-1 text-[10px] font-semibold text-[#d4dee6]">
           {material.fileLabel}
@@ -212,11 +212,11 @@ function MaterialCard({
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <p className={cn("text-[11px] font-semibold", category.accent)}>{material.categoryLabel}</p>
-        <Link className="mt-1 line-clamp-2 text-[16px] font-semibold leading-5 text-[#eef4f8] hover:text-[#55b4ff]" href={`/parceiros/materiais/${material.id}`}>
+        <p className={cn("text-[10px] font-semibold sm:text-[11px]", category.accent)}>{material.categoryLabel}</p>
+        <Link className="mt-1 line-clamp-2 text-[14px] font-semibold leading-5 text-[#eef4f8] hover:text-[#55b4ff] sm:text-[16px]" href={`/parceiros/materiais/${material.id}`}>
           {material.title}
         </Link>
-        <p className="mt-2 line-clamp-2 min-h-10 text-[12px] leading-5 text-[#8b9aa7]">
+        <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#8b9aa7] sm:mt-2 sm:min-h-10 sm:text-[12px] sm:leading-5">
           {material.description ?? "Material de apoio disponível na biblioteca."}
         </p>
         <div className="mt-auto flex items-center justify-between border-t border-[#273845] pt-3 text-[11px] text-[#8797a5]">
@@ -407,46 +407,46 @@ export function PartnerMaterialsView({ data }: PartnerMaterialsViewProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b1720] px-4 py-7 text-[#edf4f8] md:px-7 lg:px-8 xl:px-10">
+    <div className="min-h-screen bg-[#0b1720] px-3 py-4 text-[#edf4f8] sm:px-4 sm:py-7 md:px-7 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-[1440px]">
-        <header className="flex flex-wrap items-start justify-between gap-5">
+        <header className="flex flex-wrap items-start justify-between gap-3 sm:gap-5">
           <div>
-            <h1 className="text-[30px] font-bold leading-tight">Materiais</h1>
-            <p className="mt-2 text-[13px] text-[#8c9aa6]">Organize conteúdos de apoio e compartilhe com seus Clientes.</p>
+            <h1 className="text-[24px] font-bold leading-tight sm:text-[30px]">Materiais</h1>
+            <p className="mt-1 text-[12px] text-[#8c9aa6] sm:mt-2 sm:text-[13px]">Organize conteúdos de apoio e compartilhe com seus Clientes.</p>
           </div>
-          <button className="flex h-11 items-center gap-2 rounded-[8px] bg-[#168ce4] px-5 text-[13px] font-semibold text-white hover:bg-[#269cf0]" onClick={() => setNewOpen(true)} type="button">
+          <button className="flex h-9 items-center gap-1.5 rounded-[8px] bg-[#168ce4] px-3 text-[12px] font-semibold text-white hover:bg-[#269cf0] sm:h-11 sm:gap-2 sm:px-5 sm:text-[13px]" onClick={() => setNewOpen(true)} type="button">
             <Plus className="size-4" /> Novo material
           </button>
         </header>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-3 xl:grid-cols-4">
           <MetricCard icon={FileText} label="Materiais ativos" tone="bg-[#123d60] text-[#5eb5ff]" value={data.metrics.total} />
           <MetricCard icon={Send} label="Compartilhamentos ativos" tone="bg-[#123d2d] text-[#54d18a]" value={data.metrics.shared} />
           <MetricCard icon={FileSpreadsheet} label="Formulários" tone="bg-[#302052] text-[#ae88ff]" value={data.metrics.forms} />
           <MetricCard icon={Star} label="Favoritos" tone="bg-[#443818] text-[#f5c542]" value={data.metrics.favorites} />
         </div>
 
-        <Panel className="mt-5 p-3">
+        <Panel className="mt-4 p-2 sm:mt-5 sm:p-3">
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex flex-wrap gap-1">
               {categories.map((item) => (
-                <button className={cn("h-9 rounded-[7px] px-3 text-[12px] font-medium", category === item ? "bg-[#0c6eb2] text-white" : "text-[#9aa8b4] hover:bg-[#172a38]")} key={item} onClick={() => setCategory(item)} type="button">
+                <button className={cn("h-8 rounded-[7px] px-2.5 text-[11px] font-medium sm:h-9 sm:px-3 sm:text-[12px]", category === item ? "bg-[#0c6eb2] text-white" : "text-[#9aa8b4] hover:bg-[#172a38]")} key={item} onClick={() => setCategory(item)} type="button">
                   {item === "all" ? "Todos" : materialCategoryLabels[item]}
                 </button>
               ))}
             </div>
             <div className="ml-auto flex flex-1 flex-wrap justify-end gap-2 min-[900px]:flex-none">
-              <label className="relative min-w-[210px] flex-1 min-[900px]:w-[250px] min-[900px]:flex-none">
+              <label className="relative min-w-[170px] flex-1 min-[900px]:w-[250px] min-[900px]:flex-none">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#778895]" />
-                <input aria-label="Buscar material" className="h-10 w-full rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] pl-9 pr-3 text-[12px] text-white outline-none focus:border-[#168ce4]" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar material..." value={search} />
+                <input aria-label="Buscar material" className="h-9 w-full rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] pl-9 pr-3 text-[12px] text-white outline-none focus:border-[#168ce4] sm:h-10" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar material..." value={search} />
               </label>
-              <select aria-label="Filtrar por tipo" className="h-10 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-3 text-[12px] text-[#bac5ce]" onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} value={typeFilter}>
+              <select aria-label="Filtrar por tipo" className="h-9 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-2.5 text-[12px] text-[#bac5ce] sm:h-10 sm:px-3" onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} value={typeFilter}>
                 <option value="all">Todos os tipos</option><option value="pdf">PDF</option><option value="image">Imagem</option><option value="office">Office</option><option value="video">Vídeo</option>
               </select>
-              <select aria-label="Filtrar por status" className="h-10 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-3 text-[12px] text-[#bac5ce]" onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} value={statusFilter}>
+              <select aria-label="Filtrar por status" className="h-9 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-2.5 text-[12px] text-[#bac5ce] sm:h-10 sm:px-3" onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} value={statusFilter}>
                 <option value="active">Ativos</option><option value="archived">Arquivados</option><option value="all">Todos</option>
               </select>
-              <select aria-label="Ordenar materiais" className="h-10 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-3 text-[12px] text-[#bac5ce]" onChange={(event) => setSort(event.target.value as SortMode)} value={sort}>
+              <select aria-label="Ordenar materiais" className="h-9 rounded-[7px] border border-[#2b3f4e] bg-[#0d1822] px-2.5 text-[12px] text-[#bac5ce] sm:h-10 sm:px-3" onChange={(event) => setSort(event.target.value as SortMode)} value={sort}>
                 <option value="recent">Mais recentes</option><option value="oldest">Mais antigos</option><option value="title">Título</option><option value="shared">Mais compartilhados</option>
               </select>
               <div className="flex rounded-[7px] border border-[#2b3f4e] p-1">
@@ -458,7 +458,7 @@ export function PartnerMaterialsView({ data }: PartnerMaterialsViewProps) {
         </Panel>
 
         {visibleMaterials.length ? (
-          <div className={cn("mt-4 gap-3", view === "grid" ? "grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" : "flex flex-col")}>
+          <div className={cn("mt-3 gap-2 sm:mt-4 sm:gap-3", view === "grid" ? "grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" : "flex flex-col")}>
             {visibleMaterials.map((material) => (
               <MaterialCard key={material.id} layout={view} material={material} onArchive={handleArchive} onEdit={setEditMaterial} onFavorite={handleFavorite} onShare={openShare} />
             ))}

@@ -3,10 +3,8 @@
 import {
   Activity,
   CheckCircle2,
-  Copy,
   Download,
   Dumbbell,
-  Eye,
   Filter,
   HeartPulse,
   Loader2,
@@ -644,6 +642,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
   const [newClientOpen, setNewClientOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const pageSize = 6;
 
   const filteredRows = useMemo(() => {
@@ -671,47 +670,58 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
     try {
       await navigator.clipboard.writeText(row.email);
       setActionMessage(`E-mail de ${row.name} copiado.`);
+      setOpenActionMenuId(null);
     } catch {
       setActionMessage("Não foi possível copiar o e-mail.");
     }
   }
 
+  function editClient(row: PartnerClientRow) {
+    setOpenActionMenuId(null);
+    router.push(`/parceiros/clientes/${row.id}`);
+  }
+
+  function deleteClient(row: PartnerClientRow) {
+    setOpenActionMenuId(null);
+    setActionMessage(`Exclusão de ${row.name} ainda não está disponível nesta tela.`);
+  }
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-8 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6 lg:py-[74px]">
+    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-8 lg:px-6 lg:py-[74px]">
       <div className="mx-auto min-w-0 max-w-[1202px]">
-        <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <header className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-[32px] font-bold leading-10 text-[#f3f4f7]">Clientes</h1>
-            <p className="mt-1 text-[14px] leading-5 text-[#bac1ce]">
+            <h1 className="text-[24px] font-bold leading-8 text-[#f3f4f7] sm:text-[32px] sm:leading-10">Clientes</h1>
+            <p className="mt-0.5 text-[12px] leading-4 text-[#bac1ce] sm:mt-1 sm:text-[14px] sm:leading-5">
               Gerencie seus clientes. <span className="font-semibold text-[#f3f4f7]">Total: {clients.activeCount} ativos</span>
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <button
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#f3f4f7]"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#303746] bg-[#161a22] px-3 text-[12px] font-medium text-[#f3f4f7] sm:h-10 sm:gap-2 sm:rounded-[10px] sm:px-4 sm:text-[14px]"
               type="button"
               onClick={() => downloadClientsCsv(filteredRows)}
             >
-              <Download className="size-[18px]" />
+              <Download className="size-4 sm:size-[18px]" />
               Exportar
             </button>
             <button
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-4 text-[14px] font-medium text-white shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#3b97e3] px-3 text-[12px] font-medium text-white shadow-[0_1px_3px_rgba(0,0,0,0.12)] sm:h-10 sm:gap-2 sm:rounded-[10px] sm:px-4 sm:text-[14px]"
               type="button"
               onClick={() => setNewClientOpen(true)}
             >
-              <Plus className="size-[18px]" />
+              <Plus className="size-4 sm:size-[18px]" />
               Novo Cliente
             </button>
           </div>
         </header>
 
-        <section className="mt-7 flex flex-col gap-3 lg:flex-row lg:items-center">
+        <section className="mt-4 grid gap-2 sm:mt-7 lg:flex lg:items-center">
           <label className="relative min-w-0 lg:w-[447px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#bac1ce]" />
             <span className="sr-only">Buscar clientes</span>
             <input
-              className="h-10 w-full rounded-[10px] border border-[#303746] bg-[#161a22] pl-9 pr-3 text-[14px] text-[#f3f4f7] outline-none placeholder:text-[#bac1ce] focus:border-[#3b97e3]"
+              className="h-9 w-full rounded-[8px] border border-[#303746] bg-[#161a22] pl-9 pr-3 text-[12px] text-[#f3f4f7] outline-none placeholder:text-[#bac1ce] focus:border-[#3b97e3] sm:h-10 sm:rounded-[10px] sm:text-[14px]"
               placeholder="Buscar por nome, e-mail ou telefone..."
               value={search}
               onChange={(event) => {
@@ -720,22 +730,24 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
               }}
             />
           </label>
+          <div className="grid grid-cols-2 gap-2 lg:flex lg:gap-3">
           <button
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#bac1ce]"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#303746] bg-[#161a22] px-3 text-[12px] font-medium text-[#bac1ce] sm:h-10 sm:gap-2 sm:rounded-[10px] sm:px-4 sm:text-[14px]"
             type="button"
             onClick={() => setAdvancedOpen((current) => !current)}
           >
             <SlidersHorizontal className="size-4" />
-            Filtros Avançados
+            Filtros
           </button>
           <button
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[#303746] bg-[#161a22] px-4 text-[14px] font-medium text-[#bac1ce]"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#303746] bg-[#161a22] px-3 text-[12px] font-medium text-[#bac1ce] sm:h-10 sm:gap-2 sm:rounded-[10px] sm:px-4 sm:text-[14px]"
             type="button"
             onClick={() => setStatus(statusFilter === "active" ? "all" : "active")}
           >
             <Filter className="size-4" />
             Status: {statusLabels[statusFilter]}
           </button>
+          </div>
         </section>
 
         {advancedOpen ? (
@@ -744,7 +756,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
               {(Object.keys(statusLabels) as StatusFilter[]).map((status) => (
                 <button
                   className={cn(
-                    "h-9 rounded-[8px] border px-3 text-[13px] font-semibold",
+                    "h-8 rounded-[8px] border px-2.5 text-[12px] font-semibold sm:h-9 sm:px-3 sm:text-[13px]",
                     statusFilter === status
                       ? "border-[#3b97e3] bg-[#0a2c48] text-white"
                       : "border-[#303746] bg-[#161a22] text-[#bac1ce]",
@@ -767,18 +779,18 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
           </div>
         ) : null}
 
-        <PartnerPanel className="mt-6 overflow-hidden">
+        <PartnerPanel className="mt-4 overflow-hidden sm:mt-6">
           <div className="w-full overflow-x-auto">
             <table className="w-full table-fixed text-left md:min-w-[980px] md:table-auto">
               <thead className="bg-[rgba(29,33,43,0.5)] text-[12px] uppercase leading-4 tracking-[0.05em] text-[#bac1ce]">
                 <tr className="border-b border-[#303746]">
-                  <th className="w-[54%] px-3 py-4 font-medium md:w-auto md:px-6">Cliente</th>
+                  <th className="w-[54%] px-3 py-3 font-medium md:w-auto md:px-6 md:py-4">Cliente</th>
                   <th className="hidden px-4 py-4 font-medium md:table-cell">Objetivo</th>
                   <th className="hidden px-4 py-4 font-medium md:table-cell">Idade</th>
                   <th className="hidden px-4 py-4 font-medium md:table-cell">Última Atualização</th>
                   <th className="hidden px-4 py-4 text-center font-medium md:table-cell">Planos contratados</th>
-                  <th className="w-[22%] px-2 py-4 font-medium md:w-auto md:px-4">Renovação</th>
-                  <th className="w-[24%] px-3 py-4 text-right font-medium md:w-auto md:px-6">Ações</th>
+                  <th className="w-[31%] px-3 py-3 font-medium md:w-[150px] md:px-4 md:py-4">Renovação</th>
+                  <th className="w-[15%] px-3 py-3 text-right font-medium md:w-[112px] md:px-6 md:py-4">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#303746]">
@@ -790,21 +802,21 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                   </tr>
                 ) : (
                   visibleRows.map((row) => (
-                    <tr className="text-[14px] text-[#f3f4f7]" key={row.id}>
-                      <td className="px-3 py-4 md:px-6">
-                        <div className="flex items-center gap-3">
-                          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#fce4e7] text-[13px] font-bold text-[#121722]">
+                    <tr className="text-[12px] text-[#f3f4f7] sm:text-[14px]" key={row.id}>
+                      <td className="px-3 py-3 md:px-6 md:py-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#fce4e7] text-[11px] font-bold text-[#121722] sm:size-10 sm:text-[13px]">
                             {row.initial}
                           </span>
                           <div className="min-w-0">
                             <button
-                              className="block truncate text-left text-[14px] font-semibold leading-5 text-[#f3f4f7] hover:text-[#68afe9]"
+                              className="block truncate text-left text-[12px] font-semibold leading-4 text-[#f3f4f7] hover:text-[#68afe9] sm:text-[14px] sm:leading-5"
                               type="button"
                               onClick={() => router.push(`/parceiros/clientes/${row.id}`)}
                             >
                               {row.name}
                             </button>
-                            <p className="truncate text-[12px] leading-4 text-[#bac1ce]">{row.email}</p>
+                            <p className="truncate text-[11px] leading-4 text-[#bac1ce] sm:text-[12px]">{row.email}</p>
                             <p className="mt-1 text-[11px] leading-4 text-[#8b92a3] md:hidden">
                               {row.objectiveLabel} · {row.ageLabel} · {row.planSummaryLabel}
                             </p>
@@ -825,32 +837,59 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                           ))}
                         </div>
                       </td>
-                      <td className="px-2 py-4 md:px-4">
-                        <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-[12px] font-medium", renewalToneClasses[row.renewalTone])}>
+                      <td className="px-3 py-3 md:px-4 md:py-4">
+                        <span className={cn("inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-medium sm:px-2.5 sm:py-1 sm:text-[12px]", renewalToneClasses[row.renewalTone])}>
                           {row.renewalLabel}
                         </span>
                       </td>
-                      <td className="px-3 py-4 md:px-6">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="px-3 py-3 md:px-6 md:py-4">
+                        <div className="flex items-center justify-end gap-2">
                           <span className="hidden lg:inline-flex">
                             <StatusBadge label={row.statusLabel} status={row.status} />
                           </span>
-                          <button className="rounded-[8px] p-2 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => router.push(`/parceiros/clientes/${row.id}`)}>
-                            <Eye className="size-4" />
-                            <span className="sr-only">Ver Cliente</span>
-                          </button>
-                          <button className="rounded-[8px] p-2 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => copyEmail(row)}>
-                            <Copy className="size-4" />
-                            <span className="sr-only">Copiar e-mail</span>
-                          </button>
-                          <button
-                            className="rounded-[8px] p-2 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white"
-                            type="button"
-                            onClick={() => setActionMessage(`Renovação de ${row.name}: ${row.renewalDateLabel}.`)}
-                          >
-                            <MoreVertical className="size-4" />
-                            <span className="sr-only">Revisar renovação</span>
-                          </button>
+                          <div className="relative">
+                            <button
+                              aria-expanded={openActionMenuId === row.id}
+                              aria-haspopup="menu"
+                              className="rounded-[8px] p-1.5 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white sm:p-2"
+                              type="button"
+                              onClick={() => setOpenActionMenuId((current) => current === row.id ? null : row.id)}
+                            >
+                              <MoreVertical className="size-4" />
+                              <span className="sr-only">Abrir ações de {row.name}</span>
+                            </button>
+                            {openActionMenuId === row.id ? (
+                              <div
+                                className="absolute right-0 z-20 mt-2 w-40 overflow-hidden rounded-[10px] border border-[#303746] bg-[#161a22] py-1 text-left shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
+                                role="menu"
+                              >
+                                <button
+                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
+                                  role="menuitem"
+                                  type="button"
+                                  onClick={() => copyEmail(row)}
+                                >
+                                  Copiar e-mail
+                                </button>
+                                <button
+                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
+                                  role="menuitem"
+                                  type="button"
+                                  onClick={() => editClient(row)}
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#ff7b8e] hover:bg-[#31151b]"
+                                  role="menuitem"
+                                  type="button"
+                                  onClick={() => deleteClient(row)}
+                                >
+                                  Excluir
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
                       </td>
                     </tr>

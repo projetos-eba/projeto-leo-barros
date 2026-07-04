@@ -172,7 +172,7 @@ function SelectShell({ children, className }: { children: ReactNode; className?:
 }
 
 function fieldClass(className?: string) {
-  return cn("h-10 w-full rounded-[7px] border border-[#2b3e4c] bg-[#0d1822] px-3 text-[13px] text-[#eaf2f7] outline-none transition-colors placeholder:text-[#6f8090] focus:border-[#2d9cff]", className);
+  return cn("h-9 w-full rounded-[7px] border border-[#2b3e4c] bg-[#0d1822] px-3 text-[12px] text-[#eaf2f7] outline-none transition-colors placeholder:text-[#6f8090] focus:border-[#2d9cff] sm:h-10 sm:text-[13px]", className);
 }
 
 function textareaClass(className?: string) {
@@ -193,20 +193,20 @@ function formatNumber(value: number) {
 
 function FoodThumb() {
   return (
-    <div className="flex size-[74px] shrink-0 items-center justify-center rounded-[8px] border border-[#314555] bg-[radial-gradient(circle_at_30%_25%,rgba(70,189,125,0.32),rgba(16,29,39,0.95)_62%)]">
-      <Utensils className="size-8 text-[#55d58c]" />
+    <div className="flex size-12 shrink-0 items-center justify-center rounded-[8px] border border-[#314555] bg-[radial-gradient(circle_at_30%_25%,rgba(70,189,125,0.32),rgba(16,29,39,0.95)_62%)] sm:size-[74px]">
+      <Utensils className="size-5 text-[#55d58c] sm:size-8" />
     </div>
   );
 }
 
 function ExerciseThumb({ exercise }: { exercise: PartnerProtocolExercise }) {
   if (exercise.thumbnailUrl) {
-    return <img alt="" className="size-[74px] shrink-0 rounded-[8px] border border-[#314555] object-cover" src={exercise.thumbnailUrl} />;
+    return <img alt="" className="size-12 shrink-0 rounded-[8px] border border-[#314555] object-cover sm:size-[74px]" src={exercise.thumbnailUrl} />;
   }
 
   return (
-    <div className="flex size-[74px] shrink-0 items-center justify-center rounded-[8px] border border-[#314555] bg-[radial-gradient(circle_at_30%_25%,rgba(45,156,255,0.32),rgba(16,29,39,0.95)_62%)]">
-      <Dumbbell className="size-8 text-[#56b5ff]" />
+    <div className="flex size-12 shrink-0 items-center justify-center rounded-[8px] border border-[#314555] bg-[radial-gradient(circle_at_30%_25%,rgba(45,156,255,0.32),rgba(16,29,39,0.95)_62%)] sm:size-[74px]">
+      <Dumbbell className="size-5 text-[#56b5ff] sm:size-8" />
     </div>
   );
 }
@@ -223,13 +223,13 @@ function Badge({ children, tone = "blue" }: { children: ReactNode; tone?: "blue"
 
 function MetricCard({ icon: Icon, label, value, tone }: { icon: typeof Database; label: string; tone: string; value: number }) {
   return (
-    <Panel className="flex min-h-[92px] items-center gap-4 px-5 py-4">
-      <div className={cn("flex size-12 items-center justify-center rounded-[8px]", tone)}>
-        <Icon className="size-6" />
+    <Panel className="flex min-h-[72px] items-center gap-3 px-3 py-3 sm:min-h-[92px] sm:gap-4 sm:px-5 sm:py-4">
+      <div className={cn("flex size-9 items-center justify-center rounded-[7px] sm:size-12 sm:rounded-[8px]", tone)}>
+        <Icon className="size-4 sm:size-6" />
       </div>
       <div>
-        <p className="text-[25px] font-bold leading-none text-[#edf4f8]">{value}</p>
-        <p className="mt-2 text-[12px] text-[#8797a6]">{label}</p>
+        <p className="text-[21px] font-bold leading-none text-[#edf4f8] sm:text-[25px]">{value}</p>
+        <p className="mt-1 text-[11px] leading-3 text-[#8797a6] sm:mt-2 sm:text-[12px]">{label}</p>
       </div>
     </Panel>
   );
@@ -243,10 +243,10 @@ function FoodMacroChips({ food }: { food: PartnerProtocolFood }) {
     { Icon: Database, label: "Kcal", tone: "bg-[#0b2a45] text-[#58b8ff]", value: formatNumber(food.kcal) },
   ];
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
+    <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2">
       {macros.map(({ Icon, label, tone, value }) => (
-        <span className={cn("inline-flex h-7 items-center gap-1.5 rounded-[7px] px-2 text-[11px] font-bold", tone)} key={label}>
-          <Icon className="size-3.5" />
+        <span className={cn("inline-flex h-6 items-center gap-1 rounded-[6px] px-1.5 text-[10px] font-bold sm:h-7 sm:gap-1.5 sm:rounded-[7px] sm:px-2 sm:text-[11px]", tone)} key={label}>
+          <Icon className="size-3 sm:size-3.5" />
           {label} {value}
         </span>
       ))}
@@ -478,62 +478,62 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(11,48,74,0.54),transparent_34%),#07131d] px-5 py-8 text-[#eef4f8] md:px-10 lg:px-[42px]">
+    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(11,48,74,0.54),transparent_34%),#07131d] px-3 py-4 text-[#eef4f8] sm:px-5 sm:py-8 md:px-10 lg:px-[42px]">
       <div className="mx-auto max-w-[1320px]">
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-[30px] font-bold leading-tight tracking-normal text-white md:text-[34px]">Base de Protocolos</h1>
-            <p className="mt-3 max-w-[780px] text-[14px] leading-6 text-[#a0adba]">
+            <h1 className="text-[24px] font-bold leading-tight tracking-normal text-white sm:text-[30px] md:text-[34px]">Base de Protocolos</h1>
+            <p className="mt-1 max-w-[780px] text-[12px] leading-4 text-[#a0adba] sm:mt-3 sm:text-[14px] sm:leading-6">
               Monte sua base de alimentos, exercícios e blocos reutilizáveis para criar planos com mais rapidez.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button className="inline-flex h-12 items-center gap-2 rounded-[8px] bg-[#188cef] px-5 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(24,140,239,0.24)] hover:bg-[#2d9cff]" onClick={() => openFood()} type="button">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+            <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#188cef] px-3 text-[12px] font-semibold text-white shadow-[0_12px_30px_rgba(24,140,239,0.24)] hover:bg-[#2d9cff] sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => openFood()} type="button">
               <Plus className="size-4" /> Novo alimento
             </button>
-            <button className="inline-flex h-12 items-center gap-2 rounded-[8px] bg-[#188cef] px-5 text-[14px] font-semibold text-white shadow-[0_12px_30px_rgba(24,140,239,0.24)] hover:bg-[#2d9cff]" onClick={() => openExercise()} type="button">
+            <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#188cef] px-3 text-[12px] font-semibold text-white shadow-[0_12px_30px_rgba(24,140,239,0.24)] hover:bg-[#2d9cff] sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => openExercise()} type="button">
               <Plus className="size-4" /> Novo exercício
             </button>
-            <button className="inline-flex h-12 items-center gap-2 rounded-[8px] border border-[#2b3d4b] bg-[#111b27] px-5 text-[14px] font-semibold text-[#e7eef5] hover:border-[#2d9cff]" onClick={() => setDrawerMode("import")} type="button">
+            <button className="col-span-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#2b3d4b] bg-[#111b27] px-3 text-[12px] font-semibold text-[#e7eef5] hover:border-[#2d9cff] sm:col-auto sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => setDrawerMode("import")} type="button">
               <UploadCloud className="size-4" /> Importar base
             </button>
           </div>
         </header>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 md:grid-cols-3">
           <MetricCard icon={Utensils} label="alimentos ativos" tone="bg-[#0c2b1f] text-[#58d881]" value={data.metrics.activeFoods} />
           <MetricCard icon={Dumbbell} label="exercícios ativos" tone="bg-[#0b2a45] text-[#58b8ff]" value={data.metrics.activeExercises} />
           <MetricCard icon={Database} label="itens importados" tone="bg-[#2a2350] text-[#b294ff]" value={data.metrics.importedFoods} />
         </div>
 
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-b border-[#253847]">
-          <div className="flex gap-6">
-            <button className={cn("border-b-2 px-2 pb-4 text-[15px]", activeTab === "foods" ? "border-[#2d9cff] text-[#46adff]" : "border-transparent text-[#9aa8b4]")} onClick={() => setActiveTab("foods")} type="button">
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-3 border-b border-[#253847] sm:mt-8 sm:gap-4">
+          <div className="flex gap-3 sm:gap-6">
+            <button className={cn("border-b-2 px-1 pb-3 text-[12px] sm:px-2 sm:pb-4 sm:text-[15px]", activeTab === "foods" ? "border-[#2d9cff] text-[#46adff]" : "border-transparent text-[#9aa8b4]")} onClick={() => setActiveTab("foods")} type="button">
               Base de Alimentos · {data.foods.length}
             </button>
-            <button className={cn("border-b-2 px-2 pb-4 text-[15px]", activeTab === "exercises" ? "border-[#2d9cff] text-[#46adff]" : "border-transparent text-[#9aa8b4]")} onClick={() => setActiveTab("exercises")} type="button">
+            <button className={cn("border-b-2 px-1 pb-3 text-[12px] sm:px-2 sm:pb-4 sm:text-[15px]", activeTab === "exercises" ? "border-[#2d9cff] text-[#46adff]" : "border-transparent text-[#9aa8b4]")} onClick={() => setActiveTab("exercises")} type="button">
               Biblioteca de Exercícios · {data.exercises.length}
             </button>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="mt-4 grid gap-4 sm:mt-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0">
-            <div className="mb-5 flex flex-wrap gap-3">
-              <div className="relative min-w-[280px] flex-1">
+            <div className="mb-4 flex flex-wrap gap-2 sm:mb-5 sm:gap-3">
+              <div className="relative min-w-[190px] flex-1 sm:min-w-[280px]">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#7f91a0]" />
                 <input className={fieldClass("pl-10")} onChange={(event) => setQuery(event.target.value)} placeholder={activeTab === "foods" ? "Buscar alimento por nome ou categoria..." : "Buscar exercício por nome, grupo ou objetivo..."} value={query} />
               </div>
               {activeTab === "foods" ? (
                 <>
                   <SelectShell>
-                    <select className={fieldClass("w-[150px] appearance-none pr-9")} onChange={(event) => setFoodCategory(event.target.value as typeof foodCategory)} value={foodCategory}>
+                    <select className={fieldClass("w-[134px] appearance-none pr-9 sm:w-[150px]")} onChange={(event) => setFoodCategory(event.target.value as typeof foodCategory)} value={foodCategory}>
                       <option value="all">Categoria</option>
                       {foodCategories.map((category) => <option key={category} value={category}>{foodCategoryLabels[category]}</option>)}
                     </select>
                   </SelectShell>
                   <SelectShell>
-                    <select className={fieldClass("w-[130px] appearance-none pr-9")} onChange={(event) => setFoodSource(event.target.value as typeof foodSource)} value={foodSource}>
+                    <select className={fieldClass("w-[118px] appearance-none pr-9 sm:w-[130px]")} onChange={(event) => setFoodSource(event.target.value as typeof foodSource)} value={foodSource}>
                       <option value="all">Origem</option>
                       {foodSources.map((source) => <option key={source} value={source}>{foodSourceLabels[source]}</option>)}
                     </select>
@@ -542,13 +542,13 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
               ) : (
                 <>
                   <SelectShell>
-                    <select className={fieldClass("w-[170px] appearance-none pr-9")} onChange={(event) => setExerciseGroup(event.target.value as typeof exerciseGroup)} value={exerciseGroup}>
+                    <select className={fieldClass("w-[146px] appearance-none pr-9 sm:w-[170px]")} onChange={(event) => setExerciseGroup(event.target.value as typeof exerciseGroup)} value={exerciseGroup}>
                       <option value="all">Grupo muscular</option>
                       {muscleGroups.map((group) => <option key={group} value={group}>{muscleGroupLabels[group]}</option>)}
                     </select>
                   </SelectShell>
                   <SelectShell>
-                    <select className={fieldClass("w-[150px] appearance-none pr-9")} onChange={(event) => setExerciseEquipment(event.target.value as typeof exerciseEquipment)} value={exerciseEquipment}>
+                    <select className={fieldClass("w-[132px] appearance-none pr-9 sm:w-[150px]")} onChange={(event) => setExerciseEquipment(event.target.value as typeof exerciseEquipment)} value={exerciseEquipment}>
                       <option value="all">Equipamento</option>
                       {equipments.map((equipment) => <option key={equipment} value={equipment}>{equipmentLabels[equipment]}</option>)}
                     </select>
@@ -556,17 +556,17 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
                 </>
               )}
               <SelectShell>
-                <select className={fieldClass("w-[130px] appearance-none pr-9")} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} value={statusFilter}>
+                <select className={fieldClass("w-[118px] appearance-none pr-9 sm:w-[130px]")} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} value={statusFilter}>
                   <option value="active">Ativos</option>
                   <option value="archived">Arquivados</option>
                   <option value="all">Todos</option>
                 </select>
               </SelectShell>
               <div className="ml-auto flex rounded-[8px] border border-[#2b3d4b] bg-[#111b27] p-1">
-                <button aria-label="Visualização em tabela" className={cn("flex h-9 items-center gap-2 rounded-[6px] px-3 text-[13px]", viewMode === "table" ? "bg-[#0b2b45] text-[#55b4ff]" : "text-[#9aa8b4]")} onClick={() => setViewMode("table")} type="button">
+                <button aria-label="Visualização em tabela" className={cn("flex h-8 items-center gap-1.5 rounded-[6px] px-2.5 text-[12px] sm:h-9 sm:gap-2 sm:px-3 sm:text-[13px]", viewMode === "table" ? "bg-[#0b2b45] text-[#55b4ff]" : "text-[#9aa8b4]")} onClick={() => setViewMode("table")} type="button">
                   <LayoutList className="size-4" /> Tabela
                 </button>
-                <button aria-label="Visualização em cards" className={cn("flex h-9 items-center gap-2 rounded-[6px] px-3 text-[13px]", viewMode === "cards" ? "bg-[#0b2b45] text-[#55b4ff]" : "text-[#9aa8b4]")} onClick={() => setViewMode("cards")} type="button">
+                <button aria-label="Visualização em cards" className={cn("flex h-8 items-center gap-1.5 rounded-[6px] px-2.5 text-[12px] sm:h-9 sm:gap-2 sm:px-3 sm:text-[13px]", viewMode === "cards" ? "bg-[#0b2b45] text-[#55b4ff]" : "text-[#9aa8b4]")} onClick={() => setViewMode("cards")} type="button">
                   <Grid2X2 className="size-4" /> Cards
                 </button>
               </div>
@@ -773,15 +773,15 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
   if (foods.length === 0) return <EmptyState label="Nenhum alimento encontrado." />;
   if (viewMode === "cards") {
     return (
-      <div className="grid gap-4 p-4 md:grid-cols-2">
+      <div className="grid gap-2 p-2 sm:gap-4 sm:p-4 md:grid-cols-2">
         {foods.map((food) => (
-          <Panel className="p-4" key={food.id}>
-            <div className="flex gap-4">
+          <Panel className="p-3 sm:p-4" key={food.id}>
+            <div className="flex gap-3 sm:gap-4">
               <FoodThumb />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[16px] font-semibold text-white">{food.name}</p>
-                <p className="mt-1 text-[12px] text-[#8fa0ad]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
-                <p className="mt-2 text-[12px] text-[#aebbc6]">{food.servingLabel}</p>
+                <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{food.name}</p>
+                <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
+                <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[12px]">{food.servingLabel}</p>
                 <FoodMacroChips food={food} />
               </div>
             </div>
@@ -795,12 +795,12 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
   return (
     <div className="divide-y divide-[#223443]">
       {foods.map((food) => (
-        <div className="grid min-h-[104px] grid-cols-[82px_minmax(0,1fr)_100px_48px_48px_150px] items-center gap-4 px-5 py-4 max-lg:grid-cols-[82px_minmax(0,1fr)_auto] max-sm:grid-cols-[64px_minmax(0,1fr)]" key={food.id}>
+        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-center gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_100px_48px_48px_150px] sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={food.id}>
           <FoodThumb />
           <div className="min-w-0">
-            <p className="truncate text-[16px] font-semibold text-white">{food.name}</p>
-            <p className="mt-1 text-[12px] text-[#8fa0ad]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
-            <p className="mt-2 text-[13px] text-[#aebbc6]">{food.servingLabel}</p>
+            <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{food.name}</p>
+            <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
+            <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{food.servingLabel}</p>
             <FoodMacroChips food={food} />
           </div>
           <Badge tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
@@ -826,15 +826,15 @@ function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
   if (exercises.length === 0) return <EmptyState label="Nenhum exercício encontrado." />;
   if (viewMode === "cards") {
     return (
-      <div className="grid gap-4 p-4 md:grid-cols-2">
+      <div className="grid gap-2 p-2 sm:gap-4 sm:p-4 md:grid-cols-2">
         {exercises.map((exercise) => (
-          <Panel className="p-4" key={exercise.id}>
-            <div className="flex gap-4">
+          <Panel className="p-3 sm:p-4" key={exercise.id}>
+            <div className="flex gap-3 sm:gap-4">
               <ExerciseThumb exercise={exercise} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[16px] font-semibold text-white">{exercise.name}</p>
-                <p className="mt-1 text-[12px] text-[#8fa0ad]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
-                <p className="mt-2 text-[13px] text-[#aebbc6]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
+                <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{exercise.name}</p>
+                <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
+                <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
               </div>
             </div>
             <ItemActions archived={exercise.status === "archived"} onArchive={() => onArchive("exercise", exercise.id, exercise.status === "archived")} onEdit={() => onEdit(exercise)} onUse={() => onUse(exercise, "exercise")} sourceLabel={exercise.objectiveLabel} />
@@ -847,12 +847,12 @@ function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
   return (
     <div className="divide-y divide-[#223443]">
       {exercises.map((exercise) => (
-        <div className="grid min-h-[104px] grid-cols-[82px_minmax(0,1fr)_116px_48px_48px_150px] items-center gap-4 px-5 py-4 max-lg:grid-cols-[82px_minmax(0,1fr)_auto] max-sm:grid-cols-[64px_minmax(0,1fr)]" key={exercise.id}>
+        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-center gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_116px_48px_48px_150px] sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={exercise.id}>
           <ExerciseThumb exercise={exercise} />
           <div className="min-w-0">
-            <p className="truncate text-[16px] font-semibold text-white">{exercise.name}</p>
-            <p className="mt-1 text-[12px] text-[#8fa0ad]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
-            <p className="mt-2 text-[13px] text-[#aebbc6]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
+            <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{exercise.name}</p>
+            <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
+            <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
           </div>
           <Badge tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
           <IconAction label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
@@ -873,7 +873,7 @@ function EmptyState({ label }: { label: string }) {
 
 function UseButton({ onClick }: { onClick: () => void }) {
   return (
-    <button className="h-10 rounded-[7px] border border-[#1d7ece] bg-[#0c2840] px-4 text-[13px] font-semibold text-[#c9e8ff] hover:bg-[#123f68]" onClick={onClick} type="button">
+    <button className="h-8 rounded-[7px] border border-[#1d7ece] bg-[#0c2840] px-3 text-[12px] font-semibold text-[#c9e8ff] hover:bg-[#123f68] sm:h-10 sm:px-4 sm:text-[13px]" onClick={onClick} type="button">
       Usar em plano
     </button>
   );
@@ -881,7 +881,7 @@ function UseButton({ onClick }: { onClick: () => void }) {
 
 function IconAction({ children, label, onClick }: { children: ReactNode; label: string; onClick?: () => void }) {
   return (
-    <button aria-label={label} className="flex size-10 items-center justify-center rounded-[7px] text-[#b8c4cf] hover:bg-[#172a38] hover:text-white" onClick={onClick} type="button">
+    <button aria-label={label} className="flex size-8 items-center justify-center rounded-[7px] text-[#b8c4cf] hover:bg-[#172a38] hover:text-white sm:size-10" onClick={onClick} type="button">
       {children}
     </button>
   );
@@ -889,7 +889,7 @@ function IconAction({ children, label, onClick }: { children: ReactNode; label: 
 
 function ItemActions({ archived, onArchive, onEdit, onUse, sourceLabel }: { archived: boolean; onArchive: () => void; onEdit: () => void; onUse: () => void; sourceLabel: string }) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-2">
+    <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4">
       <Badge>{sourceLabel}</Badge>
       <div className="flex gap-1">
         <IconAction label="Editar item" onClick={onEdit}><Pencil className="size-4" /></IconAction>

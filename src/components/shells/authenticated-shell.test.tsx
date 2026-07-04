@@ -75,19 +75,19 @@ describe("AuthenticatedShell", () => {
       </AuthenticatedShell>,
     );
 
-    expect(screen.getByRole("link", { name: "Visão Geral" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "Visão Geral" })[0]).toHaveAttribute(
       "href",
       "/parceiros/dashboard",
     );
-    expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "Clientes" })[0]).toHaveAttribute(
       "href",
       "/parceiros/clientes",
     );
-    expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "Clientes" })[0]).toHaveAttribute(
       "aria-current",
       "page",
     );
-    const logoutButton = screen.getByRole("button", { name: "Sair" });
+    const logoutButton = screen.getAllByRole("button", { name: "Sair" })[0];
     expect(logoutButton).toHaveAttribute("type", "button");
     fireEvent.click(logoutButton);
     expect(mockedLogout).toHaveBeenCalledTimes(1);

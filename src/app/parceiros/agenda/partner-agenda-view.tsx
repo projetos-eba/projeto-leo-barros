@@ -150,7 +150,7 @@ function IconButton({
   return (
     <button
       aria-label={label}
-      className="inline-flex size-10 items-center justify-center rounded-[10px] border border-[#2b3d4b] bg-[#111b27] text-[#b8c4cf] transition-colors hover:border-[#1d7ece] hover:text-white"
+      className="inline-flex size-9 items-center justify-center rounded-[8px] border border-[#2b3d4b] bg-[#111b27] text-[#b8c4cf] transition-colors hover:border-[#1d7ece] hover:text-white sm:size-10 sm:rounded-[10px]"
       onClick={onClick}
       type="button"
     >
@@ -171,7 +171,7 @@ function SegmentButton({
   return (
     <button
       className={cn(
-        "h-10 rounded-[8px] px-5 text-[14px] font-medium transition-colors",
+        "h-9 rounded-[7px] px-3 text-[12px] font-medium transition-colors sm:h-10 sm:rounded-[8px] sm:px-5 sm:text-[14px]",
         active ? "bg-[#0a4b7d] text-[#68afe9]" : "text-[#b4c0cb] hover:bg-[#102635] hover:text-white",
       )}
       onClick={onClick}
@@ -1103,13 +1103,13 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(29,126,206,0.14),transparent_32%),#0b1720] px-4 py-8 text-[#f1f6fa] sm:px-6 lg:px-[42px]">
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(29,126,206,0.14),transparent_32%),#0b1720] px-3 py-4 text-[#f1f6fa] sm:px-6 sm:py-8 lg:px-[42px]">
+      <header className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-[30px] font-bold leading-10 text-white">Agenda de Parceiros</h1>
-          <p className="mt-2 text-[15px] leading-6 text-[#a4afbb]">Gerencie compromissos e otimize a colaboração com seus clientes.</p>
+          <h1 className="text-[24px] font-bold leading-8 text-white sm:text-[30px] sm:leading-10">Agenda de Parceiros</h1>
+          <p className="mt-1 text-[12px] leading-4 text-[#a4afbb] sm:mt-2 sm:text-[15px] sm:leading-6">Gerencie compromissos e otimize a colaboração com seus clientes.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="hidden items-center gap-4 sm:flex">
           <div className="hidden text-right md:block">
             <p className="text-[15px] font-bold text-white">{agenda.partnerName}</p>
             <p className="text-[13px] text-[#9aa8b5]">Profissional</p>
@@ -1121,15 +1121,15 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
         </div>
       </header>
 
-      <div className="mt-7 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap gap-3">
-          <div className="flex rounded-[10px] border border-[#263747] bg-[#111b27]/92 p-1">
+      <div className="mt-4 flex flex-col gap-3 sm:mt-7 sm:gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div className="flex rounded-[9px] border border-[#263747] bg-[#111b27]/92 p-1 sm:rounded-[10px]">
             <SegmentButton active={viewMode === "month"} onClick={() => setViewMode("month")}>Mês</SegmentButton>
             <SegmentButton active={viewMode === "week"} onClick={() => setViewMode("week")}>Semana</SegmentButton>
             <SegmentButton active={viewMode === "day"} onClick={() => setViewMode("day")}>Dia</SegmentButton>
           </div>
-          <div className="flex rounded-[10px] border border-[#263747] bg-[#111b27]/92 p-1">
-            <button className="inline-flex h-10 items-center gap-2 rounded-[8px] px-4 text-[14px] font-medium text-[#b4c0cb] hover:bg-[#102635]" type="button">
+          <div className="flex rounded-[9px] border border-[#263747] bg-[#111b27]/92 p-1 sm:rounded-[10px]">
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-[7px] px-3 text-[12px] font-medium text-[#b4c0cb] hover:bg-[#102635] sm:h-10 sm:gap-2 sm:rounded-[8px] sm:px-4 sm:text-[14px]" type="button">
               <Filter className="size-4" />
               Filtros
             </button>
@@ -1144,11 +1144,11 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 rounded-[10px] border border-[#263747] bg-[#111b27]/92 p-1">
+          <div className="flex min-w-0 items-center gap-1.5 rounded-[9px] border border-[#263747] bg-[#111b27]/92 p-1 sm:gap-2 sm:rounded-[10px]">
             <IconButton label="Período anterior" onClick={() => setSelectedDate(moveDate(selectedDate, viewMode, -1))}>
               <ChevronLeft className="size-4" />
             </IconButton>
-            <button className="h-10 min-w-[190px] px-4 text-[14px] font-medium capitalize text-white" type="button">
+            <button className="h-9 min-w-0 max-w-[176px] truncate px-2 text-[12px] font-medium capitalize text-white sm:h-10 sm:min-w-[190px] sm:px-4 sm:text-[14px]" type="button">
               {getPeriodLabel(viewMode, selectedDate)}
             </button>
             <IconButton label="Próximo período" onClick={() => setSelectedDate(moveDate(selectedDate, viewMode, 1))}>
@@ -1160,11 +1160,11 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
           </div>
         </div>
         <button
-          className="inline-flex h-[46px] items-center justify-center gap-3 rounded-[10px] bg-[#1d7ece] px-6 text-[15px] font-semibold text-white shadow-[0_16px_40px_rgba(29,126,206,0.26)] transition-colors hover:bg-[#2992df]"
+          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#1d7ece] px-3 text-[12px] font-semibold text-white shadow-[0_16px_40px_rgba(29,126,206,0.26)] transition-colors hover:bg-[#2992df] sm:h-[46px] sm:gap-3 sm:rounded-[10px] sm:px-6 sm:text-[15px]"
           onClick={openNewAppointment}
           type="button"
         >
-          <Plus className="size-5" />
+          <Plus className="size-4 sm:size-5" />
           Novo compromisso
         </button>
       </div>
@@ -1176,7 +1176,7 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
         </div>
       ) : null}
 
-      <main className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <main className="mt-4 grid gap-4 sm:mt-5 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 overflow-x-auto">
           {viewMode === "month" ? (
             <MonthView appointments={filteredAppointments} blocks={agenda.blocks} onSelectAppointment={selectAppointment} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
@@ -1186,7 +1186,7 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
             <DayTimeline appointments={selectedDayAppointments} blocks={selectedDayBlocks} onSelectAppointment={selectAppointment} selectedId={selectedAppointment?.id} />
           )}
         </div>
-        <aside className="space-y-5">
+        <aside className="space-y-4 sm:space-y-5">
           {viewMode === "week" ? <SummaryCards agenda={agenda} /> : null}
           <AppointmentDetail
             appointment={selectedAppointment}
@@ -1210,7 +1210,7 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
         </aside>
       </main>
 
-      <div className="mt-5 flex items-center gap-2 text-[13px] text-[#8fa0ae]">
+      <div className="mt-4 flex items-center gap-2 text-[11px] text-[#8fa0ae] sm:mt-5 sm:text-[13px]">
         <span className="flex size-5 items-center justify-center rounded-full border border-[#1d7ece] text-[#68afe9]">i</span>
         Dica: use Remarcar para mover um compromisso sem arrastar na agenda.
       </div>

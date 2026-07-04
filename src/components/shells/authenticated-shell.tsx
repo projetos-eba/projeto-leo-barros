@@ -221,9 +221,84 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
     const asideWidth = isPartner ? "w-[193px]" : "w-[235px]";
     const navTopClass = isPartner ? "mt-8 space-y-2" : "mt-10 space-y-[15px]";
     const logoSizeClass = isPartner ? "size-[37px] rounded-[6px]" : "size-[37px] rounded-[6px]";
+    const visibleNavigation = definition.navigation.filter((item) => !(isPartner && item.href === "/parceiros/configuracoes"));
 
     return (
       <div className="min-h-screen bg-[#0b1720] text-[#f1f6fa]">
+        {isPartner ? (
+          <header className="sticky top-0 z-40 border-b border-[#142432] bg-[#0b1720]/96 backdrop-blur-xl lg:hidden">
+            <div className="flex h-14 items-center justify-between gap-3 px-3">
+              <Link className="flex min-w-0 items-center gap-2" href="/parceiros/dashboard">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4f7fa] text-[15px] font-bold leading-none text-[#092333]">
+                  lß
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-bold leading-4 text-[#eaf2f7]">Leonardo Barros</p>
+                  <p className="text-[9px] font-semibold uppercase leading-3 text-[#7c93a3]">Parceiros</p>
+                </div>
+              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  aria-label="Configurações"
+                  className="flex size-9 items-center justify-center rounded-[8px] text-[#8a99a6] hover:bg-[#102a36]/70 hover:text-[#cfddea]"
+                  href="/parceiros/configuracoes"
+                >
+                  <Settings className="size-4" />
+                </Link>
+                <button
+                  aria-label={logoutPending ? "Saindo" : "Sair"}
+                  className="flex size-9 items-center justify-center rounded-[8px] text-[#8a99a6] transition-colors hover:bg-[#32151b]/70 hover:text-[#ffb8c2] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={logoutPending}
+                  type="button"
+                  onClick={() => startLogoutTransition(() => {
+                    void logout();
+                  })}
+                >
+                  <LogOut className="size-4" />
+                </button>
+              </div>
+            </div>
+            <nav aria-label="Navegação Parceiros" className="flex gap-1 overflow-x-auto px-2 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {visibleNavigation.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const content = (
+                  <>
+                    <item.icon className="size-3.5 shrink-0" />
+                    <span>{item.label}</span>
+                  </>
+                );
+
+                if (!item.implemented) {
+                  return (
+                    <button
+                      aria-disabled="true"
+                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 text-[12px] font-semibold text-[#637281]"
+                      disabled
+                      key={item.href}
+                      type="button"
+                    >
+                      {content}
+                    </button>
+                  );
+                }
+
+                return (
+                  <Link
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 text-[12px] font-semibold transition-colors",
+                      isActive ? "bg-[#0a2c48] text-[#d7e8f7]" : "text-[#8a99a6] hover:bg-[#102a36]/70 hover:text-[#cfddea]",
+                    )}
+                    href={item.href}
+                    key={item.href}
+                  >
+                    {content}
+                  </Link>
+                );
+              })}
+            </nav>
+          </header>
+        ) : null}
         <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-[#000a1c]/60 lg:block", asideWidth, isPartner ? "bg-[#0e151a]" : "bg-[#071923]/95")}>
           <div className={cn("flex h-full flex-col", isPartner ? "px-3 py-[33px]" : "px-[14px] py-8")}>
             <div className={cn("flex items-center gap-2.5", isPartner ? "px-[15px]" : "px-5")}>
@@ -244,9 +319,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
             </div>
 
             <nav className={navTopClass}>
-              {definition.navigation
-                .filter((item) => !(isPartner && item.href === "/parceiros/configuracoes"))
-                .map((item) => {
+              {visibleNavigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 const content = (

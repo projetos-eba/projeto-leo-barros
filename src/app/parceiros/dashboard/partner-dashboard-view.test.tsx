@@ -261,7 +261,7 @@ describe("PartnerDashboardView", () => {
     expect(screen.getByText("Pendências de atualização")).toBeInTheDocument();
     expect(screen.getAllByText("Premium").length).toBeGreaterThan(0);
     expect(screen.getByText("Planos próximos do vencimento")).toBeInTheDocument();
-    expect(screen.getByText("Sem exposição clínica detalhada")).toBeInTheDocument();
+    expect(screen.queryByText("Sem exposição clínica detalhada")).not.toBeInTheDocument();
     expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
   });
 });
