@@ -9,6 +9,7 @@ select tables_are(
   'public',
   array[
     'admins',
+    'auth_email_deliveries',
     'billing_payments',
     'billing_plans',
     'client_diet_daily_logs',
@@ -25,6 +26,7 @@ select tables_are(
     'client_workout_exercise_logs',
     'client_workout_sessions',
     'client_workout_set_logs',
+    'email_verification_tokens',
     'partner_calendar_blocks',
     'partner_client_adherence_snapshots',
     'partner_client_assessment_circumferences',
@@ -75,6 +77,7 @@ select tables_are(
     'partner_workout_sets',
     'partners',
     'patients',
+    'password_reset_tokens',
     'platform_activity_events',
     'platform_integrations',
     'platform_settings',

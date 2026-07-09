@@ -1,5 +1,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2.98.0";
 
+import {
+  type AuthRole,
+  buildAppUrl,
+  getSupabaseAdminEnv,
+} from "../_shared/env.ts";
+import { sendAuthEmail } from "../_shared/email/email-gateway.ts";
+import { passwordResetTemplate } from "../_shared/email/email-templates.ts";
+
 const jsonHeaders = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store",
@@ -7,7 +15,8 @@ const jsonHeaders = {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -18,14 +27,6 @@ function response(status: number, body: Record<string, unknown>) {
     status,
     headers: { ...jsonHeaders, ...corsHeaders },
   });
-}
-
-function appUrl() {
-  return (
-    Deno.env.get("APP_URL") ??
-    Deno.env.get("NEXT_PUBLIC_APP_URL") ??
-    "http://localhost:3000"
-  ).replace(/\/+$/, "");
 }
 
 function randomToken() {
@@ -48,36 +49,6 @@ async function sha256(value: string) {
     .join("");
 }
 
-async function sendEmail({
-  html,
-  subject,
-  to,
-}: {
-  html: string;
-  subject: string;
-  to: string;
-}) {
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
-  }
-
-  const from = Deno.env.get("RESEND_FROM") ?? "Leo Barros <noreply@resend.dev>";
-  const resendResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, html, subject, to: [to] }),
-  });
-
-  if (!resendResponse.ok) {
-    throw new Error("RESEND_SEND_FAILED");
-  }
-}
-
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -91,25 +62,30 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const body = (await request.json()) as {
+    let body: {
       email?: unknown;
       expectedRole?: unknown;
     };
-    const email =
-      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    const expectedRole =
-      typeof body.expectedRole === "string" ? body.expectedRole : "";
+    try {
+      body = (await request.json()) as typeof body;
+    } catch {
+      return response(400, {
+        success: false,
+        error: { message: "Requisicao invalida." },
+      });
+    }
+    const email = typeof body.email === "string"
+      ? body.email.trim().toLowerCase()
+      : "";
+    const expectedRole = typeof body.expectedRole === "string"
+      ? body.expectedRole
+      : "";
 
     if (!email || !roles.has(expectedRole)) {
       return response(200, { success: true });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("SUPABASE_ADMIN_ENV_NOT_CONFIGURED");
-    }
+    const { serviceRoleKey, supabaseUrl } = getSupabaseAdminEnv();
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -152,18 +128,17 @@ Deno.serve(async (request) => {
       throw new Error("PASSWORD_RESET_TOKEN_INSERT_FAILED");
     }
 
-    const resetUrl = `${appUrl()}/auth/redefinir-senha?token=${encodeURIComponent(token)}`;
-    await sendEmail({
-      to: email,
+    const resetUrl = buildAppUrl("/auth/redefinir-senha", { token });
+    await sendAuthEmail({
+      authUserId: profile.user_id,
+      flow: "password_reset",
+      html: passwordResetTemplate({ resetUrl }),
+      profileId: profile.id,
+      requestId: crypto.randomUUID(),
+      role: expectedRole as AuthRole,
       subject: "Redefinicao de senha - Leo Barros",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>Redefinir senha</h2>
-          <p>Recebemos uma solicitacao para redefinir sua senha.</p>
-          <p><a href="${resetUrl}">Criar nova senha</a></p>
-          <p>Este link expira em 1 hora. Se voce nao solicitou, ignore este e-mail.</p>
-        </div>
-      `,
+      supabase,
+      to: email,
     });
 
     return response(200, { success: true });

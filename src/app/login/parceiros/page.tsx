@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { resolvePostLoginDestination } from "@/lib/auth/identity-contracts";
+import { partnerHasActivePlan } from "@/lib/auth/partner-plan-access";
 import { createClient } from "@/lib/supabase/server";
 
 import { NextLoginForm } from "../login-form";
@@ -15,7 +16,7 @@ export default async function PartnerLoginPage() {
   if (userId) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, status")
+      .select("id, role, status")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -26,6 +27,15 @@ export default async function PartnerLoginPage() {
       });
 
       if (destination.allowed) {
+        if (destination.role === "parceiro") {
+          const hasActivePlan = await partnerHasActivePlan({
+            profileId: profile.id,
+            supabase,
+          });
+
+          redirect(hasActivePlan ? destination.destination : "/planos");
+        }
+
         redirect(destination.destination);
       }
     }

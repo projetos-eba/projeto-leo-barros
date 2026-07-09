@@ -1,5 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.98.0";
 
+import { getSupabaseAdminEnv } from "../_shared/env.ts";
+
 const jsonHeaders = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store",
@@ -7,7 +9,8 @@ const jsonHeaders = {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -51,14 +54,17 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const { serviceRoleKey, supabaseUrl } = getSupabaseAdminEnv();
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("SUPABASE_ADMIN_ENV_NOT_CONFIGURED");
+    let body: { token?: unknown };
+    try {
+      body = (await request.json()) as typeof body;
+    } catch {
+      return response(400, {
+        success: false,
+        error: { message: "Requisicao invalida." },
+      });
     }
-
-    const body = (await request.json()) as { token?: unknown };
     const token = typeof body.token === "string" ? body.token : "";
 
     if (!token) {
@@ -94,7 +100,8 @@ Deno.serve(async (request) => {
     const resetSessionId = randomToken();
     const resetSessionHash = await sha256(resetSessionId);
     const now = new Date().toISOString();
-    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000)
+      .toISOString();
     const { error: updateError } = await supabase
       .from("password_reset_tokens")
       .update({

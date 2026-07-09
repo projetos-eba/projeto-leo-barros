@@ -29,6 +29,7 @@ Arquivos principais:
 - `src/components/shells/**`: shell autenticado compartilhado.
 - `docs/page-profiles/**`: contratos funcionais de telas aprovadas.
 - `docs/sitemap-projeto-leo-barros.md`: referencia de rotas e nomenclatura.
+- `.codex/skills/projeto-leo-barros-auth/SKILL.md`: skill operacional para fluxos de autenticacao segmentados.
 
 ## Papel do Codex
 

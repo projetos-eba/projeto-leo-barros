@@ -1,5 +1,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2.98.0";
 
+import {
+  type AuthRole,
+  buildAppUrl,
+  getAuthEmailFlags,
+  getEmailAdmin,
+  getSupabaseAdminEnv,
+} from "../_shared/env.ts";
+import { sendAuthEmail } from "../_shared/email/email-gateway.ts";
+import {
+  adminApprovalTemplate,
+  emailConfirmationTemplate,
+} from "../_shared/email/email-templates.ts";
+
 const jsonHeaders = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store",
@@ -7,7 +20,8 @@ const jsonHeaders = {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -27,18 +41,6 @@ function response(status: number, body: Record<string, unknown>) {
     status,
     headers: { ...jsonHeaders, ...corsHeaders },
   });
-}
-
-function envFlag(name: string) {
-  return Deno.env.get(name)?.toLowerCase() === "true";
-}
-
-function appUrl() {
-  return (
-    Deno.env.get("APP_URL") ??
-    Deno.env.get("NEXT_PUBLIC_APP_URL") ??
-    "http://localhost:3000"
-  ).replace(/\/+$/, "");
 }
 
 function randomToken() {
@@ -61,47 +63,6 @@ async function sha256(value: string) {
     .join("");
 }
 
-async function sendEmail({
-  html,
-  subject,
-  to,
-}: {
-  html: string;
-  subject: string;
-  to: string;
-}) {
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
-  }
-
-  const from = Deno.env.get("RESEND_FROM") ?? "Leo Barros <onboarding@resend.dev>";
-  const resendResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      html,
-      subject,
-      to: [to],
-    }),
-  });
-
-  if (!resendResponse.ok) {
-    const errorBody = await resendResponse.text();
-    console.error(JSON.stringify({
-      code: "RESEND_SEND_FAILED",
-      status: resendResponse.status,
-      bodyLength: errorBody.length,
-    }));
-    throw new Error("RESEND_SEND_FAILED");
-  }
-}
-
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -115,17 +76,21 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const { serviceRoleKey, supabaseUrl } = getSupabaseAdminEnv();
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("SUPABASE_ADMIN_ENV_NOT_CONFIGURED");
+    let body: RequestBody;
+    try {
+      body = (await request.json()) as RequestBody;
+    } catch {
+      return response(400, {
+        success: false,
+        error: { message: "Requisicao invalida." },
+      });
     }
-
-    const body = (await request.json()) as RequestBody;
     const profileId = typeof body.profileId === "string" ? body.profileId : "";
-    const requestedPurpose =
-      typeof body.purpose === "string" ? body.purpose : "";
+    const requestedPurpose = typeof body.purpose === "string"
+      ? body.purpose
+      : "";
 
     if (!profileId || !verificationPurposes.has(requestedPurpose)) {
       return response(400, {
@@ -152,8 +117,9 @@ Deno.serve(async (request) => {
     }
 
     const now = new Date().toISOString();
+    const flags = getAuthEmailFlags();
 
-    if (envFlag("CONFIRMED_AUTOMATICALLY_EMAIL")) {
+    if (flags.automaticallyConfirmed) {
       await supabase.auth.admin.updateUserById(profile.user_id, {
         email_confirm: true,
       });
@@ -177,12 +143,8 @@ Deno.serve(async (request) => {
       });
     }
 
-    const approvalMode = envFlag("ALL_ACCOUNT_CREATE_APPROVAL_ADM");
-    const emailAdmin = Deno.env.get("EMAIL_ADMIN");
-
-    if (approvalMode && !emailAdmin) {
-      throw new Error("EMAIL_ADMIN_REQUIRED");
-    }
+    const approvalMode = flags.adminApprovalEnabled;
+    const emailAdmin = approvalMode ? getEmailAdmin() : null;
 
     await supabase
       .from("email_verification_tokens")
@@ -213,31 +175,34 @@ Deno.serve(async (request) => {
       throw new Error("TOKEN_INSERT_FAILED");
     }
 
-    const verificationUrl = `${appUrl()}/auth/confirmar-email?token=${encodeURIComponent(token)}`;
+    const verificationUrl = buildAppUrl("/auth/confirmar-email", { token });
     const to = approvalMode ? emailAdmin! : profile.email;
     const subject = approvalMode
       ? `[Leo Barros] Confirmacao pendente: ${profile.email}`
       : "Confirme seu e-mail - Leo Barros";
+    const role = profile.role as AuthRole;
     const html = approvalMode
-      ? `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>Conta aguardando confirmacao</h2>
-          <p>A conta ${profile.email} (${profile.role}) aguarda confirmacao.</p>
-          <p>Ao clicar, a conta solicitante sera confirmada.</p>
-          <p><a href="${verificationUrl}">Confirmar conta</a></p>
-          <p>Este link expira em 24 horas.</p>
-        </div>
-      `
-      : `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>Confirme seu e-mail</h2>
-          <p>Ola, ${profile.display_name}. Confirme seu e-mail para acessar o Projeto Leo Barros.</p>
-          <p><a href="${verificationUrl}">Confirmar e-mail</a></p>
-          <p>Este link expira em 24 horas. Se voce nao solicitou, ignore este e-mail.</p>
-        </div>
-      `;
+      ? adminApprovalTemplate({
+        accountEmail: profile.email,
+        role,
+        verificationUrl,
+      })
+      : emailConfirmationTemplate({
+        displayName: profile.display_name,
+        verificationUrl,
+      });
 
-    await sendEmail({ html, subject, to });
+    await sendAuthEmail({
+      authUserId: profile.user_id,
+      flow: approvalMode ? "admin_account_approval" : "email_confirmation",
+      html,
+      profileId: profile.id,
+      requestId: crypto.randomUUID(),
+      role,
+      subject,
+      supabase,
+      to,
+    });
 
     await supabase
       .from("profiles")

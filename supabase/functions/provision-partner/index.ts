@@ -37,6 +37,13 @@ type ErrorBody = {
   fields?: Record<string, string>;
 };
 
+type ProvisionPartnerResult = {
+  partner_id: string;
+  profile_id: string;
+  result_invite_status: string;
+  result_status: string;
+};
+
 function allowedOrigins() {
   const configured = Deno.env.get("PROVISIONING_ALLOWED_ORIGINS");
 
@@ -229,8 +236,8 @@ Deno.serve(async (request) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data: userData, error: userError } =
-    await callerClient.auth.getUser();
+  const { data: userData, error: userError } = await callerClient.auth
+    .getUser();
 
   if (userError || !userData.user) {
     return errorResponse(
@@ -292,7 +299,10 @@ Deno.serve(async (request) => {
     return errorResponse(
       400,
       requestId,
-      { code: "INVALID_PAYLOAD", message: "Os dados informados são inválidos." },
+      {
+        code: "INVALID_PAYLOAD",
+        message: "Os dados informados são inválidos.",
+      },
       origin,
     );
   }
@@ -319,13 +329,13 @@ Deno.serve(async (request) => {
   const email = stringValue(rawBody.email).toLowerCase();
   const phone = stringValue(rawBody.phone);
   const displayName = stringValue(rawBody.displayName);
-  const professionalName =
-    stringValue(rawBody.professionalName) || displayName;
+  const professionalName = stringValue(rawBody.professionalName) || displayName;
   const professionalType = stringValue(rawBody.professionalType);
-  const professionalRegistryType =
-    stringValue(rawBody.professionalRegistryType).toLowerCase();
-  const professionalRegistryNumber =
-    stringValue(rawBody.professionalRegistryNumber);
+  const professionalRegistryType = stringValue(rawBody.professionalRegistryType)
+    .toLowerCase();
+  const professionalRegistryNumber = stringValue(
+    rawBody.professionalRegistryNumber,
+  );
   const hasRegistryType = professionalRegistryType.length > 0;
   const hasRegistryNumber = professionalRegistryNumber.length > 0;
   const suppliedIdempotencyKey = stringValue(rawBody.idempotencyKey);
@@ -343,12 +353,18 @@ Deno.serve(async (request) => {
   if (!professionalTypes.has(professionalType)) {
     fields.professionalType = "invalid";
   }
-  if (hasRegistryType && !professionalRegistryTypes.has(professionalRegistryType)) {
+  if (
+    hasRegistryType && !professionalRegistryTypes.has(professionalRegistryType)
+  ) {
     fields.professionalRegistryType = "invalid";
   }
   if (hasRegistryType !== hasRegistryNumber) {
-    fields.professionalRegistryType = hasRegistryType ? fields.professionalRegistryType ?? "invalid" : "required";
-    fields.professionalRegistryNumber = hasRegistryNumber ? fields.professionalRegistryNumber ?? "invalid" : "required";
+    fields.professionalRegistryType = hasRegistryType
+      ? fields.professionalRegistryType ?? "invalid"
+      : "required";
+    fields.professionalRegistryNumber = hasRegistryNumber
+      ? fields.professionalRegistryNumber ?? "invalid"
+      : "required";
   }
   if (professionalRegistryNumber.length > 64) {
     fields.professionalRegistryNumber = "invalid";
@@ -375,7 +391,9 @@ Deno.serve(async (request) => {
     professionalName,
     professionalType,
     professionalRegistryType: hasRegistryType ? professionalRegistryType : null,
-    professionalRegistryNumber: hasRegistryNumber ? professionalRegistryNumber : null,
+    professionalRegistryNumber: hasRegistryNumber
+      ? professionalRegistryNumber
+      : null,
   };
   const requestHash = await sha256(JSON.stringify(normalizedPayload));
 
@@ -422,8 +440,8 @@ Deno.serve(async (request) => {
   let inviteStatus = "not_resent";
 
   if (!authUserId) {
-    const { data: inviteData, error: inviteError } =
-      await adminClient.auth.admin.generateLink({
+    const { data: inviteData, error: inviteError } = await adminClient.auth
+      .admin.generateLink({
         type: "invite",
         email,
       });
@@ -450,30 +468,37 @@ Deno.serve(async (request) => {
     inviteStatus = "pending_delivery";
   }
 
-  const { data: provisioned, error: provisionError } = await adminClient.rpc(
-    "provision_partner_records",
-    {
-      p_caller_profile_id: callerProfile.id,
-      p_idempotency_key: idempotencyKey,
-      p_request_hash: requestHash,
-      p_auth_user_id: authUserId,
-      p_email: email,
-      p_phone: phone,
-      p_display_name: displayName,
-      p_professional_name: professionalName,
-      p_professional_type: professionalType,
-      p_professional_registry_type: hasRegistryType ? professionalRegistryType : null,
-      p_professional_registry_number: hasRegistryNumber ? professionalRegistryNumber : null,
-      p_invite_status: inviteStatus,
-    },
-  ).single();
+  const { data: provisionedData, error: provisionError } = await adminClient
+    .rpc(
+      "provision_partner_records",
+      {
+        p_caller_profile_id: callerProfile.id,
+        p_idempotency_key: idempotencyKey,
+        p_request_hash: requestHash,
+        p_auth_user_id: authUserId,
+        p_email: email,
+        p_phone: phone,
+        p_display_name: displayName,
+        p_professional_name: professionalName,
+        p_professional_type: professionalType,
+        p_professional_registry_type: hasRegistryType
+          ? professionalRegistryType
+          : null,
+        p_professional_registry_number: hasRegistryNumber
+          ? professionalRegistryNumber
+          : null,
+        p_invite_status: inviteStatus,
+      },
+    ).single();
+  const provisioned = provisionedData as ProvisionPartnerResult | null;
 
   if (provisionError || !provisioned) {
     let compensationFailed = false;
 
     if (createdAuthUser && authUserId) {
-      const { error: deleteError } =
-        await adminClient.auth.admin.deleteUser(authUserId);
+      const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+        authUserId,
+      );
       compensationFailed = Boolean(deleteError);
     }
 

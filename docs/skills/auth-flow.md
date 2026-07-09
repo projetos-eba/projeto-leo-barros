@@ -46,7 +46,8 @@ Data de referencia: 2026-07-08.
 - O cadastro cria Auth user, `profiles.role = 'parceiro'` e `partners`.
 - Depois da confirmacao, o login valida plano ativo em `partner_subscriptions`.
 - Status aceitos: `active` e `trialing`, com periodo vigente.
-- Sem plano ativo, redireciona para `/planos`.
+- Sem plano ativo, redireciona para `/planos` no login e no shell protegido
+  `/parceiros/**`.
 
 ## Admin
 
@@ -66,12 +67,15 @@ Data de referencia: 2026-07-08.
 
 ## Variaveis de ambiente
 
-- `APP_URL` ou `NEXT_PUBLIC_APP_URL`: base publica dos links.
+- `APP_URL`: origem canonica server-side dos links.
+- `NEXT_PUBLIC_APP_URL`: origem publica apenas quando Client Components precisarem.
 - `RESEND_API_KEY`: chave Resend usada somente em Edge Function.
-- `RESEND_FROM`: remetente; fallback apenas para desenvolvimento.
+- `RESEND_FROM`: remetente obrigatorio do dominio verificado.
 - `ALL_ACCOUNT_CREATE_APPROVAL_ADM`: quando `true`, confirmacoes de conta vao para `EMAIL_ADMIN`.
 - `EMAIL_ADMIN`: obrigatoria quando `ALL_ACCOUNT_CREATE_APPROVAL_ADM=true`.
 - `CONFIRMED_AUTOMATICALLY_EMAIL`: quando `true`, confirma e-mail automaticamente apenas no fluxo de confirmacao.
+
+Detalhamento operacional: `docs/auth/environment-variables.md`.
 
 ## ALL_ACCOUNT_CREATE_APPROVAL_ADM
 
@@ -80,6 +84,8 @@ Quando ativo, a Edge Function envia o link de confirmacao para `EMAIL_ADMIN`, se
 ## CONFIRMED_AUTOMATICALLY_EMAIL
 
 Quando ativo, `send-verification-email` nao chama Resend. Ela confirma o Auth user e atualiza `profiles.email_confirmed_at`. Para Cliente em primeiro acesso, tambem atualiza `first_access_completed_at`.
+
+Se `CONFIRMED_AUTOMATICALLY_EMAIL=true` e `ALL_ACCOUNT_CREATE_APPROVAL_ADM=true`, a confirmacao automatica tem precedencia e nenhum e-mail e enviado.
 
 ## Checklist de seguranca
 
@@ -90,11 +96,36 @@ Quando ativo, `send-verification-email` nao chama Resend. Ela confirma o Auth us
 - Nao vazar se e-mail existe em primeiro acesso ou reset.
 - Nao logar senha, token, action link, access token ou refresh token.
 - Nao mover secrets de Edge Function para client-side.
+- Nao usar `Boolean("false")` para flags.
+- Nao usar `EMAIL_ADMIN` como conta Admin por suposicao.
+- Nao aplicar confirmacao automatica ao reset de senha.
+- Nao declarar e-mail entregue em caixa de entrada apenas por retorno `queued`
+  ou `accepted` da Resend.
+- Nao salvar URL completa com token em artefatos; usar `token=[REDACTED]`.
 
 ## Comandos de teste
 
 - `npm run lint`
 - `npm run test`
 - `npm run build`
+- `npm run test:e2e:auth`
+- `npm run test:e2e:auth:matrix`
 - `npm run validate:admin-partner-flow`
 - Quando o Supabase local estiver disponivel: `npm run db:reset`
+- `npx supabase test db`
+- `deno fmt --check supabase/functions`
+- `deno lint supabase/functions`
+- `deno check supabase/functions/**/*.ts`
+- `deno test --allow-env --allow-read supabase/functions/_shared/env.test.ts`
+
+## Homologacao local com Resend
+
+O script `npm run test:e2e:auth:matrix` cria fixtures descartaveis, executa as
+quatro combinacoes das flags de confirmacao para Cliente e Parceiro, executa
+reset para Cliente, Parceiro e Admin nas quatro combinacoes, consulta a Resend
+pelo provider ID e abre os links reais no Playwright.
+
+Para variar flags sem depender da instancia ja exposta em `54321`, o script roda
+as Edge Functions de envio via `deno run` em porta local temporaria. As funcoes
+de verificacao continuam sendo exercitadas pelo Next/Supabase local ao abrir os
+links reais.

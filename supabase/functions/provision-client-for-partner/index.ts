@@ -31,6 +31,15 @@ type ErrorBody = {
   fields?: Record<string, string>;
 };
 
+type ProvisionClientResult = {
+  patient_id: string;
+  profile_id: string;
+  relationship_ids: string[];
+  result_invite_status: string;
+  result_service_scopes: string[];
+  result_status: string;
+};
+
 function allowedOrigins() {
   const configured = Deno.env.get("PROVISIONING_ALLOWED_ORIGINS");
 
@@ -117,7 +126,9 @@ function normalizeBirthDate(value: unknown) {
   }
 
   const date = new Date(`${value}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+  if (
+    Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value
+  ) {
     return "";
   }
 
@@ -265,8 +276,8 @@ Deno.serve(async (request) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data: userData, error: userError } =
-    await callerClient.auth.getUser();
+  const { data: userData, error: userError } = await callerClient.auth
+    .getUser();
 
   if (userError || !userData.user) {
     return errorResponse(
@@ -328,7 +339,10 @@ Deno.serve(async (request) => {
     return errorResponse(
       400,
       requestId,
-      { code: "INVALID_PAYLOAD", message: "Os dados informados são inválidos." },
+      {
+        code: "INVALID_PAYLOAD",
+        message: "Os dados informados são inválidos.",
+      },
       origin,
     );
   }
@@ -363,7 +377,9 @@ Deno.serve(async (request) => {
   const fields: Record<string, string> = {};
 
   let serviceScopes: string[] = [];
-  if (!Array.isArray(rawBody.serviceScopes) || rawBody.serviceScopes.length === 0) {
+  if (
+    !Array.isArray(rawBody.serviceScopes) || rawBody.serviceScopes.length === 0
+  ) {
     fields.serviceScopes = "required";
   } else {
     serviceScopes = rawBody.serviceScopes.map((scope) =>
@@ -460,8 +476,8 @@ Deno.serve(async (request) => {
   let inviteStatus = "not_resent";
 
   if (!authUserId) {
-    const { data: inviteData, error: inviteError } =
-      await adminClient.auth.admin.generateLink({
+    const { data: inviteData, error: inviteError } = await adminClient.auth
+      .admin.generateLink({
         type: "invite",
         email,
       });
@@ -488,30 +504,33 @@ Deno.serve(async (request) => {
     inviteStatus = "pending_delivery";
   }
 
-  const { data: provisioned, error: provisionError } = await adminClient.rpc(
-    "provision_client_for_partner_records",
-    {
-      p_caller_profile_id: callerProfile.id,
-      p_idempotency_key: idempotencyKey,
-      p_request_hash: requestHash,
-      p_auth_user_id: authUserId,
-      p_email: email,
-      p_phone: phone,
-      p_display_name: displayName,
-      p_cpf: cpf,
-      p_birth_date: birthDate,
-      p_objective: objective,
-      p_service_scopes: sortedScopes,
-      p_invite_status: inviteStatus,
-    },
-  ).single();
+  const { data: provisionedData, error: provisionError } = await adminClient
+    .rpc(
+      "provision_client_for_partner_records",
+      {
+        p_caller_profile_id: callerProfile.id,
+        p_idempotency_key: idempotencyKey,
+        p_request_hash: requestHash,
+        p_auth_user_id: authUserId,
+        p_email: email,
+        p_phone: phone,
+        p_display_name: displayName,
+        p_cpf: cpf,
+        p_birth_date: birthDate,
+        p_objective: objective,
+        p_service_scopes: sortedScopes,
+        p_invite_status: inviteStatus,
+      },
+    ).single();
+  const provisioned = provisionedData as ProvisionClientResult | null;
 
   if (provisionError || !provisioned) {
     let compensationFailed = false;
 
     if (createdAuthUser && authUserId) {
-      const { error: deleteError } =
-        await adminClient.auth.admin.deleteUser(authUserId);
+      const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+        authUserId,
+      );
       compensationFailed = Boolean(deleteError);
     }
 
