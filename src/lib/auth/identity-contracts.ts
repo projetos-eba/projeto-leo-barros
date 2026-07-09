@@ -20,6 +20,12 @@ export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export const FUTURE_LOGIN_ROUTE = "/login" as const;
 
+export const ROLE_LOGIN_ROUTES: Record<OfficialRole, string> = {
+  cliente: "/login",
+  parceiro: "/login/parceiros",
+  admin: "/login/admin",
+} as const;
+
 export const ROLE_HOME_ROUTES: Record<OfficialRole, string> = {
   cliente: "/cliente/inicio",
   parceiro: "/parceiros/dashboard",

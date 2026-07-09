@@ -1,7 +1,13 @@
+import {
+  type OfficialRole,
+  isKnownRole,
+} from "./identity-contracts";
+
 export type NormalizedLoginCredentials =
   | {
       ok: true;
       email: string;
+      expectedRole: OfficialRole;
       password: string;
     }
   | {
@@ -10,11 +16,13 @@ export type NormalizedLoginCredentials =
     };
 
 export function normalizeEmailPasswordLogin(credentials: {
+  expectedRole?: OfficialRole;
   loginId: string;
   password: string;
 }): NormalizedLoginCredentials {
   const email = credentials.loginId.trim().toLowerCase();
   const password = credentials.password;
+  const expectedRole = credentials.expectedRole ?? "cliente";
 
   if (!email || !password) {
     return {
@@ -30,9 +38,17 @@ export function normalizeEmailPasswordLogin(credentials: {
     };
   }
 
+  if (!isKnownRole(expectedRole)) {
+    return {
+      ok: false,
+      message: "Area de acesso invalida.",
+    };
+  }
+
   return {
     ok: true,
     email,
+    expectedRole,
     password,
   };
 }

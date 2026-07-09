@@ -1,4 +1,5 @@
-import { Activity, CreditCard, Lock } from "lucide-react";
+import Link from "next/link";
+import { Activity, ArrowLeft, CreditCard, Lock, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ type LoginCredentials = {
 
 type LoginViewProps = LoginCredentials & {
   errorMessage?: string | null;
+  forgotPasswordHref?: string;
   isLoading: boolean;
   loginIdAutoComplete?: string;
   loginIdLabel?: string;
@@ -19,11 +21,18 @@ type LoginViewProps = LoginCredentials & {
   onPasswordChange: (value: string) => void;
   onSubmit: (credentials: LoginCredentials) => void;
   passwordAutoComplete?: string;
+  primaryAuxiliaryHref?: string;
+  primaryAuxiliaryLabel?: string;
+  roleLabel?: string;
+  showBackToSelector?: boolean;
+  subtitle?: string;
   supportText?: string;
+  title?: string;
 };
 
 export function LoginView({
   errorMessage = null,
+  forgotPasswordHref,
   isLoading,
   loginId,
   loginIdAutoComplete = "username",
@@ -34,8 +43,18 @@ export function LoginView({
   onSubmit,
   password,
   passwordAutoComplete = "current-password",
+  primaryAuxiliaryHref,
+  primaryAuxiliaryLabel,
+  roleLabel,
+  showBackToSelector = true,
+  subtitle = "Acesse sua conta para continuar",
   supportText = "Acesso restrito a pacientes cadastrados",
+  title = "Bem-vindo",
 }: LoginViewProps) {
+  const LoginIcon = loginIdLabel.toLowerCase().includes("e-mail")
+    ? Mail
+    : CreditCard;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
       {/* Background glow effects */}
@@ -61,9 +80,14 @@ export function LoginView({
         {/* Login Card */}
         <div className="glass-card p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Bem-vindo</h2>
+            {roleLabel ? (
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                {roleLabel}
+              </p>
+            ) : null}
+            <h2 className="text-2xl font-bold text-foreground">{title}</h2>
             <p className="text-muted-foreground mt-1">
-              Acesse sua conta para continuar
+              {subtitle}
             </p>
           </div>
 
@@ -82,7 +106,7 @@ export function LoginView({
                 {loginIdLabel}
               </Label>
               <div className="relative">
-                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <LoginIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="loginId"
                   type="text"
@@ -97,12 +121,22 @@ export function LoginView({
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-sm text-muted-foreground"
-              >
-                Senha
-              </Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label
+                  htmlFor="password"
+                  className="text-sm text-muted-foreground"
+                >
+                  Senha
+                </Label>
+                {forgotPasswordHref ? (
+                  <Link
+                    href={forgotPasswordHref}
+                    className="text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                ) : null}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -136,9 +170,26 @@ export function LoginView({
             ) : null}
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            {supportText}
-          </p>
+          <div className="mt-6 space-y-3 text-center">
+            {primaryAuxiliaryHref && primaryAuxiliaryLabel ? (
+              <Link
+                href={primaryAuxiliaryHref}
+                className="inline-flex text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                {primaryAuxiliaryLabel}
+              </Link>
+            ) : null}
+            <p className="text-xs text-muted-foreground">{supportText}</p>
+            {showBackToSelector ? (
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Escolher outro perfil
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

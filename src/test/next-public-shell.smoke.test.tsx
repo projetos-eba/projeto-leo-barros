@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import NextFoundationPage from "@/app/(public)/page";
 import { AppProviders } from "@/app/providers";
 
-describe("shell público Next existente", () => {
-  it("renderiza a página técnica atual dentro dos providers sem crash", () => {
+describe("shell publico Next existente", () => {
+  it("renderiza o seletor de perfil dentro dos providers sem crash", () => {
     render(
       <AppProviders>
         <NextFoundationPage />
@@ -13,14 +13,25 @@ describe("shell público Next existente", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Shell público preservado" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("App Router ativo")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Nenhuma tela de negócio foi migrada/),
+      screen.getByRole("heading", { name: "Quem está acessando?" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Validar Tooltip" }),
+      screen.getByRole("link", {
+        name: /Cliente: Sou aluno\/cliente acompanhado por um parceiro/,
+      }),
+    ).toHaveAttribute("href", "/login");
+    expect(
+      screen.getByRole("link", {
+        name: /Parceiro: Sou profissional ou prestador de serviço/,
+      }),
+    ).toHaveAttribute("href", "/login/parceiros");
+    expect(
+      screen.getByRole("link", {
+        name: /Administrador: Acesso restrito à gestão da plataforma/,
+      }),
+    ).toHaveAttribute("href", "/login/admin");
+    expect(
+      screen.getByText("Escolha seu perfil para continuar"),
     ).toBeInTheDocument();
   });
 });

@@ -6,8 +6,8 @@ import { AppProviders } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Projeto Leo Barros - Fundação Next.js",
-  description: "Base técnica paralela para a migração controlada do projeto.",
+  title: "Projeto Leo Barros",
+  description: "Acesso segmentado para Cliente, Parceiro e Admin.",
 };
 
 type RootLayoutProps = {

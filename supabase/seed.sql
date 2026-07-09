@@ -125,6 +125,7 @@ begin
       display_name,
       role,
       status,
+      email_confirmed_at,
       created_at,
       updated_at
     )
@@ -137,6 +138,7 @@ begin
       'parceiro',
       'active',
       now() - interval '8 months',
+      now() - interval '8 months',
       now()
     );
   else
@@ -148,6 +150,7 @@ begin
       display_name = 'Antonio Ferrari',
       role = 'parceiro',
       status = 'active',
+      email_confirmed_at = coalesce(email_confirmed_at, now() - interval '8 months'),
       updated_at = now()
     where id = target_profile_id;
   end if;
@@ -502,16 +505,17 @@ begin
     display_name,
     role,
     status,
+    email_confirmed_at,
     created_at,
     updated_at
   )
   values
-    ('a1000000-0000-4000-8000-000000000701', 'a1000000-0000-4000-8000-000000000701', 'cliente.seed.01@example.invalid', '+5511988800011', 'Ana Ribeiro', 'cliente', 'active', now() - interval '6 months', now() - interval '2 days'),
-    ('a1000000-0000-4000-8000-000000000702', 'a1000000-0000-4000-8000-000000000702', 'cliente.seed.02@example.invalid', '+5511988800012', 'Bruno Carvalho', 'cliente', 'active', now() - interval '5 months', now() - interval '5 days'),
-    ('a1000000-0000-4000-8000-000000000703', 'a1000000-0000-4000-8000-000000000703', 'cliente.seed.03@example.invalid', '+5511988800013', 'Camila Souza', 'cliente', 'active', now() - interval '4 months', now() - interval '10 days'),
-    ('a1000000-0000-4000-8000-000000000704', 'a1000000-0000-4000-8000-000000000704', 'cliente.seed.04@example.invalid', '+5511988800014', 'Daniel Rocha', 'cliente', 'active', now() - interval '3 months', now() - interval '35 days'),
-    ('a1000000-0000-4000-8000-000000000705', 'a1000000-0000-4000-8000-000000000705', 'cliente.seed.05@example.invalid', '+5511988800015', 'Elisa Martins', 'cliente', 'active', now() - interval '2 months', now() - interval '1 day'),
-    ('a1000000-0000-4000-8000-000000000706', 'a1000000-0000-4000-8000-000000000706', 'cliente.seed.06@example.invalid', '+5511988800016', 'Felipe Torres', 'cliente', 'active', now() - interval '1 month', now() - interval '45 days');
+    ('a1000000-0000-4000-8000-000000000701', 'a1000000-0000-4000-8000-000000000701', 'cliente.seed.01@example.invalid', '+5511988800011', 'Ana Ribeiro', 'cliente', 'active', now() - interval '6 months', now() - interval '6 months', now() - interval '2 days'),
+    ('a1000000-0000-4000-8000-000000000702', 'a1000000-0000-4000-8000-000000000702', 'cliente.seed.02@example.invalid', '+5511988800012', 'Bruno Carvalho', 'cliente', 'active', now() - interval '5 months', now() - interval '5 months', now() - interval '5 days'),
+    ('a1000000-0000-4000-8000-000000000703', 'a1000000-0000-4000-8000-000000000703', 'cliente.seed.03@example.invalid', '+5511988800013', 'Camila Souza', 'cliente', 'active', now() - interval '4 months', now() - interval '4 months', now() - interval '10 days'),
+    ('a1000000-0000-4000-8000-000000000704', 'a1000000-0000-4000-8000-000000000704', 'cliente.seed.04@example.invalid', '+5511988800014', 'Daniel Rocha', 'cliente', 'active', now() - interval '3 months', now() - interval '3 months', now() - interval '35 days'),
+    ('a1000000-0000-4000-8000-000000000705', 'a1000000-0000-4000-8000-000000000705', 'cliente.seed.05@example.invalid', '+5511988800015', 'Elisa Martins', 'cliente', 'active', now() - interval '2 months', now() - interval '2 months', now() - interval '1 day'),
+    ('a1000000-0000-4000-8000-000000000706', 'a1000000-0000-4000-8000-000000000706', 'cliente.seed.06@example.invalid', '+5511988800016', 'Felipe Torres', 'cliente', 'active', now() - interval '1 month', now() - interval '1 month', now() - interval '45 days');
 
   insert into public.patients (
     id,
@@ -2176,6 +2180,7 @@ begin
       display_name,
       role,
       status,
+      email_confirmed_at,
       created_at,
       updated_at
     )
@@ -2188,6 +2193,7 @@ begin
       'admin',
       'active',
       now(),
+      now(),
       now()
     );
   else
@@ -2198,6 +2204,7 @@ begin
       display_name = 'Admin Local',
       role = 'admin',
       status = 'active',
+      email_confirmed_at = coalesce(email_confirmed_at, now()),
       updated_at = now()
     where id = admin_profile_id;
   end if;

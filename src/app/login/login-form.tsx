@@ -4,15 +4,32 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { LoginView, type LoginCredentials } from "@/components/auth/login-view";
+import type { OfficialRole } from "@/lib/auth/identity-contracts";
 
 import { loginWithPassword } from "./actions";
 
 type NextLoginFormProps = {
+  expectedRole?: OfficialRole;
+  forgotPasswordHref?: string;
   initialErrorMessage?: string | null;
+  primaryAuxiliaryHref?: string;
+  primaryAuxiliaryLabel?: string;
+  roleLabel?: string;
+  subtitle?: string;
+  supportText?: string;
+  title?: string;
 };
 
 export function NextLoginForm({
+  expectedRole = "cliente",
+  forgotPasswordHref = "/login/esqueci-senha",
   initialErrorMessage = null,
+  primaryAuxiliaryHref = "/login/primeiro-acesso",
+  primaryAuxiliaryLabel = "Primeiro acesso",
+  roleLabel = "Cliente",
+  subtitle = "Acesse sua área de cliente para continuar",
+  supportText = "Clientes acessam somente contas ja vinculadas por um parceiro",
+  title = "Login do Cliente",
 }: NextLoginFormProps) {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(
@@ -26,7 +43,10 @@ export function NextLoginForm({
     setErrorMessage(null);
 
     startTransition(async () => {
-      const result = await loginWithPassword(credentials);
+      const result = await loginWithPassword({
+        ...credentials,
+        expectedRole,
+      });
 
       if (!result.ok) {
         setErrorMessage(result.message);
@@ -44,9 +64,15 @@ export function NextLoginForm({
       password={password}
       isLoading={isPending}
       errorMessage={errorMessage}
+      forgotPasswordHref={forgotPasswordHref}
       loginIdLabel="E-mail"
       loginIdPlaceholder="seu@email.com"
-      supportText="Acesso local por e-mail e senha"
+      primaryAuxiliaryHref={primaryAuxiliaryHref}
+      primaryAuxiliaryLabel={primaryAuxiliaryLabel}
+      roleLabel={roleLabel}
+      subtitle={subtitle}
+      supportText={supportText}
+      title={title}
       onLoginIdChange={setLoginId}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}

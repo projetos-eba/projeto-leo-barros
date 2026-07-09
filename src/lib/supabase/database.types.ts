@@ -2427,7 +2427,10 @@ export type Database = {
           created_at: string
           display_name: string
           email: string
+          email_confirmed_at: string | null
+          first_access_completed_at: string | null
           id: string
+          last_auth_flow_at: string | null
           phone: string | null
           role: string
           status: string
@@ -2438,7 +2441,10 @@ export type Database = {
           created_at?: string
           display_name: string
           email: string
+          email_confirmed_at?: string | null
+          first_access_completed_at?: string | null
           id?: string
+          last_auth_flow_at?: string | null
           phone?: string | null
           role: string
           status?: string
@@ -2449,7 +2455,10 @@ export type Database = {
           created_at?: string
           display_name?: string
           email?: string
+          email_confirmed_at?: string | null
+          first_access_completed_at?: string | null
           id?: string
+          last_auth_flow_at?: string | null
           phone?: string | null
           role?: string
           status?: string

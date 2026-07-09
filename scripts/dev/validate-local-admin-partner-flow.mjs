@@ -522,7 +522,7 @@ async function validateNextLoginWithPlaywright({ adminPassword, partnerPassword 
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
 
-    await adminPage.goto(`${LOCAL_NEXT_ORIGIN}/login`);
+    await adminPage.goto(`${LOCAL_NEXT_ORIGIN}/login/admin`);
     await adminPage.fill("#loginId", ADMIN_EMAIL);
     await adminPage.fill("#password", adminPassword);
     await adminPage.click('button[type="submit"]');
@@ -535,7 +535,7 @@ async function validateNextLoginWithPlaywright({ adminPassword, partnerPassword 
     const partnerContext = await browser.newContext();
     const partnerPage = await partnerContext.newPage();
 
-    await partnerPage.goto(`${LOCAL_NEXT_ORIGIN}/login`);
+    await partnerPage.goto(`${LOCAL_NEXT_ORIGIN}/login/parceiros`);
     await partnerPage.fill("#loginId", PARTNER_EMAIL);
     await partnerPage.fill("#password", partnerPassword);
     await partnerPage.click('button[type="submit"]');
