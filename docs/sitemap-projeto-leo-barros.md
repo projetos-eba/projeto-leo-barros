@@ -11,6 +11,7 @@ Este sitemap descreve a arquitetura alvo. Ele nao significa que todas as rotas j
 Rotas implementadas hoje no app Next:
 
 - `/login`;
+- `/planos`;
 - `/admin/clientes`;
 - `/admin/configuracoes`;
 - `/admin/dashboard`;
@@ -27,6 +28,9 @@ Rotas implementadas hoje no app Next:
 - `/parceiros/cadastros`;
 - `/parceiros/clientes`;
 - `/parceiros/clientes/:id`;
+- `/parceiros/checkout`;
+- `/parceiros/checkout/sucesso`;
+- `/parceiros/configuracoes/assinatura`;
 - `/parceiros/materiais`;
 - `/parceiros/materiais/:id`.
 
@@ -128,7 +132,7 @@ Objetivo: dar ao parceiro uma operacao clara para acompanhar clientes, prescreve
 | Agenda | `/parceiros/agenda` | N3 Calendario `/parceiros/agenda/calendario`; N4 Atendimento `/parceiros/agenda/:id`; N5 Detalhe do atendimento `/parceiros/agenda/:id/detalhes`. |
 | Materiais | `/parceiros/materiais` | N3 Biblioteca `/parceiros/materiais/biblioteca`; N4 Material educativo `/parceiros/materiais/:id`; N5 Enviar para cliente `/parceiros/materiais/:id/enviar`. |
 | Cadastros | `/parceiros/cadastros` | N3 Alimentos `/parceiros/cadastros/alimentos`; N4 Importacao nutricional `/parceiros/cadastros/alimentos/importar`; N5 TACO/TCBIO `/parceiros/cadastros/alimentos/importar/taco-tcbio`; N3 Treinos `/parceiros/cadastros/treinos`; N4 Exercicios `/parceiros/cadastros/treinos/exercicios`; N5 Novo exercicio `/parceiros/cadastros/treinos/exercicios/novo`. |
-| Configuracoes | `/parceiros/configuracoes` | N3 Perfil profissional `/parceiros/configuracoes/perfil`; N3 Preferencias `/parceiros/configuracoes/preferencias`; N4 Disponibilidade `/parceiros/configuracoes/disponibilidade`. |
+| Configuracoes | `/parceiros/configuracoes` | N3 Assinatura `/parceiros/configuracoes/assinatura`; N3 Perfil profissional `/parceiros/configuracoes/perfil`; N3 Preferencias `/parceiros/configuracoes/preferencias`; N4 Disponibilidade `/parceiros/configuracoes/disponibilidade`. |
 
 ### 4.3 Menu contextual do cliente
 

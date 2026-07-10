@@ -1,0 +1,7 @@
+interface:
+  display_name: "Leo Billing Stripe"
+  short_description: "Planos, assinaturas e cobranca Stripe"
+  default_prompt: "Use $leo-billing-stripe to maintain or evolve the Projeto Leo Barros billing domain."
+
+policy:
+  allow_implicit_invocation: true

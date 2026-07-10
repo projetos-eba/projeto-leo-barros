@@ -8,7 +8,12 @@ import { NextLoginForm } from "../login-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function PartnerLoginPage() {
+export default async function PartnerLoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ next?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
@@ -33,7 +38,11 @@ export default async function PartnerLoginPage() {
             supabase,
           });
 
-          redirect(hasActivePlan ? destination.destination : "/planos");
+          const requestedNext = params?.next;
+          const safeNext = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+            ? requestedNext
+            : "/planos";
+          redirect(hasActivePlan ? destination.destination : safeNext);
         }
 
         redirect(destination.destination);
@@ -45,6 +54,7 @@ export default async function PartnerLoginPage() {
     <NextLoginForm
       expectedRole="parceiro"
       forgotPasswordHref="/login/parceiros/esqueci-senha"
+      next={params?.next}
       primaryAuxiliaryHref="/login/parceiros/cadastro"
       primaryAuxiliaryLabel="Não tenho cadastro"
       roleLabel="Parceiro"

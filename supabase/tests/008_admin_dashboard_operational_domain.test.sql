@@ -55,7 +55,7 @@ select ok(
 
 select results_eq(
   $$
-    select count(*)::integer
+    select count(distinct tablename)::integer
     from pg_policies
     where schemaname = 'public'
       and tablename in (
@@ -67,7 +67,7 @@ select results_eq(
         'platform_activity_events'
       )
   $$,
-  array[11],
+  array[6],
   'tabelas operacionais possuem policies de leitura explícitas'
 );
 

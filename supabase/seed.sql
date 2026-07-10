@@ -197,7 +197,11 @@ begin
     billing_interval,
     price_cents,
     currency,
-    is_active
+    is_active,
+    lookup_key,
+    trial_days,
+    sort_order,
+    public_metadata
   )
   values (
     'a1000000-0000-4000-8000-000000000401',
@@ -206,7 +210,11 @@ begin
     'monthly',
     0,
     'brl',
-    true
+    true,
+    null,
+    0,
+    99,
+    '{"fixture": true}'::jsonb
   )
   on conflict (slug)
   do update set
@@ -214,9 +222,102 @@ begin
     billing_interval = excluded.billing_interval,
     price_cents = excluded.price_cents,
     currency = excluded.currency,
+    lookup_key = excluded.lookup_key,
+    trial_days = excluded.trial_days,
+    sort_order = excluded.sort_order,
+    public_metadata = excluded.public_metadata,
     is_active = true,
     updated_at = now()
   returning id into platform_plan_id;
+
+  insert into public.billing_plans (
+    id,
+    slug,
+    name,
+    billing_interval,
+    price_cents,
+    currency,
+    is_active,
+    lookup_key,
+    trial_days,
+    sort_order,
+    public_metadata
+  )
+  values
+    (
+      'a1000000-0000-4000-8000-000000000411',
+      'complete-monthly',
+      'Plano Completo - Nutricao + Treinamento',
+      'monthly',
+      11990,
+      'brl',
+      true,
+      'complete_monthly_brl',
+      7,
+      10,
+      '{"commercial": true}'::jsonb
+    ),
+    (
+      'a1000000-0000-4000-8000-000000000412',
+      'complete-annual',
+      'Plano Completo - Nutricao + Treinamento',
+      'yearly',
+      119880,
+      'brl',
+      true,
+      'complete_annual_brl',
+      7,
+      20,
+      '{"commercial": true, "annual_charge_cents": 119880, "monthly_equivalent_cents": 9990}'::jsonb
+    )
+  on conflict (slug)
+  do update set
+    name = excluded.name,
+    billing_interval = excluded.billing_interval,
+    price_cents = excluded.price_cents,
+    currency = excluded.currency,
+    is_active = true,
+    lookup_key = excluded.lookup_key,
+    trial_days = excluded.trial_days,
+    sort_order = excluded.sort_order,
+    public_metadata = excluded.public_metadata,
+    updated_at = now();
+
+  insert into public.billing_plan_addons (
+    id,
+    slug,
+    name,
+    lookup_key,
+    price_cents,
+    currency,
+    billing_interval,
+    stripe_interval,
+    usage_type,
+    is_active
+  )
+  values (
+    'a1000000-0000-4000-8000-000000000421',
+    'active-client-monthly',
+    'Cliente ativo adicional',
+    'active_client_monthly_brl',
+    199,
+    'brl',
+    'monthly',
+    'month',
+    'licensed',
+    true
+  )
+  on conflict (slug)
+  do update set
+    name = excluded.name,
+    lookup_key = excluded.lookup_key,
+    price_cents = excluded.price_cents,
+    currency = excluded.currency,
+    billing_interval = excluded.billing_interval,
+    stripe_interval = excluded.stripe_interval,
+    usage_type = excluded.usage_type,
+    is_active = true,
+    updated_at = now();
 
   update public.partner_subscriptions
   set
@@ -556,6 +657,75 @@ begin
     (target_partner_id, 'a1000000-0000-4000-8000-000000000304', 'dieta', 'active', now() - interval '3 months', null, now() - interval '3 months', now() - interval '35 days'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000305', 'treino', 'active', now() - interval '2 months', null, now() - interval '2 months', now() - interval '1 day'),
     (target_partner_id, 'a1000000-0000-4000-8000-000000000306', 'treino', 'disabled', now() - interval '6 months', now() - interval '1 month', now() - interval '6 months', now() - interval '1 month');
+
+  update public.partner_subscriptions
+  set
+    active_client_quantity = public.billing_active_client_count(target_partner_id),
+    last_quantity_synced_at = now(),
+    updated_at = now()
+  where id = 'a1000000-0000-4000-8000-000000000501';
+
+  insert into public.partner_subscription_items (
+    id,
+    subscription_id,
+    partner_id,
+    item_kind,
+    billing_plan_id,
+    lookup_key,
+    quantity,
+    unit_amount_cents,
+    currency,
+    current_period_start,
+    current_period_end
+  )
+  values (
+    'a1000000-0000-4000-8000-000000000511',
+    'a1000000-0000-4000-8000-000000000501',
+    target_partner_id,
+    'base_plan',
+    platform_plan_id,
+    'local_partner_access_fixture',
+    1,
+    0,
+    'brl',
+    now() - interval '20 days',
+    now() + interval '1 year'
+  )
+  on conflict (subscription_id, item_kind)
+  do update set
+    partner_id = excluded.partner_id,
+    billing_plan_id = excluded.billing_plan_id,
+    lookup_key = excluded.lookup_key,
+    quantity = excluded.quantity,
+    unit_amount_cents = excluded.unit_amount_cents,
+    updated_at = now();
+
+  insert into public.billing_active_client_snapshots (
+    id,
+    partner_id,
+    subscription_id,
+    active_client_quantity,
+    unit_amount_cents,
+    amount_cents,
+    reason,
+    metadata
+  )
+  values (
+    'a1000000-0000-4000-8000-000000000521',
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000501',
+    public.billing_active_client_count(target_partner_id),
+    199,
+    public.billing_active_client_count(target_partner_id) * 199,
+    'manual_reconcile',
+    '{"fixture": true}'::jsonb
+  )
+  on conflict (id)
+  do update set
+    active_client_quantity = excluded.active_client_quantity,
+    amount_cents = excluded.amount_cents,
+    captured_at = now(),
+    metadata = excluded.metadata;
 
   insert into public.partner_custom_plans (
     id,

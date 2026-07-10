@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 import { AccessBlocked } from "@/components/auth/access-blocked";
 import { AuthenticatedShell } from "@/components/shells/authenticated-shell";
 import { requireShellRole, getCurrentProfile } from "@/lib/auth/next-guards";
 import { partnerHasActivePlan } from "@/lib/auth/partner-plan-access";
+import { isBillingManagementPath } from "@/lib/billing/entitlement";
 import { createClient } from "@/lib/supabase/server";
 
 type ParceirosLayoutProps = {
@@ -31,13 +33,15 @@ export default async function ParceirosLayout({ children }: ParceirosLayoutProps
 
   const { profile } = await getCurrentProfile();
   if (profile?.role === "parceiro") {
+    const headerList = await headers();
+    const pathname = headerList.get("x-current-pathname") ?? "";
     const supabase = await createClient();
     const hasActivePlan = await partnerHasActivePlan({
       profileId: profile.id,
       supabase,
     });
 
-    if (!hasActivePlan) {
+    if (!hasActivePlan && !isBillingManagementPath(pathname)) {
       redirect("/planos");
     }
   }

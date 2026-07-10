@@ -20,3 +20,21 @@ verify_jwt = false
 
 [functions.update-password-with-token]
 verify_jwt = false
+
+[functions.billing-create-setup-intent]
+verify_jwt = true
+
+[functions.billing-create-subscription]
+verify_jwt = true
+
+[functions.billing-customer-portal]
+verify_jwt = true
+
+[functions.billing-sync-active-clients]
+verify_jwt = true
+
+[functions.stripe-bootstrap-catalog]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false

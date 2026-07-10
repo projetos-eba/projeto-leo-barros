@@ -15,6 +15,7 @@ type NextLoginFormProps = {
   primaryAuxiliaryHref?: string;
   primaryAuxiliaryLabel?: string;
   roleLabel?: string;
+  next?: string;
   subtitle?: string;
   supportText?: string;
   title?: string;
@@ -27,6 +28,7 @@ export function NextLoginForm({
   primaryAuxiliaryHref = "/login/primeiro-acesso",
   primaryAuxiliaryLabel = "Primeiro acesso",
   roleLabel = "Cliente",
+  next,
   subtitle = "Acesse sua área de cliente para continuar",
   supportText = "Clientes acessam somente contas ja vinculadas por um parceiro",
   title = "Login do Cliente",
@@ -46,6 +48,7 @@ export function NextLoginForm({
       const result = await loginWithPassword({
         ...credentials,
         expectedRole,
+        next,
       });
 
       if (!result.ok) {

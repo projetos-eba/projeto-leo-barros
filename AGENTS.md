@@ -30,6 +30,7 @@ Arquivos principais:
 - `docs/page-profiles/**`: contratos funcionais de telas aprovadas.
 - `docs/sitemap-projeto-leo-barros.md`: referencia de rotas e nomenclatura.
 - `.codex/skills/projeto-leo-barros-auth/SKILL.md`: skill operacional para fluxos de autenticacao segmentados.
+- `.codex/skills/leo-billing-stripe/SKILL.md`: skill operacional para planos, Stripe Billing, checkout, webhooks e entitlement financeiro.
 
 ## Papel do Codex
 
@@ -104,7 +105,7 @@ Regras obrigatorias:
 - dados estruturais ficam em migrations versionadas;
 - dados de sistema, fixtures e smoke local ficam em `supabase/seed.sql`;
 - a tela deve ler dados via camada server-side quando o Page Profile exigir;
-- Stripe e billing real permanecem futuros enquanto nao houver configuracao aprovada.
+- Stripe Billing esta arquitetado para homologacao por credenciais. Sem chaves reais, o app deve exibir estado seguro de pagamentos em configuracao e nunca simular sucesso do provedor.
 
 Variaveis publicas client-side:
 - `NEXT_PUBLIC_SUPABASE_URL`

@@ -24,6 +24,8 @@ Permitir que o Super Admin acompanhe receita recorrente, assinaturas, inadimplen
 
 - MRR considera assinaturas ativas/trialing de profissionais com `profiles.role = 'parceiro'` e `profiles.status = 'active'`.
 - Planos anuais sao mensalizados para MRR.
+- O adicional por Cliente ativo entra no MRR usando `partner_subscriptions.active_client_quantity * 199`.
+- A quantidade de Clientes ativos e reconciliada pela funcao canonica `billing_active_client_count`.
 - ARR = MRR x 12.
 - Assinaturas ativas seguem a mesma regra efetiva usada na Visao Geral e em Profissionais.
 - Inadimplencia considera cobrancas vencidas com status `failed` ou `pending`.
@@ -31,7 +33,7 @@ Permitir que o Super Admin acompanhe receita recorrente, assinaturas, inadimplen
 - Na tabela de assinaturas, `trialing`, `past_due`, `incomplete` e `pending` aparecem como `Pendente`; nao ha status visual de teste.
 - KPIs financeiros mantêm cards com altura alinhada.
 - Layout desktop usa duas colunas independentes: coluna principal para evolucao/tabela e coluna lateral para distribuicoes/renovacoes.
-- Stripe permanece apenas como campos opcionais no banco; nao ha checkout, webhook ou secret nesta fase.
+- Stripe possui arquitetura preparada por Edge Functions, webhook e catalogo, mas a homologacao real depende das credenciais.
 
 ## Estados
 
@@ -46,4 +48,4 @@ Permitir que o Super Admin acompanhe receita recorrente, assinaturas, inadimplen
 
 - Definir fluxo real de `Criar plano`.
 - Expandir exportacao se for necessario um relatorio financeiro auditavel alem do CSV visivel.
-- Definir billing/webhooks quando Stripe for ativado.
+- Executar homologacao Stripe real conforme `docs/runbooks/stripe-homologation.md` quando as credenciais forem adicionadas.

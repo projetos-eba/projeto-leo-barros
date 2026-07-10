@@ -24,6 +24,7 @@ export type LoginActionResult =
 export async function loginWithPassword(credentials: {
   expectedRole?: OfficialRole;
   loginId: string;
+  next?: string;
   password: string;
 }): Promise<LoginActionResult> {
   const normalized = normalizeEmailPasswordLogin(credentials);
@@ -104,7 +105,9 @@ export async function loginWithPassword(credentials: {
 
     return {
       ok: true,
-      destination: hasActivePlan ? destination.destination : "/planos",
+      destination: hasActivePlan
+        ? safePostLoginPath(credentials.next, destination.destination)
+        : safePostLoginPath(credentials.next, "/planos"),
     };
   }
 
@@ -112,6 +115,18 @@ export async function loginWithPassword(credentials: {
     ok: true,
     destination: destination.destination,
   };
+}
+
+function safePostLoginPath(value: string | undefined, fallback: string) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return fallback;
+  }
+
+  if (value.startsWith("/parceiros/checkout") || value.startsWith("/parceiros/configuracoes/assinatura")) {
+    return value;
+  }
+
+  return fallback;
 }
 
 export async function logout() {

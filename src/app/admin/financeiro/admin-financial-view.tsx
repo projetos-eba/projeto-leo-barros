@@ -183,7 +183,7 @@ export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
         <div className="grid min-w-0 gap-6">
           <Panel className="p-[22px]">
             <SectionHeader
-              info="MRR soma o valor mensalizado das assinaturas ativas de profissionais ativos. Receita nova soma assinaturas iniciadas em cada mês."
+              info="MRR soma o valor mensalizado do plano-base e o adicional por Clientes ativos das assinaturas de profissionais ativos. Receita nova soma assinaturas iniciadas em cada mês."
               subtitle="Acompanhe a evolução da receita mensal recorrente nos últimos 12 meses."
               title="Evolução da receita recorrente (MRR)"
             />
@@ -225,7 +225,7 @@ export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
 
           <Panel className="p-[22px]">
             <SectionHeader
-              info="Agrupa a receita mensalizada das assinaturas ativas pelo ciclo do plano: mensal ou anual."
+              info="Agrupa a receita mensalizada do plano-base e do adicional por Clientes ativos pelo ciclo do plano: mensal ou anual."
               subtitle="Separação da base por ciclo comercial."
               title="Distribuição por ciclo de cobrança"
             />
