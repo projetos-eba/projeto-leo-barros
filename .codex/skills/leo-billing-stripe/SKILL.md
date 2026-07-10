@@ -47,8 +47,22 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `profiles.status` nao representa inadimplencia.
 - Secrets nunca no browser.
 - Nunca confiar em Price ID, quantidade, valor ou trial vindo do cliente.
+- SetupIntent deve omitir `payment_method_types`; usar metodos dinamicos Stripe.
+- `stripe-bootstrap-catalog` valida catalogo oficial existente e nao cria Products/Prices.
 - RPC de trial fica restrito a `service_role`.
 - Contagem faturavel via RPC autenticada deve respeitar RLS.
+
+## Catalogo Stripe Homologado
+
+- API Stripe: `2026-06-24.dahlia`.
+- Produto principal: `prod_UrR2wxpxk9UJxV`, `Plano Completo — Nutrição + Treinamento`.
+- Mensal: `price_1TriAiPELBIpM2MneLhOLwW4`, `complete_monthly_brl`, BRL 11990, `month`.
+- Anual: `price_1TriAiPELBIpM2Mn7s4EpKt5`, `complete_annual_brl`, BRL 119880, `year`.
+- Produto adicional: `prod_UrRGM5chV5eXLU`, `Cliente ativo adicional`.
+- Adicional: `price_1TriNoPELBIpM2MnQRkRINCT`, `active_client_monthly_brl`, BRL 199, `month`, `licensed`, `per_unit`.
+- IDs oficiais podem existir server-side para validacao/homologacao; nunca enviar Price ID pelo browser.
+- Validar catalogo real com `RUN_STRIPE_E2E=1 npm run test:billing:stripe`.
+- Reconciliar apenas nome mutavel de Product com `RUN_STRIPE_E2E=1 BILLING_RECONCILE_PRODUCT_NAMES=1 npm run test:billing:stripe`.
 
 ## Arquivos Criticos
 
@@ -81,6 +95,17 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `invoice.finalized`: registra snapshot de Clientes ativos usado na cobranca.
 - `invoice.payment_failed`: marca assinatura como `past_due` e registra pagamento `failed` quando houver PaymentIntent.
 - `invoice.payment_action_required`: marca assinatura como `past_due` e registra pagamento `pending` quando houver PaymentIntent.
+- Eventos desconhecidos: registrar como `ignored` e retornar 2xx.
+- Eventos duplicados: retornar 2xx sem novo efeito de negocio.
+- Eventos fora de ordem: comparar `event.created` com `partner_subscriptions.stripe_last_event_created_at`.
+
+## Stripe CLI Local
+
+```bash
+stripe listen --events setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+```
+
+O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o valor; atualizar apenas o runtime local e reiniciar `supabase functions serve --env-file supabase/functions/.env`.
 - `invoice.paid`: marca assinatura como `active` e registra pagamento `succeeded` quando houver PaymentIntent.
 
 ## Validacao
@@ -94,6 +119,7 @@ git diff --check
 ```
 
 Adicionar validacoes Edge, Deno e Playwright desktop/mobile para mudancas em checkout, webhook, entitlement ou Admin Financeiro.
+Para Edge Functions alteradas, executar `deno check supabase/functions/<nome>/index.ts`.
 
 ## Regra De Manutencao Obrigatoria
 

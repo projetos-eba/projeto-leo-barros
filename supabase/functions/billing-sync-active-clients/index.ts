@@ -2,19 +2,22 @@ import {
   activeClientCount,
   ACTIVE_CLIENT_UNIT_CENTS,
   ADDON_LOOKUP_KEY,
+  forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
-  jsonHeaders,
+  getValidatedBillingCatalog,
   jsonResponse,
-  resolvePriceByLookupKey,
+  optionsResponse,
+  originIsAllowed,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response(null, { headers: jsonHeaders, status: 204 });
+  if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } });
+    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
   }
+  if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
   const stripe = getStripeClient();
   if (!stripe) return stripeNotConfiguredResponse();
@@ -29,10 +32,7 @@ Deno.serve(async (request) => {
       .order("created_at", { ascending: true })
       .limit(10);
 
-    const addonPrice = await resolvePriceByLookupKey(stripe, ADDON_LOOKUP_KEY);
-    if (!addonPrice) {
-      return jsonResponse(409, { error: { code: "CATALOG_NOT_READY", message: "Catalogo Stripe ainda nao preparado." } });
-    }
+    const { addonPrice } = await getValidatedBillingCatalog(stripe);
 
     let processed = 0;
     for (const job of jobs ?? []) {
@@ -54,15 +54,15 @@ Deno.serve(async (request) => {
       const remoteSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id, {
         expand: ["items.data.price"],
       });
-      const addonItem = remoteSubscription.items.data.find((item) => item.price.lookup_key === ADDON_LOOKUP_KEY);
+      let addonItem = remoteSubscription.items.data.find((item) => item.price.lookup_key === ADDON_LOOKUP_KEY);
 
       if (addonItem) {
-        await stripe.subscriptionItems.update(addonItem.id, {
+        addonItem = await stripe.subscriptionItems.update(addonItem.id, {
           proration_behavior: "none",
           quantity,
         });
       } else if (quantity > 0) {
-        await stripe.subscriptionItems.create({
+        addonItem = await stripe.subscriptionItems.create({
           price: addonPrice.id,
           proration_behavior: "none",
           quantity,
@@ -74,6 +74,12 @@ Deno.serve(async (request) => {
         active_client_quantity: quantity,
         last_quantity_synced_at: new Date().toISOString(),
       }).eq("id", subscription.id);
+
+      await supabase.from("partner_subscription_items").update({
+        quantity,
+        stripe_subscription_item_id: addonItem?.id ?? null,
+        unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
+      }).eq("subscription_id", subscription.id).eq("item_kind", "active_client_addon");
 
       await supabase.from("billing_active_client_snapshots").insert({
         active_client_quantity: quantity,
@@ -92,9 +98,9 @@ Deno.serve(async (request) => {
       processed += 1;
     }
 
-    return jsonResponse(200, { processed });
+    return jsonResponse(200, { processed }, request);
   } catch (error) {
     console.error(JSON.stringify({ code: "BILLING_SYNC_ACTIVE_CLIENTS_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "SYNC_FAILED", message: "Nao foi possivel reconciliar Clientes ativos." } });
+    return jsonResponse(500, { error: { code: "SYNC_FAILED", message: "Nao foi possivel reconciliar Clientes ativos." } }, request);
   }
 });

@@ -1,24 +1,25 @@
 import {
   ADDON_LOOKUP_KEY,
-  ACTIVE_CLIENT_UNIT_CENTS,
+  forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
-  jsonHeaders,
+  getValidatedBillingCatalog,
   jsonResponse,
+  OFFICIAL_STRIPE_PRICES,
+  OFFICIAL_STRIPE_PRODUCTS,
+  optionsResponse,
+  originIsAllowed,
   PLAN_LOOKUP_KEYS,
   requireAdmin,
-  resolvePriceByLookupKey,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 
-const productName = "Plano Completo - Nutricao + Treinamento";
-const addonName = "Cliente ativo adicional";
-
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response(null, { headers: jsonHeaders, status: 204 });
+  if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } });
+    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
   }
+  if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
   const stripe = getStripeClient();
   if (!stripe) return stripeNotConfiguredResponse();
@@ -28,52 +29,34 @@ Deno.serve(async (request) => {
     const adminAccess = await requireAdmin(request, supabase);
     if ("error" in adminAccess) return adminAccess.error as Response;
 
-    const baseProduct = await stripe.products.create({ name: productName }, { idempotencyKey: "product:complete-plan" });
-    const addonProduct = await stripe.products.create({ name: addonName }, { idempotencyKey: "product:active-client-addon" });
+    const catalog = await getValidatedBillingCatalog(stripe, { reconcileProductNames: true });
 
-    const desiredPrices = [
-      { interval: "month" as const, lookupKey: PLAN_LOOKUP_KEYS["complete-monthly"], product: baseProduct.id, slug: "complete-monthly", unitAmount: 11990 },
-      { interval: "year" as const, lookupKey: PLAN_LOOKUP_KEYS["complete-annual"], product: baseProduct.id, slug: "complete-annual", unitAmount: 119880 },
-      { interval: "month" as const, lookupKey: ADDON_LOOKUP_KEY, product: addonProduct.id, slug: "active-client-monthly", unitAmount: ACTIVE_CLIENT_UNIT_CENTS },
-    ];
+    await supabase.from("billing_plans").update({
+      stripe_price_id: catalog.planPrices["complete-monthly"].id,
+      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+    }).eq("slug", "complete-monthly");
 
-    for (const desired of desiredPrices) {
-      let price = await resolvePriceByLookupKey(stripe, desired.lookupKey);
-      if (price && (price.currency !== "brl" || price.unit_amount !== desired.unitAmount || price.recurring?.interval !== desired.interval)) {
-        return jsonResponse(409, {
-          error: {
-            code: "PRICE_DIVERGENCE",
-            message: `Price incompatível para lookup key ${desired.lookupKey}.`,
-          },
-        });
-      }
+    await supabase.from("billing_plans").update({
+      stripe_price_id: catalog.planPrices["complete-annual"].id,
+      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+    }).eq("slug", "complete-annual");
 
-      if (!price) {
-        price = await stripe.prices.create({
-          currency: "brl",
-          lookup_key: desired.lookupKey,
-          product: desired.product,
-          recurring: { interval: desired.interval, usage_type: "licensed" },
-          unit_amount: desired.unitAmount,
-        });
-      }
+    await supabase.from("billing_plan_addons").update({
+      stripe_price_id: catalog.addonPrice.id,
+      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.activeClientAddon.id,
+    }).eq("slug", "active-client-monthly");
 
-      if (desired.slug === "active-client-monthly") {
-        await supabase.from("billing_plan_addons").update({
-          stripe_price_id: price.id,
-          stripe_product_id: desired.product,
-        }).eq("slug", desired.slug);
-      } else {
-        await supabase.from("billing_plans").update({
-          stripe_price_id: price.id,
-          stripe_product_id: desired.product,
-        }).eq("slug", desired.slug);
-      }
-    }
-
-    return jsonResponse(200, { success: true });
+    return jsonResponse(200, {
+      catalog: {
+        addon: OFFICIAL_STRIPE_PRICES["active-client-monthly"].id,
+        annual: OFFICIAL_STRIPE_PRICES["complete-annual"].id,
+        monthly: OFFICIAL_STRIPE_PRICES["complete-monthly"].id,
+      },
+      lookupKeys: [PLAN_LOOKUP_KEYS["complete-monthly"], PLAN_LOOKUP_KEYS["complete-annual"], ADDON_LOOKUP_KEY],
+      success: true,
+    }, request);
   } catch (error) {
     console.error(JSON.stringify({ code: "STRIPE_BOOTSTRAP_CATALOG_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "BOOTSTRAP_FAILED", message: "Nao foi possivel preparar o catalogo Stripe." } });
+    return jsonResponse(500, { error: { code: "BOOTSTRAP_FAILED", message: "Nao foi possivel reconciliar o catalogo Stripe." } }, request);
   }
 });

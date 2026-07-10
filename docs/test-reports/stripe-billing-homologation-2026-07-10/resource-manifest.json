@@ -1,0 +1,39 @@
+{
+  "apiVersion": "2026-06-24.dahlia",
+  "generatedAt": "2026-07-10T19:03:13.467Z",
+  "resources": [
+    {
+      "active": true,
+      "id": "prod_UrR2wxpxk9UJxV",
+      "livemode": false,
+      "object": "product"
+    },
+    {
+      "active": true,
+      "id": "prod_UrRGM5chV5eXLU",
+      "livemode": false,
+      "object": "product"
+    },
+    {
+      "active": true,
+      "id": "price_1TriAiPELBIpM2MneLhOLwW4",
+      "livemode": false,
+      "lookup_key": "complete_monthly_brl",
+      "object": "price"
+    },
+    {
+      "active": true,
+      "id": "price_1TriAiPELBIpM2Mn7s4EpKt5",
+      "livemode": false,
+      "lookup_key": "complete_annual_brl",
+      "object": "price"
+    },
+    {
+      "active": true,
+      "id": "price_1TriNoPELBIpM2MnQRkRINCT",
+      "livemode": false,
+      "lookup_key": "active_client_monthly_brl",
+      "object": "price"
+    }
+  ]
+}

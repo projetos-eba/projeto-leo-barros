@@ -1,4 +1,4 @@
-export const STRIPE_API_VERSION = "2025-06-30.basil";
+export const STRIPE_API_VERSION = "2026-06-24.dahlia";
 
 export const BILLING_TRIAL_DAYS = 7;
 export const ACTIVE_CLIENT_ADDON_UNIT_CENTS = 199;

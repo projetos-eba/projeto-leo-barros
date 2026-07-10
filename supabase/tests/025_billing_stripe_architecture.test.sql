@@ -10,6 +10,8 @@ select ok(to_regprocedure('public.billing_public_plans()') is not null, 'RPC pub
 select ok(to_regclass('public.billing_sync_outbox') is not null, 'outbox de billing existe');
 select ok(to_regclass('public.stripe_webhook_events') is not null, 'ledger de webhook existe');
 select ok(to_regclass('public.billing_active_client_snapshots') is not null, 'snapshots de Clientes ativos existem');
+select has_column('public', 'stripe_webhook_events', 'stripe_event_created_at', 'ledger guarda created do evento Stripe');
+select has_column('public', 'partner_subscriptions', 'stripe_last_event_created_at', 'assinatura guarda ultimo evento Stripe aplicado');
 select ok(
   not has_function_privilege('anon', 'public.billing_active_client_count(uuid)', 'execute'),
   'anon nao executa contagem faturavel de outro Parceiro'
@@ -83,6 +85,16 @@ select ok(
       and policyname = 'partner_subscription_items_select_admin_or_own_partner'
   ),
   'itens de assinatura usam policy SELECT consolidada'
+);
+select ok(
+  exists (
+    select 1
+    from pg_indexes
+    where schemaname = 'public'
+      and tablename = 'partner_subscriptions'
+      and indexname = 'partner_subscriptions_stripe_last_event_created_idx'
+  ),
+  'assinaturas possuem indice para decisao de evento Stripe fora de ordem'
 );
 
 insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)

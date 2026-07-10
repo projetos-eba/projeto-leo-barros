@@ -1,18 +1,21 @@
 import {
+  forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
-  jsonHeaders,
   jsonResponse,
+  optionsResponse,
+  originIsAllowed,
   requirePartner,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 import { buildAppUrl } from "../_shared/env.ts";
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response(null, { headers: jsonHeaders, status: 204 });
+  if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } });
+    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
   }
+  if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
   const stripe = getStripeClient();
   if (!stripe) return stripeNotConfiguredResponse();
@@ -32,7 +35,7 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (!subscription?.stripe_customer_id) {
-      return jsonResponse(404, { error: { code: "CUSTOMER_NOT_FOUND", message: "Customer Stripe nao encontrado." } });
+      return jsonResponse(404, { error: { code: "CUSTOMER_NOT_FOUND", message: "Customer Stripe nao encontrado." } }, request);
     }
 
     const portalSession = await stripe.billingPortal.sessions.create({
@@ -40,9 +43,9 @@ Deno.serve(async (request) => {
       return_url: buildAppUrl("/parceiros/configuracoes/assinatura", {}),
     });
 
-    return jsonResponse(200, { url: portalSession.url });
+    return jsonResponse(200, { url: portalSession.url }, request);
   } catch (error) {
     console.error(JSON.stringify({ code: "BILLING_CUSTOMER_PORTAL_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "PORTAL_FAILED", message: "Nao foi possivel abrir o portal de cobranca." } });
+    return jsonResponse(500, { error: { code: "PORTAL_FAILED", message: "Nao foi possivel abrir o portal de cobranca." } }, request);
   }
 });

@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.98.0";
 import Stripe from "npm:stripe";
 
-export const STRIPE_API_VERSION = "2025-06-30.basil";
+export const STRIPE_API_VERSION = "2026-06-24.dahlia";
 export const TRIAL_DAYS = 7;
 export const ACTIVE_CLIENT_UNIT_CENTS = 199;
 
@@ -14,19 +14,107 @@ export const PLAN_LOOKUP_KEYS: Record<BillingPlanSlug, string> = {
 
 export const ADDON_LOOKUP_KEY = "active_client_monthly_brl";
 
+export const OFFICIAL_STRIPE_PRODUCTS = {
+  complete: {
+    id: "prod_UrR2wxpxk9UJxV",
+    name: "Plano Completo \u2014 Nutri\u00e7\u00e3o + Treinamento",
+  },
+  activeClientAddon: {
+    id: "prod_UrRGM5chV5eXLU",
+    name: "Cliente ativo adicional",
+  },
+} as const;
+
+export const OFFICIAL_STRIPE_PRICES = {
+  "complete-monthly": {
+    billingScheme: "per_unit",
+    currency: "brl",
+    id: "price_1TriAiPELBIpM2MneLhOLwW4",
+    interval: "month",
+    lookupKey: PLAN_LOOKUP_KEYS["complete-monthly"],
+    productId: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+    unitAmount: 11990,
+    usageType: "licensed",
+  },
+  "complete-annual": {
+    billingScheme: "per_unit",
+    currency: "brl",
+    id: "price_1TriAiPELBIpM2Mn7s4EpKt5",
+    interval: "year",
+    lookupKey: PLAN_LOOKUP_KEYS["complete-annual"],
+    productId: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+    unitAmount: 119880,
+    usageType: "licensed",
+  },
+  "active-client-monthly": {
+    billingScheme: "per_unit",
+    currency: "brl",
+    id: "price_1TriNoPELBIpM2MnQRkRINCT",
+    interval: "month",
+    lookupKey: ADDON_LOOKUP_KEY,
+    productId: OFFICIAL_STRIPE_PRODUCTS.activeClientAddon.id,
+    unitAmount: ACTIVE_CLIENT_UNIT_CENTS,
+    usageType: "licensed",
+  },
+} as const;
+
+function allowedOrigins() {
+  return (Deno.env.get("BILLING_ALLOWED_ORIGINS") ?? "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+export function originIsAllowed(request: Request) {
+  const origin = request.headers.get("origin");
+  return !origin || allowedOrigins().includes(origin);
+}
+
+export function corsHeadersForRequest(request?: Request) {
+  const origins = allowedOrigins();
+  const origin = request?.headers.get("origin");
+  const allowedOrigin = origin && origins.includes(origin) ? origin : origins[0] ?? "http://localhost:3000";
+
+  return {
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Cache-Control": "no-store",
+    "Content-Type": "application/json",
+    "Vary": "Origin",
+  };
+}
+
 export const jsonHeaders = {
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Origin": Deno.env.get("BILLING_ALLOWED_ORIGINS")?.split(",")[0]?.trim() || "http://localhost:3000",
   "Cache-Control": "no-store",
   "Content-Type": "application/json",
+  "Vary": "Origin",
 };
 
-export function jsonResponse(status: number, body: Record<string, unknown>) {
+export function jsonResponse(status: number, body: Record<string, unknown>, request?: Request) {
   return new Response(JSON.stringify(body), {
-    headers: jsonHeaders,
+    headers: corsHeadersForRequest(request),
     status,
   });
+}
+
+export function optionsResponse(request: Request) {
+  return new Response(null, {
+    headers: corsHeadersForRequest(request),
+    status: originIsAllowed(request) ? 204 : 403,
+  });
+}
+
+export function forbiddenOriginResponse(request: Request) {
+  return jsonResponse(403, {
+    error: {
+      code: "ORIGIN_NOT_ALLOWED",
+      message: "Origem nao autorizada para billing.",
+    },
+  }, request);
 }
 
 export function stripeNotConfiguredResponse() {
@@ -124,4 +212,77 @@ export async function resolvePriceByLookupKey(stripe: Stripe, lookupKey: string)
     lookup_keys: [lookupKey],
   });
   return prices.data[0] ?? null;
+}
+
+function productId(value: string | Stripe.Product | Stripe.DeletedProduct) {
+  return typeof value === "string" ? value : value.id;
+}
+
+function assertTestMode(livemode: boolean | undefined, objectId: string) {
+  if (livemode) {
+    throw new Error(`LIVE_MODE_OBJECT:${objectId}`);
+  }
+}
+
+async function validateProduct(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_PRODUCTS[keyof typeof OFFICIAL_STRIPE_PRODUCTS], reconcileName: boolean) {
+  const product = await stripe.products.retrieve(expected.id);
+  assertTestMode(product.livemode, expected.id);
+  if (!product.active) throw new Error(`INACTIVE_PRODUCT:${expected.id}`);
+
+  if (product.name !== expected.name) {
+    if (!reconcileName) throw new Error(`PRODUCT_NAME_MISMATCH:${expected.id}`);
+    return await stripe.products.update(expected.id, { name: expected.name });
+  }
+
+  return product;
+}
+
+async function validatePrice(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_PRICES[keyof typeof OFFICIAL_STRIPE_PRICES]) {
+  const price = await stripe.prices.retrieve(expected.id);
+  assertTestMode(price.livemode, expected.id);
+
+  const lookupMatches = await stripe.prices.list({
+    active: true,
+    limit: 100,
+    lookup_keys: [expected.lookupKey],
+  });
+  if (lookupMatches.data.some((candidate) => candidate.livemode)) {
+    throw new Error(`LIVE_MODE_LOOKUP:${expected.lookupKey}`);
+  }
+  const activeIds = lookupMatches.data.map((candidate) => candidate.id);
+  if (activeIds.length !== 1 || activeIds[0] !== expected.id) {
+    throw new Error(`LOOKUP_KEY_CONFLICT:${expected.lookupKey}`);
+  }
+
+  if (
+    !price.active ||
+    productId(price.product) !== expected.productId ||
+    price.unit_amount !== expected.unitAmount ||
+    price.currency !== expected.currency ||
+    price.recurring?.interval !== expected.interval ||
+    price.recurring?.usage_type !== expected.usageType ||
+    price.lookup_key !== expected.lookupKey ||
+    price.billing_scheme !== expected.billingScheme
+  ) {
+    throw new Error(`PRICE_DIVERGENCE:${expected.id}`);
+  }
+
+  return price;
+}
+
+export async function getValidatedBillingCatalog(stripe: Stripe, options: { reconcileProductNames?: boolean } = {}) {
+  await validateProduct(stripe, OFFICIAL_STRIPE_PRODUCTS.complete, Boolean(options.reconcileProductNames));
+  await validateProduct(stripe, OFFICIAL_STRIPE_PRODUCTS.activeClientAddon, Boolean(options.reconcileProductNames));
+
+  const monthly = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["complete-monthly"]);
+  const annual = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["complete-annual"]);
+  const activeClientAddon = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["active-client-monthly"]);
+
+  return {
+    addonPrice: activeClientAddon,
+    planPrices: {
+      "complete-monthly": monthly,
+      "complete-annual": annual,
+    },
+  };
 }

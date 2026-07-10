@@ -1,6 +1,6 @@
 # ADR - Checkout Stripe Com Mixed Intervals
 
-Data: 09 de julho de 2026.
+Data: 10 de julho de 2026.
 
 ## Problema
 
@@ -18,13 +18,17 @@ Usar Stripe Payment Element com SetupIntent e criar a assinatura no backend pela
 
 ## Detalhes
 
-- API Stripe fixada no codigo: `2025-06-30.basil`.
+- API Stripe fixada no codigo: `2026-06-24.dahlia`.
 - Mixed intervals exigem `billing_mode[type]=flexible`.
 - Trial de 7 dias com metodo de pagamento salvo previamente.
 - Promotion Codes sao resolvidos no backend.
 - Quantidade e sempre recalculada por `billing_active_client_count`.
 - Atualizacoes de quantidade usam `proration_behavior=none`.
 - Webhook assinado e ledger `stripe_webhook_events` cuidam da reconciliacao.
+- Catalogo oficial de teste e validado por IDs e lookup keys antes de criar assinatura.
+- Bootstrap de catalogo nao cria Product/Price; apenas valida recursos existentes e reconcilia nome mutavel de Product quando seguro.
+- SetupIntent omite `payment_method_types` para preservar metodos dinamicos da Stripe.
+- Webhook registra eventos ignorados e impede regressao por evento antigo usando `stripe_last_event_created_at`.
 
 ## Consequencias
 
