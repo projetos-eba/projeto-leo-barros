@@ -1,0 +1,7 @@
+{
+  "httpStatus": 200,
+  "ok": true,
+  "hasUrl": true,
+  "urlHost": "billing.stripe.com",
+  "errorCode": null
+}

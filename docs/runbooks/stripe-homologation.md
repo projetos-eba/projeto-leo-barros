@@ -64,6 +64,8 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - Cartao aprovado, recusado e 3DS de teste.
 - Webhooks assinados, duplicados, invalidos e desconhecidos.
 - Alteracao de Clientes ativos e `billing-sync-active-clients` com `proration_behavior=none`.
+- `billing-sync-active-clients` deve ser chamado apenas por processo interno usando Bearer da service role local; nunca pelo browser.
+- Antes de analisar invoices/snapshots de quantidade, confirmar que o sync processou jobs coalescidos por Parceiro para evitar duplicidade de updates no mesmo run.
 - Customer Portal e cancelamento.
 - `/parceiros/configuracoes/assinatura`.
 - `/admin/financeiro`.

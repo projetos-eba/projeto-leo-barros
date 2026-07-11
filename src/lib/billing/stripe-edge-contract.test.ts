@@ -33,4 +33,21 @@ describe("stripe edge contract", () => {
     expect(sync).toContain('proration_behavior: "none"');
     expect(subscription).toContain('proration_behavior: "none"');
   });
+
+  it("protege sincronizacao interna de quantidade com service role", () => {
+    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+    const sync = read("supabase/functions/billing-sync-active-clients/index.ts");
+
+    expect(shared).toContain("requireServiceRoleRequest");
+    expect(shared).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(sync).toContain("requireServiceRoleRequest(request)");
+  });
+
+  it("coalesce jobs de quantidade por Parceiro antes de chamar Stripe", () => {
+    const sync = read("supabase/functions/billing-sync-active-clients/index.ts");
+
+    expect(sync).toContain("const jobsByPartner = new Map<string, string[]>()");
+    expect(sync).toContain("for (const [partnerId, jobIds] of jobsByPartner)");
+    expect(sync).toContain('.in("id", jobIds)');
+  });
 });

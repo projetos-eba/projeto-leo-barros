@@ -40,12 +40,14 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Sem proporcionalidade.
 - Contagem distinta por `patient_id`.
 - Quantidade calculada no backend.
+- Sync de quantidade deve coalescer jobs por Parceiro antes de chamar Stripe para evitar atualizacoes e snapshots duplicados.
 - Payment Element + SetupIntent.
 - Assinatura criada pela Subscriptions API.
 - Mixed intervals exigem `billing_mode=flexible`.
 - Webhook reconcilia estado local.
 - `profiles.status` nao representa inadimplencia.
 - Secrets nunca no browser.
+- `billing-sync-active-clients` e interno e exige Bearer da service role; o browser nao pode acionar sincronizacao global de outbox.
 - Nunca confiar em Price ID, quantidade, valor ou trial vindo do cliente.
 - SetupIntent deve omitir `payment_method_types`; usar metodos dinamicos Stripe.
 - `stripe-bootstrap-catalog` valida catalogo oficial existente e nao cria Products/Prices.
@@ -86,6 +88,12 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `supabase/functions/billing-customer-portal/index.ts`
 - `supabase/functions/stripe-bootstrap-catalog/index.ts`
 - `supabase/functions/stripe-webhook/index.ts`
+
+## UI De Planos
+
+- `/planos` deve preservar os slugs `complete-monthly` e `complete-annual` nos CTAs.
+- Cards de plano devem manter a faixa `+ R$ 1,99/mes por Cliente ativo` visualmente separada do CTA por estrutura de layout, sem colar no botao em desktop, tablet ou mobile.
+- O rodape de `/planos` deve focar confianca no pagamento: Pagamento seguro, Processado pela Stripe e Dados protegidos, sem prometer seguranca absoluta ou certificacao nao comprovada.
 
 ## Event Matrix
 

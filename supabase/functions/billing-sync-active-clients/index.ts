@@ -9,6 +9,7 @@ import {
   jsonResponse,
   optionsResponse,
   originIsAllowed,
+  requireServiceRoleRequest,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 
@@ -18,6 +19,8 @@ Deno.serve(async (request) => {
     return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
+  const internalAccess = requireServiceRoleRequest(request);
+  if ("error" in internalAccess) return internalAccess.error as Response;
 
   const stripe = getStripeClient();
   if (!stripe) return stripeNotConfiguredResponse();
@@ -35,22 +38,31 @@ Deno.serve(async (request) => {
     const { addonPrice } = await getValidatedBillingCatalog(stripe);
 
     let processed = 0;
+    let processedPartners = 0;
+    const jobsByPartner = new Map<string, string[]>();
     for (const job of jobs ?? []) {
+      const jobIds = jobsByPartner.get(job.partner_id) ?? [];
+      jobIds.push(job.id);
+      jobsByPartner.set(job.partner_id, jobIds);
+    }
+
+    for (const [partnerId, jobIds] of jobsByPartner) {
       const { data: subscription } = await supabase
         .from("partner_subscriptions")
         .select("id, stripe_subscription_id")
-        .eq("partner_id", job.partner_id)
+        .eq("partner_id", partnerId)
         .in("status", ["trialing", "active", "past_due", "incomplete"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (!subscription?.stripe_subscription_id) {
-        await supabase.from("billing_sync_outbox").update({ processed_at: new Date().toISOString(), status: "succeeded" }).eq("id", job.id);
+        await supabase.from("billing_sync_outbox").update({ processed_at: new Date().toISOString(), status: "succeeded" }).in("id", jobIds);
+        processed += jobIds.length;
         continue;
       }
 
-      const quantity = await activeClientCount(supabase, job.partner_id);
+      const quantity = await activeClientCount(supabase, partnerId);
       const remoteSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id, {
         expand: ["items.data.price"],
       });
@@ -84,7 +96,7 @@ Deno.serve(async (request) => {
       await supabase.from("billing_active_client_snapshots").insert({
         active_client_quantity: quantity,
         amount_cents: quantity * ACTIVE_CLIENT_UNIT_CENTS,
-        partner_id: job.partner_id,
+        partner_id: partnerId,
         reason: "quantity_sync",
         stripe_subscription_id: subscription.stripe_subscription_id,
         subscription_id: subscription.id,
@@ -94,11 +106,12 @@ Deno.serve(async (request) => {
       await supabase.from("billing_sync_outbox").update({
         processed_at: new Date().toISOString(),
         status: "succeeded",
-      }).eq("id", job.id);
-      processed += 1;
+      }).in("id", jobIds);
+      processed += jobIds.length;
+      processedPartners += 1;
     }
 
-    return jsonResponse(200, { processed }, request);
+    return jsonResponse(200, { processed, processedPartners }, request);
   } catch (error) {
     console.error(JSON.stringify({ code: "BILLING_SYNC_ACTIVE_CLIENTS_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
     return jsonResponse(500, { error: { code: "SYNC_FAILED", message: "Nao foi possivel reconciliar Clientes ativos." } }, request);

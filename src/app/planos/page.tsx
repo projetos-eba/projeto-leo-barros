@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import { Check, ShieldCheck, Sparkles, UsersRound } from "lucide-react";
+import { Check, CreditCard, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getCurrentProfile } from "@/lib/auth/next-guards";
@@ -20,9 +20,21 @@ const benefits = [
 ];
 
 const planHighlights: Array<{ description: string; Icon: LucideIcon; title: string }> = [
-  { description: "O metodo de pagamento e salvo antes do inicio do teste gratuito.", Icon: ShieldCheck, title: "Trial seguro" },
-  { description: "A cobranca adicional usa Clientes unicos ativos, sem duplicar escopos.", Icon: UsersRound, title: "Clientes ativos" },
-  { description: "Mudancas de quantidade afetam somente o proximo ciclo.", Icon: Check, title: "Sem proporcionalidade" },
+  {
+    description: "Seus pagamentos sao realizados em ambiente protegido e com tecnologia de seguranca avancada.",
+    Icon: ShieldCheck,
+    title: "Pagamento seguro",
+  },
+  {
+    description: "Os pagamentos sao processados pela Stripe, plataforma global especializada em pagamentos digitais.",
+    Icon: CreditCard,
+    title: "Processado pela Stripe",
+  },
+  {
+    description: "Os dados do cartao sao enviados diretamente ao provedor de pagamento e nao ficam armazenados na plataforma.",
+    Icon: LockKeyhole,
+    title: "Dados protegidos",
+  },
 ];
 
 async function resolveCtaHref(planSlug: string) {
@@ -64,50 +76,54 @@ function PlanCard({
         highlighted ? "border-[#2d9cff] ring-1 ring-[#2d9cff]/40" : "border-[#28485b]",
       )}
     >
-      {highlighted ? (
-        <div className="absolute right-4 top-4 rounded-full border border-[#2d9cff]/55 bg-[#0a2c48] px-3 py-1 text-[12px] font-bold text-[#9fd2ff]">
-          Mais vantajoso
+      <div className="flex flex-1 flex-col">
+        {highlighted ? (
+          <div className="absolute right-4 top-4 rounded-full border border-[#2d9cff]/55 bg-[#0a2c48] px-3 py-1 text-[12px] font-bold text-[#9fd2ff]">
+            Mais vantajoso
+          </div>
+        ) : null}
+        <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">
+          Plano Completo
+        </p>
+        <h2 className="mt-3 text-[25px] font-bold leading-[31px] text-[#f5f9fc]">
+          {isAnnual ? "Anual" : "Mensal"}
+        </h2>
+        <div className="mt-8">
+          <p className="text-[38px] font-bold leading-none text-white">
+            {isAnnual ? "R$ 99,90/mes" : "R$ 119,90"}
+          </p>
+          <p className="mt-2 text-[14px] text-[#94aabb]">
+            {isAnnual ? "R$ 1.198,80 cobrados anualmente" : "por mes"}
+          </p>
         </div>
-      ) : null}
-      <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">
-        Plano Completo
-      </p>
-      <h2 className="mt-3 text-[25px] font-bold leading-[31px] text-[#f5f9fc]">
-        {isAnnual ? "Anual" : "Mensal"}
-      </h2>
-      <div className="mt-8">
-        <p className="text-[38px] font-bold leading-none text-white">
-          {isAnnual ? "R$ 99,90/mes" : "R$ 119,90"}
+        {isAnnual ? (
+          <p className="mt-4 inline-flex w-fit rounded-[6px] bg-[#1d8b46]/20 px-3 py-1 text-[13px] font-semibold text-[#76e199]">
+            Economize cerca de {annualSavingsPercent().toString().replace(".", ",")}%
+          </p>
+        ) : null}
+        <p className="mt-6 flex items-center gap-2 text-[15px] font-semibold text-[#d9e6ee]">
+          <Sparkles className="size-4 text-[#58d881]" />
+          {BILLING_TRIAL_DAYS} dias gratis
         </p>
-        <p className="mt-2 text-[14px] text-[#94aabb]">
-          {isAnnual ? "R$ 1.198,80 cobrados anualmente" : "por mes"}
-        </p>
+        <ul className="mt-6 grid gap-3 text-[14px] text-[#b7c7d2]">
+          {benefits.map((benefit) => (
+            <li className="flex items-center gap-3" key={benefit}>
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#123548] text-[#67d982]">
+                <Check className="size-3.5" />
+              </span>
+              {benefit}
+            </li>
+          ))}
+        </ul>
       </div>
-      {isAnnual ? (
-        <p className="mt-4 inline-flex w-fit rounded-[6px] bg-[#1d8b46]/20 px-3 py-1 text-[13px] font-semibold text-[#76e199]">
-          Economize cerca de {annualSavingsPercent().toString().replace(".", ",")}%
-        </p>
-      ) : null}
-      <p className="mt-6 flex items-center gap-2 text-[15px] font-semibold text-[#d9e6ee]">
-        <Sparkles className="size-4 text-[#58d881]" />
-        {BILLING_TRIAL_DAYS} dias gratis
-      </p>
-      <ul className="mt-6 grid gap-3 text-[14px] text-[#b7c7d2]">
-        {benefits.map((benefit) => (
-          <li className="flex items-center gap-3" key={benefit}>
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#123548] text-[#67d982]">
-              <Check className="size-3.5" />
-            </span>
-            {benefit}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-6 rounded-[8px] border border-[#31536a] bg-[#0b2230] p-4 text-[13px] leading-5 text-[#b8c8d2]">
-        + {formatCurrencyCents(199)}/mes por Cliente ativo
-      </div>
-      <Button asChild className="mt-auto h-11 rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]">
-        <Link href={ctaHref}>Comecar teste gratis</Link>
-      </Button>
+      <footer className="mt-6 flex flex-col gap-4">
+        <div className="rounded-[8px] border border-[#31536a] bg-[#0b2230] p-4 text-[13px] leading-5 text-[#b8c8d2]">
+          + {formatCurrencyCents(199)}/mes por Cliente ativo
+        </div>
+        <Button asChild className="h-11 rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]">
+          <Link href={ctaHref}>Comecar teste gratis</Link>
+        </Button>
+      </footer>
     </article>
   );
 }
@@ -138,7 +154,7 @@ export default async function PlansPage() {
 
         <section className="mt-8 grid gap-4 md:grid-cols-3">
           {planHighlights.map(({ description, Icon, title }) => (
-            <div className="rounded-[8px] border border-[#28485b] bg-[#0d2635]/72 p-5" key={title}>
+            <div className="flex h-full flex-col rounded-[8px] border border-[#28485b] bg-[#0d2635]/72 p-5" key={title}>
               <Icon className="size-5 text-[#5db7ef]" />
               <h2 className="mt-4 text-[16px] font-bold text-[#eaf2f7]">{title}</h2>
               <p className="mt-2 text-[13px] leading-5 text-[#94aabb]">{description}</p>

@@ -19,3 +19,5 @@ Apresentar o Plano Completo para visitantes e Parceiros, preservando o plano esc
 - Catalogo local seguro funciona sem Stripe.
 - CTA preserva `complete-monthly` ou `complete-annual`.
 - Layout responsivo em cards comparativos.
+- Cards de plano separam conteudo principal, faixa de adicional e CTA por estrutura flex, mantendo espaco consistente entre a faixa `+ R$ 1,99/mes por Cliente ativo` e o botao.
+- Rodape usa tres cards de confianca em pagamento: Pagamento seguro, Processado pela Stripe e Dados protegidos.

@@ -1,0 +1,67 @@
+{
+  "addonQuantity": 9,
+  "invoiceCount": 4,
+  "invoices": [
+    {
+      "id": "in_1TrkdMPELBIpM2MnDWM9biE8",
+      "status": "paid",
+      "billing_reason": "subscription_update",
+      "amount_due": 0,
+      "total": 0,
+      "lines": [
+        {
+          "amount": 0,
+          "quantity": 9,
+          "description": "Free trial for 9 × Cliente ativo adicional"
+        }
+      ]
+    },
+    {
+      "id": "in_1TrkcRPELBIpM2MnZvwtTY8w",
+      "status": "paid",
+      "billing_reason": "subscription_update",
+      "amount_due": 0,
+      "total": 0,
+      "lines": [
+        {
+          "amount": 0,
+          "quantity": 11,
+          "description": "Free trial for 11 × Cliente ativo adicional"
+        }
+      ]
+    },
+    {
+      "id": "in_1TrkbKPELBIpM2MnszWiEQHu",
+      "status": "paid",
+      "billing_reason": "subscription_update",
+      "amount_due": 0,
+      "total": 0,
+      "lines": [
+        {
+          "amount": 0,
+          "quantity": 12,
+          "description": "Free trial for 12 × Cliente ativo adicional"
+        }
+      ]
+    },
+    {
+      "id": "in_1TrkUwPELBIpM2MnUQ1GjhHJ",
+      "status": "paid",
+      "billing_reason": "subscription_create",
+      "amount_due": 0,
+      "total": 0,
+      "lines": [
+        {
+          "amount": 0,
+          "quantity": 1,
+          "description": "Free trial for 1 × Plano Completo — Nutrição + Treinamento"
+        },
+        {
+          "amount": 0,
+          "quantity": 10,
+          "description": "Free trial for 10 × Cliente ativo adicional"
+        }
+      ]
+    }
+  ]
+}

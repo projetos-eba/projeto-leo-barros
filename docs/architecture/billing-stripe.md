@@ -28,7 +28,7 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 5. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code.
 6. Assinatura e criada server-side via Subscriptions API com `billing_mode[type]=flexible`, API `2026-06-24.dahlia`.
 7. Webhook `stripe-webhook` reconcilia status, invoice e snapshots.
-8. `billing-sync-active-clients` processa outbox e atualiza quantidade com `proration_behavior=none`.
+8. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
 
 ## Webhook E Pagamentos
 
@@ -56,6 +56,8 @@ A estrategia implementada preserva item licenciado com quantidade `0` quando ele
 ## Sem Proporcionalidade
 
 Toda sincronizacao usa quantidade total recalculada e `proration_behavior: "none"`. Nao ha incremento/decremento cego, invoice item manual ou ajuste proporcional.
+
+`billing-sync-active-clients` e um endpoint interno: exige `Authorization: Bearer <service role local>` alem de CORS/origin quando `Origin` esta presente. O navegador nunca deve chamar essa funcao. A funcao coalesce jobs pendentes por Parceiro antes de chamar Stripe, evitando updates e snapshots duplicados para a mesma quantidade.
 
 ## Catalogo E Credenciais
 

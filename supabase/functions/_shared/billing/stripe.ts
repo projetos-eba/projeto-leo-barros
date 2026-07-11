@@ -192,6 +192,25 @@ export async function requireAdmin(request: Request, supabase: SupabaseClient) {
   return { profile };
 }
 
+export function requireServiceRoleRequest(request: Request) {
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+  const authorization = request.headers.get("authorization") ?? "";
+  const token = authorization.replace(/^Bearer\s+/i, "").trim();
+
+  if (!serviceRoleKey || token !== serviceRoleKey) {
+    return {
+      error: jsonResponse(403, {
+        error: {
+          code: "FORBIDDEN",
+          message: "Acesso interno nao autorizado.",
+        },
+      }, request),
+    };
+  }
+
+  return { ok: true };
+}
+
 export function parsePlanSlug(value: unknown): BillingPlanSlug | null {
   return value === "complete-monthly" || value === "complete-annual" ? value : null;
 }
