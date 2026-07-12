@@ -8,6 +8,8 @@ Data de referencia: 10 de julho de 2026.
 - Nunca imprimir `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, service role, JWT, client secret ou dados de cartao.
 - Confirmar prefixos: `pk_test` para public key e `sk_test` ou `rk_test` para chave server-side.
 - Abortar qualquer escrita se uma resposta Stripe retornar `livemode=true`.
+- Usar Supabase MCP local quando disponivel para inspecionar tabelas, webhooks, snapshots e RLS. O endpoint local esperado e `http://127.0.0.1:54321/mcp`.
+- Usar Playwright MCP para cliques reais, console, network, screenshots desktop/mobile e validacao visual. O servidor esta configurado em `.mcp.json` via `@playwright/mcp`; se o cliente MCP da sessao nao expuser o servidor, registrar a limitacao e usar Playwright local/headless somente como fallback.
 
 ## Catalogo Oficial
 
@@ -44,7 +46,14 @@ RUN_STRIPE_E2E=1 BILLING_RECONCILE_PRODUCT_NAMES=1 npm run test:billing:stripe
 2. `npx supabase db reset`
 3. `npx supabase functions serve --env-file supabase/functions/.env`
 4. `npm run dev`
-5. Iniciar Stripe CLI:
+5. Validar MCPs locais:
+
+```bash
+npm run mcp:playwright:check
+npm run mcp:supabase:check
+```
+
+6. Iniciar Stripe CLI:
 
 ```bash
 stripe listen --events setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook

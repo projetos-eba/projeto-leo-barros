@@ -6,7 +6,9 @@ import {
   getAdminClient,
   getStripeClient,
   getValidatedBillingCatalog,
+  hasForbiddenClientDiscountField,
   jsonResponse,
+  normalizePromotionCode,
   OFFICIAL_STRIPE_PRICES,
   optionsResponse,
   originIsAllowed,
@@ -34,7 +36,20 @@ Deno.serve(async (request) => {
     const body = await request.json().catch(() => ({}));
     const planSlug = parsePlanSlug(body.planSlug);
     const setupIntentId = typeof body.setupIntentId === "string" ? body.setupIntentId : "";
-    const couponCode = typeof body.couponCode === "string" ? body.couponCode.trim() : "";
+    if (hasForbiddenClientDiscountField(body)) {
+      return jsonResponse(400, {
+        error: {
+          code: "INVALID_DISCOUNT_PAYLOAD",
+          message: "Dados de desconto invalidos.",
+        },
+      }, request);
+    }
+
+    const promotionCodeInput = normalizePromotionCode(body.promotionCode ?? body.couponCode);
+    if ("error" in promotionCodeInput) {
+      return jsonResponse(400, { error: promotionCodeInput.error }, request);
+    }
+    const promotionCodeText = promotionCodeInput.code;
 
     if (!planSlug || !setupIntentId) {
       return jsonResponse(400, { error: { code: "INVALID_PAYLOAD", message: "Dados de checkout invalidos." } }, request);
@@ -75,25 +90,27 @@ Deno.serve(async (request) => {
     const addonPrice = catalog.addonPrice;
 
     let promotionCodeId: string | undefined;
-    if (couponCode) {
+    if (promotionCodeText) {
       const promotionCodes = await stripe.promotionCodes.list({
         active: true,
-        code: couponCode,
+        code: promotionCodeText,
         limit: 1,
       });
-      const promotionCode = promotionCodes.data[0];
-      if (!promotionCode) {
-        return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Cupom invalido ou expirado." } }, request);
+      const resolvedPromotionCode = promotionCodes.data[0];
+      if (!resolvedPromotionCode) {
+        return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Codigo promocional invalido ou indisponivel." } }, request);
       }
-      if (promotionCode.livemode) throw new Error(`LIVE_MODE_OBJECT:${promotionCode.id}`);
-      promotionCodeId = promotionCode.id;
+      if (resolvedPromotionCode.livemode) throw new Error(`LIVE_MODE_OBJECT:${resolvedPromotionCode.id}`);
+      promotionCodeId = resolvedPromotionCode.id;
     }
 
     const quantity = await activeClientCount(supabase, partnerAccess.partner.id);
     const items = [
       { price: basePrice.id, quantity: 1 },
-      { price: addonPrice.id, quantity },
     ];
+    if (quantity > 0) {
+      items.push({ price: addonPrice.id, quantity });
+    }
 
     const subscription = await stripe.subscriptions.create({
       billing_mode: { type: "flexible" },
@@ -161,7 +178,7 @@ Deno.serve(async (request) => {
     const baseItem = subscription.items.data.find((item) => item.price.id === basePrice.id);
     const addonItem = subscription.items.data.find((item) => item.price.id === addonPrice.id);
 
-    await supabase.from("partner_subscription_items").upsert([
+    const subscriptionItems: Record<string, unknown>[] = [
       {
         billing_plan_id: localPlan.data.id,
         currency: OFFICIAL_STRIPE_PRICES[planSlug].currency,
@@ -175,7 +192,10 @@ Deno.serve(async (request) => {
         subscription_id: localSubscription.id,
         unit_amount_cents: OFFICIAL_STRIPE_PRICES[planSlug].unitAmount,
       },
-      {
+    ];
+
+    if (quantity > 0 || addonItem) {
+      subscriptionItems.push({
         billing_addon_id: localAddon.data.id,
         currency: "brl",
         current_period_end: trialEnd.toISOString(),
@@ -187,8 +207,10 @@ Deno.serve(async (request) => {
         stripe_subscription_item_id: addonItem?.id ?? null,
         subscription_id: localSubscription.id,
         unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
-      },
-    ], { onConflict: "subscription_id,item_kind" });
+      });
+    }
+
+    await supabase.from("partner_subscription_items").upsert(subscriptionItems, { onConflict: "subscription_id,item_kind" });
 
     await supabase.from("partner_billing_trial_usage").insert({
       first_subscription_id: localSubscription.id,

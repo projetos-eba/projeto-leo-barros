@@ -30,6 +30,7 @@ const verificationPurposes = new Set([
   "partner_signup",
   "admin_approval",
 ]);
+const RESEND_COOLDOWN_SECONDS = 60;
 
 type RequestBody = {
   profileId?: unknown;
@@ -105,7 +106,9 @@ Deno.serve(async (request) => {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, user_id, email, display_name, role")
+      .select(
+        "id, user_id, email, display_name, role, email_confirmed_at, last_auth_flow_at",
+      )
       .eq("id", profileId)
       .maybeSingle();
 
@@ -117,6 +120,33 @@ Deno.serve(async (request) => {
     }
 
     const now = new Date().toISOString();
+    if (profile.email_confirmed_at) {
+      return response(200, {
+        success: true,
+        delivery: "already_confirmed",
+      });
+    }
+
+    if (profile.last_auth_flow_at) {
+      const secondsSinceLastSend = Math.floor(
+        (Date.now() - new Date(profile.last_auth_flow_at).getTime()) / 1000,
+      );
+
+      if (
+        secondsSinceLastSend >= 0 &&
+        secondsSinceLastSend < RESEND_COOLDOWN_SECONDS
+      ) {
+        return response(429, {
+          success: false,
+          error: {
+            message: `Aguarde ${
+              RESEND_COOLDOWN_SECONDS - secondsSinceLastSend
+            }s para reenviar.`,
+          },
+        });
+      }
+    }
+
     const flags = getAuthEmailFlags();
 
     if (flags.automaticallyConfirmed) {

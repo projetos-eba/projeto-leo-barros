@@ -145,6 +145,20 @@ Scripts oficiais:
 - `npm run db:stop`
 - `npm run validate:admin-partner-flow`
 
+## MCP Local
+
+O workspace possui configuracao MCP versionada em `.mcp.json`.
+
+Servidores configurados:
+- `playwright`: usa `@playwright/mcp` instalado em `devDependencies`, roda headless e grava saidas em `.playwright-mcp`.
+- `supabase-local`: usa o endpoint local da Supabase CLI em `http://127.0.0.1:54321/mcp`.
+
+Regras:
+- Para inspecionar schema, migrations, tabelas, RLS, dados locais e documentacao Supabase, usar Supabase MCP quando a ferramenta estiver disponivel. A documentacao oficial da Supabase indica que o MCP local fica em `/mcp` na stack local.
+- Para smoke visual/interativo, console, network, foco, teclado e screenshots de rotas web, usar Playwright MCP quando exposto pelo cliente MCP. Se o cliente atual nao expuser o servidor, registrar a limitacao e usar Playwright local/headless apenas como fallback.
+- Validar disponibilidade local com `npm run mcp:playwright:check` e, com Supabase local ativo, `npm run mcp:supabase:check`.
+- Nao conectar MCP a producao nem expor secrets em configuracoes, logs ou relatorios.
+
 Para codigo, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir.
 
 Vitest permanece intencionalmente no projeto como runner de testes. A presenca transitiva de Vite em `node_modules` via Vitest nao significa que a aplicacao use Vite como runtime.

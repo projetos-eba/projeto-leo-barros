@@ -9,6 +9,9 @@ Apresentar o Plano Completo para visitantes e Parceiros, preservando o plano esc
 ## Regras
 
 - Visitante segue para `/login/parceiros?next=/parceiros/checkout?plan=...`.
+- Se o visitante ainda nao tem conta e usa "Nao tenho cadastro", o `next` do
+  checkout deve ser preservado no cadastro de Parceiro e consumido apos
+  confirmacao/autenticacao.
 - Parceiro sem assinatura segue para checkout.
 - Parceiro com assinatura ativa/trial segue para `/parceiros/configuracoes/assinatura`.
 - Cliente e Admin nao contratam em nome proprio.

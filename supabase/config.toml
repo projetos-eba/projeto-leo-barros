@@ -3,6 +3,15 @@ project_id = "bwyiuwxjzvssbjfzazhe"
 [functions.provision-partner]
 verify_jwt = true
 
+[functions.signup-partner]
+verify_jwt = false
+
+[functions.complete-client-first-access]
+verify_jwt = false
+
+[functions.check-email-verification-status]
+verify_jwt = false
+
 [functions.provision-client-for-partner]
 verify_jwt = true
 

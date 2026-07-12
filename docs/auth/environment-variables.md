@@ -74,16 +74,25 @@ Data de referencia: 2026-07-09.
 
 ## SUPABASE_SERVICE_ROLE_KEY
 
-- Runtime: Supabase Edge Functions e, enquanto houver dependencia legada, Next
-  Server Actions server-only.
+- Runtime: Supabase Edge Functions e scripts locais de desenvolvimento que
+  inspecionam ou semeiam fixtures.
 - Obrigatoria: sim para operacoes privilegiadas.
 - Segredo: sim.
-- Local: `.env.local` para Next server e runtime local das Edge Functions quando
-  necessario.
-- Producao: secrets server-side, nunca client-side.
-- Ausente: operacoes administrativas falham.
-- Risco: nunca prefixar com `NEXT_PUBLIC_`, nunca importar modulo admin em Client
-  Components e nunca imprimir o valor.
+- Local: `supabase/functions/.env` ou ambiente do Supabase local/CLI.
+- Producao: secrets das Edge Functions, nunca ambiente publico do app.
+- Ausente: operacoes privilegiadas nas Edge Functions falham com erro
+  sanitizado.
+- Risco: nunca prefixar com `NEXT_PUBLIC_`, nunca colocar no `.env.local` do
+  Next, nunca importar client admin no app Next e nunca imprimir o valor.
+
+## Regra de arquitetura Next
+
+- O app Next usa apenas `NEXT_PUBLIC_SUPABASE_URL` e
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para clientes Supabase.
+- Server Actions de auth devem chamar Edge Functions para operacoes
+  privilegiadas; elas nao podem carregar `SUPABASE_SERVICE_ROLE_KEY`.
+- Cadastro publico de Parceiro usa `signup-partner`.
+- Primeiro acesso de Cliente usa `complete-client-first-access`.
 
 ## Validacao Local
 

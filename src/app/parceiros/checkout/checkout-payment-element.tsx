@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import type { BillingPlanSlug } from "@/lib/billing/catalog";
+import { stripeElementsAppearance } from "@/lib/billing/stripe-appearance";
 
 type CheckoutPaymentElementProps = {
   planSlug: BillingPlanSlug;
@@ -24,7 +25,7 @@ function PaymentForm({ clientSecret, planSlug }: { clientSecret: string; planSlu
   const elements = useElements();
   const router = useRouter();
   const stripe = useStripe();
-  const [couponCode, setCouponCode] = useState("");
+  const [promotionCode, setPromotionCode] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -49,8 +50,8 @@ function PaymentForm({ clientSecret, planSlug }: { clientSecret: string; planSlu
       const supabase = createClient();
       const { data, error } = await supabase.functions.invoke("billing-create-subscription", {
         body: {
-          couponCode: couponCode.trim() || undefined,
           planSlug,
+          promotionCode: promotionCode.trim() || undefined,
           setupIntentId: setupResult.setupIntent?.id,
         },
       });
@@ -66,18 +67,21 @@ function PaymentForm({ clientSecret, planSlug }: { clientSecret: string; planSlu
   }
 
   return (
-    <div className="space-y-5">
-      <PaymentElement />
+    <div className="w-full min-w-0 space-y-5">
+      <div className="w-full min-w-0">
+        <PaymentElement className="w-full" options={{ layout: "tabs" }} />
+      </div>
       <div className="grid gap-2">
         <label className="text-[13px] font-semibold text-[#cbd8e1]" htmlFor="coupon">
-          Cupom promocional
+          Codigo promocional
         </label>
         <Input
           className="border-[#31536a] bg-[#071923] text-[#f1f6fa]"
           id="coupon"
+          maxLength={64}
           placeholder="Opcional"
-          value={couponCode}
-          onChange={(event) => setCouponCode(event.target.value)}
+          value={promotionCode}
+          onChange={(event) => setPromotionCode(event.target.value)}
         />
       </div>
       {errorMessage ? (
@@ -91,10 +95,10 @@ function PaymentForm({ clientSecret, planSlug }: { clientSecret: string; planSlu
         type="button"
         onClick={submit}
       >
-        {isPending ? "Confirmando..." : "Iniciar teste gratis"}
+        {isPending ? "Confirmando..." : "Iniciar periodo de teste gratis"}
       </Button>
       <p className="text-[12px] leading-5 text-[#8ca1af]">
-        O trial comeca somente depois que o metodo de pagamento for salvo com sucesso.
+        O periodo de teste comeca somente depois que o metodo de pagamento for salvo com sucesso.
       </p>
     </div>
   );
@@ -137,7 +141,14 @@ export function CheckoutPaymentElement({ planSlug, publishableKey }: CheckoutPay
   }
 
   return (
-    <Elements options={{ clientSecret: setupIntent.clientSecret, locale: "pt-BR" }} stripe={stripePromise}>
+    <Elements
+      options={{
+        appearance: stripeElementsAppearance,
+        clientSecret: setupIntent.clientSecret,
+        locale: "pt-BR",
+      }}
+      stripe={stripePromise}
+    >
       <PaymentForm clientSecret={setupIntent.clientSecret} planSlug={planSlug} />
     </Elements>
   );

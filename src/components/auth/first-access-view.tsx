@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Lock, Mail } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { requestFirstAccess } from "@/app/login/account-actions";
@@ -9,30 +9,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { AuthCardShell } from "./auth-card-shell";
+import { EmailVerificationPendingView } from "./email-verification-pending-view";
 
 export function FirstAccessView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] = useState<{
+    email: string;
+    loginHref: string;
+    message: string;
+    password: string;
+    profileId: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  if (message) {
+  if (pendingVerification) {
     return (
-      <AuthCardShell
-        backHref="/login"
-        backLabel="Ir para o login"
+      <EmailVerificationPendingView
+        autoLogin={{
+          password: pendingVerification.password,
+        }}
+        email={pendingVerification.email}
+        loginHref={pendingVerification.loginHref}
+        message={pendingVerification.message}
+        profileId={pendingVerification.profileId}
+        role="cliente"
         title="Senha criada"
-        subtitle="Confirme seu e-mail para liberar o acesso de Cliente."
-      >
-        <div className="space-y-5 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <CheckCircle2 className="h-8 w-8 text-primary" />
-          </div>
-          <p className="text-sm leading-6 text-muted-foreground">{message}</p>
-        </div>
-      </AuthCardShell>
+      />
     );
   }
 
@@ -56,7 +61,14 @@ export function FirstAccessView() {
             });
 
             if (result.ok) {
-              setMessage(result.message);
+              const submittedPassword = password;
+              setPendingVerification({
+                email: result.verification?.email ?? email,
+                loginHref: result.verification?.loginHref ?? "/login",
+                message: result.message,
+                password: submittedPassword,
+                profileId: result.verification?.profileId ?? "",
+              });
             } else {
               setError(result.message);
             }

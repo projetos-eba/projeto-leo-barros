@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CreditCard, Info, ShieldCheck, UsersRound } from "lucide-react";
+import { CreditCard, Info, LockKeyhole, ShieldCheck } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { CheckoutPaymentElement } from "./checkout-payment-element";
 import { Button } from "@/components/ui/button";
@@ -24,19 +25,20 @@ export default async function PartnerCheckoutPage({
   const configured = stripeIsConfigured();
 
   return (
-    <main className="min-h-screen bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] md:px-8 lg:px-[43px] lg:py-[35px]">
+    <main className="mx-auto w-full max-w-6xl px-5 py-6 text-[#f1f6fa] md:px-8 lg:px-0 lg:py-[35px]">
       <header className="border-b border-[#244454]/70 pb-6">
         <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Checkout</p>
         <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">
           Iniciar teste gratis
         </h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
-          Salve um metodo de pagamento para iniciar {BILLING_TRIAL_DAYS} dias gratuitos. A assinatura e criada no backend apos a confirmacao do SetupIntent.
+          Salve um metodo de pagamento para iniciar {BILLING_TRIAL_DAYS} dias gratuitos de periodo de teste. A assinatura sera ativada apos a confirmacao do pagamento.
         </p>
       </header>
 
-      <section className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="rounded-[8px] border border-[#2b4a5d]/90 bg-[#0d2635]/80 p-6">
+      <section className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(620px,1fr)_420px]">
+        <div className="min-w-0 rounded-[8px] border border-[#2b4a5d]/90 bg-[#0d2635]/80 p-6 md:p-8">
+          <h2 className="mb-5 text-[18px] font-bold text-[#eaf2f7]">Pagamento</h2>
           {!configured ? (
             <div className="rounded-[8px] border border-[#b16a06]/55 bg-[#2e2511] p-5 text-[#f1c36d]">
               <div className="flex items-start gap-3">
@@ -53,10 +55,22 @@ export default async function PartnerCheckoutPage({
             <CheckoutPaymentElement planSlug={planSlug} publishableKey={publishableKey} />
           )}
 
-          <div className="mt-6 grid gap-3 text-[13px] text-[#9fb1be]">
-            <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-[#58d881]" /> Metodo salvo via Stripe Payment Element.</p>
-            <p className="flex items-center gap-2"><CreditCard className="size-4 text-[#5db7ef]" /> Cartao nao trafega pelo backend do Projeto Leo Barros.</p>
-            <p className="flex items-center gap-2"><UsersRound className="size-4 text-[#5db7ef]" /> Quantidade recalculada no banco: {activeClientCount} Clientes ativos.</p>
+          <div className="mt-7 grid gap-4 border-t border-[#244454]/70 pt-5 text-[13px] text-[#9fb1be] md:grid-cols-3">
+            <TrustItem
+              icon={<ShieldCheck className="size-4 text-[#58d881]" />}
+              title="Pagamento seguro"
+              description="Seus dados de pagamento sao protegidos durante todo o processo."
+            />
+            <TrustItem
+              icon={<CreditCard className="size-4 text-[#5db7ef]" />}
+              title="Processado pela Stripe"
+              description="O pagamento e processado pela Stripe, plataforma especializada em pagamentos digitais."
+            />
+            <TrustItem
+              icon={<LockKeyhole className="size-4 text-[#5db7ef]" />}
+              title="Dados protegidos"
+              description="Os dados do cartao sao enviados diretamente ao provedor de pagamento e nao ficam armazenados na plataforma."
+            />
           </div>
         </div>
 
@@ -68,12 +82,18 @@ export default async function PartnerCheckoutPage({
               <span className="font-semibold text-[#f1f6fa]">{formatCurrencyCents(estimate.planCents)}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-[#9fb1be]">Clientes ativos ({activeClientCount} x R$ 1,99)</span>
+              <span className="text-[#9fb1be]">Clientes ativos</span>
+              <span className="font-semibold text-[#f1f6fa]">
+                {activeClientCount > 0 ? `${activeClientCount} x R$ 1,99` : "0"}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-[#9fb1be]">Adicional mensal</span>
               <span className="font-semibold text-[#f1f6fa]">{formatCurrencyCents(estimate.addonCents)}</span>
             </div>
             <div className="border-t border-[#31536a] pt-4">
               <div className="flex justify-between gap-4">
-                <span className="font-bold text-[#eaf2f7]">Proximo ciclo apos trial</span>
+                <span className="font-bold text-[#eaf2f7]">Proximo ciclo apos o periodo de teste</span>
                 <span className="font-bold text-[#f1f6fa]">{formatCurrencyCents(estimate.cycleCents)}</span>
               </div>
               {plan.billingInterval === "yearly" ? (
@@ -89,5 +109,27 @@ export default async function PartnerCheckoutPage({
         </aside>
       </section>
     </main>
+  );
+}
+
+function TrustItem({
+  description,
+  icon,
+  title,
+}: {
+  description: string;
+  icon: ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-[#071923]">
+        {icon}
+      </span>
+      <span>
+        <span className="block font-semibold text-[#d9e7f0]">{title}</span>
+        <span className="mt-1 block leading-5 text-[#8ca1af]">{description}</span>
+      </span>
+    </div>
   );
 }

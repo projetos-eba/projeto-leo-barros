@@ -25,10 +25,18 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 2. `/parceiros/checkout` recalcula Clientes ativos no banco.
 3. Edge Function `billing-create-setup-intent` cria ou reutiliza Customer e cria SetupIntent.
 4. Payment Element confirma o SetupIntent no navegador.
-5. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code.
+5. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code. O navegador envia somente o codigo digitavel (`promotionCode`); Coupon ID, Promotion Code ID, percentual, valor e desconto calculado sao rejeitados.
 6. Assinatura e criada server-side via Subscriptions API com `billing_mode[type]=flexible`, API `2026-06-24.dahlia`.
 7. Webhook `stripe-webhook` reconcilia status, invoice e snapshots.
 8. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
+
+## Layout E UI
+
+- `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing, sem menu operacional de Parceiros.
+- A ausencia do menu nao altera seguranca: as rotas seguem autenticadas e restritas a Parceiro ativo administrativamente.
+- Payment Element usa Stripe Appearance em tema escuro para integrar inputs, foco, bordas e mensagens ao visual do Projeto Leo Barros.
+- Mensagens de confianca no checkout devem ser comerciais e claras: Pagamento seguro, Processado pela Stripe e Dados protegidos.
+- A tela de assinatura usa `src/lib/billing/presentation.ts` para status pt-BR, datas em formato `dd/MM/yyyy`, pagamentos e periodo de teste. Enums tecnicos permanecem apenas no banco, Stripe e logs seguros.
 
 ## Webhook E Pagamentos
 

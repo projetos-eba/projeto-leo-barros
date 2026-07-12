@@ -57,16 +57,28 @@ Nao reescrever migrations historicas aplicadas. Mudancas novas devem entrar como
 
 ## Edge Functions atuais
 
+- `signup-partner`;
+- `complete-client-first-access`;
+- `send-verification-email`;
+- `verify-email-token`;
+- `send-password-reset-email`;
+- `verify-password-reset-token`;
+- `update-password-with-token`;
 - `provision-partner`;
 - `provision-client-for-partner`.
 
-As duas funcoes exigem JWT, validam `profiles` e a extensao do chamador, usam service role apenas no ambiente seguro da function e retornam respostas sem senha, token, link de convite ou segredo.
+As funcoes publicas de auth validam payload/origem, retornam mensagens
+sanitizadas e usam service role apenas dentro do runtime da Edge Function. As
+funcoes administrativas exigem JWT, validam `profiles` e a extensao do
+chamador, usam service role apenas depois da autorizacao e retornam respostas
+sem senha, token, link de convite ou segredo. O app Next nao carrega client
+admin Supabase.
 
 ## Regras de autorizacao
 
 - `user_metadata.role` nao participa de decisao sensivel.
 - O browser usa somente chaves publicas destinadas ao cliente.
-- Service role e secrets ficam fora do Next client-side.
+- Service role e secrets ficam fora do Next client-side e das Server Actions.
 - RLS e validacoes server-side continuam sendo a barreira final.
 - Vínculos entre Parceiro e Cliente passam por `partner_clients`.
 

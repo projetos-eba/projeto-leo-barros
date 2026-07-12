@@ -1,9 +1,18 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.98.0";
-import Stripe from "npm:stripe";
+import Stripe from "npm:stripe@22.3.1";
 
 export const STRIPE_API_VERSION = "2026-06-24.dahlia";
 export const TRIAL_DAYS = 7;
 export const ACTIVE_CLIENT_UNIT_CENTS = 199;
+export const PROMOTION_CODE_MAX_LENGTH = 64;
+export const FORBIDDEN_CLIENT_DISCOUNT_FIELDS = [
+  "amountOff",
+  "couponId",
+  "discountAmount",
+  "discountId",
+  "percentOff",
+  "promotionCodeId",
+] as const;
 
 export type BillingPlanSlug = "complete-monthly" | "complete-annual";
 
@@ -59,7 +68,7 @@ export const OFFICIAL_STRIPE_PRICES = {
 } as const;
 
 function allowedOrigins() {
-  return (Deno.env.get("BILLING_ALLOWED_ORIGINS") ?? "http://localhost:3000")
+  return (Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() || "http://localhost:3000")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -213,6 +222,37 @@ export function requireServiceRoleRequest(request: Request) {
 
 export function parsePlanSlug(value: unknown): BillingPlanSlug | null {
   return value === "complete-monthly" || value === "complete-annual" ? value : null;
+}
+
+export function hasForbiddenClientDiscountField(body: Record<string, unknown>) {
+  return FORBIDDEN_CLIENT_DISCOUNT_FIELDS.some((field) =>
+    Object.prototype.hasOwnProperty.call(body, field)
+  );
+}
+
+export function normalizePromotionCode(value: unknown) {
+  if (value === undefined || value === null) return { code: null };
+  if (typeof value !== "string") {
+    return {
+      error: {
+        code: "INVALID_PROMOTION_CODE",
+        message: "Codigo promocional invalido ou indisponivel.",
+      },
+    };
+  }
+
+  const code = value.trim();
+  if (!code) return { code: null };
+  if (code.length > PROMOTION_CODE_MAX_LENGTH) {
+    return {
+      error: {
+        code: "PROMOTION_CODE_TOO_LONG",
+        message: "Codigo promocional invalido ou indisponivel.",
+      },
+    };
+  }
+
+  return { code };
 }
 
 export async function activeClientCount(supabase: SupabaseClient, partnerId: string) {

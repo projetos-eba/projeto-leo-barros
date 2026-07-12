@@ -16,6 +16,7 @@ export default async function ConfirmEmailPage({
 
   return (
     <EmailConfirmationStatusView
+      loginHref={result.loginHref}
       message={result.message}
       ok={result.ok}
     />

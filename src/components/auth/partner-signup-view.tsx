@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Lock, Mail, Phone, UserRound } from "lucide-react";
+import { Lock, Mail, Phone, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState, useTransition } from "react";
 
@@ -15,11 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { PartnerSignupInput } from "@/lib/auth/partner-signup-contracts";
+import type {
+  PartnerSignupFieldErrors,
+  PartnerSignupInput,
+} from "@/lib/auth/partner-signup-contracts";
+import type { OfficialRole } from "@/lib/auth/identity-contracts";
 
 import { AuthCardShell } from "./auth-card-shell";
+import { EmailVerificationPendingView } from "./email-verification-pending-view";
 
-export function PartnerSignupView() {
+type PendingVerification = {
+  email: string;
+  loginHref: string;
+  message: string;
+  password: string;
+  profileId: string;
+  role: Exclude<OfficialRole, "admin">;
+};
+
+type PartnerSignupViewProps = {
+  next?: string;
+};
+
+export function PartnerSignupView({ next }: PartnerSignupViewProps) {
   const [form, setForm] = useState<PartnerSignupInput>({
     confirmPassword: "",
     displayName: "",
@@ -30,25 +48,26 @@ export function PartnerSignupView() {
     professionalRegistryType: "",
     professionalType: "personal_trainer",
   });
-  const [message, setMessage] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] =
+    useState<PendingVerification | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<PartnerSignupFieldErrors>({});
   const [isPending, startTransition] = useTransition();
 
-  if (message) {
+  if (pendingVerification) {
     return (
-      <AuthCardShell
-        backHref="/login/parceiros"
-        backLabel="Ir para o login"
+      <EmailVerificationPendingView
+        autoLogin={{
+          next,
+          password: pendingVerification.password,
+        }}
+        email={pendingVerification.email}
+        loginHref={pendingVerification.loginHref}
+        message={pendingVerification.message}
+        profileId={pendingVerification.profileId}
+        role={pendingVerification.role}
         title="Cadastro recebido"
-        subtitle="Confirme seu e-mail para acessar como Parceiro."
-      >
-        <div className="space-y-5 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <CheckCircle2 className="h-8 w-8 text-primary" />
-          </div>
-          <p className="text-sm leading-6 text-muted-foreground">{message}</p>
-        </div>
-      </AuthCardShell>
+      />
     );
   }
 
@@ -57,6 +76,7 @@ export function PartnerSignupView() {
     value: PartnerSignupInput[K],
   ) {
     setForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => ({ ...current, [key]: undefined }));
   }
 
   return (
@@ -71,13 +91,23 @@ export function PartnerSignupView() {
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
+          setFieldErrors({});
           startTransition(async () => {
             const result = await signupPartner(form);
 
             if (result.ok) {
-              setMessage(result.message);
+              const submittedPassword = form.password;
+              setPendingVerification({
+                email: result.verification?.email ?? form.email,
+                loginHref: result.verification?.loginHref ?? "/login/parceiros",
+                message: result.message,
+                password: submittedPassword,
+                profileId: result.verification?.profileId ?? "",
+                role: "parceiro",
+              });
             } else {
               setError(result.message);
+              setFieldErrors(result.fieldErrors ?? {});
             }
           });
         }}
@@ -87,6 +117,7 @@ export function PartnerSignupView() {
           id="displayName"
           label="Nome"
           value={form.displayName}
+          error={fieldErrors.displayName}
           onChange={(value) => update("displayName", value)}
           placeholder="Seu nome completo"
         />
@@ -96,6 +127,7 @@ export function PartnerSignupView() {
           label="E-mail"
           type="email"
           value={form.email}
+          error={fieldErrors.email}
           onChange={(value) => update("email", value)}
           placeholder="seu@email.com"
         />
@@ -104,12 +136,13 @@ export function PartnerSignupView() {
           id="phone"
           label="Telefone"
           value={form.phone}
+          error={fieldErrors.phone}
           onChange={(value) => update("phone", value)}
           placeholder="+5511999999999"
         />
 
         <div className="space-y-2">
-          <Label>Tipo profissional</Label>
+          <Label htmlFor="professionalType">Tipo profissional</Label>
           <Select
             value={form.professionalType}
             onValueChange={(value) =>
@@ -119,7 +152,12 @@ export function PartnerSignupView() {
               )
             }
           >
-            <SelectTrigger className="h-12 bg-accent">
+            <SelectTrigger
+              aria-describedby={fieldErrors.professionalType ? "professionalType-error" : undefined}
+              aria-invalid={Boolean(fieldErrors.professionalType)}
+              className="h-12 bg-accent"
+              id="professionalType"
+            >
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
@@ -128,6 +166,11 @@ export function PartnerSignupView() {
               <SelectItem value="medico">Médico</SelectItem>
             </SelectContent>
           </Select>
+          {fieldErrors.professionalType ? (
+            <p className="text-sm text-destructive" id="professionalType-error">
+              {fieldErrors.professionalType}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -135,6 +178,7 @@ export function PartnerSignupView() {
             id="professionalRegistryType"
             label="Tipo do registro"
             value={form.professionalRegistryType ?? ""}
+            error={fieldErrors.professionalRegistryType}
             onChange={(value) => update("professionalRegistryType", value)}
             placeholder="CREF, CRN, CRM"
           />
@@ -142,6 +186,7 @@ export function PartnerSignupView() {
             id="professionalRegistryNumber"
             label="Número do registro"
             value={form.professionalRegistryNumber ?? ""}
+            error={fieldErrors.professionalRegistryNumber}
             onChange={(value) => update("professionalRegistryNumber", value)}
             placeholder="Opcional"
           />
@@ -153,6 +198,7 @@ export function PartnerSignupView() {
           label="Senha"
           type="password"
           value={form.password}
+          error={fieldErrors.password}
           onChange={(value) => update("password", value)}
           placeholder="Mínimo 8 caracteres"
         />
@@ -162,6 +208,7 @@ export function PartnerSignupView() {
           label="Confirmar senha"
           type="password"
           value={form.confirmPassword}
+          error={fieldErrors.confirmPassword}
           onChange={(value) => update("confirmPassword", value)}
           placeholder="Repita a senha"
         />
@@ -183,6 +230,7 @@ export function PartnerSignupView() {
 
 function Field({
   icon,
+  error,
   id,
   label,
   onChange,
@@ -191,6 +239,7 @@ function Field({
   value,
 }: {
   icon?: ReactNode;
+  error?: string;
   id: string;
   label: string;
   onChange: (value: string) => void;
@@ -198,6 +247,8 @@ function Field({
   type?: string;
   value: string;
 }) {
+  const errorId = `${id}-error`;
+
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -208,6 +259,8 @@ function Field({
           </span>
         ) : null}
         <Input
+          aria-describedby={error ? errorId : undefined}
+          aria-invalid={Boolean(error)}
           id={id}
           type={type}
           value={value}
@@ -220,6 +273,11 @@ function Field({
           }
         />
       </div>
+      {error ? (
+        <p className="text-sm text-destructive" id={errorId}>
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -49,6 +49,7 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Secrets nunca no browser.
 - `billing-sync-active-clients` e interno e exige Bearer da service role; o browser nao pode acionar sincronizacao global de outbox.
 - Nunca confiar em Price ID, quantidade, valor ou trial vindo do cliente.
+- Nunca aceitar do navegador Coupon ID, Promotion Code ID, percentual, valor ou desconto calculado; o client envia apenas codigo promocional digitado e o backend resolve Promotion Code ativo na Stripe.
 - SetupIntent deve omitir `payment_method_types`; usar metodos dinamicos Stripe.
 - `stripe-bootstrap-catalog` valida catalogo oficial existente e nao cria Products/Prices.
 - RPC de trial fica restrito a `service_role`.
@@ -72,6 +73,7 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `src/lib/billing/pricing.ts`
 - `src/lib/billing/data.ts`
 - `src/lib/billing/entitlement.ts`
+- `src/lib/billing/stripe-appearance.ts`
 - `src/app/planos/page.tsx`
 - `src/app/parceiros/checkout/**`
 - `src/app/parceiros/configuracoes/assinatura/page.tsx`
@@ -95,6 +97,17 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Cards de plano devem manter a faixa `+ R$ 1,99/mes por Cliente ativo` visualmente separada do CTA por estrutura de layout, sem colar no botao em desktop, tablet ou mobile.
 - O rodape de `/planos` deve focar confianca no pagamento: Pagamento seguro, Processado pela Stripe e Dados protegidos, sem prometer seguranca absoluta ou certificacao nao comprovada.
 
+## UI De Billing
+
+- `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing, sem menu operacional de Parceiros.
+- Essas rotas continuam protegidas por autenticacao, `profiles.role = parceiro` e `profiles.status = active`, mas nao exigem assinatura ativa para acesso.
+- Payment Element deve usar Stripe Appearance em `src/lib/billing/stripe-appearance.ts`, tema escuro, foco azul e inputs integrados ao card.
+- Checkout deve mostrar Pagamento seguro, Processado pela Stripe e Dados protegidos, sem mensagens tecnicas como SetupIntent, backend ou quantidade recalculada.
+- Zero Clientes ativos exibe adicional `R$ 0,00`; no checkout inicial, a Edge Function nao envia item adicional para Stripe quando a quantidade for `0`.
+- `/parceiros/configuracoes/assinatura` deve traduzir status de assinatura com `src/lib/billing/presentation.ts`, nunca renderizar enums Stripe crus nem a frase interna `Nao identificado nos arquivos analisados`.
+- A UI usa `Periodo de teste`: status `trialing` com datas exibe inicio e termino; assinatura com trial historico exibe periodo encerrado; assinatura sem trial exibe `Sem periodo de teste`; status `trialing` sem datas exibe erro seguro e gera log estruturado.
+- Codigo promocional usa contrato publico `promotionCode`, normalizacao por trim, limite de 64 caracteres e revalidacao server-side antes de criar a assinatura. `couponCode` pode existir apenas como compatibilidade temporaria de entrada no backend.
+
 ## Event Matrix
 
 - `customer.subscription.created`: registra status local.
@@ -115,6 +128,14 @@ stripe listen --events setup_intent.succeeded,customer.subscription.created,cust
 
 O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o valor; atualizar apenas o runtime local e reiniciar `supabase functions serve --env-file supabase/functions/.env`.
 - `invoice.paid`: marca assinatura como `active` e registra pagamento `succeeded` quando houver PaymentIntent.
+
+## MCP Local
+
+- `.mcp.json` configura `playwright` via `@playwright/mcp` e `supabase-local` em `http://127.0.0.1:54321/mcp`.
+- Antes de homologar billing, validar `npm run mcp:playwright:check` e, com Supabase local ativo, `npm run mcp:supabase:check`.
+- Use Supabase MCP para inspecionar `partner_subscriptions`, `partner_subscription_items`, `billing_payments`, `stripe_webhook_events`, snapshots e RLS quando as ferramentas estiverem expostas.
+- Use Playwright MCP para smoke real desktop/mobile em `/planos`, `/login`, `/parceiros/checkout`, `/parceiros/checkout/sucesso`, `/parceiros/configuracoes/assinatura` e `/admin/financeiro`.
+- Se o cliente MCP da sessao nao expuser Playwright, registrar explicitamente e usar Playwright local/headless apenas como fallback, sem declarar que Playwright MCP foi usado.
 
 ## Validacao
 

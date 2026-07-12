@@ -3,7 +3,7 @@ import { usePathname } from "next/navigation";
 import { forwardRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { logout } from "@/app/login/actions";
+import { logout, logoutAdmin, logoutPartner } from "@/app/login/actions";
 
 import { AuthenticatedShell } from "./authenticated-shell";
 
@@ -26,15 +26,21 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/app/login/actions", () => ({
   logout: vi.fn(),
+  logoutAdmin: vi.fn(),
+  logoutPartner: vi.fn(),
 }));
 
 const mockedUsePathname = vi.mocked(usePathname);
 const mockedLogout = vi.mocked(logout);
+const mockedLogoutAdmin = vi.mocked(logoutAdmin);
+const mockedLogoutPartner = vi.mocked(logoutPartner);
 
 describe("AuthenticatedShell", () => {
   beforeEach(() => {
     mockedUsePathname.mockReset();
     mockedLogout.mockReset();
+    mockedLogoutAdmin.mockReset();
+    mockedLogoutPartner.mockReset();
   });
 
   it("renderiza children e marca a rota Cliente como ativa", () => {
@@ -90,7 +96,8 @@ describe("AuthenticatedShell", () => {
     const logoutButton = screen.getAllByRole("button", { name: "Sair" })[0];
     expect(logoutButton).toHaveAttribute("type", "button");
     fireEvent.click(logoutButton);
-    expect(mockedLogout).toHaveBeenCalledTimes(1);
+    expect(mockedLogoutPartner).toHaveBeenCalledTimes(1);
+    expect(mockedLogout).not.toHaveBeenCalled();
   });
 
   it("mantém o Admin separado da operação de Parceiros", () => {
@@ -126,7 +133,11 @@ describe("AuthenticatedShell", () => {
       "href",
       "/admin/configuracoes",
     );
-    expect(screen.getByRole("button", { name: "Sair" })).toHaveAttribute("type", "button");
+    const logoutButton = screen.getByRole("button", { name: "Sair" });
+    expect(logoutButton).toHaveAttribute("type", "button");
+    fireEvent.click(logoutButton);
+    expect(mockedLogoutAdmin).toHaveBeenCalledTimes(1);
+    expect(mockedLogout).not.toHaveBeenCalled();
     expect(screen.queryByText("Relatórios")).not.toBeInTheDocument();
     expect(screen.queryByText("Agenda")).not.toBeInTheDocument();
     expect(screen.queryByText("Materiais")).not.toBeInTheDocument();

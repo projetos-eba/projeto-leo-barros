@@ -30,11 +30,38 @@ Data de referencia: 2026-07-08.
 - Parceiro sem plano ativo: `/planos`.
 - Admin: `/admin/dashboard`.
 
+## Confirmacao pendente
+
+- Depois do primeiro acesso de Cliente ou cadastro publico de Parceiro, a UI
+  exibe a tela "Confirme seu e-mail" e nao tenta autenticar enquanto o dominio
+  estiver sem `profiles.email_confirmed_at`.
+- A tela consulta `check-email-verification-status` a cada 5 segundos usando
+  `profileId` e `role`; a Edge Function usa service role apenas no runtime
+  Supabase e retorna somente `confirmed` e `destination`.
+- Quando a confirmacao e detectada na mesma aba que iniciou o cadastro/primeiro
+  acesso, a UI faz login por senha via Server Action antes de redirecionar. A
+  senha digitada fica apenas em memoria React, nunca em URL, storage ou log.
+- Apos login, Cliente vai para `/cliente/inicio`; Parceiro com assinatura
+  `active` ou `trialing` vigente vai para `/parceiros/dashboard`; Parceiro sem
+  plano vigente vai para `/planos` ou para o `next` seguro preservado, como
+  `/parceiros/checkout?plan=...`.
+- O botao "Reenviar e-mail" fica bloqueado por 60 segundos no client e o mesmo
+  cooldown e aplicado na Edge Function `send-verification-email`.
+- A pagina `/auth/confirmar-email` usa o role retornado por `verify-email-token`
+  para direcionar "Ir para o login": Cliente `/login`, Parceiro
+  `/login/parceiros`, Admin `/login/admin`.
+- O logout deve preservar o segmento: Cliente retorna para `/login`, Parceiro
+  retorna para `/login/parceiros` e Admin retorna para `/login/admin`.
+
 ## Cliente / Primeiro acesso
 
 - Cliente nao tem cadastro publico.
 - O primeiro acesso apenas ativa conta ja criada por Parceiro.
-- O backend valida `profiles.role = 'cliente'`, extensao `patients` e vinculo ativo em `partner_clients`.
+- A Server Action do Next apenas valida o contrato de entrada e chama a Edge
+  Function publica controlada `complete-client-first-access`.
+- A Edge Function valida `profiles.role = 'cliente'`, `profiles.status =
+  'active'`, extensao `patients` e vinculo ativo em `partner_clients` antes de
+  alterar senha ou disparar confirmacao.
 - Falhas retornam mensagem generica para evitar enumeracao.
 - A senha e definida no Auth, o dominio fica aguardando confirmacao por e-mail.
 - O Cliente so acessa a area autenticada depois da confirmacao de e-mail.
@@ -43,7 +70,14 @@ Data de referencia: 2026-07-08.
 
 - Parceiro pode usar `/login/parceiros/cadastro`.
 - Campos minimos: nome, e-mail, telefone, tipo profissional, registro quando aplicavel, senha e confirmacao.
-- O cadastro cria Auth user, `profiles.role = 'parceiro'` e `partners`.
+- Registro profissional vazio e aceito e persiste como `null` em `partners.professional_registry_type` e `partners.professional_registry_number`.
+- Quando o registro for informado parcialmente, a UI deve mostrar erro especifico no campo faltante; quando completo, o tipo e normalizado para `cref`, `crn`, `crm` ou `outro`.
+- A Server Action do Next nao usa service role; ela valida o contrato e chama a
+  Edge Function publica controlada `signup-partner`.
+- `signup-partner` cria Auth user, `profiles.role = 'parceiro'` e `partners`
+  com service role apenas dentro do runtime da Edge Function. Se houver falha
+  apos criacao parcial, tenta rollback de `auth.users`, `profiles`,
+  `partners`, tokens e ledger de e-mail.
 - Depois da confirmacao, o login valida plano ativo em `partner_subscriptions`.
 - Status aceitos: `active` e `trialing`, com periodo vigente.
 - Sem plano ativo, redireciona para `/planos` no login e no shell protegido
@@ -59,8 +93,14 @@ Data de referencia: 2026-07-08.
 
 ## Edge Functions
 
+- `signup-partner`: cadastro publico de Parceiro, com validacao defensiva,
+  criacao privilegiada, envio/auto-confirmacao e rollback de falha parcial.
+- `complete-client-first-access`: primeiro acesso publico de Cliente ja
+  provisionado, com validacao de ownership antes de alterar senha.
 - `send-verification-email`: gera token forte, armazena hash e envia link via Resend.
 - `verify-email-token`: valida hash, expira em 24h, consome token e confirma Auth/domino.
+- `check-email-verification-status`: consulta confirmacao e destino pos-confirmacao
+  sem retornar dados sensiveis.
 - `send-password-reset-email`: valida role esperada, responde de forma generica, envia reset ao dono da conta.
 - `verify-password-reset-token`: valida token de reset, gera sessao curta hashada.
 - `update-password-with-token`: atualiza senha via Admin API e consome sessao.
@@ -83,7 +123,9 @@ Quando ativo, a Edge Function envia o link de confirmacao para `EMAIL_ADMIN`, se
 
 ## CONFIRMED_AUTOMATICALLY_EMAIL
 
-Quando ativo, `send-verification-email` nao chama Resend. Ela confirma o Auth user e atualiza `profiles.email_confirmed_at`. Para Cliente em primeiro acesso, tambem atualiza `first_access_completed_at`.
+Quando ativo, as Edge Functions de confirmacao nao chamam Resend. Elas confirmam
+o Auth user e atualizam `profiles.email_confirmed_at`. Para Cliente em primeiro
+acesso, tambem atualizam `first_access_completed_at`.
 
 Se `CONFIRMED_AUTOMATICALLY_EMAIL=true` e `ALL_ACCOUNT_CREATE_APPROVAL_ADM=true`, a confirmacao automatica tem precedencia e nenhum e-mail e enviado.
 

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 import { AccessBlocked } from "@/components/auth/access-blocked";
 import { AuthenticatedShell } from "@/components/shells/authenticated-shell";
+import { PartnerBillingShell } from "@/components/shells/partner-billing-shell";
 import { requireShellRole, getCurrentProfile } from "@/lib/auth/next-guards";
 import { partnerHasActivePlan } from "@/lib/auth/partner-plan-access";
 import { isBillingManagementPath } from "@/lib/billing/entitlement";
@@ -32,18 +33,25 @@ export default async function ParceirosLayout({ children }: ParceirosLayoutProps
   }
 
   const { profile } = await getCurrentProfile();
+  let isBillingPath = false;
+
   if (profile?.role === "parceiro") {
     const headerList = await headers();
     const pathname = headerList.get("x-current-pathname") ?? "";
+    isBillingPath = isBillingManagementPath(pathname);
     const supabase = await createClient();
     const hasActivePlan = await partnerHasActivePlan({
       profileId: profile.id,
       supabase,
     });
 
-    if (!hasActivePlan && !isBillingManagementPath(pathname)) {
+    if (!hasActivePlan && !isBillingPath) {
       redirect("/planos");
     }
+  }
+
+  if (isBillingPath) {
+    return <PartnerBillingShell>{children}</PartnerBillingShell>;
   }
 
   return <AuthenticatedShell profile="parceiros">{children}</AuthenticatedShell>;

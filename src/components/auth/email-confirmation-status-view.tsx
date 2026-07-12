@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { AuthCardShell } from "./auth-card-shell";
 
 type EmailConfirmationStatusViewProps = {
+  loginHref: string;
   message: string;
   ok: boolean;
 };
 
 export function EmailConfirmationStatusView({
+  loginHref,
   message,
   ok,
 }: EmailConfirmationStatusViewProps) {
@@ -28,7 +30,7 @@ export function EmailConfirmationStatusView({
           <Icon className="h-8 w-8 text-primary" />
         </div>
         <Button asChild className="h-12 w-full">
-          <Link href="/login">Ir para o login</Link>
+          <Link href={loginHref}>Ir para o login</Link>
         </Button>
       </div>
     </AuthCardShell>

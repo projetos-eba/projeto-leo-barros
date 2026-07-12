@@ -18,7 +18,7 @@ export function CustomerPortalButton({ disabled }: { disabled: boolean }) {
       });
 
       if (error || data?.error || !data?.url) {
-        setErrorMessage(data?.error?.message ?? "Nao foi possivel abrir o portal.");
+        setErrorMessage(data?.error?.message ?? "Nao foi possivel abrir o portal de pagamentos.");
         return;
       }
 
@@ -29,7 +29,7 @@ export function CustomerPortalButton({ disabled }: { disabled: boolean }) {
   return (
     <div className="mt-6">
       <Button className="rounded-[8px]" disabled={disabled || isPending} type="button" onClick={openPortal}>
-        {isPending ? "Abrindo..." : "Abrir Customer Portal"}
+        {isPending ? "Abrindo..." : "Abrir portal de pagamentos"}
       </Button>
       {errorMessage ? <p className="mt-3 text-[12px] text-[#ffb7ad]">{errorMessage}</p> : null}
     </div>

@@ -14,6 +14,10 @@ export default async function PartnerLoginPage({
   searchParams?: Promise<{ next?: string }>;
 }) {
   const params = await searchParams;
+  const requestedNext = params?.next;
+  const safeNext = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+    ? requestedNext
+    : undefined;
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
@@ -38,11 +42,7 @@ export default async function PartnerLoginPage({
             supabase,
           });
 
-          const requestedNext = params?.next;
-          const safeNext = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
-            ? requestedNext
-            : "/planos";
-          redirect(hasActivePlan ? destination.destination : safeNext);
+          redirect(hasActivePlan ? destination.destination : safeNext ?? "/planos");
         }
 
         redirect(destination.destination);
@@ -50,12 +50,16 @@ export default async function PartnerLoginPage({
     }
   }
 
+  const signupHref = safeNext
+    ? `/login/parceiros/cadastro?next=${encodeURIComponent(safeNext)}`
+    : "/login/parceiros/cadastro";
+
   return (
     <NextLoginForm
       expectedRole="parceiro"
       forgotPasswordHref="/login/parceiros/esqueci-senha"
-      next={params?.next}
-      primaryAuxiliaryHref="/login/parceiros/cadastro"
+      next={safeNext}
+      primaryAuxiliaryHref={signupHref}
       primaryAuxiliaryLabel="Não tenho cadastro"
       roleLabel="Parceiro"
       subtitle="Acesse sua área profissional para acompanhar clientes"

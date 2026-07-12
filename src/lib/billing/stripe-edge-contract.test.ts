@@ -34,6 +34,14 @@ describe("stripe edge contract", () => {
     expect(subscription).toContain('proration_behavior: "none"');
   });
 
+  it("nao cria item adicional no checkout inicial quando a quantidade e zero", () => {
+    const subscription = read("supabase/functions/billing-create-subscription/index.ts");
+
+    expect(subscription).toContain("if (quantity > 0) {");
+    expect(subscription).toContain("items.push({ price: addonPrice.id, quantity })");
+    expect(subscription).not.toContain("{ price: addonPrice.id, quantity },");
+  });
+
   it("protege sincronizacao interna de quantidade com service role", () => {
     const shared = read("supabase/functions/_shared/billing/stripe.ts");
     const sync = read("supabase/functions/billing-sync-active-clients/index.ts");
@@ -43,11 +51,36 @@ describe("stripe edge contract", () => {
     expect(sync).toContain("requireServiceRoleRequest(request)");
   });
 
+  it("mantem fallback local quando BILLING_ALLOWED_ORIGINS esta vazio", () => {
+    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+
+    expect(shared).toContain('Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() || "http://localhost:3000"');
+  });
+
   it("coalesce jobs de quantidade por Parceiro antes de chamar Stripe", () => {
     const sync = read("supabase/functions/billing-sync-active-clients/index.ts");
 
     expect(sync).toContain("const jobsByPartner = new Map<string, string[]>()");
     expect(sync).toContain("for (const [partnerId, jobIds] of jobsByPartner)");
     expect(sync).toContain('.in("id", jobIds)');
+  });
+
+  it("resolve Promotion Code no backend e rejeita campos de desconto manipulaveis", () => {
+    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+    const subscription = read("supabase/functions/billing-create-subscription/index.ts");
+    const checkout = read("src/app/parceiros/checkout/checkout-payment-element.tsx");
+
+    expect(checkout).toContain("promotionCode:");
+    expect(checkout).not.toContain("couponCode:");
+    expect(shared).toContain("PROMOTION_CODE_MAX_LENGTH = 64");
+    expect(shared).toContain("FORBIDDEN_CLIENT_DISCOUNT_FIELDS");
+    expect(shared).toContain('"couponId"');
+    expect(shared).toContain('"promotionCodeId"');
+    expect(shared).toContain('"percentOff"');
+    expect(shared).toContain('"discountAmount"');
+    expect(subscription).toContain("hasForbiddenClientDiscountField(body)");
+    expect(subscription).toContain("normalizePromotionCode(body.promotionCode ?? body.couponCode)");
+    expect(subscription).toContain("stripe.promotionCodes.list");
+    expect(subscription).toContain("discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined");
   });
 });

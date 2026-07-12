@@ -1,8 +1,13 @@
 "use server";
 
 import { SAFE_AUTH_ERROR_MESSAGES } from "@/lib/auth/auth-errors";
-import { emailVerificationTokenSchema } from "@/lib/auth/email-verification-contracts";
+import {
+  emailVerificationStatusSchema,
+  emailVerificationTokenSchema,
+  type EmailVerificationStatusInput,
+} from "@/lib/auth/email-verification-contracts";
 import { firstAccessSchema, type FirstAccessInput } from "@/lib/auth/first-access";
+import type { OfficialRole } from "@/lib/auth/identity-contracts";
 import {
   passwordResetRequestSchema,
   passwordResetUpdateSchema,
@@ -11,20 +16,29 @@ import {
 } from "@/lib/auth/password-reset-contracts";
 import {
   partnerSignupSchema,
+  type PartnerSignupFieldErrors,
   type PartnerSignupInput,
 } from "@/lib/auth/partner-signup-contracts";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { invokeSupabaseFunction } from "@/lib/supabase/functions";
 
 type ActionResult =
   | {
       ok: true;
       message: string;
+      verification?: PendingEmailVerification;
     }
   | {
+      fieldErrors?: PartnerSignupFieldErrors;
       ok: false;
       message: string;
     };
+
+type PendingEmailVerification = {
+  email: string;
+  loginHref: string;
+  profileId: string;
+  role: Exclude<OfficialRole, "admin">;
+};
 
 type VerifyPasswordResetResult =
   | {
@@ -36,12 +50,53 @@ type VerifyPasswordResetResult =
       message: string;
     };
 
+type EmailVerificationStatusResult =
+  | {
+      confirmed: boolean;
+      destination: string | null;
+      ok: true;
+    }
+  | {
+      ok: false;
+      message: string;
+    };
+
+type VerifyEmailResult =
+  | {
+      loginHref: string;
+      message: string;
+      ok: true;
+      role: OfficialRole;
+    }
+  | {
+      loginHref: string;
+      message: string;
+      ok: false;
+    };
+
 const FIRST_ACCESS_SUCCESS =
   "Senha criada. Confirme seu e-mail para acessar.";
 const PARTNER_SIGNUP_SUCCESS =
   "Cadastro recebido. Confirme seu e-mail para acessar.";
+const GENERIC_PARTNER_SIGNUP_ERROR =
+  "Nao foi possivel concluir o cadastro. Tente novamente.";
 
 export async function requestFirstAccess(
+  input: FirstAccessInput,
+): Promise<ActionResult> {
+  try {
+    return await requestFirstAccessUnsafe(input);
+  } catch (error) {
+    logAuthActionError("FIRST_ACCESS_UNHANDLED", error);
+
+    return {
+      ok: false,
+      message: SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
+    };
+  }
+}
+
+async function requestFirstAccessUnsafe(
   input: FirstAccessInput,
 ): Promise<ActionResult> {
   const parsed = firstAccessSchema.safeParse(input);
@@ -53,198 +108,124 @@ export async function requestFirstAccess(
     };
   }
 
-  const admin = createAdminClient();
   const { email, password } = parsed.data;
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("id, role, user_id")
-    .ilike("email", email)
-    .maybeSingle();
-
-  if (!profile || profile.role !== "cliente") {
-    return {
-      ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
-    };
-  }
-
-  const { data: patient } = await admin
-    .from("patients")
-    .select("id")
-    .eq("profile_id", profile.id)
-    .maybeSingle();
-
-  if (!patient) {
-    return {
-      ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
-    };
-  }
-
-  const { data: relationship } = await admin
-    .from("partner_clients")
-    .select("id")
-    .eq("patient_id", patient.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-
-  if (!relationship) {
-    return {
-      ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
-    };
-  }
-
-  const { error: passwordError } = await admin.auth.admin.updateUserById(
-    profile.user_id,
+  const firstAccess = await invokeSupabaseFunction<{
+    profileId?: string;
+    success: boolean;
+  }>(
+    "complete-client-first-access",
     {
+      confirmPassword: parsed.data.confirmPassword,
+      email,
       password,
     },
   );
 
-  if (passwordError) {
+  if (!firstAccess.ok) {
     return {
       ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
-    };
-  }
-
-  await admin
-    .from("profiles")
-    .update({
-      email_confirmed_at: null,
-      last_auth_flow_at: new Date().toISOString(),
-    })
-    .eq("id", profile.id);
-
-  const verification = await invokeSupabaseFunction<{ success: boolean }>(
-    "send-verification-email",
-    {
-      profileId: profile.id,
-      purpose: "client_first_access",
-    },
-  );
-
-  if (!verification.ok) {
-    return {
-      ok: false,
-      message: "Senha definida, mas nao foi possivel enviar a confirmacao.",
+      message: firstAccess.message || SAFE_AUTH_ERROR_MESSAGES.firstAccessDenied,
     };
   }
 
   return {
     ok: true,
     message: FIRST_ACCESS_SUCCESS,
+    verification: {
+      email,
+      loginHref: "/login",
+      profileId: firstAccess.data.profileId ?? "",
+      role: "cliente",
+    },
   };
 }
 
 export async function signupPartner(
   input: PartnerSignupInput,
 ): Promise<ActionResult> {
+  try {
+    return await signupPartnerUnsafe(input);
+  } catch (error) {
+    logAuthActionError("PARTNER_SIGNUP_UNHANDLED", error);
+
+    return {
+      ok: false,
+      message: GENERIC_PARTNER_SIGNUP_ERROR,
+    };
+  }
+}
+
+async function signupPartnerUnsafe(
+  input: PartnerSignupInput,
+): Promise<ActionResult> {
   const parsed = partnerSignupSchema.safeParse(input);
 
   if (!parsed.success) {
     return {
+      fieldErrors: collectPartnerSignupFieldErrors(parsed.error),
       ok: false,
       message: "Revise os dados informados para concluir o cadastro.",
     };
   }
 
-  const admin = createAdminClient();
   const payload = parsed.data;
-
-  const { data: authUser, error: authError } =
-    await admin.auth.admin.createUser({
-      email: payload.email,
-      password: payload.password,
-      email_confirm: false,
-    });
-
-  if (authError || !authUser.user) {
-    return {
-      ok: false,
-      message: "Nao foi possivel concluir o cadastro.",
-    };
-  }
-
-  const { data: profile, error: profileError } = await admin
-    .from("profiles")
-    .insert({
-      display_name: payload.displayName,
-      email: payload.email,
-      phone: payload.phone,
-      role: "parceiro",
-      status: "active",
-      user_id: authUser.user.id,
-    })
-    .select("id")
-    .single();
-
-  if (profileError || !profile) {
-    await admin.auth.admin.deleteUser(authUser.user.id);
-
-    return {
-      ok: false,
-      message: "Nao foi possivel concluir o cadastro.",
-    };
-  }
 
   const hasRegistry =
     payload.professionalRegistryType && payload.professionalRegistryNumber;
-  const { data: partner, error: partnerError } = await admin
-    .from("partners")
-    .insert({
-      professional_name: payload.displayName,
-      professional_registry_number: hasRegistry
+  const signup = await invokeSupabaseFunction<{
+    profileId?: string;
+    success: boolean;
+  }>(
+    "signup-partner",
+    {
+      displayName: payload.displayName,
+      email: payload.email,
+      password: payload.password,
+      phone: payload.phone,
+      professionalRegistryNumber: hasRegistry
         ? payload.professionalRegistryNumber
         : null,
-      professional_registry_type: hasRegistry
+      professionalRegistryType: hasRegistry
         ? payload.professionalRegistryType
         : null,
-      professional_type: payload.professionalType,
-      profile_id: profile.id,
-    })
-    .select("id")
-    .single();
-
-  if (partnerError || !partner) {
-    await admin.from("profiles").delete().eq("id", profile.id);
-    await admin.auth.admin.deleteUser(authUser.user.id);
-
-    return {
-      ok: false,
-      message: "Nao foi possivel concluir o cadastro.",
-    };
-  }
-
-  await admin.from("platform_activity_events").insert({
-    event_type: "partner_created",
-    partner_id: partner.id,
-    title: "Parceiro cadastrado",
-    detail: "Cadastro publico de parceiro recebido.",
-    metadata: { source: "public_signup" },
-  });
-
-  const verification = await invokeSupabaseFunction<{ success: boolean }>(
-    "send-verification-email",
-    {
-      profileId: profile.id,
-      purpose: "partner_signup",
+      professionalType: payload.professionalType,
     },
   );
 
-  if (!verification.ok) {
+  if (!signup.ok) {
     return {
       ok: false,
-      message: "Cadastro criado, mas nao foi possivel enviar a confirmacao.",
+      message: signup.message || GENERIC_PARTNER_SIGNUP_ERROR,
     };
   }
 
   return {
     ok: true,
     message: PARTNER_SIGNUP_SUCCESS,
+    verification: {
+      email: payload.email,
+      loginHref: "/login/parceiros",
+      profileId: signup.data.profileId ?? "",
+      role: "parceiro",
+    },
   };
+}
+
+function collectPartnerSignupFieldErrors(
+  error: { flatten: () => { fieldErrors: Record<string, string[]> } },
+): PartnerSignupFieldErrors {
+  return Object.fromEntries(
+    Object.entries(error.flatten().fieldErrors)
+      .filter(([, messages]) => messages[0])
+      .map(([field, messages]) => [field, messages[0]]),
+  ) as PartnerSignupFieldErrors;
+}
+
+function logAuthActionError(code: string, error: unknown) {
+  console.error(JSON.stringify({
+    code,
+    message: error instanceof Error ? error.message : "UNKNOWN",
+  }));
 }
 
 export async function requestPasswordReset(
@@ -344,30 +325,110 @@ export async function updatePasswordWithToken(
   };
 }
 
-export async function verifyEmailToken(token: string): Promise<ActionResult> {
-  const parsed = emailVerificationTokenSchema.safeParse({ token });
+export async function getEmailVerificationStatus(
+  input: EmailVerificationStatusInput,
+): Promise<EmailVerificationStatusResult> {
+  const parsed = emailVerificationStatusSchema.safeParse(input);
 
   if (!parsed.success) {
     return {
       ok: false,
-      message: "Link de confirmacao invalido ou expirado.",
+      message: "Nao foi possivel verificar a confirmacao.",
     };
   }
 
+  const result = await invokeSupabaseFunction<{
+    confirmed?: boolean;
+    destination?: string | null;
+    success: boolean;
+  }>("check-email-verification-status", parsed.data);
+
+  if (!result.ok) {
+    return {
+      ok: false,
+      message: "Nao foi possivel verificar a confirmacao.",
+    };
+  }
+
+  return {
+    confirmed: Boolean(result.data.confirmed),
+    destination: result.data.destination ?? null,
+    ok: true,
+  };
+}
+
+export async function resendEmailVerification(
+  input: EmailVerificationStatusInput,
+): Promise<ActionResult> {
+  const parsed = emailVerificationStatusSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Nao foi possivel reenviar a confirmacao.",
+    };
+  }
+
+  const purpose = parsed.data.role === "cliente"
+    ? "client_first_access"
+    : "partner_signup";
   const result = await invokeSupabaseFunction<{ success: boolean }>(
-    "verify-email-token",
-    parsed.data,
+    "send-verification-email",
+    {
+      profileId: parsed.data.profileId,
+      purpose,
+    },
   );
 
   if (!result.ok) {
     return {
       ok: false,
-      message: "Link de confirmacao invalido ou expirado.",
+      message: result.message || "Nao foi possivel reenviar a confirmacao.",
     };
   }
 
   return {
     ok: true,
-    message: "E-mail confirmado com sucesso.",
+    message: "E-mail de confirmacao reenviado.",
   };
+}
+
+export async function verifyEmailToken(token: string): Promise<VerifyEmailResult> {
+  const parsed = emailVerificationTokenSchema.safeParse({ token });
+
+  if (!parsed.success) {
+    return {
+      loginHref: "/login",
+      ok: false,
+      message: "Link de confirmacao invalido ou expirado.",
+    };
+  }
+
+  const result = await invokeSupabaseFunction<{
+    role?: OfficialRole;
+    success: boolean;
+  }>("verify-email-token", parsed.data);
+
+  if (!result.ok) {
+    return {
+      loginHref: "/login",
+      ok: false,
+      message: "Link de confirmacao invalido ou expirado.",
+    };
+  }
+
+  const role = result.data.role ?? "cliente";
+
+  return {
+    loginHref: roleLoginHref(role),
+    ok: true,
+    message: "E-mail confirmado com sucesso.",
+    role,
+  };
+}
+
+function roleLoginHref(role: OfficialRole) {
+  if (role === "admin") return "/login/admin";
+  if (role === "parceiro") return "/login/parceiros";
+  return "/login";
 }

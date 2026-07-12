@@ -62,16 +62,41 @@ Use os prefixos oficiais `/cliente`, `/parceiros` e `/admin`.
 - Parceiro deve ter assinatura `active` ou `trialing` vigente; caso contrario vai
   para `/planos`.
 
+## Confirmacao Pendente
+
+- Apos primeiro acesso de Cliente ou cadastro publico de Parceiro, renderize a
+  tela pendente com polling de `check-email-verification-status` a cada 5s.
+- A Edge Function retorna somente estado e destino seguro: Cliente confirmado
+  vai para `/cliente/inicio`; Parceiro confirmado com plano vigente vai para
+  `/parceiros/dashboard`; Parceiro sem plano vigente vai para `/planos`.
+- Se a aba que iniciou o fluxo ainda tiver a senha em memoria, apos confirmacao
+  a UI deve autenticar via `loginWithPassword` antes de redirecionar, para criar
+  cookies Supabase SSR. Nunca persistir senha em URL, localStorage,
+  sessionStorage ou log.
+- Quando o fluxo comeca em `/planos`, preservar `next=/parceiros/checkout?...`
+  pelo login e pelo cadastro publico de Parceiro.
+- O botao de reenvio deve ter cooldown de 60s no client, e
+  `send-verification-email` deve aplicar o mesmo limite no backend.
+- A tela `/auth/confirmar-email` deve usar o role retornado por
+  `verify-email-token` para montar o link de login segmentado.
+- Em telas de checkout/billing de Parceiro, logout deve voltar para
+  `/login/parceiros`, nao para `/login`.
+
 ## Primeiro Acesso
 
 Cliente nao tem cadastro publico. Primeiro acesso so pode ativar conta ja criada,
 com `profiles.role = 'cliente'`, registro em `patients` e vinculo ativo em
-`partner_clients`. Falhas usam mensagem generica para evitar enumeracao.
+`partner_clients`. A Server Action do Next deve apenas validar entrada e chamar
+`complete-client-first-access`; a service role fica somente na Edge Function.
+Falhas usam mensagem generica para evitar enumeracao.
 
 ## Cadastro De Parceiro
 
-Cadastro publico cria Auth user, `profiles.role = 'parceiro'` e `partners`.
-Depois envia confirmacao ou segue a politica de aprovacao/confirmacao automatica.
+Cadastro publico chama `signup-partner`, que cria Auth user,
+`profiles.role = 'parceiro'` e `partners` dentro da Edge Function. O Next nao
+deve carregar service role para cadastro publico. Depois envia confirmacao ou
+segue a politica de aprovacao/confirmacao automatica. Falhas parciais devem
+tentar rollback dos registros criados.
 
 ## Admin
 
@@ -116,9 +141,11 @@ Client Components quando houver necessidade real.
 
 - Nunca expor service role no browser.
 - Nunca prefixar com `NEXT_PUBLIC_`.
-- Modulos com service role devem usar `import "server-only"`.
-- Operacoes privilegiadas devem preferir Edge Functions. Se ficarem no Next,
-  documente a justificativa e mantenha testes arquiteturais.
+- O app Next nao deve ter client admin Supabase nem importar service role em
+  Server Actions.
+- Operacoes privilegiadas de auth devem ficar em Edge Functions.
+- Excecoes exigem plano aprovado, justificativa documentada e teste
+  arquitetural especifico.
 
 ## Supabase MCP E Playwright MCP
 

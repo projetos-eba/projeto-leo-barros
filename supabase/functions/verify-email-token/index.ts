@@ -106,10 +106,25 @@ Deno.serve(async (request) => {
       profileUpdate.first_access_completed_at = now;
     }
 
-    await supabase
+    const { error: profileError } = await supabase
       .from("profiles")
       .update(profileUpdate)
       .eq("id", tokenRow.profile_id);
+
+    if (profileError) {
+      throw new Error("PROFILE_EMAIL_CONFIRM_UPDATE_FAILED");
+    }
+
+    const { data: confirmedProfile, error: confirmedProfileError } =
+      await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", tokenRow.profile_id)
+        .maybeSingle();
+
+    if (confirmedProfileError || !confirmedProfile) {
+      throw new Error("PROFILE_CONFIRMATION_LOOKUP_FAILED");
+    }
 
     await supabase
       .from("email_verification_tokens")
@@ -117,6 +132,7 @@ Deno.serve(async (request) => {
       .eq("id", tokenRow.id);
 
     return response(200, {
+      role: confirmedProfile.role,
       success: true,
     });
   } catch (error) {

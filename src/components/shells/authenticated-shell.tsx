@@ -41,7 +41,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { logout } from "@/app/login/actions";
+import { logout, logoutAdmin, logoutPartner } from "@/app/login/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ClientShellIdentity } from "@/lib/clients/home-data";
 import { cn } from "@/lib/utils";
@@ -114,6 +114,12 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
   const pathname = usePathname() ?? "";
   const [logoutPending, startLogoutTransition] = useTransition();
   const definition = shellDefinitions[profile];
+  const logoutAction =
+    profile === "parceiros"
+      ? logoutPartner
+      : profile === "admin"
+        ? logoutAdmin
+        : logout;
 
   if (profile === "cliente") {
     const identity = clientIdentity ?? {
@@ -200,7 +206,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                 disabled={logoutPending}
                 type="button"
                 onClick={() => startLogoutTransition(() => {
-                  void logout();
+                  void logoutAction();
                 })}
               >
                 <LogOut className="size-4" />
@@ -251,7 +257,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                   disabled={logoutPending}
                   type="button"
                   onClick={() => startLogoutTransition(() => {
-                    void logout();
+                    void logoutAction();
                   })}
                 >
                   <LogOut className="size-4" />
@@ -387,7 +393,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                 disabled={logoutPending}
                 type="button"
                 onClick={() => startLogoutTransition(() => {
-                  void logout();
+                  void logoutAction();
                 })}
               >
                 <LogOut className="size-5 shrink-0" />

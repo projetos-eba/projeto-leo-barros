@@ -134,3 +134,15 @@ export async function logout() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function logoutPartner() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login/parceiros");
+}
+
+export async function logoutAdmin() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login/admin");
+}

@@ -27,6 +27,16 @@ test.describe("public segmented auth pages", () => {
     );
   });
 
+  test("partner login preserves selected checkout plan through signup", async ({ page }) => {
+    await page.goto(
+      "/login/parceiros?next=/parceiros/checkout?plan=complete-annual",
+    );
+
+    await expect(page.locator(
+      'a[href="/login/parceiros/cadastro?next=%2Fparceiros%2Fcheckout%3Fplan%3Dcomplete-annual"]',
+    )).toBeVisible();
+  });
+
   test("admin login has forgot password and no public signup", async ({ page }) => {
     await page.goto("/login/admin");
 
