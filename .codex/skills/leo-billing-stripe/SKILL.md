@@ -26,9 +26,10 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 9. `supabase/migrations/20260710110548_billing_stripe_security_hardening.sql`
 10. `supabase/migrations/20260710110622_billing_stripe_rpc_scope_hardening.sql`
 11. `supabase/migrations/20260710110939_billing_stripe_policy_performance.sql`
-12. `supabase/functions/**/index.ts`
-13. `src/lib/billing/**`
-14. `docs/runbooks/stripe-homologation.md`
+12. `supabase/migrations/20260712150000_partner_subscription_financial_summaries.sql`
+13. `supabase/functions/**/index.ts`
+14. `src/lib/billing/**`
+15. `docs/runbooks/stripe-homologation.md`
 
 ## Regras Imutaveis
 
@@ -83,8 +84,10 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `supabase/migrations/20260710110548_billing_stripe_security_hardening.sql`
 - `supabase/migrations/20260710110622_billing_stripe_rpc_scope_hardening.sql`
 - `supabase/migrations/20260710110939_billing_stripe_policy_performance.sql`
+- `supabase/migrations/20260712150000_partner_subscription_financial_summaries.sql`
 - `supabase/functions/_shared/billing/stripe.ts`
 - `supabase/functions/billing-create-setup-intent/index.ts`
+- `supabase/functions/billing-preview-subscription/index.ts`
 - `supabase/functions/billing-create-subscription/index.ts`
 - `supabase/functions/billing-sync-active-clients/index.ts`
 - `supabase/functions/billing-customer-portal/index.ts`
@@ -102,16 +105,22 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing, sem menu operacional de Parceiros.
 - Essas rotas continuam protegidas por autenticacao, `profiles.role = parceiro` e `profiles.status = active`, mas nao exigem assinatura ativa para acesso.
 - Payment Element deve usar Stripe Appearance em `src/lib/billing/stripe-appearance.ts`, tema escuro, foco azul e inputs integrados ao card.
-- Checkout deve mostrar Pagamento seguro, Processado pela Stripe e Dados protegidos, sem mensagens tecnicas como SetupIntent, backend ou quantidade recalculada.
+- Checkout deve apresentar metodos de pagamento como opcoes selecionaveis; Cartao de credito ou debito abre o Payment Element dentro do card, sem botao generico para iniciar metodo de pagamento.
+- A opcao visual de cartao nao autoriza fixar `payment_method_types`; SetupIntent continua omitindo esse campo para preservar metodos dinamicos Stripe.
+- Checkout deve mostrar Pagamento seguro, Processado pela Stripe e Dados protegidos, sem mensagens tecnicas como SetupIntent, backend, Edge Function, webhook, read model, quantidade recalculada, revalidacao interna ou estado reconciliado.
+- Codigo promocional deve ficar no card de resumo/subtotal e ser validado por acao explicita antes do cartao via `billing-preview-subscription`, usando preview oficial de invoice/subscription na Stripe. O resumo deve atualizar subtotal, desconto e primeira cobranca apos o periodo de teste sem exigir SetupIntent ou PaymentMethod.
 - Zero Clientes ativos exibe adicional `R$ 0,00`; no checkout inicial, a Edge Function nao envia item adicional para Stripe quando a quantidade for `0`.
 - `/parceiros/configuracoes/assinatura` deve traduzir status de assinatura com `src/lib/billing/presentation.ts`, nunca renderizar enums Stripe crus nem a frase interna `Nao identificado nos arquivos analisados`.
+- Parceiro com entitlement `trialing` ou `active` deve usar shell proprio em `/parceiros/configuracoes/**`; parceiro sem entitlement pode acessar assinatura/recuperacao pelo shell de billing, sem menu operacional.
+- `/parceiros/configuracoes/assinatura` nao deve exibir KPI de estimativa calculado apenas por `billing_plans.price_cents` nem historico local vazio como fonte completa de faturas; subtotal, desconto ativo e total apos desconto devem vir de `partner_subscription_financial_summaries` quando disponiveis, com copy de produto como `Em processamento` enquanto a cobranca ainda nao tiver dados finais.
+- UI final de billing nunca deve expor mensagens de desenvolvimento ou implementacao como backend, Edge Function, webhook, read model, SetupIntent, service role, credenciais, nomes de tabela, nomes de RPC, sincronizacao interna, fallback local, ambiente local ou `nesta fase`.
 - A UI usa `Periodo de teste`: status `trialing` com datas exibe inicio e termino; assinatura com trial historico exibe periodo encerrado; assinatura sem trial exibe `Sem periodo de teste`; status `trialing` sem datas exibe erro seguro e gera log estruturado.
 - Codigo promocional usa contrato publico `promotionCode`, normalizacao por trim, limite de 64 caracteres e revalidacao server-side antes de criar a assinatura. `couponCode` pode existir apenas como compatibilidade temporaria de entrada no backend.
 
 ## Event Matrix
 
-- `customer.subscription.created`: registra status local.
-- `customer.subscription.updated`: atualiza status, periodos, trial e cancelamento.
+- `customer.subscription.created`: registra status local e sincroniza `partner_subscription_financial_summaries` com preview oficial da proxima cobranca.
+- `customer.subscription.updated`: atualiza status, periodos, trial, cancelamento e `partner_subscription_financial_summaries`.
 - `customer.subscription.deleted`: marca assinatura cancelada.
 - `invoice.finalized`: registra snapshot de Clientes ativos usado na cobranca.
 - `invoice.payment_failed`: marca assinatura como `past_due` e registra pagamento `failed` quando houver PaymentIntent.
@@ -144,7 +153,7 @@ npx supabase test db
 npm run test
 npm run lint
 npm run build
-git diff --check
+npm run git:local -- diff --check
 ```
 
 Adicionar validacoes Edge, Deno e Playwright desktop/mobile para mudancas em checkout, webhook, entitlement ou Admin Financeiro.

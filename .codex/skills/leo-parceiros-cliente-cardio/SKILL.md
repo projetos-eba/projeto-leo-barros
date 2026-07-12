@@ -36,5 +36,5 @@ npm run test -- client-cardio-metrics partner-client-cardio-view
 npm run lint
 npm run build
 npx supabase test db
-git diff --check
+npm run git:local -- diff --check
 ```

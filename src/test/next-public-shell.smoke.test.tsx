@@ -17,7 +17,7 @@ describe("shell publico Next existente", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: /Cliente: Sou aluno\/cliente acompanhado por um parceiro/,
+        name: /Cliente: Sou aluno\/cliente acompanhado por um profissional/,
       }),
     ).toHaveAttribute("href", "/login");
     expect(

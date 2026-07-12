@@ -130,6 +130,20 @@ Regras:
 - preferir composicao de componentes existentes;
 - usar `cn` de `src/lib/utils.ts`.
 
+## Texto Visivel Ao Usuario
+
+Nao deixar mensagens de desenvolvimento, arquitetura ou implementacao nas paginas, drawers, modais, tooltips, estados vazios, alertas ou textos de apoio.
+
+Evitar termos como `backend`, `Edge Function`, `webhook`, `read model`, `SetupIntent`, `service role`, `fallback`, `ambiente local`, `nesta fase`, `sincronizacao`, `estado reconciliado`, nomes de tabela, nomes de RPC e detalhes internos de seguranca.
+
+Preferir linguagem de produto e estado do usuario:
+- `Em processamento` em vez de `Aguardando sincronizacao da Stripe`;
+- `Pagamentos temporariamente indisponiveis` em vez de explicar credenciais ou configuracao local;
+- `Nenhuma senha sera definida ou exibida nesta etapa` em vez de descrever chamada autenticada ou chave privilegiada;
+- `Consulte no portal de pagamentos` em vez de citar a implementacao do provedor, exceto em selos comerciais como `Processado pela Stripe`.
+
+Termos tecnicos podem aparecer em logs seguros, testes, documentacao tecnica e nomes internos de codigo, mas nao em UI final.
+
 ## Qualidade e Validacao
 
 Scripts oficiais:
@@ -139,11 +153,21 @@ Scripts oficiais:
 - `npm run lint`
 - `npm run test`
 - `npm run test:watch`
+- `npm run git:local -- diff --check`
 - `npm run db:start`
 - `npm run db:status`
 - `npm run db:reset`
 - `npm run db:stop`
 - `npm run validate:admin-partner-flow`
+
+Quando `git` nao estiver no PATH do PowerShell, usar o wrapper local:
+
+```bash
+npm run git:local -- status --short
+npm run git:local -- diff --check
+```
+
+O wrapper procura `git` no PATH, em caminhos comuns do Git for Windows e tambem aceita `GIT_BINARY` com caminho absoluto.
 
 ## MCP Local
 

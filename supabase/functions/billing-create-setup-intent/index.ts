@@ -7,6 +7,7 @@ import {
   originIsAllowed,
   parsePlanSlug,
   requirePartner,
+  resolvePartnerStripeCustomer,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 
@@ -42,29 +43,7 @@ Deno.serve(async (request) => {
       return jsonResponse(409, { error: { code: "SUBSCRIPTION_EXISTS", message: "Ja existe uma assinatura comercial para este Parceiro." } }, request);
     }
 
-    let customerId: string | null = null;
-    const { data: lastSubscription } = await supabase
-      .from("partner_subscriptions")
-      .select("stripe_customer_id")
-      .eq("partner_id", partnerAccess.partner.id)
-      .not("stripe_customer_id", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    customerId = lastSubscription?.stripe_customer_id ?? null;
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: partnerAccess.profile.email,
-        metadata: {
-          partner_id: partnerAccess.partner.id,
-          profile_id: partnerAccess.profile.id,
-        },
-        name: partnerAccess.profile.display_name,
-      });
-      customerId = customer.id;
-    }
+    const customerId = await resolvePartnerStripeCustomer(stripe, partnerAccess);
 
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,

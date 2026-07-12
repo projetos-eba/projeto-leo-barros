@@ -24,24 +24,30 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 1. Parceiro seleciona plano em `/planos`.
 2. `/parceiros/checkout` recalcula Clientes ativos no banco.
 3. Edge Function `billing-create-setup-intent` cria ou reutiliza Customer e cria SetupIntent.
-4. Payment Element confirma o SetupIntent no navegador.
-5. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code. O navegador envia somente o codigo digitavel (`promotionCode`); Coupon ID, Promotion Code ID, percentual, valor e desconto calculado sao rejeitados.
-6. Assinatura e criada server-side via Subscriptions API com `billing_mode[type]=flexible`, API `2026-06-24.dahlia`.
-7. Webhook `stripe-webhook` reconcilia status, invoice e snapshots.
-8. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
+4. Antes do cartao, Edge Function `billing-preview-subscription` valida Promotion Code, recalcula Clientes ativos e usa `stripe.invoices.createPreview` para retornar subtotal, desconto e total seguro para exibicao.
+5. Payment Element confirma o SetupIntent no navegador.
+6. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code. O navegador envia somente o codigo digitavel (`promotionCode`); Coupon ID, Promotion Code ID, percentual, valor e desconto calculado sao rejeitados.
+7. Assinatura e criada server-side via Subscriptions API com `billing_mode[type]=flexible`, API `2026-06-24.dahlia`.
+8. Webhook `stripe-webhook` reconcilia status, invoice, snapshots e o read model `partner_subscription_financial_summaries`.
+9. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
 
 ## Layout E UI
 
-- `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing, sem menu operacional de Parceiros.
+- `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing quando nao ha entitlement financeiro, sem menu operacional de Parceiros.
+- Parceiro com assinatura `trialing` ou `active` usa shell proprio de Configuracoes em `/parceiros/configuracoes/**`.
 - A ausencia do menu nao altera seguranca: as rotas seguem autenticadas e restritas a Parceiro ativo administrativamente.
 - Payment Element usa Stripe Appearance em tema escuro para integrar inputs, foco, bordas e mensagens ao visual do Projeto Leo Barros.
+- O checkout apresenta a forma de pagamento como opcao selecionavel antes dos campos; a opcao Cartao de credito ou debito abre o Payment Element. A selecao visual nao fixa `payment_method_types`; a elegibilidade real continua vindo dos metodos dinamicos da Stripe.
+- Codigo promocional fica no card de resumo/subtotal do checkout e continua sendo validado por acao explicita antes da criacao da assinatura.
 - Mensagens de confianca no checkout devem ser comerciais e claras: Pagamento seguro, Processado pela Stripe e Dados protegidos.
-- A tela de assinatura usa `src/lib/billing/presentation.ts` para status pt-BR, datas em formato `dd/MM/yyyy`, pagamentos e periodo de teste. Enums tecnicos permanecem apenas no banco, Stripe e logs seguros.
+- A tela de assinatura usa `src/lib/billing/presentation.ts` para status pt-BR, datas em formato `dd/MM/yyyy`, pagamentos e periodo de teste. Valores de desconto e total sincronizado vêm de `partner_subscription_financial_summaries` quando disponiveis. Enums tecnicos permanecem apenas no banco, Stripe e logs seguros.
+- A UI final nao deve exibir mensagens de desenvolvimento ou implementacao como backend, Edge Function, webhook, read model, SetupIntent, sincronizacao interna, credenciais, nomes de tabela ou estado reconciliado.
 
 ## Webhook E Pagamentos
 
 - `customer.subscription.created`, `customer.subscription.updated` e `customer.subscription.deleted` atualizam status local da assinatura.
 - `invoice.finalized` captura snapshot da quantidade de Clientes ativos usada para cobranca.
+- `customer.subscription.created` e `customer.subscription.updated` atualizam `partner_subscription_financial_summaries` com preview oficial da proxima cobranca da assinatura.
 - `invoice.paid`, `invoice.payment_failed` e `invoice.payment_action_required` atualizam status financeiro e registram `billing_payments` quando o evento traz `payment_intent`.
 - Eventos desconhecidos sao registrados como `ignored`.
 - Eventos duplicados retornam 2xx sem novo efeito de negocio.
@@ -70,6 +76,8 @@ Toda sincronizacao usa quantidade total recalculada e `proration_behavior: "none
 ## Catalogo E Credenciais
 
 As Edge Functions nao criam cliente Stripe no topo do modulo. Sem `STRIPE_SECRET_KEY` ou `STRIPE_WEBHOOK_SECRET`, retornam `STRIPE_NOT_CONFIGURED` com HTTP 503.
+
+`BILLING_ALLOWED_ORIGINS` define os origins autorizados a chamar as Edge Functions de billing pelo navegador. O valor e uma lista separada por virgulas, sem barra final e contendo protocolo, host e porta quando houver. Localmente, usar `http://localhost:3000`. Em producao, usar somente o dominio publico HTTPS do app, por exemplo `https://app.exemplo.com`; incluir dominios de preview apenas quando eles precisarem executar checkout real.
 
 `stripe-bootstrap-catalog` nao cria Products nem Prices. A funcao valida os IDs oficiais existentes, reconcilia apenas nome mutavel de Product quando seguro e grava os IDs no catalogo local.
 

@@ -10,8 +10,13 @@ select ok(to_regprocedure('public.billing_public_plans()') is not null, 'RPC pub
 select ok(to_regclass('public.billing_sync_outbox') is not null, 'outbox de billing existe');
 select ok(to_regclass('public.stripe_webhook_events') is not null, 'ledger de webhook existe');
 select ok(to_regclass('public.billing_active_client_snapshots') is not null, 'snapshots de Clientes ativos existem');
+select ok(to_regclass('public.partner_subscription_financial_summaries') is not null, 'read model financeiro de assinatura existe');
 select has_column('public', 'stripe_webhook_events', 'stripe_event_created_at', 'ledger guarda created do evento Stripe');
 select has_column('public', 'partner_subscriptions', 'stripe_last_event_created_at', 'assinatura guarda ultimo evento Stripe aplicado');
+select has_column('public', 'partner_subscription_financial_summaries', 'discount_code', 'read model guarda codigo de desconto');
+select has_column('public', 'partner_subscription_financial_summaries', 'discount_amount_cents', 'read model guarda valor de desconto');
+select has_column('public', 'partner_subscription_financial_summaries', 'total_after_discount_cents', 'read model guarda total apos desconto');
+select has_column('public', 'partner_subscription_financial_summaries', 'stripe_promotion_code_id', 'read model guarda Promotion Code interno');
 select ok(
   not has_function_privilege('anon', 'public.billing_active_client_count(uuid)', 'execute'),
   'anon nao executa contagem faturavel de outro Parceiro'
@@ -75,6 +80,26 @@ select ok(
       and policyname = 'partner_subscriptions_select_admin_or_own_partner'
   ),
   'assinaturas usam policy SELECT consolidada'
+);
+select ok(
+  exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'partner_subscription_financial_summaries'
+      and policyname = 'partner_subscription_financial_select_admin_or_own_partner'
+  ),
+  'read model financeiro usa policy SELECT consolidada'
+);
+select ok(
+  exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'partner_subscription_financial_summaries'
+      and policyname = 'partner_subscription_financial_service_role_all'
+  ),
+  'read model financeiro possui policy explicita para service role'
 );
 select ok(
   exists (

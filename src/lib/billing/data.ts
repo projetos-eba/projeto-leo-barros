@@ -42,11 +42,30 @@ type BillingPlanRow = {
   slug: string;
 };
 
+type BillingFinancialSummaryRow = {
+  active_client_quantity: number;
+  active_client_subtotal_cents: number;
+  active_client_unit_amount_cents: number;
+  currency: string;
+  discount_amount_cents: number;
+  discount_code: string | null;
+  discount_duration: string | null;
+  discount_label: string | null;
+  plan_base_amount_cents: number;
+  source: string;
+  stripe_invoice_id: string | null;
+  stripe_subscription_id: string | null;
+  subtotal_cents: number;
+  synced_at: string;
+  total_after_discount_cents: number;
+};
+
 export type PartnerBillingOverview = {
   activeClientCount: number;
   addonUnitCents: number;
   currentPlanSlug: BillingPlanSlug | null;
   estimate: ReturnType<typeof estimateBillingCents> | null;
+  financialSummary: BillingFinancialSummaryRow | null;
   partnerId: string;
   payments: BillingPaymentRow[];
   plan: BillingPlanRow | null;
@@ -128,11 +147,20 @@ export async function getPartnerBillingOverview(): Promise<PartnerBillingOvervie
         .limit(8)
     : { data: [] };
 
+  const { data: financialSummary } = subscription
+    ? await supabase
+        .from("partner_subscription_financial_summaries")
+        .select("active_client_quantity, active_client_subtotal_cents, active_client_unit_amount_cents, currency, discount_amount_cents, discount_code, discount_duration, discount_label, plan_base_amount_cents, source, stripe_invoice_id, stripe_subscription_id, subtotal_cents, synced_at, total_after_discount_cents")
+        .eq("subscription_id", subscription.id)
+        .maybeSingle()
+    : { data: null };
+
   return {
     activeClientCount,
     addonUnitCents: ACTIVE_CLIENT_ADDON_UNIT_CENTS,
     currentPlanSlug,
     estimate: currentPlanSlug ? estimateBillingCents({ activeClientCount, planSlug: currentPlanSlug }) : null,
+    financialSummary: financialSummary as BillingFinancialSummaryRow | null,
     partnerId,
     payments: (payments ?? []) as BillingPaymentRow[],
     plan,

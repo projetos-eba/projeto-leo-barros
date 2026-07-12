@@ -11,6 +11,7 @@
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
     "db:status": "npx supabase status",
+    "git:local": "node scripts/dev/git.mjs",
     "lint": "eslint .",
     "mcp:playwright:check": "playwright-mcp --version",
     "mcp:supabase:check": "node scripts/dev/check-supabase-mcp.mjs",

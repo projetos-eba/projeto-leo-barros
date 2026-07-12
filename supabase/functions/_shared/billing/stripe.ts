@@ -263,6 +263,120 @@ export async function activeClientCount(supabase: SupabaseClient, partnerId: str
   return typeof data === "number" ? data : 0;
 }
 
+export async function resolvePartnerStripeCustomer(
+  stripe: Stripe,
+  partnerAccess: {
+    partner: { id: string };
+    profile: { display_name: string; email: string; id: string };
+  },
+) {
+  const customers = await stripe.customers.search({
+    limit: 1,
+    query: `metadata['partner_id']:'${partnerAccess.partner.id}'`,
+  });
+  const existing = customers.data[0];
+  if (existing) {
+    assertTestMode(existing.livemode, existing.id);
+    return existing.id;
+  }
+
+  const customer = await stripe.customers.create({
+    email: partnerAccess.profile.email,
+    metadata: {
+      partner_id: partnerAccess.partner.id,
+      profile_id: partnerAccess.profile.id,
+    },
+    name: partnerAccess.profile.display_name,
+  }, {
+    idempotencyKey: `customer:${partnerAccess.partner.id}`,
+  });
+  assertTestMode(customer.livemode, customer.id);
+  return customer.id;
+}
+
+export function describeCoupon(coupon: Stripe.Coupon) {
+  if (typeof coupon.percent_off === "number") {
+    return `${coupon.percent_off}% de desconto`;
+  }
+
+  if (typeof coupon.amount_off === "number") {
+    return `${new Intl.NumberFormat("pt-BR", {
+      currency: (coupon.currency ?? "brl").toUpperCase(),
+      style: "currency",
+    }).format(coupon.amount_off / 100)} de desconto`;
+  }
+
+  return "Desconto aplicado";
+}
+
+export type BillingFinancialSummaryInput = {
+  activeClientQuantity: number;
+  currency?: string | null;
+  discountAmountCents?: number | null;
+  invoiceId?: string | null;
+  planSlug: BillingPlanSlug;
+  source: "stripe_preview" | "stripe_webhook" | "manual_reconcile";
+  stripeEventCreatedAt?: string | null;
+  stripeSubscriptionId?: string | null;
+  totalAfterDiscountCents?: number | null;
+  promotion?: {
+    code?: string | null;
+    couponId?: string | null;
+    duration?: string | null;
+    label?: string | null;
+    promotionCodeId?: string | null;
+  } | null;
+};
+
+export function stripeInvoiceDiscountCents(invoice: { total_discount_amounts?: Array<{ amount?: number | null }> | null }) {
+  return invoice.total_discount_amounts?.reduce((total, discount) => total + (discount.amount ?? 0), 0) ?? 0;
+}
+
+export function buildBillingFinancialSummary(input: BillingFinancialSummaryInput) {
+  const planBaseAmountCents = OFFICIAL_STRIPE_PRICES[input.planSlug].unitAmount;
+  const activeClientSubtotalCents = input.activeClientQuantity * ACTIVE_CLIENT_UNIT_CENTS;
+  const localSubtotalCents = planBaseAmountCents + activeClientSubtotalCents;
+  const discountAmountCents = Math.max(0, input.discountAmountCents ?? 0);
+  const totalAfterDiscountCents = Math.max(
+    0,
+    input.totalAfterDiscountCents ?? localSubtotalCents - discountAmountCents,
+  );
+
+  return {
+    active_client_quantity: input.activeClientQuantity,
+    active_client_subtotal_cents: activeClientSubtotalCents,
+    active_client_unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
+    currency: (input.currency ?? "brl").toLowerCase(),
+    discount_amount_cents: discountAmountCents,
+    discount_code: input.promotion?.code ?? null,
+    discount_duration: input.promotion?.duration ?? null,
+    discount_label: input.promotion?.label ?? null,
+    plan_base_amount_cents: planBaseAmountCents,
+    source: input.source,
+    stripe_coupon_id: input.promotion?.couponId ?? null,
+    stripe_event_created_at: input.stripeEventCreatedAt ?? null,
+    stripe_invoice_id: input.invoiceId ?? null,
+    stripe_promotion_code_id: input.promotion?.promotionCodeId ?? null,
+    stripe_subscription_id: input.stripeSubscriptionId ?? null,
+    subtotal_cents: localSubtotalCents,
+    synced_at: new Date().toISOString(),
+    total_after_discount_cents: totalAfterDiscountCents,
+  };
+}
+
+export async function resolveActivePromotionCode(stripe: Stripe, code: string) {
+  const promotionCodes = await stripe.promotionCodes.list({
+    active: true,
+    code,
+    expand: ["data.promotion.coupon"],
+    limit: 1,
+  });
+  const promotionCode = promotionCodes.data[0] ?? null;
+  if (!promotionCode) return null;
+  if (promotionCode.livemode) throw new Error(`LIVE_MODE_OBJECT:${promotionCode.id}`);
+  return promotionCode;
+}
+
 export async function resolvePriceByLookupKey(stripe: Stripe, lookupKey: string) {
   const prices = await stripe.prices.list({
     active: true,

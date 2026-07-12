@@ -264,7 +264,7 @@ export function CreatePartnerForm() {
         title: isExisting ? "Parceiro ja existente" : "Parceiro criado",
         message: isExisting
           ? "Encontramos um Parceiro compativel com estes dados. Nenhuma senha, link ou token foi exposto."
-          : "O Parceiro foi criado como active. O convite permanece pendente ate configurarmos o envio real de e-mail.",
+          : "O Parceiro foi criado com acesso ativo. O convite permanece pendente de envio.",
         response,
       });
     } catch {
@@ -290,8 +290,7 @@ export function CreatePartnerForm() {
               Dados de acesso e registro
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              O Admin informa apenas dados cadastrais. Senha, role e status sao
-              definidos pelo backend local.
+              Informe os dados cadastrais para criar o acesso do Parceiro.
             </p>
           </div>
 
@@ -408,8 +407,7 @@ export function CreatePartnerForm() {
                 Professional name
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Sem campo visual nesta fase; a Edge Function usa o nome de
-                exibicao como fallback.
+                Usaremos o nome de exibicao quando o nome profissional nao for informado.
               </p>
             </div>
             <p className="max-w-full truncate rounded-full border border-border bg-accent px-3 py-1 text-sm text-muted-foreground">
@@ -447,8 +445,7 @@ export function CreatePartnerForm() {
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-muted-foreground">
-            O navegador chama apenas a Edge Function autenticada. Nenhuma senha
-            ou chave privilegiada circula na interface.
+            Nenhuma senha sera definida ou exibida nesta etapa.
           </p>
           <Button
             className="h-11 rounded-[10px] px-5 font-semibold"
@@ -481,7 +478,7 @@ export function CreatePartnerForm() {
                 Contrato da operacao
               </h2>
               <p className="text-sm text-muted-foreground">
-                O backend decide role e status.
+                A plataforma aplica as permissoes adequadas para este perfil.
               </p>
             </div>
           </div>

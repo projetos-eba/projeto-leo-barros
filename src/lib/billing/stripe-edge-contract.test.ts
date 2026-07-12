@@ -68,10 +68,22 @@ describe("stripe edge contract", () => {
   it("resolve Promotion Code no backend e rejeita campos de desconto manipulaveis", () => {
     const shared = read("supabase/functions/_shared/billing/stripe.ts");
     const subscription = read("supabase/functions/billing-create-subscription/index.ts");
+    const preview = read("supabase/functions/billing-preview-subscription/index.ts");
+    const webhook = read("supabase/functions/stripe-webhook/index.ts");
     const checkout = read("src/app/parceiros/checkout/checkout-payment-element.tsx");
+    const experience = read("src/app/parceiros/checkout/checkout-experience.tsx");
 
     expect(checkout).toContain("promotionCode:");
     expect(checkout).not.toContain("couponCode:");
+    expect(checkout).toContain("Cartao de credito ou debito");
+    expect(checkout).toContain("CARD_PAYMENT_METHOD");
+    expect(checkout).not.toContain("Informar metodo de pagamento");
+    expect(experience).toContain("Inserir codigo promocional");
+    expect(experience).toContain('supabase.functions.invoke("billing-preview-subscription"');
+    expect(preview).toContain("stripe.invoices.createPreview");
+    expect(preview).toContain("hasForbiddenClientDiscountField(body)");
+    expect(preview).toContain("normalizePromotionCode(body.promotionCode)");
+    expect(preview).not.toContain("setupIntentId");
     expect(shared).toContain("PROMOTION_CODE_MAX_LENGTH = 64");
     expect(shared).toContain("FORBIDDEN_CLIENT_DISCOUNT_FIELDS");
     expect(shared).toContain('"couponId"');
@@ -80,7 +92,13 @@ describe("stripe edge contract", () => {
     expect(shared).toContain('"discountAmount"');
     expect(subscription).toContain("hasForbiddenClientDiscountField(body)");
     expect(subscription).toContain("normalizePromotionCode(body.promotionCode ?? body.couponCode)");
-    expect(subscription).toContain("stripe.promotionCodes.list");
+    expect(subscription).toContain("resolveActivePromotionCode(stripe, promotionCodeText)");
     expect(subscription).toContain("discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined");
+    expect(subscription).toContain("partner_subscription_financial_summaries");
+    expect(subscription).toContain("stripe.invoices.createPreview");
+    expect(webhook).toContain("syncFinancialSummaryFromStripeSubscription");
+    expect(webhook).toContain("partner_subscription_financial_summaries");
+    expect(webhook).toContain("stripe.invoices.createPreview");
+    expect(webhook).toContain("persistedSummary?.discount_code");
   });
 });

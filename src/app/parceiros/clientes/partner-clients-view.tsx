@@ -466,7 +466,7 @@ function NewClientDrawer({
         <SheetHeader className="border-b border-[#303746] px-6 py-5 text-left">
           <SheetTitle className="text-[22px] font-bold text-[#f3f4f7]">Novo Cliente</SheetTitle>
           <SheetDescription className="text-[13px] text-[#8b92a3]">
-            O convite será criado pelo backend e ficará pendente de envio real.
+            O convite ficara pendente ate o envio ser confirmado.
           </SheetDescription>
         </SheetHeader>
 

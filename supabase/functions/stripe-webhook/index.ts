@@ -1,10 +1,15 @@
 import {
   ACTIVE_CLIENT_UNIT_CENTS,
+  buildBillingFinancialSummary,
+  describeCoupon,
   getAdminClient,
   getStripeClient,
   jsonResponse,
+  OFFICIAL_STRIPE_PRICES,
+  stripeInvoiceDiscountCents,
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
+import type { BillingPlanSlug } from "../_shared/billing/stripe.ts";
 
 type StripeInvoiceEvent = {
   amount_due?: number;
@@ -16,10 +21,140 @@ type StripeInvoiceEvent = {
   payment_intent?: string | { id?: string } | null;
   subscription?: string | { id?: string } | null;
   total?: number;
+  total_discount_amounts?: Array<{ amount?: number | null }> | null;
 };
 
 function stripeId(value: string | { id?: string } | null | undefined) {
   return typeof value === "string" ? value : value?.id ?? null;
+}
+
+function asRecord(value: unknown) {
+  return value && typeof value === "object" ? value as Record<string, unknown> : null;
+}
+
+function textValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function planSlugFromSubscriptionItems(items: unknown): BillingPlanSlug | null {
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return null;
+
+  for (const item of data) {
+    const price = asRecord(asRecord(item)?.price);
+    const priceId = textValue(price?.id);
+    if (priceId === OFFICIAL_STRIPE_PRICES["complete-monthly"].id) return "complete-monthly";
+    if (priceId === OFFICIAL_STRIPE_PRICES["complete-annual"].id) return "complete-annual";
+  }
+
+  return null;
+}
+
+function activeClientQuantityFromSubscriptionItems(items: unknown) {
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return 0;
+  const addonItem = data.find((item) => {
+    const price = asRecord(asRecord(item)?.price);
+    return textValue(price?.id) === OFFICIAL_STRIPE_PRICES["active-client-monthly"].id;
+  });
+  const quantity = asRecord(addonItem)?.quantity;
+  return typeof quantity === "number" && quantity > 0 ? quantity : 0;
+}
+
+function promotionFromDiscounts(subscription: Record<string, unknown>) {
+  const discounts = Array.isArray(subscription.discounts)
+    ? subscription.discounts
+    : subscription.discount
+      ? [subscription.discount]
+      : [];
+  const discount = asRecord(discounts.find((candidate) => Boolean(asRecord(candidate))));
+  const promotionCode = asRecord(discount?.promotion_code);
+  const coupon = asRecord(discount?.coupon) ?? asRecord(promotionCode?.coupon);
+  if (!discount || !coupon) return null;
+
+  return {
+    code: textValue(promotionCode?.code),
+    couponId: textValue(coupon.id),
+    duration: textValue(coupon.duration),
+    label: describeCoupon(coupon as unknown as Parameters<typeof describeCoupon>[0]),
+    promotionCodeId: textValue(promotionCode?.id),
+  };
+}
+
+function promotionHasDisplayData(promotion: ReturnType<typeof promotionFromDiscounts>) {
+  return Boolean(promotion?.code || promotion?.couponId || promotion?.duration || promotion?.label || promotion?.promotionCodeId);
+}
+
+async function syncFinancialSummaryFromStripeSubscription({
+  eventCreatedAt,
+  localSubscriptionId,
+  partnerId,
+  stripe,
+  stripeSubscriptionId,
+  supabase,
+}: {
+  eventCreatedAt: number;
+  localSubscriptionId: string;
+  partnerId: string;
+  stripe: ReturnType<typeof getStripeClient>;
+  stripeSubscriptionId: string;
+  supabase: ReturnType<typeof getAdminClient>;
+}) {
+  if (!stripe) return;
+
+  try {
+    const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
+      expand: ["discounts.promotion_code", "discounts.coupon", "items.data.price"],
+    }) as unknown as Record<string, unknown>;
+    const planSlug = planSlugFromSubscriptionItems(stripeSubscription.items);
+    if (!planSlug) return;
+
+    const customerId = stripeId(stripeSubscription.customer as string | { id?: string } | null | undefined);
+    if (!customerId) return;
+
+    const previewInvoice = await stripe.invoices.createPreview({
+      customer: customerId,
+      subscription: stripeSubscriptionId,
+    });
+    const quantity = activeClientQuantityFromSubscriptionItems(stripeSubscription.items);
+    const stripePromotion = promotionFromDiscounts(stripeSubscription);
+    const { data: persistedSummary } = promotionHasDisplayData(stripePromotion)
+      ? { data: null }
+      : await supabase
+          .from("partner_subscription_financial_summaries")
+          .select("discount_code, discount_duration, discount_label, stripe_coupon_id, stripe_promotion_code_id")
+          .eq("subscription_id", localSubscriptionId)
+          .maybeSingle();
+    const promotion = {
+      code: stripePromotion?.code ?? persistedSummary?.discount_code ?? null,
+      couponId: stripePromotion?.couponId ?? persistedSummary?.stripe_coupon_id ?? null,
+      duration: stripePromotion?.duration ?? persistedSummary?.discount_duration ?? null,
+      label: stripePromotion?.label ?? persistedSummary?.discount_label ?? null,
+      promotionCodeId: stripePromotion?.promotionCodeId ?? persistedSummary?.stripe_promotion_code_id ?? null,
+    };
+
+    await supabase.from("partner_subscription_financial_summaries").upsert({
+      ...buildBillingFinancialSummary({
+        activeClientQuantity: quantity,
+        currency: previewInvoice.currency,
+        discountAmountCents: stripeInvoiceDiscountCents(previewInvoice),
+        planSlug,
+        promotion: promotionHasDisplayData(promotion) ? promotion : null,
+        source: "stripe_webhook",
+        stripeEventCreatedAt: new Date(eventCreatedAt * 1000).toISOString(),
+        stripeSubscriptionId,
+        totalAfterDiscountCents: previewInvoice.total,
+      }),
+      partner_id: partnerId,
+      subscription_id: localSubscriptionId,
+    }, { onConflict: "subscription_id" });
+  } catch (error) {
+    console.warn(JSON.stringify({
+      code: "BILLING_FINANCIAL_SUMMARY_SYNC_SKIPPED",
+      message: error instanceof Error ? error.message.slice(0, 240) : "UNKNOWN",
+      stripeSubscriptionId,
+    }));
+  }
 }
 
 const handledEvents = new Set([
@@ -84,7 +219,7 @@ Deno.serve(async (request) => {
       if (partnerId) {
         const { data: currentSubscription } = await supabase
           .from("partner_subscriptions")
-          .select("id, stripe_last_event_created_at")
+          .select("id, partner_id, stripe_last_event_created_at")
           .eq("stripe_subscription_id", subscription.id)
           .maybeSingle();
 
@@ -114,6 +249,17 @@ Deno.serve(async (request) => {
           trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
           trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
         }).eq("stripe_subscription_id", subscription.id);
+
+        if (currentSubscription?.id && event.type !== "customer.subscription.deleted") {
+          await syncFinancialSummaryFromStripeSubscription({
+            eventCreatedAt: event.created,
+            localSubscriptionId: currentSubscription.id,
+            partnerId: currentSubscription.partner_id ?? partnerId,
+            stripe,
+            stripeSubscriptionId: subscription.id,
+            supabase,
+          });
+        }
       }
     }
 

@@ -37,6 +37,6 @@ description: Use ao alterar a tela /parceiros/cadastros do Projeto Leo Barros, i
 
 ## Validação
 
-- Rodar `npm run test`, `npm run lint`, `npm run build`, `npx supabase test db` e `git diff --check`.
+- Rodar `npm run test`, `npm run lint`, `npm run build`, `npx supabase test db` e `npm run git:local -- diff --check`.
 - Testar no navegador `/parceiros/cadastros` em desktop e mobile.
 - Conferir sem overflow horizontal global, sem `Pacientes`, sem `Cardio`, drawers funcionando e importação criando alimentos.

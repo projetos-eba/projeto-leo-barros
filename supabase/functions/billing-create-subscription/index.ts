@@ -3,6 +3,8 @@ import {
   ACTIVE_CLIENT_UNIT_CENTS,
   ADDON_LOOKUP_KEY,
   forbiddenOriginResponse,
+  buildBillingFinancialSummary,
+  describeCoupon,
   getAdminClient,
   getStripeClient,
   getValidatedBillingCatalog,
@@ -14,6 +16,8 @@ import {
   originIsAllowed,
   parsePlanSlug,
   requirePartner,
+  resolveActivePromotionCode,
+  stripeInvoiceDiscountCents,
   stripeNotConfiguredResponse,
   TRIAL_DAYS,
 } from "../_shared/billing/stripe.ts";
@@ -90,18 +94,30 @@ Deno.serve(async (request) => {
     const addonPrice = catalog.addonPrice;
 
     let promotionCodeId: string | undefined;
+    let promotionPresentation: {
+      code: string;
+      couponId: string;
+      duration: string;
+      label: string;
+      promotionCodeId: string;
+    } | null = null;
     if (promotionCodeText) {
-      const promotionCodes = await stripe.promotionCodes.list({
-        active: true,
-        code: promotionCodeText,
-        limit: 1,
-      });
-      const resolvedPromotionCode = promotionCodes.data[0];
+      const resolvedPromotionCode = await resolveActivePromotionCode(stripe, promotionCodeText);
       if (!resolvedPromotionCode) {
         return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Codigo promocional invalido ou indisponivel." } }, request);
       }
-      if (resolvedPromotionCode.livemode) throw new Error(`LIVE_MODE_OBJECT:${resolvedPromotionCode.id}`);
+      const coupon = resolvedPromotionCode.promotion.coupon;
+      if (!coupon || typeof coupon === "string") {
+        return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Codigo promocional invalido ou indisponivel." } }, request);
+      }
       promotionCodeId = resolvedPromotionCode.id;
+      promotionPresentation = {
+        code: resolvedPromotionCode.code,
+        couponId: coupon.id,
+        duration: coupon.duration,
+        label: describeCoupon(coupon),
+        promotionCodeId: resolvedPromotionCode.id,
+      };
     }
 
     const quantity = await activeClientCount(supabase, partnerAccess.partner.id);
@@ -111,6 +127,16 @@ Deno.serve(async (request) => {
     if (quantity > 0) {
       items.push({ price: addonPrice.id, quantity });
     }
+
+    const previewInvoice = await stripe.invoices.createPreview({
+      customer: customerId,
+      discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined,
+      subscription_details: {
+        billing_mode: { type: "flexible" },
+        items,
+        proration_behavior: "none",
+      },
+    });
 
     const subscription = await stripe.subscriptions.create({
       billing_mode: { type: "flexible" },
@@ -211,6 +237,21 @@ Deno.serve(async (request) => {
     }
 
     await supabase.from("partner_subscription_items").upsert(subscriptionItems, { onConflict: "subscription_id,item_kind" });
+
+    await supabase.from("partner_subscription_financial_summaries").upsert({
+      ...buildBillingFinancialSummary({
+        activeClientQuantity: quantity,
+        currency: previewInvoice.currency,
+        discountAmountCents: stripeInvoiceDiscountCents(previewInvoice),
+        planSlug,
+        promotion: promotionPresentation,
+        source: "stripe_preview",
+        stripeSubscriptionId: subscription.id,
+        totalAfterDiscountCents: previewInvoice.total,
+      }),
+      partner_id: partnerAccess.partner.id,
+      subscription_id: localSubscription.id,
+    }, { onConflict: "subscription_id" });
 
     await supabase.from("partner_billing_trial_usage").insert({
       first_subscription_id: localSubscription.id,

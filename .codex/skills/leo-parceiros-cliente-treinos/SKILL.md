@@ -32,7 +32,7 @@ npm run test -- client-workout-metrics partner-client-workout-view partner-proto
 npm run lint
 npm run build
 npx supabase test db
-git diff --check
+npm run git:local -- diff --check
 ```
 
 Read `docs/page-profiles/parceiros-cliente-treinos.md` before changing behavior or schema.

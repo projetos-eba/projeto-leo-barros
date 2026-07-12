@@ -33,5 +33,5 @@ Use esta skill ao trabalhar na aba `Dietas` do Cliente em `/parceiros/clientes/[
 - `npm run lint`
 - `npm run build`
 - `npx supabase test db`
-- `git diff --check`
+- `npm run git:local -- diff --check`
 - Smoke Playwright MCP desktop/mobile quando o browser estiver disponível.

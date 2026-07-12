@@ -9,7 +9,7 @@ const accessOptions = [
     icon: UserRound,
     label: "Cliente",
     role: "cliente",
-    subtext: "Sou aluno/cliente acompanhado por um parceiro",
+    subtext: "Sou aluno/cliente acompanhado por um profissional",
   },
   {
     href: "/login/parceiros",

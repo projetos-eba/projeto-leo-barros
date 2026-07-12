@@ -155,6 +155,96 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_subscription_financial_summaries: {
+        Row: {
+          active_client_quantity: number
+          active_client_subtotal_cents: number
+          active_client_unit_amount_cents: number
+          created_at: string
+          currency: string
+          discount_amount_cents: number
+          discount_code: string | null
+          discount_duration: string | null
+          discount_label: string | null
+          partner_id: string
+          plan_base_amount_cents: number
+          source: string
+          stripe_coupon_id: string | null
+          stripe_event_created_at: string | null
+          stripe_invoice_id: string | null
+          stripe_promotion_code_id: string | null
+          stripe_subscription_id: string | null
+          subscription_id: string
+          subtotal_cents: number
+          synced_at: string
+          total_after_discount_cents: number
+          updated_at: string
+        }
+        Insert: {
+          active_client_quantity?: number
+          active_client_subtotal_cents?: number
+          active_client_unit_amount_cents?: number
+          created_at?: string
+          currency?: string
+          discount_amount_cents?: number
+          discount_code?: string | null
+          discount_duration?: string | null
+          discount_label?: string | null
+          partner_id: string
+          plan_base_amount_cents?: number
+          source?: string
+          stripe_coupon_id?: string | null
+          stripe_event_created_at?: string | null
+          stripe_invoice_id?: string | null
+          stripe_promotion_code_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id: string
+          subtotal_cents?: number
+          synced_at?: string
+          total_after_discount_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          active_client_quantity?: number
+          active_client_subtotal_cents?: number
+          active_client_unit_amount_cents?: number
+          created_at?: string
+          currency?: string
+          discount_amount_cents?: number
+          discount_code?: string | null
+          discount_duration?: string | null
+          discount_label?: string | null
+          partner_id?: string
+          plan_base_amount_cents?: number
+          source?: string
+          stripe_coupon_id?: string | null
+          stripe_event_created_at?: string | null
+          stripe_invoice_id?: string | null
+          stripe_promotion_code_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id?: string
+          subtotal_cents?: number
+          synced_at?: string
+          total_after_discount_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_subscription_financial_summaries_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_subscription_financial_summaries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: true
+            referencedRelation: "partner_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_calendar_blocks: {
         Row: {
           created_at: string

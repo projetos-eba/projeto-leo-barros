@@ -212,7 +212,7 @@ function UsersTab({ admins }: { admins: AdminSettingsData["admins"] }) {
   return (
     <Panel className="p-[22px]">
       <SectionHeader
-        info="Lista admins cadastrados no banco. Permissões granulares ainda não serão editadas nesta fase."
+        info="Lista admins cadastrados e mantem a visao de acesso administrativo."
         subtitle="Visão operacional de usuários com acesso administrativo."
         title="Usuários & Permissões"
       />
@@ -282,8 +282,8 @@ function IntegrationsTab({ integrations, onAdd, onConfigure, onTest, pending }: 
     <Panel className="p-[22px]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <SectionHeader
-          info="Mostra integrações preparadas para operação. O teste atual valida apenas configuração local, sem chamada externa ao Stripe."
-          subtitle="Configure referências não sensíveis e valide prontidão local."
+          info="Mostra integrações preparadas para operação e seus dados de configuração."
+          subtitle="Configure referências não sensíveis e acompanhe a prontidão operacional."
           title="Integrações"
         />
         <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[6px] bg-[#1e94ff] px-4 text-[12px] font-bold text-white" onClick={onAdd} type="button">
@@ -308,7 +308,7 @@ function SecurityTab({ onChange, security }: { onChange: (security: SecuritySett
   return (
     <Panel className="p-[22px]">
       <SectionHeader
-        info="Controla políticas administrativas locais. Não altera provedores externos de autenticação nesta fase."
+        info="Controla políticas administrativas da plataforma."
         subtitle="Proteja plataforma e controle acessos administrativos."
         title="Segurança e acesso"
       />

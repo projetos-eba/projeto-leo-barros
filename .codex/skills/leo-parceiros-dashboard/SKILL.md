@@ -59,6 +59,6 @@ Prefer this validation set for material changes:
 - `npm run test`
 - `npm run build`
 - `npm run lint`
-- `git diff --check`
+- `npm run git:local -- diff --check`
 
 For browser smoke, use Playwright/MCP only when available and keep the test local.

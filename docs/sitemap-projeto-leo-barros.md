@@ -30,6 +30,8 @@ Rotas implementadas hoje no app Next:
 - `/parceiros/clientes/:id`;
 - `/parceiros/checkout`;
 - `/parceiros/checkout/sucesso`;
+- `/parceiros/configuracoes`;
+- `/parceiros/configuracoes/geral`;
 - `/parceiros/configuracoes/assinatura`;
 - `/parceiros/materiais`;
 - `/parceiros/materiais/:id`.

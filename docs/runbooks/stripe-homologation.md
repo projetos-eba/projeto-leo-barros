@@ -26,6 +26,21 @@ Arquivos locais esperados:
 - `.env.local`: `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
 - `supabase/functions/.env`: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `BILLING_ALLOWED_ORIGINS`.
 
+Preenchimento de `BILLING_ALLOWED_ORIGINS`:
+
+```bash
+# Local, quando o Next roda em npm run dev -p 3000
+BILLING_ALLOWED_ORIGINS=http://localhost:3000
+
+# Local com mais de um host de teste
+BILLING_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+# Producao
+BILLING_ALLOWED_ORIGINS=https://app.seu-dominio.com
+```
+
+Use origins exatos, separados por virgula, sem espacos e sem barra final. Nao use `*` em billing. Em preview/staging, adicione apenas os dominios HTTPS que realmente precisam acionar checkout, portal ou preview de assinatura.
+
 O secret do `stripe listen` local normalmente e diferente do secret de endpoint cadastrado no Dashboard. Use o `whsec_...` mostrado pelo listener apenas no runtime local da Edge Function e nao o registre em docs.
 
 ## Validacao De Catalogo
@@ -66,6 +81,7 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - `/planos` desktop/mobile.
 - Login Parceiro e preservacao de `next=/parceiros/checkout?plan=...`.
 - `/parceiros/checkout` com Payment Element real.
+- Preview de cupom antes do cartao: aplicar, remover e reaplicar Promotion Code sem SetupIntent confirmado.
 - SetupIntent confirmado.
 - Assinatura mensal e anual com `billing_mode=flexible`.
 - Trial de 7 dias uma vez por Parceiro.
@@ -75,6 +91,7 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - Alteracao de Clientes ativos e `billing-sync-active-clients` com `proration_behavior=none`.
 - `billing-sync-active-clients` deve ser chamado apenas por processo interno usando Bearer da service role local; nunca pelo browser.
 - Antes de analisar invoices/snapshots de quantidade, confirmar que o sync processou jobs coalescidos por Parceiro para evitar duplicidade de updates no mesmo run.
+- Confirmar `partner_subscription_financial_summaries` apos checkout com cupom e apos webhook `customer.subscription.updated`: subtotal, desconto e total devem refletir preview oficial da Stripe.
 - Customer Portal e cancelamento.
 - `/parceiros/configuracoes/assinatura`.
 - `/admin/financeiro`.
@@ -86,7 +103,7 @@ SUPABASE_NO_TELEMETRY=1 DO_NOT_TRACK=1 npx supabase test db
 npm run test
 npm run lint
 npm run build
-git diff --check
+npm run git:local -- diff --check
 ```
 
 Para Edge Functions:

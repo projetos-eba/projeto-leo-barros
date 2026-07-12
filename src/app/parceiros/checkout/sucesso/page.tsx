@@ -23,10 +23,10 @@ export default async function PartnerCheckoutSuccessPage() {
         </h1>
         <p className="mt-3 text-[14px] leading-6 text-[#9fb1be]">
           {hasEntitlement
-            ? `Seu acesso ja esta liberado. O periodo de teste de ${billing.trialDays} dias fica registrado no estado financeiro da plataforma.`
+            ? `Seu acesso ja esta liberado. O periodo de teste de ${billing.trialDays} dias esta ativo.`
             : hasFailure
-              ? "Nao foi possivel confirmar a assinatura no estado financeiro local. Revise o metodo de pagamento ou tente novamente."
-              : "Estamos aguardando a confirmacao dos eventos de pagamento. Esta pagina usa o estado real reconciliado pelo backend."}
+              ? "Nao foi possivel confirmar a assinatura. Revise o metodo de pagamento ou tente novamente."
+              : "Estamos finalizando a confirmacao da assinatura. Isso pode levar alguns instantes."}
         </p>
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild className="rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]">

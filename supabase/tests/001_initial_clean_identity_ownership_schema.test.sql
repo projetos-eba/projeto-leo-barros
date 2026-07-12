@@ -74,6 +74,7 @@ select tables_are(
     'partner_protocol_foods',
     'partner_protocol_use_drafts',
     'partner_subscriptions',
+    'partner_subscription_financial_summaries',
     'partner_subscription_items',
     'partner_workout_events',
     'partner_workout_exercises',
