@@ -22,7 +22,9 @@ describe("platform-branding-contract", () => {
     );
 
     expect(branding).toMatchObject({
+      faviconUrl: "/api/branding/favicon?v=2026-07-13T12%3A00%3A00.000Z",
       initials: "DF",
+      logoVersion: "2026-07-13T12:00:00.000Z",
       logoUrl: "https://assets.example.invalid/branding/logo.png",
       platformName: "DeLoad Fit",
     });
@@ -32,6 +34,7 @@ describe("platform-branding-contract", () => {
     expect(resolvePlatformBrandingFromValue(null).platformName).toBe(DEFAULT_PLATFORM_NAME);
     expect(resolvePlatformBrandingFromValue({ platformName: " " }).platformName).toBe(DEFAULT_PLATFORM_NAME);
     expect(resolvePlatformBrandingFromValue({ logo: { path: "bad/logo.png" } }).logo).toBeNull();
+    expect(resolvePlatformBrandingFromValue({ platformName: "DeLoad Fit" }).faviconUrl).toBe("/api/branding/favicon?v=default");
   });
 
   it("gera iniciais estaveis a partir do nome", () => {

@@ -3,6 +3,7 @@ import type { AuthRole } from "../env.ts";
 export type AuthEmailType =
   | "email_confirmation"
   | "admin_account_approval"
+  | "admin_invite"
   | "password_reset";
 
 export function buildResendTags({

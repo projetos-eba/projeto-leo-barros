@@ -35,3 +35,4 @@ supabase/.temp
 
 #Arquivos de testee3
 .playwright-mcp
+.claude/

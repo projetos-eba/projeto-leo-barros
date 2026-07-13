@@ -21,6 +21,7 @@ const raw: SettingsRawData = {
       title: "Configurações gerais atualizadas",
     },
   ],
+  currentProfileId: "profile-admin",
   admins: [
     {
       display_name: "Super Admin",
@@ -85,6 +86,8 @@ describe("settings-metrics", () => {
     });
     expect(settings.admins[0]).toMatchObject({
       email: "admin@example.invalid",
+      isCurrentUser: true,
+      isProtectedLastActive: true,
       statusLabel: "Ativo",
     });
   });

@@ -47,6 +47,7 @@ export type SettingsAdminProfileRecord = {
 export type SettingsRawData = {
   activities: PlatformSettingsActivityRecord[];
   admins: SettingsAdminProfileRecord[];
+  currentProfileId?: string | null;
   integrations: PlatformIntegrationRecord[];
   settings: PlatformSettingRecord[];
 };
@@ -93,6 +94,8 @@ export type SettingsActivity = {
 export type SettingsAdminUser = {
   email: string;
   id: string;
+  isCurrentUser: boolean;
+  isProtectedLastActive: boolean;
   name: string;
   status: string;
   statusLabel: string;
@@ -243,6 +246,7 @@ function activityTone(action: string): SettingsActivity["tone"] {
 export function buildAdminSettingsData(raw: SettingsRawData, now = new Date()): AdminSettingsData {
   const settingsByKey = new Map(raw.settings.map((setting) => [setting.key, setting.value]));
   const integrationsByKey = new Map(raw.integrations.map((integration) => [integration.integration_key, integration]));
+  const activeAdminCount = raw.admins.filter((admin) => admin.status === "active").length;
 
   const integrations = defaultIntegrations.map((fallback) => {
     const saved = integrationsByKey.get(fallback.integration_key);
@@ -276,13 +280,27 @@ export function buildAdminSettingsData(raw: SettingsRawData, now = new Date()): 
       title: activity.title,
       tone: activityTone(activity.action),
     })),
-    admins: raw.admins.map((admin) => ({
-      email: admin.email,
-      id: admin.id,
-      name: admin.display_name,
-      status: admin.status,
-      statusLabel: admin.status === "active" ? "Ativo" : admin.status === "suspended" ? "Suspenso" : "Inativo",
-    })),
+    admins: raw.admins
+      .map((admin) => ({
+        email: admin.email,
+        id: admin.id,
+        isCurrentUser: admin.id === raw.currentProfileId,
+        isProtectedLastActive: admin.status === "active" && activeAdminCount <= 1,
+        name: admin.display_name,
+        status: admin.status,
+        statusLabel: admin.status === "active"
+          ? "Ativo"
+          : admin.status === "pending"
+          ? "Pendente"
+          : admin.status === "suspended"
+          ? "Suspenso"
+          : "Inativo",
+      }))
+      .sort((first, second) => {
+        if (first.status === "active" && second.status !== "active") return -1;
+        if (first.status !== "active" && second.status === "active") return 1;
+        return first.name.localeCompare(second.name, "pt-BR");
+      }),
     generatedAt: now.toISOString(),
     general: mergeGeneralSettings(settingsByKey.get("general")),
     integrations,

@@ -49,6 +49,10 @@ export function passwordResetSubject(platformName: string) {
   return `Redefinicao de senha - ${subjectText(platformName)}`;
 }
 
+export function adminInviteSubject(platformName: string) {
+  return `Convite administrativo - ${subjectText(platformName)}`;
+}
+
 export function renderEmailLayout({
   content,
   platformName,
@@ -197,5 +201,30 @@ export function passwordResetTemplate({
     platformName,
     preheader: `Crie uma nova senha para acessar ${platformName}.`,
     title: "Redefinir senha",
+  });
+}
+
+export function adminInviteTemplate({
+  displayName,
+  inviteUrl,
+  platformName,
+}: {
+  displayName: string;
+  inviteUrl: string;
+  platformName: string;
+}) {
+  return renderEmailLayout({
+    content: `
+      <p style="margin:0 0 16px 0;">Ola, ${
+      escapeHtml(displayName)
+    }. Voce recebeu acesso administrativo para ${escapeHtml(platformName)}.</p>
+      <p style="margin:0 0 16px 0;">Use o botao abaixo para aceitar o convite e concluir o acesso com seguranca.</p>
+      ${renderEmailActionButton({ href: inviteUrl, label: "Aceitar convite" })}
+      ${renderEmailFallbackLink({ url: inviteUrl })}
+      <p style="margin:18px 0 0 0;color:#526879;font-size:13px;line-height:20px;">Se voce nao esperava este convite, ignore este e-mail.</p>
+    `,
+    platformName,
+    preheader: `Convite administrativo para acessar ${platformName}.`,
+    title: "Convite administrativo",
   });
 }

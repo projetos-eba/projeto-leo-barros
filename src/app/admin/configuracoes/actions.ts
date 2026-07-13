@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { getCurrentProfile } from "@/lib/auth/next-guards";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import {
   PLATFORM_ASSETS_BUCKET,
   PLATFORM_LOGO_FOLDER,
@@ -26,6 +27,28 @@ type IntegrationPayload = {
   config: Record<string, string>;
   integrationKey: string;
   name?: string;
+};
+
+type AdminUserPayload = {
+  displayName?: string;
+  email?: string;
+  status?: string;
+  targetProfileId?: string;
+};
+
+type AdminUsersEdgeResponse = {
+  admin?: {
+    activeAdminCount?: number;
+    inviteStatus?: string;
+    profileId?: string;
+    status?: string;
+  };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+  requestId?: string;
+  status?: string;
 };
 
 type SupabaseWriteResult = {
@@ -200,6 +223,70 @@ function cleanConfig(config: Record<string, string>) {
   return Object.fromEntries(
     Object.entries(config).map(([key, value]) => [key, String(value).trim().slice(0, 180)]),
   );
+}
+
+function adminUserErrorMessage(code?: string, fallback?: string) {
+  const messages: Record<string, string> = {
+    AUTH_REQUIRED: "Sua sessão expirou. Entre novamente para continuar.",
+    EMAIL_DELIVERY_FAILED: "Não foi possível enviar o convite.",
+    EMAIL_EXISTS: "Já existe um usuário com este e-mail.",
+    FORBIDDEN: "Sua conta não possui permissão para esta operação.",
+    IDENTITY_RECONCILIATION_REQUIRED: "Existe uma identidade com este e-mail que precisa de revisão manual.",
+    INVALID_PAYLOAD: "Revise os dados informados.",
+    LAST_ACTIVE_ADMIN: "Não é possível excluir ou inativar o único administrador ativo da plataforma.",
+    NOT_FOUND: "Usuário administrativo não encontrado.",
+    SELF_DEACTIVATE: "Não é possível inativar a própria conta.",
+    SELF_DELETE: "Não é possível excluir a própria conta.",
+  };
+
+  return messages[code ?? ""] ?? fallback ?? "Não foi possível concluir a operação.";
+}
+
+async function invokeAdminUsersEdge(
+  action: "activate" | "create" | "deactivate" | "delete" | "update",
+  payload: AdminUserPayload,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+
+  if (sessionError || !accessToken) {
+    return { message: "Sua sessão expirou. Entre novamente para continuar.", ok: false };
+  }
+
+  const { publishableKey, url } = getSupabasePublicEnv();
+  const response = await fetch(`${url}/functions/v1/admin-users`, {
+    body: JSON.stringify({ action, ...payload }),
+    cache: "no-store",
+    headers: {
+      apikey: publishableKey,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+  const body = (await response.json().catch(() => null)) as AdminUsersEdgeResponse | null;
+
+  if (!response.ok) {
+    return {
+      message: adminUserErrorMessage(body?.error?.code, body?.error?.message),
+      ok: false,
+    };
+  }
+
+  revalidatePath("/admin/configuracoes");
+  return {
+    message: action === "create"
+      ? "Administrador cadastrado."
+      : action === "activate"
+      ? "Administrador ativado."
+      : action === "deactivate"
+      ? "Administrador inativado."
+      : action === "delete"
+      ? "Usuário administrativo excluído."
+      : "Administrador atualizado.",
+    ok: true,
+  };
 }
 
 export async function saveGeneralSettingsAction(
@@ -421,4 +508,52 @@ export async function testIntegrationAction(payload: IntegrationPayload): Promis
   } catch (error) {
     return { message: error instanceof Error ? error.message : "Falha ao testar integração.", ok: false };
   }
+}
+
+export async function createAdminUserAction(input: {
+  displayName: string;
+  email: string;
+  status: string;
+}): Promise<ActionResult> {
+  const displayName = input.displayName.trim().slice(0, 120);
+  const email = input.email.trim().toLowerCase();
+  const status = input.status.trim();
+
+  if (!displayName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { message: "Revise os dados informados.", ok: false };
+  }
+
+  if (!["pending", "active", "suspended", "disabled"].includes(status)) {
+    return { message: "Revise os dados informados.", ok: false };
+  }
+
+  return invokeAdminUsersEdge("create", { displayName, email, status });
+}
+
+export async function updateAdminUserAction(input: {
+  displayName: string;
+  status: string;
+  targetProfileId: string;
+}): Promise<ActionResult> {
+  const displayName = input.displayName.trim().slice(0, 120);
+  const status = input.status.trim();
+  const targetProfileId = input.targetProfileId.trim();
+
+  if (!displayName || !targetProfileId || !["pending", "active", "suspended", "disabled"].includes(status)) {
+    return { message: "Revise os dados informados.", ok: false };
+  }
+
+  return invokeAdminUsersEdge("update", { displayName, status, targetProfileId });
+}
+
+export async function activateAdminUserAction(targetProfileId: string): Promise<ActionResult> {
+  return invokeAdminUsersEdge("activate", { targetProfileId: targetProfileId.trim() });
+}
+
+export async function deactivateAdminUserAction(targetProfileId: string): Promise<ActionResult> {
+  return invokeAdminUsersEdge("deactivate", { targetProfileId: targetProfileId.trim() });
+}
+
+export async function deleteAdminUserAction(targetProfileId: string): Promise<ActionResult> {
+  return invokeAdminUsersEdge("delete", { targetProfileId: targetProfileId.trim() });
 }

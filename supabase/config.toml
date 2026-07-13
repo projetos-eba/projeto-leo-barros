@@ -15,6 +15,9 @@ verify_jwt = false
 [functions.provision-client-for-partner]
 verify_jwt = true
 
+[functions.admin-users]
+verify_jwt = true
+
 [functions.send-verification-email]
 verify_jwt = false
 

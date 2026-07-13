@@ -1,6 +1,8 @@
 import {
   adminApprovalSubject,
   adminApprovalTemplate,
+  adminInviteSubject,
+  adminInviteTemplate,
   emailConfirmationSubject,
   emailConfirmationTemplate,
   escapeHtml,
@@ -84,6 +86,29 @@ Deno.test("adminApprovalTemplate escapa conta, papel e renderiza confirmar conta
   }
 });
 
+Deno.test("adminInviteTemplate escapa nome e renderiza aceitar convite", () => {
+  const html = adminInviteTemplate({
+    displayName: 'Admin <script>alert("xss")</script>',
+    inviteUrl:
+      "https://app.example.test/auth/v1/verify?token=invite&type=invite",
+    platformName: "Marca Operacional",
+  });
+
+  if (html.includes("<script>")) {
+    throw new Error("displayName deve ser escapado");
+  }
+
+  if (!html.includes("Aceitar convite")) {
+    throw new Error("CTA de convite ausente");
+  }
+
+  if (
+    !html.includes("Admin &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;")
+  ) {
+    throw new Error("displayName escapado nao encontrado");
+  }
+});
+
 Deno.test("passwordResetTemplate renderiza criar nova senha e validade de 1 hora", () => {
   const html = passwordResetTemplate({
     platformName: "Marca Operacional",
@@ -121,6 +146,13 @@ Deno.test("assuntos usam nome dinamico e removem quebras de linha", () => {
       "[Minha Plataforma] Confirmacao pendente: conta@example.test bcc:other@example.test"
   ) {
     throw new Error("assunto de aprovacao inesperado");
+  }
+
+  if (
+    adminInviteSubject(platformName) !==
+      "Convite administrativo - Minha Plataforma"
+  ) {
+    throw new Error("assunto de convite admin inesperado");
   }
 
   if (

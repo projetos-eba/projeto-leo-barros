@@ -18,16 +18,18 @@ export type PlatformBranding = {
   logo: PlatformLogoSettings | null;
   logoAlt: string;
   logoUrl: string | null;
+  logoVersion: string;
   platformName: string;
   tagline: string;
 };
 
 export const defaultPlatformBranding: PlatformBranding = {
-  faviconUrl: "/api/branding/favicon",
+  faviconUrl: "/api/branding/favicon?v=default",
   initials: "LB",
   logo: null,
   logoAlt: DEFAULT_PLATFORM_NAME,
   logoUrl: null,
+  logoVersion: "default",
   platformName: DEFAULT_PLATFORM_NAME,
   tagline: DEFAULT_PLATFORM_TAGLINE,
 };
@@ -85,13 +87,15 @@ export function resolvePlatformBrandingFromValue(
   const platformName = normalizePlatformName(value.platformName) ?? DEFAULT_PLATFORM_NAME;
   const logo = normalizePlatformLogo(value.logo);
   const logoUrl = logo && getPublicUrl ? getPublicUrl(logo.path) : null;
+  const logoVersion = logo?.updatedAt ?? "default";
 
   return {
-    faviconUrl: "/api/branding/favicon",
+    faviconUrl: `/api/branding/favicon?v=${encodeURIComponent(logoVersion)}`,
     initials: getPlatformInitials(platformName),
     logo,
     logoAlt: platformName,
     logoUrl,
+    logoVersion,
     platformName,
     tagline: DEFAULT_PLATFORM_TAGLINE,
   };

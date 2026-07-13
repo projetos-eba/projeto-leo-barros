@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PlatformBrandingProvider } from "@/components/branding/platform-branding-context";
+import { DynamicFavicon } from "@/components/branding/dynamic-favicon";
 import {
   defaultPlatformBranding,
   type PlatformBranding,
@@ -24,6 +25,7 @@ export function AppProviders({ branding = defaultPlatformBranding, children }: A
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <PlatformBrandingProvider branding={branding}>
+          <DynamicFavicon href={branding.faviconUrl} />
           <Toaster />
           <Sonner />
           {children}

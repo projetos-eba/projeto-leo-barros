@@ -5,35 +5,56 @@ import {
   Check,
   Clock3,
   Database,
+  Eye,
   History,
   KeyRound,
+  Loader2,
   Lock,
   Mail,
+  Pencil,
   Plus,
+  Power,
+  PowerOff,
   RotateCcw,
   Save,
   Settings,
   ShieldCheck,
   TestTube2,
+  Trash2,
   Upload,
+  UserPlus,
   UsersRound,
   WalletCards,
   Webhook,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
+  activateAdminUserAction,
   addIntegrationAction,
+  createAdminUserAction,
+  deactivateAdminUserAction,
+  deleteAdminUserAction,
   restoreSettingsSectionAction,
   saveGeneralSettingsAction,
   saveIntegrationAction,
   saveSecuritySettingsAction,
   testIntegrationAction,
+  updateAdminUserAction,
 } from "./actions";
 import { InfoHint } from "@/components/ui/info-hint";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -41,6 +62,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   AdminSettingsData,
   GeneralSettings,
@@ -115,6 +141,7 @@ function Field({ children, label }: { children: ReactNode; label: string }) {
 
 const inputClass = "h-[40px] rounded-[6px] border border-[#1c3a4d] bg-[#071b2b] px-3 text-[13px] font-semibold text-[#e8edf2] outline-none transition placeholder:text-[#6f8593] focus:border-[#1e94ff]";
 const textareaClass = "min-h-[96px] rounded-[6px] border border-[#1c3a4d] bg-[#071b2b] p-3 text-[13px] font-semibold leading-[19px] text-[#e8edf2] outline-none transition placeholder:text-[#6f8593] focus:border-[#1e94ff]";
+const selectClass = "h-[40px] rounded-[6px] border border-[#1c3a4d] bg-[#071b2b] px-3 text-[13px] font-semibold text-[#e8edf2] outline-none transition focus:border-[#1e94ff]";
 
 function ToggleRow({ checked, description, label, onChange }: { checked: boolean; description: string; label: string; onChange: (checked: boolean) => void }) {
   return (
@@ -244,38 +271,296 @@ function GeneralTab({
   );
 }
 
-function UsersTab({ admins }: { admins: AdminSettingsData["admins"] }) {
+type AdminUser = AdminSettingsData["admins"][number];
+
+const adminStatusOptions = [
+  { label: "Ativo", value: "active" },
+  { label: "Pendente", value: "pending" },
+  { label: "Suspenso", value: "suspended" },
+  { label: "Inativo", value: "disabled" },
+];
+
+function adminStatusTone(status: string) {
+  if (status === "active") return "border-[#1d8b46]/55 bg-[#1d8b46]/25 text-[#67d982]";
+  if (status === "pending") return "border-[#b16a06]/55 bg-[#b16a06]/25 text-[#ebaa3a]";
+  if (status === "suspended") return "border-[#9d3b3b]/70 bg-[#401b20]/70 text-[#ff9b8f]";
+  return "border-[#456172]/70 bg-[#173140]/70 text-[#c2d0d8]";
+}
+
+function adminRemovalBlockReason(admin: AdminUser) {
+  if (admin.isCurrentUser) return "A própria conta não pode ser removida por esta ação.";
+  if (admin.isProtectedLastActive) {
+    return "Não é possível excluir ou inativar o único administrador ativo da plataforma.";
+  }
+  return "";
+}
+
+function IconAction({ children, disabled, label, onClick }: { children: ReactNode; disabled?: boolean; label: string; onClick: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex">
+          <button
+            aria-label={label}
+            className="inline-flex size-9 items-center justify-center rounded-[6px] border border-[#294657] bg-[#0a2030] text-[#8db1c9] transition hover:border-[#5ba8ff] hover:text-[#dce8ef] disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={disabled}
+            onClick={onClick}
+            type="button"
+          >
+            {children}
+          </button>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function UsersTab({ admins, onMessage }: { admins: AdminSettingsData["admins"]; onMessage: (message: string) => void }) {
+  const router = useRouter();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [viewAdmin, setViewAdmin] = useState<AdminUser | null>(null);
+  const [editAdmin, setEditAdmin] = useState<AdminUser | null>(null);
+  const [deleteAdmin, setDeleteAdmin] = useState<AdminUser | null>(null);
+  const [createDraft, setCreateDraft] = useState({ displayName: "", email: "", status: "active" });
+  const [editDraft, setEditDraft] = useState({ displayName: "", status: "active" });
+  const [pendingAction, setPendingAction] = useState("");
+  const [isAdminPending, startAdminTransition] = useTransition();
+
+  function finish(result: { message: string; ok: boolean }) {
+    onMessage(result.message);
+    if (result.ok) {
+      toast.success(result.message);
+      router.refresh();
+    } else {
+      toast.error(result.message);
+    }
+  }
+
+  function openEdit(admin: AdminUser) {
+    setEditAdmin(admin);
+    setEditDraft({ displayName: admin.name, status: admin.status });
+  }
+
+  function submitCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPendingAction("create");
+    startAdminTransition(async () => {
+      const result = await createAdminUserAction(createDraft);
+      if (result.ok) {
+        setCreateOpen(false);
+        setCreateDraft({ displayName: "", email: "", status: "active" });
+      }
+      finish(result);
+      setPendingAction("");
+    });
+  }
+
+  function submitEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editAdmin) return;
+    setPendingAction(`edit:${editAdmin.id}`);
+    startAdminTransition(async () => {
+      const result = await updateAdminUserAction({
+        displayName: editDraft.displayName,
+        status: editDraft.status,
+        targetProfileId: editAdmin.id,
+      });
+      if (result.ok) setEditAdmin(null);
+      finish(result);
+      setPendingAction("");
+    });
+  }
+
+  function mutateAdmin(admin: AdminUser, action: "activate" | "deactivate" | "delete") {
+    setPendingAction(`${action}:${admin.id}`);
+    startAdminTransition(async () => {
+      const result = action === "activate"
+        ? await activateAdminUserAction(admin.id)
+        : action === "deactivate"
+        ? await deactivateAdminUserAction(admin.id)
+        : await deleteAdminUserAction(admin.id);
+      if (result.ok && action === "delete") setDeleteAdmin(null);
+      finish(result);
+      setPendingAction("");
+    });
+  }
+
   return (
     <Panel className="p-[22px]">
-      <SectionHeader
-        info="Lista admins cadastrados e mantem a visao de acesso administrativo."
-        subtitle="Visão operacional de usuários com acesso administrativo."
-        title="Usuários & Permissões"
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <SectionHeader
+          info="Lista admins cadastrados e mantém a visão de acesso administrativo."
+          subtitle="Visão operacional de usuários com acesso administrativo."
+          title="Usuários & Permissões"
+        />
+        <button
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-[6px] bg-[#1e94ff] px-4 text-[12px] font-bold text-white transition hover:bg-[#1688ef]"
+          onClick={() => setCreateOpen(true)}
+          type="button"
+        >
+          <UserPlus className="size-4" />
+          Adicionar administrador
+        </button>
+      </div>
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left">
+        <table className="w-full min-w-[820px] text-left">
           <thead>
             <tr className="border-b border-[#294657]/80 text-[11px] font-semibold text-[#8495a3]">
               <th className="px-2 py-3">Usuário</th>
               <th className="px-2 py-3">E-mail</th>
               <th className="px-2 py-3">Perfil</th>
               <th className="px-2 py-3">Status</th>
+              <th className="px-2 py-3 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#294657]/55">
             {admins.length === 0 ? (
-              <tr><td className="px-2 py-6 text-center text-[13px] text-[#8ca1af]" colSpan={4}>Nenhum admin listado no banco local.</td></tr>
-            ) : admins.map((admin) => (
-              <tr className="text-[12px] text-[#b8c5ce]" key={admin.id}>
-                <td className="px-2 py-3 font-bold text-[#d5dee5]">{admin.name}</td>
-                <td className="px-2 py-3">{admin.email}</td>
-                <td className="px-2 py-3">Super/Admin</td>
-                <td className="px-2 py-3"><span className="rounded-[4px] border border-[#1d8b46]/55 bg-[#1d8b46]/25 px-2 py-1 text-[10px] font-bold text-[#67d982]">{admin.statusLabel}</span></td>
-              </tr>
-            ))}
+              <tr><td className="px-2 py-6 text-center text-[13px] text-[#8ca1af]" colSpan={5}>Nenhum administrador listado.</td></tr>
+            ) : admins.map((admin) => {
+              const removalBlockReason = adminRemovalBlockReason(admin);
+
+              return (
+                <tr className="text-[12px] text-[#b8c5ce]" key={admin.id}>
+                  <td className="px-2 py-3 font-bold text-[#d5dee5]">
+                    <span>{admin.name}</span>
+                    {admin.isCurrentUser ? <span className="ml-2 text-[10px] font-semibold text-[#5ba8ff]">Você</span> : null}
+                  </td>
+                  <td className="px-2 py-3">{admin.email}</td>
+                  <td className="px-2 py-3">Admin</td>
+                  <td className="px-2 py-3"><span className={cn("rounded-[4px] border px-2 py-1 text-[10px] font-bold", adminStatusTone(admin.status))}>{admin.statusLabel}</span></td>
+                  <td className="px-2 py-3">
+                    <div className="flex justify-end gap-2">
+                      <IconAction label="Visualizar" onClick={() => setViewAdmin(admin)}>
+                        <Eye className="size-4" />
+                      </IconAction>
+                      <IconAction label="Editar" onClick={() => openEdit(admin)}>
+                        <Pencil className="size-4" />
+                      </IconAction>
+                      {admin.status === "active" ? (
+                        <IconAction disabled={Boolean(removalBlockReason) || pendingAction === `deactivate:${admin.id}` || isAdminPending} label={removalBlockReason || "Inativar"} onClick={() => mutateAdmin(admin, "deactivate")}>
+                          {pendingAction === `deactivate:${admin.id}` ? <Loader2 className="size-4 animate-spin" /> : <PowerOff className="size-4" />}
+                        </IconAction>
+                      ) : (
+                        <IconAction disabled={pendingAction === `activate:${admin.id}` || isAdminPending} label="Ativar" onClick={() => mutateAdmin(admin, "activate")}>
+                          {pendingAction === `activate:${admin.id}` ? <Loader2 className="size-4 animate-spin" /> : <Power className="size-4" />}
+                        </IconAction>
+                      )}
+                      <IconAction disabled={Boolean(removalBlockReason) || pendingAction === `delete:${admin.id}` || isAdminPending} label={removalBlockReason || "Excluir"} onClick={() => setDeleteAdmin(admin)}>
+                        <Trash2 className="size-4" />
+                      </IconAction>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="border-[#244454] bg-[#082235] text-[#e8edf2] sm:max-w-[520px]">
+          <form onSubmit={submitCreate}>
+            <DialogHeader>
+              <DialogTitle>Cadastrar administrador</DialogTitle>
+              <DialogDescription>O acesso será criado sem definir ou exibir senha nesta etapa.</DialogDescription>
+            </DialogHeader>
+            <div className="mt-5 grid gap-4">
+              <Field label="Nome">
+                <input className={inputClass} value={createDraft.displayName} onChange={(event) => setCreateDraft((current) => ({ ...current, displayName: event.target.value }))} />
+              </Field>
+              <Field label="E-mail">
+                <input className={inputClass} type="email" value={createDraft.email} onChange={(event) => setCreateDraft((current) => ({ ...current, email: event.target.value }))} />
+              </Field>
+              <Field label="Perfil">
+                <input className={inputClass} readOnly value="Admin" />
+              </Field>
+              <Field label="Status inicial">
+                <select className={selectClass} value={createDraft.status} onChange={(event) => setCreateDraft((current) => ({ ...current, status: event.target.value }))}>
+                  {adminStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </Field>
+            </div>
+            <DialogFooter className="mt-6 gap-3">
+              <button className="inline-flex h-10 items-center justify-center rounded-[6px] border border-[#31536a] px-4 text-[12px] font-bold text-[#7dbaff]" type="button" onClick={() => setCreateOpen(false)}>Cancelar</button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[6px] bg-[#1e94ff] px-4 text-[12px] font-bold text-white disabled:opacity-50" disabled={isAdminPending} type="submit">
+                {pendingAction === "create" ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+                Cadastrar administrador
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(viewAdmin)} onOpenChange={(open) => !open && setViewAdmin(null)}>
+        <DialogContent className="border-[#244454] bg-[#082235] text-[#e8edf2] sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Detalhes do administrador</DialogTitle>
+            <DialogDescription>Informações operacionais do acesso administrativo.</DialogDescription>
+          </DialogHeader>
+          {viewAdmin ? (
+            <div className="mt-4 grid gap-3 text-[13px]">
+              <p><span className="text-[#8ca1af]">Nome: </span><strong>{viewAdmin.name}</strong></p>
+              <p><span className="text-[#8ca1af]">E-mail: </span>{viewAdmin.email}</p>
+              <p><span className="text-[#8ca1af]">Perfil: </span>Admin</p>
+              <p><span className="text-[#8ca1af]">Status: </span>{viewAdmin.statusLabel}</p>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(editAdmin)} onOpenChange={(open) => !open && setEditAdmin(null)}>
+        <DialogContent className="border-[#244454] bg-[#082235] text-[#e8edf2] sm:max-w-[520px]">
+          <form onSubmit={submitEdit}>
+            <DialogHeader>
+              <DialogTitle>Editar administrador</DialogTitle>
+              <DialogDescription>O e-mail permanece somente leitura para preservar a identidade de acesso.</DialogDescription>
+            </DialogHeader>
+            {editAdmin ? (
+              <div className="mt-5 grid gap-4">
+                <Field label="Nome">
+                  <input className={inputClass} value={editDraft.displayName} onChange={(event) => setEditDraft((current) => ({ ...current, displayName: event.target.value }))} />
+                </Field>
+                <Field label="E-mail">
+                  <input className={inputClass} readOnly value={editAdmin.email} />
+                </Field>
+                <Field label="Perfil">
+                  <input className={inputClass} readOnly value="Admin" />
+                </Field>
+                <Field label="Status">
+                  <select className={selectClass} value={editDraft.status} onChange={(event) => setEditDraft((current) => ({ ...current, status: event.target.value }))}>
+                    {adminStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                  </select>
+                </Field>
+              </div>
+            ) : null}
+            <DialogFooter className="mt-6 gap-3">
+              <button className="inline-flex h-10 items-center justify-center rounded-[6px] border border-[#31536a] px-4 text-[12px] font-bold text-[#7dbaff]" type="button" onClick={() => setEditAdmin(null)}>Cancelar</button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[6px] bg-[#1e94ff] px-4 text-[12px] font-bold text-white disabled:opacity-50" disabled={isAdminPending} type="submit">
+                {pendingAction.startsWith("edit:") ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Salvar alterações
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(deleteAdmin)} onOpenChange={(open) => !open && setDeleteAdmin(null)}>
+        <DialogContent className="border-[#244454] bg-[#082235] text-[#e8edf2] sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Excluir usuário administrativo?</DialogTitle>
+            <DialogDescription>Esta ação removerá o acesso administrativo deste usuário.</DialogDescription>
+          </DialogHeader>
+          {deleteAdmin ? <p className="mt-4 text-[13px] text-[#aab7c2]">{deleteAdmin.name} ficará sem acesso administrativo ativo.</p> : null}
+          <DialogFooter className="mt-6 gap-3">
+            <button className="inline-flex h-10 items-center justify-center rounded-[6px] border border-[#31536a] px-4 text-[12px] font-bold text-[#7dbaff]" type="button" onClick={() => setDeleteAdmin(null)}>Cancelar</button>
+            <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[6px] bg-[#b3261e] px-4 text-[12px] font-bold text-white disabled:opacity-50" disabled={!deleteAdmin || isAdminPending} onClick={() => deleteAdmin && mutateAdmin(deleteAdmin, "delete")} type="button">
+              {pendingAction.startsWith("delete:") ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Excluir usuário
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Panel>
   );
 }
@@ -606,7 +891,7 @@ export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
             onLogoChange={setLogoFile}
           />
         ) : null}
-        {activeTab === "users" ? <UsersTab admins={settings.admins} /> : null}
+        {activeTab === "users" ? <UsersTab admins={settings.admins} onMessage={setMessage} /> : null}
         {activeTab === "integrations" ? <IntegrationsTab integrations={integrations} onAdd={handleAddIntegration} onConfigure={handleConfigure} onTest={handleTestIntegration} pending={isPending} /> : null}
         {activeTab === "security" ? <SecurityTab security={security} onChange={setSecurity} /> : null}
 

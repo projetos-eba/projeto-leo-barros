@@ -21,6 +21,7 @@
     "test:billing:stripe": "node scripts/dev/validate-stripe-billing-catalog.mjs",
     "test:watch": "vitest",
     "validate:admin-partner-flow": "node scripts/dev/validate-local-admin-partner-flow.mjs",
+    "validate:admin-users-crud": "node scripts/dev/validate-admin-users-crud.mjs",
     "dev:seed-admin-dashboard-smoke": "node scripts/dev/seed-admin-dashboard-smoke.mjs",
     "dev:seed-admin-profissionais-smoke": "node scripts/dev/seed-admin-dashboard-smoke.mjs",
     "dev:seed-partner-materials-storage": "node scripts/dev/seed-partner-materials-storage.mjs",
