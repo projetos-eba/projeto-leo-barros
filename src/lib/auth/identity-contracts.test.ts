@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FUTURE_LOGIN_ROUTE,
   ROLE_HOME_ROUTES,
+  getLoginRouteByRole,
   isActiveAccountStatus,
   isKnownRole,
   resolvePostLoginDestination,
@@ -11,6 +12,14 @@ import {
 describe("contratos de identidade e autorização", () => {
   it("declara a rota futura de login único sem criar runtime", () => {
     expect(FUTURE_LOGIN_ROUTE).toBe("/login");
+  });
+
+  it("resolve rotas de login por role com fallback seguro", () => {
+    expect(getLoginRouteByRole("cliente")).toBe("/login");
+    expect(getLoginRouteByRole("parceiro")).toBe("/login/parceiros");
+    expect(getLoginRouteByRole("admin")).toBe("/login/admin");
+    expect(getLoginRouteByRole("patient")).toBe("/login");
+    expect(getLoginRouteByRole(undefined)).toBe("/login");
   });
 
   it("cliente ativo redireciona para /cliente/inicio", () => {
