@@ -1,4 +1,5 @@
 {
+  "lock": false,
   "fmt": {
     "include": ["supabase/functions/**/*.ts"],
     "lineWidth": 80,
