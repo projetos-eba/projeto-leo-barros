@@ -492,7 +492,7 @@ async function validateProduct(
   return product;
 }
 
-async function validateLiveProduct(
+function validateLiveProduct(
   product: string | Stripe.Product | Stripe.DeletedProduct,
   expectedName: string,
 ) {
@@ -577,7 +577,7 @@ async function validatePriceByLookupKey(
     throw new Error(`PRICE_DIVERGENCE:${price.id}`);
   }
 
-  const product = await validateLiveProduct(price.product, expectedProductName);
+  const product = validateLiveProduct(price.product, expectedProductName);
   return { price, product };
 }
 
