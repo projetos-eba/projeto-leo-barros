@@ -21,58 +21,87 @@ type CheckoutPaymentElementProps = {
 type SetupIntentResponse = {
   clientSecret?: string;
   error?: { code?: string; message?: string };
+  setupIntentId?: string;
 };
 
 const CARD_PAYMENT_METHOD = "card";
 
+function createCheckoutAttemptId() {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
 function PaymentForm({
   planSlug,
   promotionCode,
+  setupIntentId,
 }: {
   planSlug: BillingPlanSlug;
   promotionCode: string;
+  setupIntentId: string;
 }) {
   const elements = useElements();
   const router = useRouter();
   const stripe = useStripe();
+  const [confirmedSetupIntentId, setConfirmedSetupIntentId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function submit() {
-    if (!stripe || !elements) return;
-    setErrorMessage(null);
-
-    startTransition(async () => {
-      const setupResult = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/parceiros/checkout/sucesso`,
-        },
-        redirect: "if_required",
-      });
-
-      if (setupResult.error) {
-        setErrorMessage(setupResult.error.message ?? "Nao foi possivel salvar o metodo de pagamento.");
-        return;
-      }
-
-      const supabase = createClient();
-      const { data, error } = await supabase.functions.invoke("billing-create-subscription", {
-          body: {
-            planSlug,
-            promotionCode: promotionCode.trim() || undefined,
-            setupIntentId: setupResult.setupIntent?.id,
-        },
-      });
-
-      if (error || data?.error) {
-        setErrorMessage(data?.error?.message ?? "Nao foi possivel criar a assinatura.");
-        return;
-      }
-
-      router.replace("/parceiros/checkout/sucesso");
-      router.refresh();
+  async function createSubscription(confirmedId: string) {
+    const supabase = createClient();
+    const { data, error } = await supabase.functions.invoke("billing-create-subscription", {
+      body: {
+        planSlug,
+        promotionCode: promotionCode.trim() || undefined,
+        setupIntentId: confirmedId,
+      },
     });
+
+    if (error || data?.error) {
+      setErrorMessage(data?.error?.message ?? "Nao foi possivel criar a assinatura.");
+      return false;
+    }
+
+    router.replace("/parceiros/checkout/sucesso");
+    router.refresh();
+    return true;
+  }
+
+  async function submit() {
+    if (!stripe || !elements || isSubmitting) return;
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      let confirmedId = confirmedSetupIntentId;
+
+      if (!confirmedId) {
+        const setupResult = await stripe.confirmSetup({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/parceiros/checkout/sucesso`,
+          },
+          redirect: "if_required",
+        });
+
+        if (setupResult.error) {
+          if (setupResult.error.code === "setup_intent_unexpected_state") {
+            setConfirmedSetupIntentId(setupIntentId);
+            await createSubscription(setupIntentId);
+            return;
+          }
+
+          setErrorMessage(setupResult.error.message ?? "Nao foi possivel salvar o metodo de pagamento.");
+          return;
+        }
+
+        confirmedId = setupResult.setupIntent?.id ?? setupIntentId;
+        setConfirmedSetupIntentId(confirmedId);
+      }
+
+      await createSubscription(confirmedId);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -87,11 +116,11 @@ function PaymentForm({
       ) : null}
       <Button
         className="h-11 w-full rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]"
-        disabled={!stripe || isPending}
+        disabled={!stripe || isSubmitting}
         type="button"
         onClick={submit}
       >
-        {isPending ? "Confirmando..." : "Iniciar periodo de teste gratis"}
+        {isSubmitting ? "Confirmando..." : "Iniciar periodo de teste gratis"}
       </Button>
       <p className="text-[12px] leading-5 text-[#8ca1af]">
         O periodo de teste comeca somente depois que o metodo de pagamento for salvo com sucesso.
@@ -101,6 +130,7 @@ function PaymentForm({
 }
 
 export function CheckoutPaymentElement({ planSlug, promotionCode, publishableKey }: CheckoutPaymentElementProps) {
+  const [checkoutAttemptId, setCheckoutAttemptId] = useState(createCheckoutAttemptId);
   const [selectedMethod, setSelectedMethod] = useState("");
   const [setupIntent, setSetupIntent] = useState<SetupIntentResponse | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -111,9 +141,15 @@ export function CheckoutPaymentElement({ planSlug, promotionCode, publishableKey
     startTransition(async () => {
       const supabase = createClient();
       const { data, error } = await supabase.functions.invoke("billing-create-setup-intent", {
-        body: { planSlug },
+        body: { checkoutAttemptId, planSlug },
       });
-      setSetupIntent(error ? { error: { message: "Nao foi possivel iniciar o checkout." } } : data);
+      if (error) {
+        setCheckoutAttemptId(createCheckoutAttemptId());
+        setSetupIntent({ error: { message: "Nao foi possivel iniciar o checkout." } });
+        return;
+      }
+
+      setSetupIntent(data);
     });
   }
 
@@ -168,7 +204,7 @@ export function CheckoutPaymentElement({ planSlug, promotionCode, publishableKey
             <p className="rounded-[8px] border border-[#b16a06]/55 bg-[#2e2511] p-4 text-[13px] leading-5 text-[#f1c36d]">
               {setupIntent.error?.message ?? "Pagamentos em configuracao."}
             </p>
-          ) : canRenderPaymentElement ? (
+          ) : canRenderPaymentElement && setupIntent.setupIntentId ? (
             <Elements
               options={{
                 appearance: stripeElementsAppearance,
@@ -177,7 +213,7 @@ export function CheckoutPaymentElement({ planSlug, promotionCode, publishableKey
               }}
               stripe={stripePromise}
             >
-              <PaymentForm planSlug={planSlug} promotionCode={promotionCode} />
+              <PaymentForm planSlug={planSlug} promotionCode={promotionCode} setupIntentId={setupIntent.setupIntentId} />
             </Elements>
           ) : null}
         </div>
