@@ -35,6 +35,12 @@ Deno.serve(async (request) => {
         error: { code: "INVALID_PLAN", message: "Plano invalido." },
       }, request);
     }
+    const bodyCheckoutAttemptId = typeof body.checkoutAttemptId === "string"
+      ? body.checkoutAttemptId.trim()
+      : "";
+    const checkoutAttemptId = /^[A-Za-z0-9_-]{8,80}$/.test(bodyCheckoutAttemptId)
+      ? bodyCheckoutAttemptId
+      : crypto.randomUUID();
 
     const { data: existingSubscription } = await supabase
       .from("partner_subscriptions")
@@ -60,12 +66,14 @@ Deno.serve(async (request) => {
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       metadata: {
+        checkout_attempt_id: checkoutAttemptId,
         partner_id: partnerAccess.partner.id,
         plan_slug: planSlug,
       },
       usage: "off_session",
     }, {
-      idempotencyKey: `setup-intent:${partnerAccess.partner.id}:${planSlug}`,
+      idempotencyKey:
+        `setup-intent:${partnerAccess.partner.id}:${planSlug}:${checkoutAttemptId}`,
     });
 
     return jsonResponse(200, {

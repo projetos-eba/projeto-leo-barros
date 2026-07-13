@@ -20,7 +20,10 @@ Permitir que Parceiro ativo, mesmo sem entitlement financeiro, salve metodo de p
 
 - Payment Element.
 - Aparencia configurada via Stripe Appearance para tema escuro.
-- SetupIntent.
+- SetupIntent novo por tentativa de checkout, com idempotencia limitada a `checkout_attempt_id`.
+- Nunca reutilizar SetupIntent por Parceiro e plano. Um SetupIntent confirmado nao pode ser confirmado novamente.
+- Se a assinatura falhar depois da confirmacao do metodo de pagamento, a tela deve retentar somente `billing-create-subscription` com o mesmo `setupIntentId`.
+- O botao de confirmacao deve bloquear clique concorrente antes de chamar Stripe.
 - Preview de codigo promocional antes do cartao via Edge Function `billing-preview-subscription`, usando `stripe.invoices.createPreview`.
 - Assinatura criada por Edge Function `billing-create-subscription`.
 - Codigo promocional digitado pelo usuario e enviado como `promotionCode`; a Edge Function normaliza, limita tamanho, resolve Promotion Code ativo na Stripe e aplica o ID internamente.

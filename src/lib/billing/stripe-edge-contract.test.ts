@@ -22,6 +22,21 @@ describe("stripe edge contract", () => {
     expect(read("supabase/functions/billing-create-setup-intent/index.ts")).not.toContain("payment_method_types");
   });
 
+  it("escopa SetupIntent por tentativa de checkout e nao por parceiro/plano permanente", () => {
+    const setupIntent = read("supabase/functions/billing-create-setup-intent/index.ts");
+    const checkout = read("src/app/parceiros/checkout/checkout-payment-element.tsx");
+
+    expect(setupIntent).toContain("checkoutAttemptId");
+    expect(setupIntent).toContain("checkout_attempt_id");
+    expect(setupIntent).toContain("setup-intent:${partnerAccess.partner.id}:${planSlug}:${checkoutAttemptId}");
+    expect(setupIntent).not.toContain("setup-intent:${partnerAccess.partner.id}:${planSlug}`");
+    expect(checkout).toContain("createCheckoutAttemptId");
+    expect(checkout).toContain("confirmedSetupIntentId");
+    expect(checkout).toContain('setupResult.error.code === "setup_intent_unexpected_state"');
+    expect(checkout).toContain("await createSubscription(setupIntentId)");
+    expect(checkout).toContain("if (!confirmedId)");
+  });
+
   it("nao cria produtos ou precos Stripe no bootstrap de homologacao", () => {
     const bootstrap = read("supabase/functions/stripe-bootstrap-catalog/index.ts");
 
