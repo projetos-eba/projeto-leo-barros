@@ -54,7 +54,7 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Nunca confiar em Price ID, quantidade, valor ou trial vindo do cliente.
 - Nunca aceitar do navegador Coupon ID, Promotion Code ID, percentual, valor ou desconto calculado; o client envia apenas codigo promocional digitado e o backend resolve Promotion Code ativo na Stripe.
 - SetupIntent deve omitir `payment_method_types`; usar metodos dinamicos Stripe.
-- `stripe-bootstrap-catalog` valida catalogo oficial existente e nao cria Products/Prices.
+- `stripe-bootstrap-catalog` valida catalogo oficial existente, nao cria Products/Prices na Stripe e faz upsert idempotente das linhas oficiais locais.
 - Em producao live, billing deve aceitar objetos Stripe live somente quando a chave server-side for live; em test mode deve rejeitar objetos live e vice-versa.
 - Catalogo live deve ser resolvido por `lookup_key` oficial e validado contra valores, moeda, intervalo, tipo de uso e nomes de Product antes de gravar IDs locais.
 - RPC de trial fica restrito a `service_role`.

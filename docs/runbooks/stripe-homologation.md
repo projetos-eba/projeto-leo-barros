@@ -63,6 +63,72 @@ Antes do primeiro checkout live, crie no Dashboard live os Products e Prices ofi
 
 Os valores, moeda, intervalo, tipo de uso e nomes de Product devem seguir o catalogo oficial. Depois disso, execute `stripe-bootstrap-catalog` autenticado como Admin para gravar os IDs live reais no catalogo local.
 
+### Executar `stripe-bootstrap-catalog` Em Producao
+
+Use este procedimento somente depois de confirmar que:
+
+- `stripe-bootstrap-catalog` esta deployada no projeto Supabase correto.
+- `STRIPE_SECRET_KEY` de producao esta em live mode.
+- `BILLING_ALLOWED_ORIGINS` contem `https://www.deloadfit.app`.
+- Existem no Stripe live Products e Prices ativos com os lookup keys oficiais:
+  - `complete_monthly_brl`
+  - `complete_annual_brl`
+  - `active_client_monthly_brl`
+
+No PowerShell, nunca grave senha, token ou secrets em arquivo. Informe as credenciais Admin apenas na sessao atual:
+
+```powershell
+$env:ADMIN_EMAIL = "admin@exemplo.com"
+$env:ADMIN_PASSWORD = "senha-do-admin"
+
+$envLines = Get-Content .env.production
+$supabaseUrl = (($envLines | Where-Object { $_ -match '^NEXT_PUBLIC_SUPABASE_URL=' }) -replace '^NEXT_PUBLIC_SUPABASE_URL=', '').Trim()
+$publishableKey = (($envLines | Where-Object { $_ -match '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=' }) -replace '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=', '').Trim()
+
+$authBody = @{
+  email = $env:ADMIN_EMAIL
+  password = $env:ADMIN_PASSWORD
+} | ConvertTo-Json
+
+$auth = Invoke-RestMethod `
+  -Method Post `
+  -Uri "$supabaseUrl/auth/v1/token?grant_type=password" `
+  -Headers @{
+    apikey = $publishableKey
+    "Content-Type" = "application/json"
+  } `
+  -Body $authBody
+
+$result = Invoke-RestMethod `
+  -Method Post `
+  -Uri "$supabaseUrl/functions/v1/stripe-bootstrap-catalog" `
+  -Headers @{
+    apikey = $publishableKey
+    Authorization = "Bearer $($auth.access_token)"
+    "Content-Type" = "application/json"
+    Origin = "https://www.deloadfit.app"
+  } `
+  -Body '{}'
+
+$result | ConvertTo-Json -Depth 10
+
+Remove-Item Env:\ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:\ADMIN_PASSWORD -ErrorAction SilentlyContinue
+Remove-Variable auth -ErrorAction SilentlyContinue
+```
+
+A resposta esperada deve conter `success: true`, os tres `lookupKeys` e os IDs live resolvidos no objeto `catalog`.
+
+Depois da execucao, valide no banco sem imprimir secrets:
+
+```bash
+npx supabase db query "select slug, stripe_product_id is not null as has_product, stripe_price_id is not null as has_price from public.billing_plans where slug in ('complete-monthly','complete-annual') union all select slug, stripe_product_id is not null, stripe_price_id is not null from public.billing_plan_addons where slug = 'active-client-monthly' order by slug;" --linked
+```
+
+Todas as linhas devem retornar `has_product = true` e `has_price = true`. A funcao faz upsert idempotente das linhas oficiais em `billing_plans` e `billing_plan_addons`, entao o catalogo local pode estar vazio antes da primeira execucao.
+
+Se a funcao retornar `403 FORBIDDEN`, o token usado nao pertence a um profile `admin` ativo. Se retornar sucesso mas a consulta do banco continuar vazia, nao considerar o bootstrap concluido: verificar logs de `stripe-bootstrap-catalog` e confirmar se a versao deployada contem upsert local do catalogo.
+
 ## Validacao De Catalogo
 
 ```bash
