@@ -2,9 +2,12 @@ import {
   ACTIVE_CLIENT_UNIT_CENTS,
   buildBillingFinancialSummary,
   describeCoupon,
+  ADDON_LOOKUP_KEY,
+  assertStripeRuntimeMode,
   getAdminClient,
   getStripeClient,
   jsonResponse,
+  PLAN_LOOKUP_KEYS,
   OFFICIAL_STRIPE_PRICES,
   stripeInvoiceDiscountCents,
   stripeNotConfiguredResponse,
@@ -45,6 +48,13 @@ function planSlugFromSubscriptionItems(items: unknown): BillingPlanSlug | null {
   for (const item of data) {
     const price = asRecord(asRecord(item)?.price);
     const priceId = textValue(price?.id);
+    const lookupKey = textValue(price?.lookup_key);
+    if (lookupKey === PLAN_LOOKUP_KEYS["complete-monthly"]) {
+      return "complete-monthly";
+    }
+    if (lookupKey === PLAN_LOOKUP_KEYS["complete-annual"]) {
+      return "complete-annual";
+    }
     if (priceId === OFFICIAL_STRIPE_PRICES["complete-monthly"].id) {
       return "complete-monthly";
     }
@@ -61,6 +71,7 @@ function activeClientQuantityFromSubscriptionItems(items: unknown) {
   if (!Array.isArray(data)) return 0;
   const addonItem = data.find((item) => {
     const price = asRecord(asRecord(item)?.price);
+    if (textValue(price?.lookup_key) === ADDON_LOOKUP_KEY) return true;
     return textValue(price?.id) ===
       OFFICIAL_STRIPE_PRICES["active-client-monthly"].id;
   });
@@ -228,9 +239,7 @@ Deno.serve(async (request) => {
     stripeEventId = event.id;
     const supabase = getAdminClient();
 
-    if (event.livemode) {
-      throw new Error(`LIVE_MODE_OBJECT:${event.id}`);
-    }
+    assertStripeRuntimeMode(event.livemode, event.id);
 
     const { error: ledgerError } = await supabase.from("stripe_webhook_events")
       .insert({

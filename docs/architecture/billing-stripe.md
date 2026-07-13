@@ -79,9 +79,9 @@ As Edge Functions nao criam cliente Stripe no topo do modulo. Sem `STRIPE_SECRET
 
 `BILLING_ALLOWED_ORIGINS` define os origins autorizados a chamar as Edge Functions de billing pelo navegador. O valor e uma lista separada por virgulas, sem barra final e contendo protocolo, host e porta quando houver. Localmente, usar `http://localhost:3000`. Em producao, usar somente o dominio publico HTTPS do app, por exemplo `https://app.exemplo.com`; incluir dominios de preview apenas quando eles precisarem executar checkout real.
 
-`stripe-bootstrap-catalog` nao cria Products nem Prices. A funcao valida os IDs oficiais existentes, reconcilia apenas nome mutavel de Product quando seguro e grava os IDs no catalogo local.
+`stripe-bootstrap-catalog` nao cria Products nem Prices. Em test mode, a funcao valida os IDs oficiais homologados; em live mode, valida Products e Prices ativos por `lookup_key`, valores, moeda, intervalo, tipo de uso e nomes oficiais de Product, gravando os IDs reais do ambiente no catalogo local.
 
-`test:billing:stripe` executa validacao real do catalogo somente com `RUN_STRIPE_E2E=1` e aborta com qualquer chave live.
+`test:billing:stripe` executa validacao real do catalogo somente com `RUN_STRIPE_E2E=1` e continua restrito a chaves test mode.
 
 ## Escopo De RPC E RLS
 

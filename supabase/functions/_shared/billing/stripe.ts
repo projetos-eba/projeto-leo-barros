@@ -70,6 +70,19 @@ export const OFFICIAL_STRIPE_PRICES = {
   },
 } as const;
 
+type StripeRuntimeMode = "live" | "test";
+
+function stripeRuntimeModeFromKey(secretKey: string): StripeRuntimeMode | null {
+  if (/^(sk|rk)_live_/.test(secretKey)) return "live";
+  if (/^(sk|rk)_test_/.test(secretKey)) return "test";
+  return null;
+}
+
+export function getStripeRuntimeMode(): StripeRuntimeMode | null {
+  const secretKey = Deno.env.get("STRIPE_SECRET_KEY")?.trim();
+  return secretKey ? stripeRuntimeModeFromKey(secretKey) : null;
+}
+
 function allowedOrigins() {
   return (Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() ||
     "http://localhost:3000")
@@ -156,6 +169,19 @@ export function getStripeClient() {
   return new Stripe(secretKey, {
     apiVersion: STRIPE_API_VERSION as Stripe.LatestApiVersion,
   });
+}
+
+export function assertStripeRuntimeMode(
+  livemode: boolean | undefined,
+  objectId: string,
+) {
+  const runtimeMode = getStripeRuntimeMode();
+  if (!runtimeMode) throw new Error("STRIPE_KEY_MODE_UNRECOGNIZED");
+
+  const expectedLivemode = runtimeMode === "live";
+  if (Boolean(livemode) !== expectedLivemode) {
+    throw new Error(`STRIPE_MODE_MISMATCH:${objectId}`);
+  }
 }
 
 export function getAdminClient() {
@@ -318,7 +344,7 @@ export async function resolvePartnerStripeCustomer(
   });
   const existing = customers.data[0];
   if (existing) {
-    assertTestMode(existing.livemode, existing.id);
+    assertStripeRuntimeMode(existing.livemode, existing.id);
     return existing.id;
   }
 
@@ -332,7 +358,7 @@ export async function resolvePartnerStripeCustomer(
   }, {
     idempotencyKey: `customer:${partnerAccess.partner.id}`,
   });
-  assertTestMode(customer.livemode, customer.id);
+  assertStripeRuntimeMode(customer.livemode, customer.id);
   return customer.id;
 }
 
@@ -427,9 +453,7 @@ export async function resolveActivePromotionCode(stripe: Stripe, code: string) {
   });
   const promotionCode = promotionCodes.data[0] ?? null;
   if (!promotionCode) return null;
-  if (promotionCode.livemode) {
-    throw new Error(`LIVE_MODE_OBJECT:${promotionCode.id}`);
-  }
+  assertStripeRuntimeMode(promotionCode.livemode, promotionCode.id);
   return promotionCode;
 }
 
@@ -450,12 +474,6 @@ function productId(value: string | Stripe.Product | Stripe.DeletedProduct) {
   return typeof value === "string" ? value : value.id;
 }
 
-function assertTestMode(livemode: boolean | undefined, objectId: string) {
-  if (livemode) {
-    throw new Error(`LIVE_MODE_OBJECT:${objectId}`);
-  }
-}
-
 async function validateProduct(
   stripe: Stripe,
   expected:
@@ -463,7 +481,7 @@ async function validateProduct(
   reconcileName: boolean,
 ) {
   const product = await stripe.products.retrieve(expected.id);
-  assertTestMode(product.livemode, expected.id);
+  assertStripeRuntimeMode(product.livemode, expected.id);
   if (!product.active) throw new Error(`INACTIVE_PRODUCT:${expected.id}`);
 
   if (product.name !== expected.name) {
@@ -474,21 +492,39 @@ async function validateProduct(
   return product;
 }
 
+async function validateLiveProduct(
+  product: string | Stripe.Product | Stripe.DeletedProduct,
+  expectedName: string,
+) {
+  if (typeof product === "string") {
+    throw new Error(`PRICE_PRODUCT_NOT_EXPANDED:${product}`);
+  }
+  if ("deleted" in product && product.deleted) {
+    throw new Error(`DELETED_PRODUCT:${product.id}`);
+  }
+  assertStripeRuntimeMode(product.livemode, product.id);
+  if (!product.active) throw new Error(`INACTIVE_PRODUCT:${product.id}`);
+  if (product.name !== expectedName) {
+    throw new Error(`PRODUCT_NAME_MISMATCH:${product.id}`);
+  }
+  return product;
+}
+
 async function validatePrice(
   stripe: Stripe,
   expected: typeof OFFICIAL_STRIPE_PRICES[keyof typeof OFFICIAL_STRIPE_PRICES],
 ) {
   const price = await stripe.prices.retrieve(expected.id);
-  assertTestMode(price.livemode, expected.id);
+  assertStripeRuntimeMode(price.livemode, expected.id);
 
   const lookupMatches = await stripe.prices.list({
     active: true,
     limit: 100,
     lookup_keys: [expected.lookupKey],
   });
-  if (lookupMatches.data.some((candidate) => candidate.livemode)) {
-    throw new Error(`LIVE_MODE_LOOKUP:${expected.lookupKey}`);
-  }
+  lookupMatches.data.forEach((candidate) =>
+    assertStripeRuntimeMode(candidate.livemode, candidate.id)
+  );
   const activeIds = lookupMatches.data.map((candidate) => candidate.id);
   if (activeIds.length !== 1 || activeIds[0] !== expected.id) {
     throw new Error(`LOOKUP_KEY_CONFLICT:${expected.lookupKey}`);
@@ -510,10 +546,80 @@ async function validatePrice(
   return price;
 }
 
+async function validatePriceByLookupKey(
+  stripe: Stripe,
+  expected: typeof OFFICIAL_STRIPE_PRICES[keyof typeof OFFICIAL_STRIPE_PRICES],
+  expectedProductName: string,
+) {
+  const lookupMatches = await stripe.prices.list({
+    active: true,
+    expand: ["data.product"],
+    limit: 100,
+    lookup_keys: [expected.lookupKey],
+  });
+  lookupMatches.data.forEach((candidate) =>
+    assertStripeRuntimeMode(candidate.livemode, candidate.id)
+  );
+  if (lookupMatches.data.length !== 1) {
+    throw new Error(`LOOKUP_KEY_CONFLICT:${expected.lookupKey}`);
+  }
+
+  const price = lookupMatches.data[0];
+  if (
+    !price.active ||
+    price.unit_amount !== expected.unitAmount ||
+    price.currency !== expected.currency ||
+    price.recurring?.interval !== expected.interval ||
+    price.recurring?.usage_type !== expected.usageType ||
+    price.lookup_key !== expected.lookupKey ||
+    price.billing_scheme !== expected.billingScheme
+  ) {
+    throw new Error(`PRICE_DIVERGENCE:${price.id}`);
+  }
+
+  const product = await validateLiveProduct(price.product, expectedProductName);
+  return { price, product };
+}
+
 export async function getValidatedBillingCatalog(
   stripe: Stripe,
   options: { reconcileProductNames?: boolean } = {},
 ) {
+  const runtimeMode = getStripeRuntimeMode();
+  if (runtimeMode === "live") {
+    const monthly = await validatePriceByLookupKey(
+      stripe,
+      OFFICIAL_STRIPE_PRICES["complete-monthly"],
+      OFFICIAL_STRIPE_PRODUCTS.complete.name,
+    );
+    const annual = await validatePriceByLookupKey(
+      stripe,
+      OFFICIAL_STRIPE_PRICES["complete-annual"],
+      OFFICIAL_STRIPE_PRODUCTS.complete.name,
+    );
+    const activeClientAddon = await validatePriceByLookupKey(
+      stripe,
+      OFFICIAL_STRIPE_PRICES["active-client-monthly"],
+      OFFICIAL_STRIPE_PRODUCTS.activeClientAddon.name,
+    );
+
+    if (monthly.product.id !== annual.product.id) {
+      throw new Error("PLAN_PRODUCT_MISMATCH");
+    }
+
+    return {
+      addonPrice: activeClientAddon.price,
+      planPrices: {
+        "complete-monthly": monthly.price,
+        "complete-annual": annual.price,
+      },
+      products: {
+        activeClientAddon: activeClientAddon.product,
+        complete: monthly.product,
+      },
+    };
+  }
+
   await validateProduct(
     stripe,
     OFFICIAL_STRIPE_PRODUCTS.complete,
@@ -543,6 +649,10 @@ export async function getValidatedBillingCatalog(
     planPrices: {
       "complete-monthly": monthly,
       "complete-annual": annual,
+    },
+    products: {
+      activeClientAddon: { id: productId(activeClientAddon.product) },
+      complete: { id: productId(monthly.product) },
     },
   };
 }

@@ -5,8 +5,6 @@ import {
   getStripeClient,
   getValidatedBillingCatalog,
   jsonResponse,
-  OFFICIAL_STRIPE_PRICES,
-  OFFICIAL_STRIPE_PRODUCTS,
   optionsResponse,
   originIsAllowed,
   PLAN_LOOKUP_KEYS,
@@ -37,24 +35,24 @@ Deno.serve(async (request) => {
 
     await supabase.from("billing_plans").update({
       stripe_price_id: catalog.planPrices["complete-monthly"].id,
-      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+      stripe_product_id: catalog.products.complete.id,
     }).eq("slug", "complete-monthly");
 
     await supabase.from("billing_plans").update({
       stripe_price_id: catalog.planPrices["complete-annual"].id,
-      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.complete.id,
+      stripe_product_id: catalog.products.complete.id,
     }).eq("slug", "complete-annual");
 
     await supabase.from("billing_plan_addons").update({
       stripe_price_id: catalog.addonPrice.id,
-      stripe_product_id: OFFICIAL_STRIPE_PRODUCTS.activeClientAddon.id,
+      stripe_product_id: catalog.products.activeClientAddon.id,
     }).eq("slug", "active-client-monthly");
 
     return jsonResponse(200, {
       catalog: {
-        addon: OFFICIAL_STRIPE_PRICES["active-client-monthly"].id,
-        annual: OFFICIAL_STRIPE_PRICES["complete-annual"].id,
-        monthly: OFFICIAL_STRIPE_PRICES["complete-monthly"].id,
+        addon: catalog.addonPrice.id,
+        annual: catalog.planPrices["complete-annual"].id,
+        monthly: catalog.planPrices["complete-monthly"].id,
       },
       lookupKeys: [
         PLAN_LOOKUP_KEYS["complete-monthly"],
