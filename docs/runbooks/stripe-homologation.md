@@ -43,6 +43,26 @@ Use origins exatos, separados por virgula, sem espacos e sem barra final. Nao us
 
 O secret do `stripe listen` local normalmente e diferente do secret de endpoint cadastrado no Dashboard. Use o `whsec_...` mostrado pelo listener apenas no runtime local da Edge Function e nao o registre em docs.
 
+## Producao Live
+
+Em producao, o runtime deve usar chaves Stripe live coerentes entre frontend,
+Edge Functions e webhook:
+
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` com prefixo `pk_live_`.
+- `STRIPE_SECRET_KEY` ou restricted key com prefixo `sk_live_` ou `rk_live_`.
+- `STRIPE_WEBHOOK_SECRET` do endpoint live cadastrado no Dashboard.
+- `BILLING_ALLOWED_ORIGINS` com os dominios HTTPS reais do checkout, separados por virgula e sem barra final.
+
+O codigo aceita objetos Stripe live apenas quando a chave server-side tambem e live. Se a chave for test mode e um objeto live aparecer, ou o inverso, a Edge Function rejeita a operacao com erro interno de incompatibilidade de modo.
+
+Antes do primeiro checkout live, crie no Dashboard live os Products e Prices oficiais com os mesmos `lookup_key`s do test mode:
+
+- `complete_monthly_brl`
+- `complete_annual_brl`
+- `active_client_monthly_brl`
+
+Os valores, moeda, intervalo, tipo de uso e nomes de Product devem seguir o catalogo oficial. Depois disso, execute `stripe-bootstrap-catalog` autenticado como Admin para gravar os IDs live reais no catalogo local.
+
 ## Validacao De Catalogo
 
 ```bash
