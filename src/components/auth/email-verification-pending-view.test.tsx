@@ -132,6 +132,39 @@ describe("EmailVerificationPendingView", () => {
     expect(routerRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it("redireciona para o destino confirmado quando o auto-login falha", async () => {
+    mockedGetEmailVerificationStatus.mockResolvedValueOnce({
+      confirmed: true,
+      destination: "/planos",
+      ok: true,
+    });
+    mockedLoginWithPassword.mockResolvedValueOnce({
+      ok: false,
+      message: "E-mail ou senha invalidos.",
+    });
+
+    render(
+      <EmailVerificationPendingView
+        autoLogin={{
+          password: "senha-com-divergencia",
+        }}
+        email="parceiro@example.com"
+        loginHref="/login/parceiros"
+        message="Cadastro recebido."
+        profileId="11111111-1111-4111-8111-111111111111"
+        role="parceiro"
+        title="Cadastro recebido"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenCalledWith("/planos");
+    });
+    expect(routerRefresh).not.toHaveBeenCalled();
+    expect(screen.queryByText("E-mail ou senha invalidos.")).not
+      .toBeInTheDocument();
+  });
+
   it("mantem reenvio bloqueado durante o cooldown inicial", () => {
     mockedGetEmailVerificationStatus.mockResolvedValue({
       confirmed: false,

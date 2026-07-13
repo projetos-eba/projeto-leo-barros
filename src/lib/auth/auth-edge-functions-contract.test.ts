@@ -74,6 +74,19 @@ describe("contrato das Edge Functions de auth publico", () => {
     expect(signup).toContain("auth.admin.deleteUser");
   });
 
+  it("preserva senha sem trim nas funcoes que fazem cadastro ou primeiro acesso", () => {
+    const signup = readProjectFile("supabase/functions/signup-partner/index.ts");
+    const firstAccess = readProjectFile(
+      "supabase/functions/complete-client-first-access/index.ts",
+    );
+
+    expect(signup).toContain("const password = rawStringValue(rawBody.password)");
+    expect(firstAccess).toContain("const password = rawStringValue(rawBody.password)");
+    expect(firstAccess).toContain(
+      "const confirmPassword = rawStringValue(rawBody.confirmPassword)",
+    );
+  });
+
   it("mantem destino segmentado na confirmacao e no checkout de Parceiro", () => {
     const confirmationPage = readProjectFile(
       "src/app/auth/confirmar-email/page.tsx",
