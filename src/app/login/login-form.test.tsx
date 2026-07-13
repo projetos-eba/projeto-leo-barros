@@ -63,7 +63,7 @@ describe("NextLoginForm", () => {
   it("mostra erro seguro quando o servidor rejeita o login", async () => {
     vi.mocked(loginWithPassword).mockResolvedValue({
       ok: false,
-      message: "E-mail ou senha inválidos.",
+      message: "Nao foi possivel entrar. Confira seus dados ou redefina a senha.",
     });
 
     render(<NextLoginForm />);
@@ -77,7 +77,7 @@ describe("NextLoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "E-mail ou senha inválidos.",
+      "Nao foi possivel entrar. Confira seus dados ou redefina a senha.",
     );
     expect(routerReplace).not.toHaveBeenCalled();
   });

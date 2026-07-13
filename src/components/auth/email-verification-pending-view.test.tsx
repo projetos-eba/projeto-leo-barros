@@ -132,7 +132,7 @@ describe("EmailVerificationPendingView", () => {
     expect(routerRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it("redireciona para o destino confirmado quando o auto-login falha", async () => {
+  it("nao redireciona sem sessao quando o auto-login falha", async () => {
     mockedGetEmailVerificationStatus.mockResolvedValueOnce({
       confirmed: true,
       destination: "/planos",
@@ -158,8 +158,11 @@ describe("EmailVerificationPendingView", () => {
     );
 
     await waitFor(() => {
-      expect(routerReplace).toHaveBeenCalledWith("/planos");
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "E-mail confirmado. Entre novamente ou redefina sua senha para continuar.",
+      );
     });
+    expect(routerReplace).not.toHaveBeenCalled();
     expect(routerRefresh).not.toHaveBeenCalled();
     expect(screen.queryByText("E-mail ou senha invalidos.")).not
       .toBeInTheDocument();

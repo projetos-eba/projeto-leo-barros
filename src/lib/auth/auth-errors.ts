@@ -1,5 +1,5 @@
 export const SAFE_AUTH_ERROR_MESSAGES = {
-  genericLogin: "E-mail ou senha invalidos.",
+  genericLogin: "Nao foi possivel entrar. Confira seus dados ou redefina a senha.",
   inactiveAccount: "Conta indisponivel para acesso neste momento.",
   invalidAccountType: "Nao foi possivel identificar o tipo da sua conta.",
   missingProfile: "Conta autenticada, mas sem perfil ativo configurado.",

@@ -16,6 +16,8 @@ import { AuthCardShell } from "./auth-card-shell";
 
 const POLLING_INTERVAL_MS = 5_000;
 const RESEND_COOLDOWN_SECONDS = 60;
+const AUTO_LOGIN_FAILED_MESSAGE =
+  "E-mail confirmado. Entre novamente ou redefina sua senha para continuar.";
 
 type EmailVerificationPendingViewProps = {
   autoLogin?: {
@@ -91,12 +93,7 @@ export function EmailVerificationPendingView({
           return;
         }
 
-        if (status.destination) {
-          router.replace(status.destination);
-          return;
-        }
-
-        setFeedback(login.message);
+        setFeedback(AUTO_LOGIN_FAILED_MESSAGE);
         setAuthFailure(true);
         redirectStartedRef.current = false;
         setIsRedirecting(false);
