@@ -15,13 +15,15 @@ import {
   Settings,
   ShieldCheck,
   TestTube2,
+  Upload,
   UsersRound,
   WalletCards,
   Webhook,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   addIntegrationAction,
@@ -46,6 +48,8 @@ import type {
   SettingsIntegration,
   SettingsSection,
 } from "@/lib/admin/settings-metrics";
+import { usePlatformBranding } from "@/components/branding/use-platform-branding";
+import { PlatformLogo } from "@/components/branding/platform-logo";
 import { cn } from "@/lib/utils";
 
 type AdminSettingsViewProps = {
@@ -163,7 +167,20 @@ function ActionBar({ activeTab, message, onRestore, onSave, pending }: { activeT
   );
 }
 
-function GeneralTab({ general, onChange }: { general: GeneralSettings; onChange: (general: GeneralSettings) => void }) {
+function GeneralTab({
+  general,
+  logoPreviewUrl,
+  onChange,
+  onLogoChange,
+}: {
+  general: GeneralSettings;
+  logoPreviewUrl: string | null;
+  onChange: (general: GeneralSettings) => void;
+  onLogoChange: (file: File | null) => void;
+}) {
+  const branding = usePlatformBranding();
+  const previewUrl = logoPreviewUrl ?? branding.logoUrl;
+
   return (
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <Panel className="p-[22px]">
@@ -198,10 +215,29 @@ function GeneralTab({ general, onChange }: { general: GeneralSettings; onChange:
           title="Branding"
         />
         <div className="mt-6 grid gap-4">
-          <div className="flex size-24 items-center justify-center rounded-[9px] bg-white text-[32px] font-bold text-[#061725]">LB</div>
-          <div className="rounded-[8px] border border-dashed border-[#31536a] bg-[#071b2b] p-5 text-[13px] leading-[19px] text-[#8ca1af]">
-            Upload de logo fica preparado visualmente, mas a persistência de arquivo entra junto com a estratégia final de storage.
+          <div className="flex items-center gap-4">
+            {previewUrl ? (
+              <div className="flex size-24 items-center justify-center overflow-hidden rounded-[9px] bg-white p-3">
+                <img alt="" className="max-h-full max-w-full object-contain" src={previewUrl} />
+              </div>
+            ) : (
+              <PlatformLogo className="size-24 rounded-[9px] bg-white text-[32px] text-[#061725]" fallbackClassName="text-[32px]" />
+            )}
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold text-[#dce8ef]">{general.platformName || branding.platformName}</p>
+              <p className="mt-1 text-[12px] leading-[18px] text-[#8ca1af]">PNG, JPG, WEBP ou ICO ate 2 MB.</p>
+            </div>
           </div>
+          <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-[#31536a] bg-[#0a2030] px-4 text-[13px] font-bold text-[#7dbaff] transition hover:border-[#5ba8ff] hover:text-[#dce8ef]">
+            <Upload className="size-4" />
+            Escolher logo
+            <input
+              accept="image/png,image/jpeg,image/webp,image/x-icon,image/vnd.microsoft.icon"
+              className="sr-only"
+              type="file"
+              onChange={(event) => onLogoChange(event.target.files?.[0] ?? null)}
+            />
+          </label>
         </div>
       </Panel>
     </div>
@@ -405,8 +441,11 @@ function IntegrationDrawer({ integration, onOpenChange, onSave, onTest, open, pe
 }
 
 export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SettingsSection>("general");
   const [general, setGeneral] = useState(settings.general);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [security, setSecurity] = useState(settings.security);
   const [integrations, setIntegrations] = useState(settings.integrations);
   const [selectedIntegration, setSelectedIntegration] = useState<SettingsIntegration | null>(null);
@@ -416,6 +455,18 @@ export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
 
   const activeTitle = useMemo(() => tabs.find((tab) => tab.id === activeTab)?.label ?? "Geral", [activeTab]);
 
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreviewUrl(null);
+      return;
+    }
+
+    const nextUrl = URL.createObjectURL(logoFile);
+    setLogoPreviewUrl(nextUrl);
+
+    return () => URL.revokeObjectURL(nextUrl);
+  }, [logoFile]);
+
   function updateIntegration(key: string, patch: Partial<SettingsIntegration>) {
     setIntegrations((items) => items.map((item) => item.key === key ? { ...item, ...patch } : item));
   }
@@ -424,7 +475,11 @@ export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
     startTransition(async () => {
       const result = activeTab === "security"
         ? await saveSecuritySettingsAction(security)
-        : await saveGeneralSettingsAction(general);
+        : await saveGeneralSettingsAction(general, logoFile);
+      if (result.ok && activeTab === "general") {
+        setLogoFile(null);
+        router.refresh();
+      }
       setMessage(result.message);
     });
   }
@@ -543,7 +598,14 @@ export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
 
       <main className="mt-6">
         <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-[#5db7ef]">{activeTitle}</p>
-        {activeTab === "general" ? <GeneralTab general={general} onChange={setGeneral} /> : null}
+        {activeTab === "general" ? (
+          <GeneralTab
+            general={general}
+            logoPreviewUrl={logoPreviewUrl}
+            onChange={setGeneral}
+            onLogoChange={setLogoFile}
+          />
+        ) : null}
         {activeTab === "users" ? <UsersTab admins={settings.admins} /> : null}
         {activeTab === "integrations" ? <IntegrationsTab integrations={integrations} onAdd={handleAddIntegration} onConfigure={handleConfigure} onTest={handleTestIntegration} pending={isPending} /> : null}
         {activeTab === "security" ? <SecurityTab security={security} onChange={setSecurity} /> : null}

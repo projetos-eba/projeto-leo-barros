@@ -1,6 +1,10 @@
-import Link from "next/link";
-import { Activity, ArrowLeft, CreditCard, Lock, Mail } from "lucide-react";
+"use client";
 
+import Link from "next/link";
+import { ArrowLeft, CreditCard, Lock, Mail } from "lucide-react";
+
+import { PlatformLogo } from "@/components/branding/platform-logo";
+import { usePlatformBranding } from "@/components/branding/use-platform-branding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,6 +55,7 @@ export function LoginView({
   supportText = "Acesso restrito a pacientes cadastrados",
   title = "Bem-vindo",
 }: LoginViewProps) {
+  const branding = usePlatformBranding();
   const LoginIcon = loginIdLabel.toLowerCase().includes("e-mail")
     ? Mail
     : CreditCard;
@@ -65,13 +70,11 @@ export function LoginView({
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Activity className="w-6 h-6 text-primary" />
-            </div>
+            <PlatformLogo className="h-12 w-12 rounded-xl bg-primary/10 text-primary" fallbackClassName="text-base text-primary" showIconFallback />
             <div className="text-left">
-              <h1 className="text-xl font-bold text-foreground">Leonardo Barros</h1>
+              <h1 className="text-xl font-bold text-foreground">{branding.platformName}</h1>
               <p className="text-xs text-muted-foreground font-medium tracking-wider uppercase">
-                Saúde & Performance
+                {branding.tagline}
               </p>
             </div>
           </div>

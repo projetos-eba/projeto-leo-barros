@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import type { ClientHomeData } from "@/lib/clients/home-metrics";
+import { DEFAULT_PLATFORM_NAME } from "@/lib/branding/platform-branding-contract";
 import { cn } from "@/lib/utils";
 
 const modules = [
@@ -46,6 +47,7 @@ const modules = [
 
 type ClientHomeViewProps = {
   home: ClientHomeData;
+  platformName?: string;
 };
 
 type ModuleKey = (typeof modules)[number]["key"];
@@ -114,7 +116,7 @@ function ModuleScopeCards({ home, moduleKey }: { home: ClientHomeData; moduleKey
   );
 }
 
-export function ClientHomeView({ home }: ClientHomeViewProps) {
+export function ClientHomeView({ home, platformName = DEFAULT_PLATFORM_NAME }: ClientHomeViewProps) {
   const renewal = home.subscription;
 
   return (
@@ -226,11 +228,11 @@ export function ClientHomeView({ home }: ClientHomeViewProps) {
       <footer className="border-t border-[#1b2b37] bg-[#17232c]">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 py-9 text-[#8da0b1] sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
           <div>
-            <p className="text-[20px] font-bold leading-none text-[#dce8f1]">Leonardo Barros</p>
+            <p className="text-[20px] font-bold leading-none text-[#dce8f1]">{platformName}</p>
             <p className="mt-1 text-[9px] font-semibold uppercase text-[#6f8495]">Saúde | Nutrição | Performance</p>
           </div>
           <p className="max-w-[420px] text-[13px] font-semibold leading-6">
-            © 2026 Plataforma Leonardo Barros. Todos os direitos reservados.
+            © 2026 Plataforma {platformName}. Todos os direitos reservados.
           </p>
         </div>
       </footer>

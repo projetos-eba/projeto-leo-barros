@@ -4,6 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminSettingsView } from "./admin-settings-view";
 import type { AdminSettingsData } from "@/lib/admin/settings-metrics";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+  }),
+}));
+
 vi.mock("./actions", () => ({
   addIntegrationAction: vi.fn(async () => ({ message: "Integração adicionada.", ok: true })),
   restoreSettingsSectionAction: vi.fn(async () => ({ message: "Padrão restaurado.", ok: true })),
@@ -36,6 +42,7 @@ const settings: AdminSettingsData = {
   ],
   generatedAt: "2026-06-29T12:00:00.000Z",
   general: {
+    logo: null,
     maintenanceMessage: "Voltamos em breve.",
     maintenanceMode: false,
     platformDomain: "app.leonardobarros.com.br",

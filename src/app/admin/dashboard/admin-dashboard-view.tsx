@@ -22,6 +22,7 @@ import {
   ProfessionalStatusChart,
 } from "./admin-dashboard-charts";
 import { InfoHint } from "@/components/ui/info-hint";
+import { DEFAULT_PLATFORM_NAME } from "@/lib/branding/platform-branding-contract";
 import type {
   AdminDashboardData,
   DashboardAlert,
@@ -34,6 +35,7 @@ import { cn } from "@/lib/utils";
 
 type AdminDashboardViewProps = {
   dashboard: AdminDashboardData;
+  platformName?: string;
 };
 
 const kpiIcons: Record<DashboardKpi["id"], LucideIcon> = {
@@ -256,7 +258,7 @@ function BottomMetricsGrid({ metrics }: { metrics: DashboardBottomMetric[] }) {
   );
 }
 
-export function AdminDashboardView({ dashboard }: AdminDashboardViewProps) {
+export function AdminDashboardView({ dashboard, platformName = DEFAULT_PLATFORM_NAME }: AdminDashboardViewProps) {
   return (
     <div className="min-h-screen bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] md:px-8 lg:px-[43px] lg:py-[35px]">
       <header className="flex flex-col gap-4 border-b border-[#244454]/70 pb-6 md:flex-row md:items-start md:justify-between">
@@ -322,7 +324,7 @@ export function AdminDashboardView({ dashboard }: AdminDashboardViewProps) {
       </section>
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
-        <span>Leonardo Barros — Plataforma Admin</span>
+        <span>{platformName} — Plataforma Admin</span>
         <span>Atualizado pelo banco local em {new Date(dashboard.generatedAt).toLocaleString("pt-BR")}</span>
       </footer>
     </div>

@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useTransition } from "react";
 
 import { logoutPartner } from "@/app/login/actions";
+import { PlatformLogo } from "@/components/branding/platform-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -28,9 +29,7 @@ export function PartnerSettingsShell({ children }: PartnerSettingsShellProps) {
       <header className="sticky top-0 z-40 border-b border-[#142432] bg-[#0b1720]/96 backdrop-blur-xl lg:hidden">
         <div className="flex h-14 items-center justify-between gap-3 px-3">
           <Link className="flex min-w-0 items-center gap-2" href="/parceiros/dashboard">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4f7fa] text-[15px] font-bold leading-none text-[#092333]">
-              LB
-            </span>
+            <PlatformLogo className="size-8 rounded-[6px] bg-[#f4f7fa] text-[12px] text-[#092333]" fallbackClassName="text-[12px]" />
             <span className="min-w-0">
               <span className="block truncate text-[13px] font-bold leading-4 text-[#eaf2f7]">Configuracoes</span>
               <span className="block text-[9px] font-semibold uppercase leading-3 text-[#7c93a3]">Parceiros</span>
@@ -81,9 +80,7 @@ export function PartnerSettingsShell({ children }: PartnerSettingsShellProps) {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[220px] border-r border-[#000a1c]/60 bg-[#0e151a] lg:block">
         <div className="flex h-full flex-col px-3 py-[33px]">
           <div className="flex items-center gap-2.5 px-[15px]">
-            <span className="flex size-[37px] items-center justify-center rounded-[6px] bg-[#f4f7fa] text-[18px] font-bold leading-none text-[#092333]">
-              LB
-            </span>
+            <PlatformLogo className="size-[37px] rounded-[6px] bg-[#f4f7fa] text-[14px] text-[#092333]" fallbackClassName="text-[14px]" />
             <span className="min-w-0">
               <span className="block text-[17px] font-bold leading-[17px] text-[#eaf2f7]">Configuracoes</span>
               <span className="mt-0.5 block text-[8px] font-medium uppercase leading-[10px] text-[#7c93a3]">

@@ -28,10 +28,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { DEFAULT_PLATFORM_NAME } from "@/lib/branding/platform-branding-contract";
 import { cn } from "@/lib/utils";
 import type { AdminSupportData, SupportKpi, SupportTicketRow } from "@/lib/admin/support-metrics";
 
 type AdminSupportViewProps = {
+  platformName?: string;
   support: AdminSupportData;
 };
 
@@ -257,7 +259,7 @@ function TicketDrawer({ onOpenChange, open, ticket }: { onOpenChange: (open: boo
   );
 }
 
-export function AdminSupportView({ support }: AdminSupportViewProps) {
+export function AdminSupportView({ platformName = DEFAULT_PLATFORM_NAME, support }: AdminSupportViewProps) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<FilterValue>("all");
   const [priority, setPriority] = useState<FilterValue>("all");
@@ -486,7 +488,7 @@ export function AdminSupportView({ support }: AdminSupportViewProps) {
       </section>
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
-        <span>Leonardo Barros — Suporte Admin</span>
+        <span>{platformName} — Suporte Admin</span>
         <span>Atualizado pelo banco local em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(support.generatedAt))}</span>
       </footer>
 

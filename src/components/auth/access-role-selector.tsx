@@ -1,6 +1,10 @@
-import Link from "next/link";
-import { Activity, ArrowRight, Shield, UserRound, UsersRound } from "lucide-react";
+"use client";
 
+import Link from "next/link";
+import { ArrowRight, Shield, UserRound, UsersRound } from "lucide-react";
+
+import { PlatformLogo } from "@/components/branding/platform-logo";
+import { usePlatformBranding } from "@/components/branding/use-platform-branding";
 import { cn } from "@/lib/utils";
 
 const accessOptions = [
@@ -28,6 +32,8 @@ const accessOptions = [
 ] as const;
 
 export function AccessRoleSelector() {
+  const branding = usePlatformBranding();
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background px-6 py-10 text-foreground">
       <div className="pointer-events-none absolute left-1/2 top-[-120px] h-80 w-80 -translate-x-1/2 rounded-full bg-primary/10 blur-[150px]" />
@@ -36,9 +42,9 @@ export function AccessRoleSelector() {
       <section className="page-enter relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl flex-col items-center justify-center">
         <div className="mb-10 text-center">
           <div className="mb-5 inline-flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2">
-            <Activity className="h-4 w-4 text-primary" />
+            <PlatformLogo className="h-5 w-5 rounded-[5px] bg-primary/10 text-primary" fallbackClassName="text-[9px] text-primary" showIconFallback />
             <span className="text-sm font-semibold text-muted-foreground">
-              Leonardo Barros
+              {branding.platformName}
             </span>
           </div>
           <h1 className="text-4xl font-bold tracking-normal text-foreground md:text-5xl">

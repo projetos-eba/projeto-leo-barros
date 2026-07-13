@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/next-guards";
 import { createClient } from "@/lib/supabase/server";
 import {
+  PLATFORM_ASSETS_BUCKET,
+  PLATFORM_LOGO_FOLDER,
+  normalizePlatformLogo,
+  type PlatformLogoSettings,
+} from "@/lib/branding/platform-branding-contract";
+import {
   defaultGeneralSettings,
   defaultSecuritySettings,
   type GeneralSettings,
@@ -28,13 +34,33 @@ type SupabaseWriteResult = {
 
 type SupabaseWriteClient = {
   from(table: string): {
+    select(columns: string): {
+      eq(column: string, value: string): {
+        maybeSingle(): Promise<{ data: { value: unknown } | null; error: { message: string } | null }>;
+      };
+    };
     insert(values: Record<string, unknown> | Record<string, unknown>[]): Promise<SupabaseWriteResult>;
     update(values: Record<string, unknown>): {
       eq(column: string, value: string): Promise<SupabaseWriteResult>;
     };
     upsert(values: Record<string, unknown> | Record<string, unknown>[], options?: { onConflict?: string }): Promise<SupabaseWriteResult>;
   };
+  storage: {
+    from(bucket: string): {
+      remove(paths: string[]): Promise<{ error: { message: string } | null }>;
+      upload(path: string, file: File, options?: { contentType?: string; upsert?: boolean }): Promise<{ error: { message: string } | null }>;
+    };
+  };
 };
+
+const logoMimeTypes = new Map([
+  ["image/png", "png"],
+  ["image/jpeg", "jpg"],
+  ["image/webp", "webp"],
+  ["image/x-icon", "ico"],
+  ["image/vnd.microsoft.icon", "ico"],
+]);
+const maxLogoSizeBytes = 2 * 1024 * 1024;
 
 async function requireAdminProfileId() {
   const { profile, reason } = await getCurrentProfile();
@@ -67,11 +93,98 @@ async function writeActivity(
 
 function normalizeGeneral(input: GeneralSettings): GeneralSettings {
   return {
+    logo: normalizePlatformLogo(input.logo),
     maintenanceMessage: input.maintenanceMessage.trim().slice(0, 200),
     maintenanceMode: Boolean(input.maintenanceMode),
     platformDomain: input.platformDomain.trim().slice(0, 120),
     platformName: input.platformName.trim().slice(0, 80),
   };
+}
+
+function fileSignatureMatches(bytes: Uint8Array, contentType: string) {
+  if (contentType === "image/png") {
+    return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  }
+
+  if (contentType === "image/jpeg") {
+    return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+
+  if (contentType === "image/webp") {
+    return (
+      bytes[0] === 0x52 &&
+      bytes[1] === 0x49 &&
+      bytes[2] === 0x46 &&
+      bytes[3] === 0x46 &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    );
+  }
+
+  if (contentType === "image/x-icon" || contentType === "image/vnd.microsoft.icon") {
+    return bytes[0] === 0x00 && bytes[1] === 0x00 && bytes[2] === 0x01 && bytes[3] === 0x00;
+  }
+
+  return false;
+}
+
+async function uploadLogoIfPresent(
+  supabase: SupabaseWriteClient,
+  logoFile: File | null | undefined,
+): Promise<PlatformLogoSettings | null> {
+  if (!logoFile || logoFile.size === 0) return null;
+
+  const contentType = logoFile.type;
+  const extension = logoMimeTypes.get(contentType);
+
+  if (!extension) {
+    throw new Error("Formato de logo nao aceito. Envie PNG, JPG, WEBP ou ICO.");
+  }
+
+  if (logoFile.size > maxLogoSizeBytes) {
+    throw new Error("Logo muito grande. Envie um arquivo de ate 2 MB.");
+  }
+
+  const bytes = new Uint8Array(await logoFile.arrayBuffer());
+
+  if (!fileSignatureMatches(bytes, contentType)) {
+    throw new Error("Arquivo de logo invalido.");
+  }
+
+  const updatedAt = new Date().toISOString();
+  const path = `${PLATFORM_LOGO_FOLDER}/logo-${Date.now()}.${extension}`;
+  const upload = await supabase.storage.from(PLATFORM_ASSETS_BUCKET).upload(path, logoFile, {
+    contentType,
+    upsert: false,
+  });
+
+  if (upload.error) throw new Error(`Falha ao enviar logo: ${upload.error.message}`);
+
+  return {
+    contentType,
+    path,
+    sizeBytes: logoFile.size,
+    updatedAt,
+  };
+}
+
+async function fetchCurrentGeneralValue(supabase: SupabaseWriteClient) {
+  const { data, error } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "general")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data?.value;
+}
+
+function revalidateBranding() {
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/configuracoes");
 }
 
 function normalizeSecurity(input: SecuritySettings): SecuritySettings {
@@ -89,11 +202,24 @@ function cleanConfig(config: Record<string, string>) {
   );
 }
 
-export async function saveGeneralSettingsAction(input: GeneralSettings): Promise<ActionResult> {
+export async function saveGeneralSettingsAction(
+  input: GeneralSettings,
+  logoFile?: File | null,
+): Promise<ActionResult> {
   try {
     const actorProfileId = await requireAdminProfileId();
     const supabase = (await createClient()) as unknown as SupabaseWriteClient;
-    const general = normalizeGeneral(input);
+    const currentValue = await fetchCurrentGeneralValue(supabase);
+    const currentLogo = normalizePlatformLogo(
+      currentValue && typeof currentValue === "object" && !Array.isArray(currentValue)
+        ? (currentValue as { logo?: unknown }).logo
+        : null,
+    );
+    const uploadedLogo = await uploadLogoIfPresent(supabase, logoFile);
+    const general = normalizeGeneral({
+      ...input,
+      logo: uploadedLogo ?? normalizePlatformLogo(input.logo) ?? currentLogo,
+    });
 
     const { error } = await supabase.from("platform_settings").upsert({
       key: "general",
@@ -112,7 +238,11 @@ export async function saveGeneralSettingsAction(input: GeneralSettings): Promise
       { section: "general" },
     );
 
-    revalidatePath("/admin/configuracoes");
+    if (uploadedLogo && currentLogo?.path && currentLogo.path !== uploadedLogo.path) {
+      await supabase.storage.from(PLATFORM_ASSETS_BUCKET).remove([currentLogo.path]);
+    }
+
+    revalidateBranding();
     return { message: "Configurações gerais salvas.", ok: true };
   } catch (error) {
     return { message: error instanceof Error ? error.message : "Falha ao salvar configurações gerais.", ok: false };
@@ -172,7 +302,11 @@ export async function restoreSettingsSectionAction(section: "general" | "securit
       { section },
     );
 
-    revalidatePath("/admin/configuracoes");
+    if (section === "general") {
+      revalidateBranding();
+    } else {
+      revalidatePath("/admin/configuracoes");
+    }
     return { message: "Padrão restaurado.", ok: true };
   } catch (error) {
     return { message: error instanceof Error ? error.message : "Falha ao restaurar padrão.", ok: false };

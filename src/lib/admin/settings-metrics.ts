@@ -1,4 +1,8 @@
 import type { Json } from "@/lib/supabase/database.types";
+import {
+  normalizePlatformLogo,
+  type PlatformLogoSettings,
+} from "@/lib/branding/platform-branding-contract";
 
 export type SettingsSection = "general" | "integrations" | "security" | "users";
 
@@ -48,6 +52,7 @@ export type SettingsRawData = {
 };
 
 export type GeneralSettings = {
+  logo: PlatformLogoSettings | null;
   maintenanceMessage: string;
   maintenanceMode: boolean;
   platformDomain: string;
@@ -103,6 +108,7 @@ export type AdminSettingsData = {
 };
 
 export const defaultGeneralSettings: GeneralSettings = {
+  logo: null,
   maintenanceMessage: "Estamos realizando manutencoes programadas. Voltaremos em breve.",
   maintenanceMode: false,
   platformDomain: "app.leonardobarros.com.br",
@@ -189,6 +195,7 @@ export function mergeGeneralSettings(value: Json | undefined): GeneralSettings {
   return {
     maintenanceMessage: stringValue(value.maintenanceMessage, defaultGeneralSettings.maintenanceMessage),
     maintenanceMode: booleanValue(value.maintenanceMode, defaultGeneralSettings.maintenanceMode),
+    logo: normalizePlatformLogo(value.logo),
     platformDomain: stringValue(value.platformDomain, defaultGeneralSettings.platformDomain),
     platformName: stringValue(value.platformName, defaultGeneralSettings.platformName),
   };
