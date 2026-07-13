@@ -80,7 +80,7 @@ Deno.serve(async (request) => {
     const tokenHash = await sha256(token);
     const { data: tokenRow, error: tokenError } = await supabase
       .from("password_reset_tokens")
-      .select("id, expires_at, consumed_at, validated_at")
+      .select("id, expires_at, consumed_at, validated_at, role")
       .eq("token_hash", tokenHash)
       .maybeSingle();
 
@@ -116,6 +116,7 @@ Deno.serve(async (request) => {
     }
 
     return response(200, {
+      role: tokenRow.role,
       success: true,
       resetSessionId,
       sessionExpiresAt,

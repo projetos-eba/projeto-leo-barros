@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { SAFE_AUTH_ERROR_MESSAGES } from "@/lib/auth/auth-errors";
 import {
   type OfficialRole,
+  isKnownRole,
   resolvePostLoginDestination,
 } from "@/lib/auth/identity-contracts";
 import { normalizeEmailPasswordLogin } from "@/lib/auth/login-contracts";
@@ -41,9 +42,16 @@ export async function loginWithPassword(credentials: {
     });
 
   if (authError || !authData.user) {
+    logLoginAttemptIssue("AUTH_PROVIDER_REJECTED", {
+      errorCode: authError && "code" in authError ? authError.code : undefined,
+      errorName: authError?.name,
+      errorStatus: authError && "status" in authError ? authError.status : undefined,
+      message: authError?.message,
+    });
+
     return {
       ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.genericLogin,
+      message: mapAuthProviderLoginError(authError),
     };
   }
 
@@ -55,6 +63,9 @@ export async function loginWithPassword(credentials: {
 
   if (profileError || !profile) {
     await supabase.auth.signOut();
+    logLoginAttemptIssue("LOGIN_PROFILE_MISSING", {
+      hasProfileError: Boolean(profileError),
+    });
 
     return {
       ok: false,
@@ -62,12 +73,15 @@ export async function loginWithPassword(credentials: {
     };
   }
 
-  if (profile.role !== normalized.expectedRole) {
+  if (!isKnownRole(profile.role)) {
     await supabase.auth.signOut();
+    logLoginAttemptIssue("LOGIN_ROLE_INVALID", {
+      role: profile.role,
+    });
 
     return {
       ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.wrongArea,
+      message: SAFE_AUTH_ERROR_MESSAGES.invalidAccountType,
     };
   }
 
@@ -78,10 +92,30 @@ export async function loginWithPassword(credentials: {
 
   if (!destination.allowed) {
     await supabase.auth.signOut();
+    logLoginAttemptIssue("LOGIN_ACCOUNT_NOT_ALLOWED", {
+      reason: destination.reason,
+      role: profile.role,
+      status: profile.status,
+    });
 
     return {
       ok: false,
-      message: SAFE_AUTH_ERROR_MESSAGES.inactiveAccount,
+      message: destination.reason === "unknown_role"
+        ? SAFE_AUTH_ERROR_MESSAGES.invalidAccountType
+        : SAFE_AUTH_ERROR_MESSAGES.inactiveAccount,
+    };
+  }
+
+  if (destination.role !== normalized.expectedRole) {
+    await supabase.auth.signOut();
+    logLoginAttemptIssue("LOGIN_WRONG_AREA", {
+      expectedRole: normalized.expectedRole,
+      role: destination.role,
+    });
+
+    return {
+      ok: false,
+      message: SAFE_AUTH_ERROR_MESSAGES.wrongArea,
     };
   }
 
@@ -90,6 +124,9 @@ export async function loginWithPassword(credentials: {
     !profile.email_confirmed_at
   ) {
     await supabase.auth.signOut();
+    logLoginAttemptIssue("LOGIN_EMAIL_NOT_CONFIRMED", {
+      role: destination.role,
+    });
 
     return {
       ok: false,
@@ -115,6 +152,30 @@ export async function loginWithPassword(credentials: {
     ok: true,
     destination: destination.destination,
   };
+}
+
+function mapAuthProviderLoginError(error: { message?: string } | null) {
+  const message = error?.message?.toLowerCase() ?? "";
+
+  if (
+    message.includes("email not confirmed") ||
+    message.includes("not confirmed") ||
+    message.includes("email_not_confirmed")
+  ) {
+    return SAFE_AUTH_ERROR_MESSAGES.emailNotConfirmed;
+  }
+
+  return SAFE_AUTH_ERROR_MESSAGES.genericLogin;
+}
+
+function logLoginAttemptIssue(
+  code: string,
+  details: Record<string, unknown>,
+) {
+  console.error(JSON.stringify({
+    code,
+    ...details,
+  }));
 }
 
 function safePostLoginPath(value: string | undefined, fallback: string) {

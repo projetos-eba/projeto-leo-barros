@@ -20,6 +20,7 @@ type ResetPasswordViewProps = {
 
 export function ResetPasswordView({ token }: ResetPasswordViewProps) {
   const [resetSessionId, setResetSessionId] = useState<string | null>(null);
+  const [loginHref, setLoginHref] = useState("/login");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<"loading" | "ready" | "success" | "error">(
@@ -48,6 +49,7 @@ export function ResetPasswordView({ token }: ResetPasswordViewProps) {
       }
 
       setResetSessionId(result.resetSessionId);
+      setLoginHref(result.loginHref);
       setStatus("ready");
     }
 
@@ -80,7 +82,7 @@ export function ResetPasswordView({ token }: ResetPasswordViewProps) {
           </div>
           {status === "success" ? (
             <Button asChild className="h-12 w-full">
-              <Link href="/login">Ir para o login</Link>
+              <Link href={loginHref}>Ir para o login</Link>
             </Button>
           ) : null}
         </div>
@@ -109,6 +111,9 @@ export function ResetPasswordView({ token }: ResetPasswordViewProps) {
             });
 
             if (result.ok) {
+              if (result.loginHref) {
+                setLoginHref(result.loginHref);
+              }
               setStatus("success");
               setMessage(result.message);
             } else {

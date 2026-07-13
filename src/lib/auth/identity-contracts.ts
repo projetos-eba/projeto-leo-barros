@@ -51,6 +51,10 @@ export function isKnownRole(role: unknown): role is OfficialRole {
   );
 }
 
+export function getLoginRouteByRole(role: unknown): string {
+  return isKnownRole(role) ? ROLE_LOGIN_ROUTES[role] : ROLE_LOGIN_ROUTES.cliente;
+}
+
 export function isActiveAccountStatus(
   status: unknown,
 ): status is Extract<AccountStatus, "active"> {

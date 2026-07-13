@@ -7,7 +7,11 @@ import {
   type EmailVerificationStatusInput,
 } from "@/lib/auth/email-verification-contracts";
 import { firstAccessSchema, type FirstAccessInput } from "@/lib/auth/first-access";
-import type { OfficialRole } from "@/lib/auth/identity-contracts";
+import {
+  getLoginRouteByRole,
+  isKnownRole,
+  type OfficialRole,
+} from "@/lib/auth/identity-contracts";
 import {
   passwordResetRequestSchema,
   passwordResetUpdateSchema,
@@ -23,6 +27,7 @@ import { invokeSupabaseFunction } from "@/lib/supabase/functions";
 
 type ActionResult =
   | {
+      loginHref?: string;
       ok: true;
       message: string;
       verification?: PendingEmailVerification;
@@ -42,8 +47,10 @@ type PendingEmailVerification = {
 
 type VerifyPasswordResetResult =
   | {
+      loginHref: string;
       ok: true;
       resetSessionId: string;
+      role: OfficialRole;
     }
   | {
       ok: false;
@@ -266,6 +273,7 @@ export async function verifyPasswordResetToken(
   const result = await invokeSupabaseFunction<{
     resetSessionId?: string;
     reset_session_id?: string;
+    role?: OfficialRole;
     success: boolean;
   }>("verify-password-reset-token", parsed.data);
 
@@ -287,8 +295,10 @@ export async function verifyPasswordResetToken(
   }
 
   return {
+    loginHref: getLoginRouteByRole(result.data.role),
     ok: true,
     resetSessionId,
+    role: isKnownRole(result.data.role) ? result.data.role : "cliente",
   };
 }
 
@@ -304,7 +314,10 @@ export async function updatePasswordWithToken(
     };
   }
 
-  const result = await invokeSupabaseFunction<{ success: boolean }>(
+  const result = await invokeSupabaseFunction<{
+    role?: OfficialRole;
+    success: boolean;
+  }>(
     "update-password-with-token",
     {
       newPassword: parsed.data.password,
@@ -320,6 +333,7 @@ export async function updatePasswordWithToken(
   }
 
   return {
+    loginHref: getLoginRouteByRole(result.data.role),
     ok: true,
     message: "Senha redefinida com sucesso.",
   };
@@ -428,7 +442,5 @@ export async function verifyEmailToken(token: string): Promise<VerifyEmailResult
 }
 
 function roleLoginHref(role: OfficialRole) {
-  if (role === "admin") return "/login/admin";
-  if (role === "parceiro") return "/login/parceiros";
-  return "/login";
+  return getLoginRouteByRole(role);
 }
