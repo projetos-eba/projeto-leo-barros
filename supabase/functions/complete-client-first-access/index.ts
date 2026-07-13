@@ -94,6 +94,10 @@ function stringValue(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function rawStringValue(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
 function isValidEmail(value: string) {
   return value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -304,8 +308,8 @@ Deno.serve(async (request) => {
     unknownFields.map((field) => [field, "unknown"]),
   );
   const email = stringValue(rawBody.email).toLowerCase();
-  const password = stringValue(rawBody.password);
-  const confirmPassword = stringValue(rawBody.confirmPassword);
+  const password = rawStringValue(rawBody.password);
+  const confirmPassword = rawStringValue(rawBody.confirmPassword);
 
   if (!isValidEmail(email)) fields.email = "invalid";
   if (password.length < 8 || password.length > 72) fields.password = "invalid";

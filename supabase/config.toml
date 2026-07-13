@@ -1,4 +1,4 @@
-project_id = "bwyiuwxjzvssbjfzazhe"
+project_id = "ltporrxlugkspjfbqvga"
 
 [functions.provision-partner]
 verify_jwt = true

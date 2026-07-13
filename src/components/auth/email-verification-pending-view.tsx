@@ -91,6 +91,11 @@ export function EmailVerificationPendingView({
           return;
         }
 
+        if (status.destination) {
+          router.replace(status.destination);
+          return;
+        }
+
         setFeedback(login.message);
         setAuthFailure(true);
         redirectStartedRef.current = false;
