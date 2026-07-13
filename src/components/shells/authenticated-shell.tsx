@@ -41,7 +41,9 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { logout } from "@/app/login/actions";
+import { logout, logoutAdmin, logoutPartner } from "@/app/login/actions";
+import { PlatformLogo } from "@/components/branding/platform-logo";
+import { usePlatformBranding } from "@/components/branding/use-platform-branding";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ClientShellIdentity } from "@/lib/clients/home-data";
 import { cn } from "@/lib/utils";
@@ -112,8 +114,15 @@ type AuthenticatedShellProps = {
 
 export function AuthenticatedShell({ children, clientIdentity, profile }: AuthenticatedShellProps) {
   const pathname = usePathname() ?? "";
+  const branding = usePlatformBranding();
   const [logoutPending, startLogoutTransition] = useTransition();
   const definition = shellDefinitions[profile];
+  const logoutAction =
+    profile === "parceiros"
+      ? logoutPartner
+      : profile === "admin"
+        ? logoutAdmin
+        : logout;
 
   if (profile === "cliente") {
     const identity = clientIdentity ?? {
@@ -127,14 +136,11 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
         <header className="sticky top-0 z-40 border-b border-[#132430] bg-[#07141d]/95 shadow-[0_2px_4px_rgba(0,0,0,0.18)] backdrop-blur-xl">
           <div className="mx-auto flex h-[81px] w-full max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
             <Link className="flex items-center gap-3" href="/cliente/inicio">
-              <div className="flex size-10 items-center justify-center rounded-[9px] bg-[#f4f7fa] text-[21px] font-bold leading-none text-[#092333]">
-                lß
-              </div>
+              <PlatformLogo className="size-10 rounded-[9px] bg-[#f4f7fa] text-[16px] text-[#092333]" fallbackClassName="text-[16px]" />
               <div className="hidden min-w-0 sm:block">
-                <p className="text-[18px] font-bold leading-[17px] text-[#eaf2f7]">Leonardo</p>
-                <p className="text-[18px] font-bold leading-[17px] text-[#eaf2f7]">Barros</p>
+                <p className="max-w-[180px] truncate text-[18px] font-bold leading-[20px] text-[#eaf2f7]">{branding.platformName}</p>
                 <p className="mt-0.5 text-[7px] font-medium uppercase leading-[8px] text-[#7c93a3]">
-                  Saude | Nutricao | Performance
+                  {branding.tagline}
                 </p>
               </div>
             </Link>
@@ -200,7 +206,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                 disabled={logoutPending}
                 type="button"
                 onClick={() => startLogoutTransition(() => {
-                  void logout();
+                  void logoutAction();
                 })}
               >
                 <LogOut className="size-4" />
@@ -229,11 +235,9 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
           <header className="sticky top-0 z-40 border-b border-[#142432] bg-[#0b1720]/96 backdrop-blur-xl lg:hidden">
             <div className="flex h-14 items-center justify-between gap-3 px-3">
               <Link className="flex min-w-0 items-center gap-2" href="/parceiros/dashboard">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4f7fa] text-[15px] font-bold leading-none text-[#092333]">
-                  lß
-                </div>
+                <PlatformLogo className="size-8 rounded-[6px] bg-[#f4f7fa] text-[12px] text-[#092333]" fallbackClassName="text-[12px]" />
                 <div className="min-w-0">
-                  <p className="truncate text-[13px] font-bold leading-4 text-[#eaf2f7]">Leonardo Barros</p>
+                  <p className="truncate text-[13px] font-bold leading-4 text-[#eaf2f7]">{branding.platformName}</p>
                   <p className="text-[9px] font-semibold uppercase leading-3 text-[#7c93a3]">Parceiros</p>
                 </div>
               </Link>
@@ -251,7 +255,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                   disabled={logoutPending}
                   type="button"
                   onClick={() => startLogoutTransition(() => {
-                    void logout();
+                    void logoutAction();
                   })}
                 >
                   <LogOut className="size-4" />
@@ -302,18 +306,13 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
         <aside className={cn("fixed inset-y-0 left-0 z-40 hidden border-r border-[#000a1c]/60 lg:block", asideWidth, isPartner ? "bg-[#0e151a]" : "bg-[#071923]/95")}>
           <div className={cn("flex h-full flex-col", isPartner ? "px-3 py-[33px]" : "px-[14px] py-8")}>
             <div className={cn("flex items-center gap-2.5", isPartner ? "px-[15px]" : "px-5")}>
-              <div className={cn("flex items-center justify-center bg-[#f4f7fa] text-[18px] font-bold leading-none text-[#092333]", logoSizeClass)}>
-                lß
-              </div>
+              <PlatformLogo className={cn("bg-[#f4f7fa] text-[14px] text-[#092333]", logoSizeClass)} fallbackClassName="text-[14px]" />
               <div className="min-w-0">
-                <p className={cn("font-bold text-[#eaf2f7]", isPartner ? "text-[17px] leading-[17px]" : "text-[18px] leading-[18px]")}>
-                  Leonardo
-                </p>
-                <p className={cn("font-bold text-[#eaf2f7]", isPartner ? "text-[17px] leading-[17px]" : "text-[18px] leading-[18px]")}>
-                  Barros
+                <p className={cn("max-w-[150px] truncate font-bold text-[#eaf2f7]", isPartner ? "text-[17px] leading-[19px]" : "text-[18px] leading-[20px]")}>
+                  {branding.platformName}
                 </p>
                 <p className="mt-0.5 text-[7px] font-medium uppercase leading-[8px] text-[#7c93a3]">
-                  Saude | Nutricao | Performance
+                  {branding.tagline}
                 </p>
               </div>
             </div>
@@ -387,7 +386,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                 disabled={logoutPending}
                 type="button"
                 onClick={() => startLogoutTransition(() => {
-                  void logout();
+                  void logoutAction();
                 })}
               >
                 <LogOut className="size-5 shrink-0" />

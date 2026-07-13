@@ -13,12 +13,14 @@ import {
 } from "recharts";
 
 import { WorkoutMuscleMap } from "@/components/workouts/muscle-map";
+import { DEFAULT_PLATFORM_NAME } from "@/lib/branding/platform-branding-contract";
 import type { ClientEvolutionData, EvolutionComparisonRow, EvolutionMetricCard } from "@/lib/clients/evolution-metrics";
 import { photoAngles, type PhotoAngle } from "@/lib/partners/client-photos-metrics";
 import { cn } from "@/lib/utils";
 
 type ClientEvolutionViewProps = {
   evolution: ClientEvolutionData | null;
+  platformName?: string;
 };
 
 const panelClass = "rounded-[10px] border border-[#1d3445] bg-[linear-gradient(145deg,rgba(15,31,43,0.98),rgba(6,18,27,0.96))] shadow-[0_18px_44px_rgba(0,0,0,0.22)]";
@@ -211,7 +213,7 @@ function PhotosSection({ evolution }: { evolution: ClientEvolutionData }) {
   );
 }
 
-export function ClientEvolutionView({ evolution }: ClientEvolutionViewProps) {
+export function ClientEvolutionView({ evolution, platformName = DEFAULT_PLATFORM_NAME }: ClientEvolutionViewProps) {
   const icons = [<Scale className="size-4" key="scale" />, <TrendingUp className="size-4" key="trend" />, <Users className="size-4" key="users" />, <TrendingUp className="size-4" key="fat" />, <Info className="size-4" key="info" />];
 
   const macroStyle = useMemo(() => {
@@ -315,8 +317,8 @@ export function ClientEvolutionView({ evolution }: ClientEvolutionViewProps) {
       </main>
       <footer className="border-t border-[#1b2b37] bg-[#17232c] px-8 py-10 text-[#728697]">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between">
-          <p className="text-[20px] font-bold text-[#dce8f1]">Leonardo Barros</p>
-          <p className="text-[12px]">© 2026 Plataforma Leonardo Barros. Todos os direitos reservados.</p>
+          <p className="text-[20px] font-bold text-[#dce8f1]">{platformName}</p>
+          <p className="text-[12px]">© 2026 Plataforma {platformName}. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

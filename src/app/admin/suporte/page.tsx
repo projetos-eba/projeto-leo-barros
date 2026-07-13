@@ -4,6 +4,7 @@ import { AdminSupportView } from "./admin-support-view";
 import { AccessBlocked } from "@/components/auth/access-blocked";
 import { requireShellRole } from "@/lib/auth/next-guards";
 import { fetchAdminSupportData } from "@/lib/admin/support-data";
+import { fetchPlatformBranding } from "@/lib/branding/platform-branding";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,10 @@ export default async function AdminSupportPage() {
     );
   }
 
-  const support = await fetchAdminSupportData();
+  const [support, branding] = await Promise.all([
+    fetchAdminSupportData(),
+    fetchPlatformBranding(),
+  ]);
 
-  return <AdminSupportView support={support} />;
+  return <AdminSupportView support={support} platformName={branding.platformName} />;
 }

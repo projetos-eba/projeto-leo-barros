@@ -4,6 +4,7 @@ import { AdminDashboardView } from "./admin-dashboard-view";
 import { AccessBlocked } from "@/components/auth/access-blocked";
 import { requireShellRole } from "@/lib/auth/next-guards";
 import { fetchAdminDashboardData } from "@/lib/admin/dashboard-data";
+import { fetchPlatformBranding } from "@/lib/branding/platform-branding";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,10 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const dashboard = await fetchAdminDashboardData();
+  const [dashboard, branding] = await Promise.all([
+    fetchAdminDashboardData(),
+    fetchPlatformBranding(),
+  ]);
 
-  return <AdminDashboardView dashboard={dashboard} />;
+  return <AdminDashboardView dashboard={dashboard} platformName={branding.platformName} />;
 }

@@ -27,6 +27,11 @@ const sensitiveKeys = [
 ];
 
 const children = new Set();
+const nextDevCommand = process.platform === "win32" ? "cmd.exe" : "npx";
+const nextDevArgs =
+  process.platform === "win32"
+    ? ["/d", "/s", "/c", "npx.cmd next dev -p 3000"]
+    : ["next", "dev", "-p", "3000"];
 
 function log(message) {
   console.log(`OK: ${message}`);
@@ -189,6 +194,94 @@ async function waitForUrl(url, {
   fail(`Timeout aguardando ${url}. Último status: ${lastStatus ?? "sem resposta"}.`);
 }
 
+async function isUrlHealthy(url, { expectedStatuses = [200] } = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5_000);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!expectedStatuses.includes(response.status)) return false;
+
+    const text = await response.text();
+    return text.length > 0;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function resolveListeningPidOnPort(port) {
+  if (process.platform !== "win32") return null;
+
+  const output = execFileSync("netstat", ["-ano"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: process.env,
+  });
+
+  const line = output
+    .split("\n")
+    .map((entry) => entry.trim())
+    .find((entry) => {
+      const normalized = entry.replace(/\s+/g, " ");
+      return (
+        normalized.includes(`:${port} `) &&
+        normalized.includes(" LISTENING ")
+      );
+    });
+
+  const pid = line?.split(/\s+/).at(-1);
+  return pid && /^\d+$/.test(pid) ? Number(pid) : null;
+}
+
+function getWindowsCommandLine(pid) {
+  if (process.platform !== "win32") return "";
+
+  return execFileSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-Command",
+      `(Get-CimInstance Win32_Process -Filter "ProcessId=${pid}").CommandLine`,
+    ],
+    {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      env: process.env,
+    },
+  ).trim();
+}
+
+async function stopUnhealthyLocalNextOnPort(port) {
+  const pid = resolveListeningPidOnPort(port);
+  if (!pid) return false;
+
+  const commandLine = getWindowsCommandLine(pid);
+  const normalizedRepoPath = process.cwd().toLowerCase();
+  const normalizedCommand = commandLine.toLowerCase();
+  const isLocalNext =
+    normalizedCommand.includes("next") &&
+    normalizedCommand.includes(normalizedRepoPath);
+
+  if (!isLocalNext) {
+    fail(
+      `Porta ${port} ocupada por processo nao reconhecido como Next local do repositorio.`,
+    );
+  }
+
+  process.kill(pid, "SIGTERM");
+  await new Promise((resolve) => setTimeout(resolve, 2_000));
+
+  if (resolveListeningPidOnPort(port) === pid) {
+    process.kill(pid, "SIGKILL");
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+
+  log(`Processo Next local preso na porta ${port} foi finalizado.`);
+  return true;
+}
+
 async function findAuthUserByEmail(adminClient, email) {
   let page = 1;
   const perPage = 1000;
@@ -339,6 +432,22 @@ where idempotency_key = ${sqlLiteral(PARTNER_IDEMPOTENCY_KEY)}::uuid
      where email = ${sqlLiteral(PARTNER_EMAIL)}
    );
 
+delete from public.billing_payments
+where partner_id in (
+  select partner.id
+  from public.partners partner
+  join public.profiles profile on profile.id = partner.profile_id
+  where profile.email = ${sqlLiteral(PARTNER_EMAIL)}
+);
+
+delete from public.partner_subscriptions
+where partner_id in (
+  select partner.id
+  from public.partners partner
+  join public.profiles profile on profile.id = partner.profile_id
+  where profile.email = ${sqlLiteral(PARTNER_EMAIL)}
+);
+
 delete from public.partners
 where profile_id in (
   select id
@@ -464,6 +573,75 @@ async function verifyPartnerRecords(adminClient) {
   };
 }
 
+function ensureActivePartnerPlatformSubscription(partnerId) {
+  psqlLocal(`
+with plan as (
+  insert into public.billing_plans (
+    id,
+    slug,
+    name,
+    billing_interval,
+    price_cents,
+    currency,
+    is_active
+  )
+  values (
+    'e0000000-0000-4000-8000-000000000101'::uuid,
+    'local-validation-monthly',
+    'Plano Local de Validacao',
+    'monthly',
+    0,
+    'brl',
+    true
+  )
+  on conflict (slug) do update
+  set is_active = true
+  returning id
+),
+cancel_previous as (
+  update public.partner_subscriptions
+  set
+    status = 'canceled',
+    canceled_at = coalesce(canceled_at, now())
+  where partner_id = ${sqlLiteral(partnerId)}::uuid
+    and status in ('trialing', 'active', 'past_due', 'incomplete')
+  returning id
+)
+insert into public.partner_subscriptions (
+  id,
+  partner_id,
+  plan_id,
+  status,
+  current_period_start,
+  current_period_end
+)
+select
+  'e0000000-0000-4000-8000-000000000102'::uuid,
+  ${sqlLiteral(partnerId)}::uuid,
+  plan.id,
+  'active',
+  now() - interval '1 day',
+  now() + interval '30 days'
+from plan
+on conflict (id) do update
+set
+  status = 'active',
+  current_period_start = excluded.current_period_start,
+  current_period_end = excluded.current_period_end,
+  canceled_at = null;
+`);
+}
+
+function clearPartnerPlatformSubscriptions(partnerId) {
+  psqlLocal(`
+delete from public.billing_payments
+where partner_id = ${sqlLiteral(partnerId)}::uuid;
+
+delete from public.partner_subscriptions
+where partner_id = ${sqlLiteral(partnerId)}::uuid;
+`);
+}
+
 async function setLocalDevPartnerPassword(adminClient, userId, password) {
   const { error } = await adminClient.auth.admin.updateUserById(userId, {
     password,
@@ -471,6 +649,18 @@ async function setLocalDevPartnerPassword(adminClient, userId, password) {
   });
 
   if (error) fail(`Falha ao definir senha local/dev do Parceiro: ${error.message}`);
+
+  const { error: profileError } = await adminClient
+    .from("profiles")
+    .update({ email_confirmed_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("role", "parceiro");
+
+  if (profileError) {
+    fail(
+      `Falha ao confirmar profile local/dev do Parceiro: ${profileError.message}`,
+    );
+  }
 }
 
 async function waitForProvisionPartner(env) {
@@ -481,7 +671,19 @@ async function waitForProvisionPartner(env) {
 }
 
 async function startNextDev(env) {
-  const nextProcess = spawnSilent("npx", ["next", "dev", "-p", "3000"], {
+  const hasHealthyLogin = await isUrlHealthy(`${LOCAL_NEXT_ORIGIN}/login`);
+  const hasHealthyAdminLogin = await isUrlHealthy(
+    `${LOCAL_NEXT_ORIGIN}/login/admin`,
+  );
+
+  if (hasHealthyLogin && hasHealthyAdminLogin) {
+    log("Next local ja estava ativo em http://localhost:3000.");
+    return null;
+  }
+
+  await stopUnhealthyLocalNextOnPort(3000);
+
+  const nextProcess = spawnSilent(nextDevCommand, nextDevArgs, {
     env: {
       ...process.env,
       NEXT_PUBLIC_SUPABASE_URL: env.apiUrl,
@@ -497,11 +699,19 @@ async function startNextDev(env) {
     expectedStatuses: [200],
     timeoutMs: 90_000,
   });
+  await waitForUrl(`${LOCAL_NEXT_ORIGIN}/login/admin`, {
+    expectedStatuses: [200],
+    timeoutMs: 90_000,
+  });
 
   return nextProcess;
 }
 
-async function validateNextLoginWithPlaywright({ adminPassword, partnerPassword }) {
+async function validateNextLoginWithPlaywright({
+  adminPassword,
+  partnerExpectedDestination,
+  partnerPassword,
+}) {
   const { chromium } = await import("playwright");
   let browser;
 
@@ -521,8 +731,13 @@ async function validateNextLoginWithPlaywright({ adminPassword, partnerPassword 
   try {
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
+    adminPage.setDefaultTimeout(15_000);
+    adminPage.setDefaultNavigationTimeout(30_000);
 
-    await adminPage.goto(`${LOCAL_NEXT_ORIGIN}/login`);
+    log("Validando login Admin no navegador headless.");
+    await adminPage.goto(`${LOCAL_NEXT_ORIGIN}/login/admin`, {
+      waitUntil: "domcontentloaded",
+    });
     await adminPage.fill("#loginId", ADMIN_EMAIL);
     await adminPage.fill("#password", adminPassword);
     await adminPage.click('button[type="submit"]');
@@ -534,15 +749,30 @@ async function validateNextLoginWithPlaywright({ adminPassword, partnerPassword 
 
     const partnerContext = await browser.newContext();
     const partnerPage = await partnerContext.newPage();
+    partnerPage.setDefaultTimeout(15_000);
+    partnerPage.setDefaultNavigationTimeout(30_000);
 
-    await partnerPage.goto(`${LOCAL_NEXT_ORIGIN}/login`);
+    log(
+      partnerExpectedDestination === "dashboard"
+        ? "Validando login Parceiro com assinatura ativa."
+        : "Validando login Parceiro sem assinatura ativa.",
+    );
+    await partnerPage.goto(`${LOCAL_NEXT_ORIGIN}/login/parceiros`, {
+      waitUntil: "domcontentloaded",
+    });
     await partnerPage.fill("#loginId", PARTNER_EMAIL);
     await partnerPage.fill("#password", partnerPassword);
     await partnerPage.click('button[type="submit"]');
-    await partnerPage.waitForURL("**/parceiros/dashboard", { timeout: 30_000 });
+    await partnerPage.waitForURL(
+      partnerExpectedDestination === "dashboard" ? "**/parceiros/dashboard" : "**/planos",
+      { timeout: 30_000 },
+    );
 
     await partnerPage.goto(`${LOCAL_NEXT_ORIGIN}/admin/dashboard`);
-    await partnerPage.waitForURL("**/parceiros/dashboard", { timeout: 30_000 });
+    await partnerPage.waitForURL(
+      partnerExpectedDestination === "dashboard" ? "**/parceiros/dashboard" : "**/planos",
+      { timeout: 30_000 },
+    );
     await partnerContext.close();
   } finally {
     await browser.close();
@@ -613,7 +843,7 @@ async function main() {
 
   log("provision-partner criou Parceiro local e retry idempotente retornou existing.");
 
-  const { profile: partnerProfile } = await verifyPartnerRecords(adminClient);
+  const { partner, profile: partnerProfile } = await verifyPartnerRecords(adminClient);
   await setLocalDevPartnerPassword(
     adminClient,
     partnerProfile.user_id,
@@ -625,7 +855,24 @@ async function main() {
   log("Login Auth do Parceiro local validado.");
 
   await startNextDev(localEnv);
-  await validateNextLoginWithPlaywright({ adminPassword: ADMIN_PASSWORD, partnerPassword });
+  clearPartnerPlatformSubscriptions(partner.id);
+  log("Assinaturas locais do Parceiro ficticio limpas para validar /planos.");
+
+  await validateNextLoginWithPlaywright({
+    adminPassword: ADMIN_PASSWORD,
+    partnerExpectedDestination: "plans",
+    partnerPassword,
+  });
+  log("Parceiro sem assinatura ativa redireciona para /planos no Next.");
+
+  ensureActivePartnerPlatformSubscription(partner.id);
+  log("Assinatura local ativa do Parceiro ficticio criada para validar dashboard.");
+
+  await validateNextLoginWithPlaywright({
+    adminPassword: ADMIN_PASSWORD,
+    partnerExpectedDestination: "dashboard",
+    partnerPassword,
+  });
 
   log("Login real no Next e guards Admin/Parceiro validados no navegador headless.");
   log(`Fluxo local validado para ${ADMIN_EMAIL} e ${PARTNER_EMAIL}.`);
@@ -643,7 +890,17 @@ async function shutdown() {
           }
 
           child.once("exit", resolve);
-          child.kill("SIGTERM");
+          if (process.platform === "win32") {
+            try {
+              execFileSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+                stdio: ["ignore", "ignore", "ignore"],
+              });
+            } catch {
+              child.kill("SIGTERM");
+            }
+          } else {
+            child.kill("SIGTERM");
+          }
 
           setTimeout(() => {
             if (child.exitCode === null) child.kill("SIGKILL");

@@ -18,6 +18,7 @@ import {
 } from "./admin-financial-charts";
 import { AdminFinancialActions } from "./admin-financial-actions";
 import { InfoHint } from "@/components/ui/info-hint";
+import { DEFAULT_PLATFORM_NAME } from "@/lib/branding/platform-branding-contract";
 import type {
   AdminFinancialData,
   FinancialKpi,
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 type AdminFinancialViewProps = {
   financial: AdminFinancialData;
+  platformName?: string;
 };
 
 const kpiIcons: Record<FinancialKpi["id"], LucideIcon> = {
@@ -155,7 +157,7 @@ function RenewalsTable({ rows }: { rows: FinancialRenewalRow[] }) {
   );
 }
 
-export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
+export function AdminFinancialView({ financial, platformName = DEFAULT_PLATFORM_NAME }: AdminFinancialViewProps) {
   return (
     <div className="min-h-screen bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] md:px-8 lg:px-[43px] lg:py-[35px]">
       <header className="flex flex-col gap-4 border-b border-[#244454]/70 pb-6 xl:flex-row xl:items-start xl:justify-between">
@@ -183,7 +185,7 @@ export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
         <div className="grid min-w-0 gap-6">
           <Panel className="p-[22px]">
             <SectionHeader
-              info="MRR soma o valor mensalizado das assinaturas ativas de profissionais ativos. Receita nova soma assinaturas iniciadas em cada mês."
+              info="MRR soma o valor mensalizado do plano-base e o adicional por Clientes ativos das assinaturas de profissionais ativos. Receita nova soma assinaturas iniciadas em cada mês."
               subtitle="Acompanhe a evolução da receita mensal recorrente nos últimos 12 meses."
               title="Evolução da receita recorrente (MRR)"
             />
@@ -225,7 +227,7 @@ export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
 
           <Panel className="p-[22px]">
             <SectionHeader
-              info="Agrupa a receita mensalizada das assinaturas ativas pelo ciclo do plano: mensal ou anual."
+              info="Agrupa a receita mensalizada do plano-base e do adicional por Clientes ativos pelo ciclo do plano: mensal ou anual."
               subtitle="Separação da base por ciclo comercial."
               title="Distribuição por ciclo de cobrança"
             />
@@ -244,7 +246,7 @@ export function AdminFinancialView({ financial }: AdminFinancialViewProps) {
       </section>
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
-        <span>Leonardo Barros — Financeiro Admin</span>
+        <span>{platformName} — Financeiro Admin</span>
         <span>Atualizado pelo banco local em {new Date(financial.generatedAt).toLocaleString("pt-BR")}</span>
       </footer>
     </div>

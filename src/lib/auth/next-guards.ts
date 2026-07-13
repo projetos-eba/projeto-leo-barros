@@ -1,4 +1,5 @@
 import type { OfficialRole } from "./identity-contracts";
+import { ROLE_LOGIN_ROUTES } from "./identity-contracts";
 import {
   type ProtectedShellAccessResult,
   resolveProtectedShellAccess,
@@ -13,8 +14,6 @@ type ShellGuardResult =
       destination: string;
       reason: "missing_session" | "missing_profile";
     };
-
-const LOGIN_ROUTE = "/login";
 
 export async function getCurrentProfile() {
   const supabase = await createClient();
@@ -54,13 +53,15 @@ export async function requireShellRole(
   const { profile, reason } = await getCurrentProfile();
 
   if (!profile) {
+    const loginRoute = ROLE_LOGIN_ROUTES[requiredRole];
+
     return {
       allowed: false,
       action: "redirect",
       destination:
         reason === "missing_profile"
-          ? `${LOGIN_ROUTE}?error=profile_unavailable`
-          : LOGIN_ROUTE,
+          ? `${loginRoute}?error=profile_unavailable`
+          : loginRoute,
       reason,
     };
   }

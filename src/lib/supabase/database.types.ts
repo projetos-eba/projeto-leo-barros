@@ -105,11 +105,16 @@ export type Database = {
           currency: string
           id: string
           is_active: boolean
+          lookup_key: string | null
           name: string
           price_cents: number
+          public_metadata: Json
           slug: string
+          sort_order: number
           stripe_price_id: string | null
           stripe_product_id: string | null
+          stripe_product_lookup_key: string | null
+          trial_days: number
           updated_at: string
         }
         Insert: {
@@ -118,11 +123,16 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          lookup_key?: string | null
           name: string
           price_cents: number
+          public_metadata?: Json
           slug: string
+          sort_order?: number
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_product_lookup_key?: string | null
+          trial_days?: number
           updated_at?: string
         }
         Update: {
@@ -131,14 +141,109 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          lookup_key?: string | null
           name?: string
           price_cents?: number
+          public_metadata?: Json
           slug?: string
+          sort_order?: number
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_product_lookup_key?: string | null
+          trial_days?: number
           updated_at?: string
         }
         Relationships: []
+      }
+      partner_subscription_financial_summaries: {
+        Row: {
+          active_client_quantity: number
+          active_client_subtotal_cents: number
+          active_client_unit_amount_cents: number
+          created_at: string
+          currency: string
+          discount_amount_cents: number
+          discount_code: string | null
+          discount_duration: string | null
+          discount_label: string | null
+          partner_id: string
+          plan_base_amount_cents: number
+          source: string
+          stripe_coupon_id: string | null
+          stripe_event_created_at: string | null
+          stripe_invoice_id: string | null
+          stripe_promotion_code_id: string | null
+          stripe_subscription_id: string | null
+          subscription_id: string
+          subtotal_cents: number
+          synced_at: string
+          total_after_discount_cents: number
+          updated_at: string
+        }
+        Insert: {
+          active_client_quantity?: number
+          active_client_subtotal_cents?: number
+          active_client_unit_amount_cents?: number
+          created_at?: string
+          currency?: string
+          discount_amount_cents?: number
+          discount_code?: string | null
+          discount_duration?: string | null
+          discount_label?: string | null
+          partner_id: string
+          plan_base_amount_cents?: number
+          source?: string
+          stripe_coupon_id?: string | null
+          stripe_event_created_at?: string | null
+          stripe_invoice_id?: string | null
+          stripe_promotion_code_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id: string
+          subtotal_cents?: number
+          synced_at?: string
+          total_after_discount_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          active_client_quantity?: number
+          active_client_subtotal_cents?: number
+          active_client_unit_amount_cents?: number
+          created_at?: string
+          currency?: string
+          discount_amount_cents?: number
+          discount_code?: string | null
+          discount_duration?: string | null
+          discount_label?: string | null
+          partner_id?: string
+          plan_base_amount_cents?: number
+          source?: string
+          stripe_coupon_id?: string | null
+          stripe_event_created_at?: string | null
+          stripe_invoice_id?: string | null
+          stripe_promotion_code_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id?: string
+          subtotal_cents?: number
+          synced_at?: string
+          total_after_discount_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_subscription_financial_summaries_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_subscription_financial_summaries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: true
+            referencedRelation: "partner_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_calendar_blocks: {
         Row: {
@@ -1778,45 +1883,72 @@ export type Database = {
       }
       partner_subscriptions: {
         Row: {
+          active_client_quantity: number
           cancel_at_period_end: boolean
           canceled_at: string | null
           created_at: string
           current_period_end: string
           current_period_start: string
+          default_payment_method_id: string | null
+          ended_at: string | null
           id: string
+          last_quantity_synced_at: string | null
+          latest_invoice_id: string | null
+          metadata: Json
           partner_id: string
           plan_id: string
           status: string
           stripe_customer_id: string | null
+          stripe_status: string | null
           stripe_subscription_id: string | null
+          trial_end: string | null
+          trial_start: string | null
           updated_at: string
         }
         Insert: {
+          active_client_quantity?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           created_at?: string
           current_period_end: string
           current_period_start: string
+          default_payment_method_id?: string | null
+          ended_at?: string | null
           id?: string
+          last_quantity_synced_at?: string | null
+          latest_invoice_id?: string | null
+          metadata?: Json
           partner_id: string
           plan_id: string
           status: string
           stripe_customer_id?: string | null
+          stripe_status?: string | null
           stripe_subscription_id?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Update: {
+          active_client_quantity?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           created_at?: string
           current_period_end?: string
           current_period_start?: string
+          default_payment_method_id?: string | null
+          ended_at?: string | null
           id?: string
+          last_quantity_synced_at?: string | null
+          latest_invoice_id?: string | null
+          metadata?: Json
           partner_id?: string
           plan_id?: string
           status?: string
           stripe_customer_id?: string | null
+          stripe_status?: string | null
           stripe_subscription_id?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2427,7 +2559,10 @@ export type Database = {
           created_at: string
           display_name: string
           email: string
+          email_confirmed_at: string | null
+          first_access_completed_at: string | null
           id: string
+          last_auth_flow_at: string | null
           phone: string | null
           role: string
           status: string
@@ -2438,7 +2573,10 @@ export type Database = {
           created_at?: string
           display_name: string
           email: string
+          email_confirmed_at?: string | null
+          first_access_completed_at?: string | null
           id?: string
+          last_auth_flow_at?: string | null
           phone?: string | null
           role: string
           status?: string
@@ -2449,7 +2587,10 @@ export type Database = {
           created_at?: string
           display_name?: string
           email?: string
+          email_confirmed_at?: string | null
+          first_access_completed_at?: string | null
           id?: string
+          last_auth_flow_at?: string | null
           phone?: string | null
           role?: string
           status?: string
@@ -2604,6 +2745,27 @@ export type Database = {
       current_active_partner_id: { Args: never; Returns: string }
       current_active_patient_id: { Args: never; Returns: string }
       current_active_profile_id: { Args: never; Returns: string }
+      billing_active_client_count: {
+        Args: { target_partner_id: string }
+        Returns: number
+      }
+      billing_partner_trial_available: {
+        Args: { target_partner_id: string }
+        Returns: boolean
+      }
+      billing_public_plans: {
+        Args: never
+        Returns: {
+          active_client_unit_cents: number
+          billing_interval: string
+          currency: string
+          lookup_key: string | null
+          name: string
+          price_cents: number
+          slug: string
+          trial_days: number
+        }[]
+      }
       current_partner_has_active_patient_link: {
         Args: { target_patient_id: string }
         Returns: boolean

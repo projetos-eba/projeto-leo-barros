@@ -3,5 +3,50 @@ project_id = "bwyiuwxjzvssbjfzazhe"
 [functions.provision-partner]
 verify_jwt = true
 
+[functions.signup-partner]
+verify_jwt = false
+
+[functions.complete-client-first-access]
+verify_jwt = false
+
+[functions.check-email-verification-status]
+verify_jwt = false
+
 [functions.provision-client-for-partner]
 verify_jwt = true
+
+[functions.admin-users]
+verify_jwt = true
+
+[functions.send-verification-email]
+verify_jwt = false
+
+[functions.verify-email-token]
+verify_jwt = false
+
+[functions.send-password-reset-email]
+verify_jwt = false
+
+[functions.verify-password-reset-token]
+verify_jwt = false
+
+[functions.update-password-with-token]
+verify_jwt = false
+
+[functions.billing-create-setup-intent]
+verify_jwt = true
+
+[functions.billing-create-subscription]
+verify_jwt = true
+
+[functions.billing-customer-portal]
+verify_jwt = true
+
+[functions.billing-sync-active-clients]
+verify_jwt = true
+
+[functions.stripe-bootstrap-catalog]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false

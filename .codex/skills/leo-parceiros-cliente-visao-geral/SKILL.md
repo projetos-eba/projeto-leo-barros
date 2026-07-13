@@ -39,5 +39,5 @@ Prefer this validation set for material changes:
 - `npm run test`
 - `npm run lint`
 - `npm run build`
-- `git diff --check`
+- `npm run git:local -- diff --check`
 - Playwright smoke on `/parceiros/clientes/[id]` desktop and mobile after logging in as the smoke partner.

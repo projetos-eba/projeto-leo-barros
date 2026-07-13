@@ -83,7 +83,7 @@ Dar ao parceiro uma visao operacional da propria carteira: clientes ativos, atua
   - `npm run test`
   - `npm run build`
   - `npm run lint`
-  - `git diff --check`
+  - `npm run git:local -- diff --check`
 
 ## Smoke local
 

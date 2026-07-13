@@ -22,7 +22,7 @@ select has_index(
 select ok(
   has_function_privilege(
     'service_role',
-    'public.provision_client_for_partner_records(uuid,uuid,text,uuid,text,text,text,text,date,text[],text)',
+    'public.provision_client_for_partner_records(uuid,uuid,text,uuid,text,text,text,text,date,text,text[],text)',
     'execute'
   ),
   'service_role pode executar a RPC de Cliente'
@@ -31,7 +31,7 @@ select ok(
 select ok(
   not has_function_privilege(
     'authenticated',
-    'public.provision_client_for_partner_records(uuid,uuid,text,uuid,text,text,text,text,date,text[],text)',
+    'public.provision_client_for_partner_records(uuid,uuid,text,uuid,text,text,text,text,date,text,text[],text)',
     'execute'
   ),
   'authenticated não executa diretamente a RPC de Cliente'
@@ -216,6 +216,7 @@ select lives_ok(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['treino', 'dieta'],
       'pending_delivery'
     )
@@ -281,6 +282,7 @@ select is(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['dieta', 'treino'],
       'pending_delivery'
     )
@@ -304,6 +306,7 @@ select throws_ok(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['dieta', 'treino'],
       'pending_delivery'
     )
@@ -326,6 +329,7 @@ select throws_ok(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['dieta'],
       'not_resent'
     )
@@ -348,6 +352,7 @@ select throws_ok(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['dieta', 'dieta'],
       'not_resent'
     )
@@ -391,6 +396,7 @@ select throws_ok(
       'RPC Target Client',
       '33333333333',
       '1993-03-03',
+      null,
       array['saude'],
       'not_resent'
     )
@@ -413,6 +419,7 @@ select throws_ok(
       'RPC Target Client',
       '44444444444',
       '1993-03-03',
+      null,
       array['cardio'],
       'not_resent'
     )

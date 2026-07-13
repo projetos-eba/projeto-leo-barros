@@ -12,6 +12,22 @@ describe("contrato do login Next por e-mail e senha", () => {
     ).toEqual({
       ok: true,
       email: "parceiro@example.com",
+      expectedRole: "cliente",
+      password: "senha-local",
+    });
+  });
+
+  it("preserva a role esperada informada pela rota", () => {
+    expect(
+      normalizeEmailPasswordLogin({
+        expectedRole: "parceiro",
+        loginId: "parceiro@example.com",
+        password: "senha-local",
+      }),
+    ).toEqual({
+      ok: true,
+      email: "parceiro@example.com",
+      expectedRole: "parceiro",
       password: "senha-local",
     });
   });

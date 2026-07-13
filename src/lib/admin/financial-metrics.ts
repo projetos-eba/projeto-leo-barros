@@ -14,6 +14,7 @@ export type FinancialPlan = {
 };
 
 export type FinancialSubscription = {
+  active_client_quantity?: number;
   cancel_at_period_end?: boolean;
   canceled_at: string | null;
   created_at: string;
@@ -202,6 +203,14 @@ function monthlyizePlanPrice(plan: FinancialPlan | undefined) {
   return plan.billing_interval === "yearly" ? Math.round(plan.price_cents / 12) : plan.price_cents;
 }
 
+function monthlyActiveClientAddon(subscription: FinancialSubscription) {
+  return Math.max(0, subscription.active_client_quantity ?? 0) * 199;
+}
+
+function monthlySubscriptionAmount(subscription: FinancialSubscription, plansById: Map<string, FinancialPlan>) {
+  return monthlyizePlanPrice(plansById.get(subscription.plan_id)) + monthlyActiveClientAddon(subscription);
+}
+
 function profileIsActivePartner(partner: FinancialPartner, profilesById: Map<string, FinancialProfile>) {
   const profile = profilesById.get(partner.profile_id);
   return profile?.role === "parceiro" && profile.status === "active";
@@ -227,7 +236,7 @@ function activeSubscriptionsAt(raw: FinancialRawData, at: Date) {
 }
 
 function mrrAt(raw: FinancialRawData, plansById: Map<string, FinancialPlan>, at: Date) {
-  return activeSubscriptionsAt(raw, at).reduce((sum, subscription) => sum + monthlyizePlanPrice(plansById.get(subscription.plan_id)), 0);
+  return activeSubscriptionsAt(raw, at).reduce((sum, subscription) => sum + monthlySubscriptionAmount(subscription, plansById), 0);
 }
 
 function churnRate(raw: FinancialRawData, start: Date, end: Date) {
@@ -240,13 +249,13 @@ function newMrrWithin(raw: FinancialRawData, plansById: Map<string, FinancialPla
   const activePartnerIds = activePartnerIdsAt(raw, end);
   return raw.subscriptions
     .filter((subscription) => activePartnerIds.has(subscription.partner_id) && isWithin(parseDate(subscription.created_at), start, end))
-    .reduce((sum, subscription) => sum + monthlyizePlanPrice(plansById.get(subscription.plan_id)), 0);
+    .reduce((sum, subscription) => sum + monthlySubscriptionAmount(subscription, plansById), 0);
 }
 
 function churnedMrrWithin(raw: FinancialRawData, plansById: Map<string, FinancialPlan>, start: Date, end: Date) {
   return raw.subscriptions
     .filter((subscription) => isWithin(parseDate(subscription.canceled_at), start, end))
-    .reduce((sum, subscription) => sum + monthlyizePlanPrice(plansById.get(subscription.plan_id)), 0);
+    .reduce((sum, subscription) => sum + monthlySubscriptionAmount(subscription, plansById), 0);
 }
 
 function delinquentPayments(raw: FinancialRawData, now: Date) {
@@ -331,7 +340,7 @@ export function buildAdminFinancialData(raw: FinancialRawData, now = new Date())
   const churnMrr = churnedMrrWithin(raw, plansById, currentStart, currentEnd);
   const reductionMrr = raw.subscriptions
     .filter((subscription) => subscription.status === "past_due" && isSubscriptionCurrentAt(subscription, now))
-    .reduce((sum, subscription) => sum + monthlyizePlanPrice(plansById.get(subscription.plan_id)), 0);
+    .reduce((sum, subscription) => sum + monthlySubscriptionAmount(subscription, plansById), 0);
 
   const revenueTrend = Array.from({ length: 12 }, (_, index) => {
     const monthStart = addMonths(currentStart, index - 11);
@@ -379,7 +388,7 @@ export function buildAdminFinancialData(raw: FinancialRawData, now = new Date())
   const cycleValues = activeSubscriptions.reduce<Record<string, number>>((totals, subscription) => {
     const plan = plansById.get(subscription.plan_id);
     const key = plan?.billing_interval === "yearly" ? "Anual" : "Mensal";
-    return { ...totals, [key]: (totals[key] ?? 0) + monthlyizePlanPrice(plan) };
+    return { ...totals, [key]: (totals[key] ?? 0) + monthlySubscriptionAmount(subscription, plansById) };
   }, {});
   const cycleTotal = Object.values(cycleValues).reduce((sum, value) => sum + value, 0);
   const cycleDistribution = Object.entries(cycleValues).map(([label, value], index) => ({
@@ -398,7 +407,7 @@ export function buildAdminFinancialData(raw: FinancialRawData, now = new Date())
       const partner = partnerLabel(subscription.partner_id, partnersById, profilesById);
       const payment = latestPaymentBySubscription.get(subscription.id);
       return {
-        amount: formatCurrencyCents(monthlyizePlanPrice(plan)),
+        amount: formatCurrencyCents(monthlySubscriptionAmount(subscription, plansById)),
         dateLabel: formatDate(subscription.current_period_end),
         email: partner.email,
         id: subscription.id,
@@ -420,7 +429,7 @@ export function buildAdminFinancialData(raw: FinancialRawData, now = new Date())
       const plan = plansById.get(subscription.plan_id);
       const partner = partnerLabel(subscription.partner_id, partnersById, profilesById);
       return {
-        amount: formatCurrencyCents(monthlyizePlanPrice(plan), 2),
+        amount: formatCurrencyCents(monthlySubscriptionAmount(subscription, plansById), 2),
         dateLabel: formatDate(subscription.current_period_end),
         email: partner.email,
         id: subscription.id,

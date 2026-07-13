@@ -37,9 +37,12 @@ async function expectData<T>(result: PromiseLike<QueryResult<T>>, label: string)
 }
 
 export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
-  const supabase = (await createClient()) as unknown as SupabaseReadClient;
+  const supabaseBase = await createClient();
+  const { data: claimsData } = await supabaseBase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  const supabase = supabaseBase as unknown as SupabaseReadClient;
 
-  const [settings, integrations, activities, admins] = await Promise.all([
+  const [settings, integrations, activities, admins, currentProfiles] = await Promise.all([
     expectData(
       asQuery<import("./settings-metrics").PlatformSettingRecord>(
         supabase
@@ -47,7 +50,7 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
           .select("key, value, updated_at, updated_by_profile_id")
           .order("key", { ascending: true }),
       ),
-      "configurações",
+      "configuracoes",
     ),
     expectData(
       asQuery<import("./settings-metrics").PlatformIntegrationRecord>(
@@ -56,7 +59,7 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
           .select("id, integration_key, name, category, status, config, last_test_status, last_test_message, last_tested_at, created_at, updated_at")
           .order("category", { ascending: true }),
       ),
-      "integrações",
+      "integracoes",
     ),
     expectData(
       asQuery<import("./settings-metrics").PlatformSettingsActivityRecord>(
@@ -66,7 +69,7 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
           .order("created_at", { ascending: false })
           .limit(10),
       ),
-      "histórico de configurações",
+      "historico de configuracoes",
     ),
     expectData(
       asQuery<import("./settings-metrics").SettingsAdminProfileRecord>(
@@ -76,13 +79,26 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
           .eq("role", "admin")
           .order("display_name", { ascending: true }),
       ),
-      "usuários admins",
+      "usuarios admins",
     ),
+    userId
+      ? expectData(
+        asQuery<{ id: string }>(
+          supabase
+            .from("profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .limit(1),
+        ),
+        "profile atual",
+      )
+      : Promise.resolve([]),
   ]);
 
   return buildAdminSettingsData({
     activities,
     admins,
+    currentProfileId: currentProfiles[0]?.id ?? null,
     integrations,
     settings,
   });

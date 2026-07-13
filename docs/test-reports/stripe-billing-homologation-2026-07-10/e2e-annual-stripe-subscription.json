@@ -1,0 +1,28 @@
+{
+  "id": "sub_1TrkXMPELBIpM2Mnq3zmNHS9",
+  "livemode": false,
+  "status": "trialing",
+  "trial_start": true,
+  "trial_end": true,
+  "billing_mode": "flexible",
+  "customer": "cus_UrTUBuS5n77SWj",
+  "items": [
+    {
+      "id": "si_UrTUN31AHslk8G",
+      "price": "price_1TriAiPELBIpM2Mn7s4EpKt5",
+      "lookup_key": "complete_annual_brl",
+      "interval": "year",
+      "quantity": 1,
+      "livemode": false
+    },
+    {
+      "id": "si_UrTUqwOC0aGxCO",
+      "price": "price_1TriNoPELBIpM2MnQRkRINCT",
+      "lookup_key": "active_client_monthly_brl",
+      "interval": "month",
+      "quantity": 10,
+      "livemode": false
+    }
+  ],
+  "latest_invoice": "in_1TrkXMPELBIpM2MnuGPx2ivz"
+}

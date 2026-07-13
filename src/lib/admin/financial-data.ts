@@ -59,7 +59,7 @@ export async function fetchAdminFinancialData(): Promise<AdminFinancialData> {
       asQuery<import("./financial-metrics").FinancialSubscription>(
         supabase
           .from("partner_subscriptions")
-          .select("id, partner_id, plan_id, status, current_period_start, current_period_end, cancel_at_period_end, canceled_at, created_at")
+          .select("id, partner_id, plan_id, status, current_period_start, current_period_end, cancel_at_period_end, canceled_at, created_at, active_client_quantity")
           .order("created_at", { ascending: false }),
       ),
       "assinaturas financeiras",

@@ -6,7 +6,11 @@ import { getSupabasePublicEnv } from "./env";
 
 export async function updateSession(request: NextRequest) {
   const { publishableKey, url } = getSupabasePublicEnv();
-  let response = NextResponse.next({ request });
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-current-pathname", request.nextUrl.pathname);
+  let response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const supabase = createServerClient<Database>(url, publishableKey, {
     cookies: {
@@ -18,7 +22,9 @@ export async function updateSession(request: NextRequest) {
           request.cookies.set(name, value);
         });
 
-        response = NextResponse.next({ request });
+        response = NextResponse.next({
+          request: { headers: requestHeaders },
+        });
 
         cookiesToSet.forEach(({ name, options, value }) => {
           response.cookies.set(name, value, options);

@@ -34,5 +34,5 @@ npm run test -- client-exams-metrics partner-client-exams-view
 npm run lint
 npm run build
 npx supabase test db
-git diff --check
+npm run git:local -- diff --check
 ```

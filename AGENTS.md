@@ -1,249 +1,209 @@
-versão: 2026-06-19
+versao: 2026-07-08
 revisado por: Codex
-próxima revisão sugerida: ao migrar para Next.js ou ao alterar stack
+proxima revisao sugerida: ao alterar stack, auth, rotas oficiais ou modelo Supabase
 
 # AGENTS.md
 
+Constituicao tecnica e operacional do Projeto Leo Barros.
 
-## Atualizacao Fase F.2 - 28 de junho de 2026
+## Estado Oficial
 
-Cada tela funcional aprovada deve ter um Page Profile em `docs/page-profiles/` contendo objetivo, rota, perfil, fontes de dados, métricas, estados, validações e pendências. Quando a tela ganhar workflow próprio recorrente, criar ou atualizar uma skill local do Codex em `~/.codex/skills/` apontando para o Page Profile e para as fontes obrigatórias.
+O Next.js App Router e a base oficial do produto. A camada Vite/React Router legada nao e mais o caminho funcional principal.
 
-Estrutura de banco deve ficar em migrations versionadas (`supabase/migrations`): tabelas, colunas, constraints, índices, RLS, grants, triggers e funções/RPCs. Dados de sistema, fixtures e dados de smoke local devem ficar em `supabase/seed.sql`; não inserir dados operacionais em migrations novas, exceto metadados estruturais indispensáveis ao próprio schema.
+Fonte operacional complementar: `docs/fase-f0-next-oficial.md`.
 
-Para `/admin/dashboard`, a fonte operacional é `docs/page-profiles/admin-dashboard.md`; a tela deve ler dados do Supabase local via camada server-side e nunca usar service role no browser. Stripe é o gateway futuro, mas permanece sem configuração, webhook, checkout ou secrets nesta fase.
+Stack atual:
+- Next.js 16 com App Router em `src/app`.
+- React 18, TypeScript, Tailwind CSS 3, shadcn/ui local e Radix UI.
+- Supabase local com migrations em `supabase/migrations`, seed em `supabase/seed.sql` e Edge Functions em `supabase/functions`.
+- Auth Next com `@supabase/ssr`, cookies, `profiles.role` e `profiles.status`.
+- Vitest para testes, ESLint para qualidade estatica.
+- npm e `package-lock.json` sao o caminho oficial de instalacao.
 
-## Atualizacao Fase F.0 - 28 de junho de 2026
+Arquivos principais:
+- `src/app/**`: rotas, layouts e paginas App Router.
+- `src/proxy.ts`: middleware/proxy de sessao e acesso.
+- `src/lib/supabase/**`: clients Supabase, env publica e tipos.
+- `src/components/ui/**`: componentes base shadcn/ui locais.
+- `src/components/auth/**`: componentes de autenticacao.
+- `src/components/shells/**`: shell autenticado compartilhado.
+- `docs/page-profiles/**`: contratos funcionais de telas aprovadas.
+- `docs/sitemap-projeto-leo-barros.md`: referencia de rotas e nomenclatura.
+- `.codex/skills/projeto-leo-barros-auth/SKILL.md`: skill operacional para fluxos de autenticacao segmentados.
+- `.codex/skills/leo-billing-stripe/SKILL.md`: skill operacional para planos, Stripe Billing, checkout, webhooks e entitlement financeiro.
 
-O Next.js App Router e a base oficial do produto. A camada Vite/React Router legada foi removida do caminho funcional principal. Se houver conflito entre secoes historicas deste arquivo e a Fase F.0, considerar a Fase F.0 e `docs/fase-f0-next-oficial.md` como estado operacional mais recente.
+## Papel do Codex
 
+O Codex atua como agente de desenvolvimento, manutencao, refatoracao, controle de qualidade e auditoria de consistencia.
 
-> **NUNCA:**
-> - Inventar stack, rota, componente, integração, regra de negócio ou estrutura do Figma.
-> - Alterar código sem consultar as fontes relevantes listadas neste arquivo.
-> - Criar componente equivalente a um já existente em `src/components/`.
-> - Refatorar áreas não relacionadas ao pedido recebido.
-> - Expor secrets, credenciais ou valores de `.env` em qualquer output.
-> - Afirmar que validação ocorreu sem tê-la executado de fato.
-> - Remover rota, componente ou migration sem plano de transição explícito.
-> - Ignorar divergência entre Figma, código, sitemap ou banco; registrar sempre.
+Toda atuacao deve respeitar:
+1. solicitacao atual do usuario;
+2. este `AGENTS.md`;
+3. Figma `Projeto Leo Barros Atualizado`, quando acessivel;
+4. `docs/sitemap-projeto-leo-barros.md`;
+5. Page Profile da tela em `docs/page-profiles/`, quando existir;
+6. codigo real em `src/` e `supabase/`;
+7. documentacao em `docs/`.
 
-Constituição técnica e operacional do Projeto Leo Barros para todo trabalho futuro do Codex em `/Users/antoniofelipe/Projeto_Leo_Barros`.
-Este arquivo governa desenvolvimento, manutenção, refatoração, auditoria de consistência, Figma, Design System, validação, segurança e futura migração para Next.js.
+Quando uma informacao nao existir nas fontes analisadas, escrever: `Nao identificado nos arquivos analisados.`
 
-## 1. Papel do Codex no projeto
-O Codex atua como agente de desenvolvimento, manutenção, refatoração, controle de qualidade e auditoria de consistência.
-Toda atuação deve respeitar: solicitação atual do usuário; este `AGENTS.md`; Figma `Projeto Leo Barros Atualizado`, quando acessível; `docs/sitemap-projeto-leo-barros.md`; Design System em `docs/`; código real em `src/` e `supabase/`; evidências verificadas nos arquivos analisados.
-Quando houver conflito, registrar inconsistência, explicar impacto e pedir decisão se a escolha alterar comportamento, arquitetura, rotas, permissão, design visual, banco de dados ou dados.
-Quando uma informação não existir nas fontes, escrever: `Não identificado nos arquivos analisados.`
+## Gate de Confirmacao
 
-### Gate de confirmação
-Pausar e pedir decisão explícita do usuário antes de:
-- Alterar rota existente ou criar rota nova.
-- Modificar schema de banco, migration ou policy do Supabase.
-- Remover ou renomear componente, hook ou integração existente.
-- Alterar arquitetura, providers ou estrutura de layouts.
-- Introduzir nova dependência no `package.json`.
-- Afetar comportamento de autenticação ou permissão.
-Para alterações documentais, de estilo ou de texto em componente isolado: executar e reportar no resultado final.
+Pausar e pedir decisao explicita do usuario antes de:
+- alterar rota existente ou criar rota nova;
+- modificar schema de banco, migration ou policy do Supabase;
+- remover ou renomear componente, hook ou integracao existente;
+- alterar arquitetura, providers ou estrutura de layouts;
+- introduzir nova dependencia no `package.json`;
+- afetar comportamento de autenticacao ou permissao.
 
-## 2. Estado real do projeto em 19 de junho de 2026
-Stack principal real: Vite 5, React 18, TypeScript, React Router DOM, Tailwind CSS 3, shadcn/ui, Radix UI, Supabase, TanStack Query, Vitest, ESLint e Lovable.
-Fundação paralela: Next.js 16.2.2 com App Router técnico isolado por arquivos `*.next.tsx`; Fases 2, 3, 3.5, 4.0 e a auditoria 4.1 encerradas, ainda sem telas de negócio ou integrações migradas para o Next.
-Arquivos e diretórios principais:
-- `src/App.tsx`: roteamento atual com `BrowserRouter`.
-- `src/layouts/AdminLayout.tsx`: shell administrativo/operacional atual.
-- `src/layouts/PatientLayout.tsx`: shell atual do paciente.
-- `src/components/AdminSidebar.tsx`: sidebar global atual do admin.
-- `src/index.css`: tokens visuais atuais, fontes e classes utilitárias customizadas.
-- `src/components/ui/**`: componentes shadcn/ui locais.
-- `src/integrations/supabase/client.ts`: cliente Supabase gerado.
-- `src/integrations/supabase/types.ts`: tipos Supabase.
-- `supabase/migrations/**`: schema e policies.
-- `supabase/functions/**`: Edge Functions.
-- `docs/**`: documentação de Design System, sitemap, roadmap e guias.
-- `handoff_versao_16072026.md`: handoff operacional lido nesta auditoria.
-- `src/app/**`: fundação técnica paralela do Next.js.
-- `src/app/providers.next.tsx`: Query Client, Tooltip e toasters no Next.js.
-- `src/app/globals.css`: cópia controlada dos tokens e classes de `src/index.css`.
-- `src/app/foundation-validation.next.tsx`: smoke técnico de Tooltip e toasters na página Next.
-- `src/app/providers.next.test.tsx`: testes mínimos da árvore de providers.
-- `src/test/vite-bootstrap.smoke.test.tsx`: smoke do bootstrap Vite com `App` mockado.
-- `src/test/next-public-shell.smoke.test.tsx`: smoke da página pública Next existente dentro dos providers.
-- `src/test/legacy-form-route.contract.test.ts`: contrato que preserva `/form/:token` apenas como implementação Vite legada e impede tratá-la como rota pública alvo do Next.
-- `docs/estrategia-mocks-supabase-testes.md`: estratégia de mocks sem banco, rede ou ambiente real.
-- `src/components/auth/login-view.tsx`: apresentação controlada do login, desacoplada de Supabase, React Router e Sonner.
-- `src/components/auth/login-view.test.tsx`: testes de renderização, credenciais e loading do login apresentacional.
-- `docs/estrategia-autenticacao-perfis-next.md`: auditoria dos perfis e estratégia recomendada de login único temporário antes da separação Cliente/Parceiro/Admin.
-- `src/components/shells/authenticated-shell.next.tsx`: shell autenticado compartilhado por Cliente, Parceiros e Admin.
-- `src/components/shells/shell-placeholder.next.tsx`: placeholder técnico reutilizável dos shells.
-- `src/app/(public)/**`, `src/app/cliente/**`, `src/app/parceiros/**` e `src/app/admin/**`: layouts e páginas técnicas da Fase 3.
-- `next.config.ts` e `tsconfig.next.json`: isolamento do Next.js em relação ao legado Vite.
-Importante: o produto real ainda roda em Vite; o Next.js existe apenas como fundação paralela. O handoff e o `AGENTS.md` anterior tinham premissas antigas sobre Next.js, Storybook e ausência de Supabase, substituídas por esta leitura da raiz real.
+Para alteracoes documentais, organizacionais, scripts sem mudanca de runtime, estilo ou texto em componente isolado: executar e reportar no resultado final.
 
-## 3. Fontes de verdade e ordem de consulta
-### Prioridade de fontes
-| Prioridade | Fonte |
+## Fontes por Tipo de Tarefa
+
+| Contexto | Arquivos a ler primeiro |
 |---|---|
-| 1 | Solicitação atual do usuário |
-| 2 | Este `AGENTS.md` |
-| 3 | Figma `Projeto Leo Barros Atualizado` |
-| 4 | `docs/sitemap-projeto-leo-barros.md` |
-| 5 | Código real em `src/` e `supabase/` |
-| 6 | Documentação em `docs/` |
+| Rotas, menus, navegacao | `docs/sitemap-projeto-leo-barros.md`, `src/app/**/page.tsx`, layouts relacionados |
+| UI, componentes, tokens | `docs/DESIGN_SYSTEM.md`, `docs/TOKENS.md`, `src/app/globals.css`, `tailwind.config.ts`, `src/components/ui/**` |
+| Dados, auth, permissoes | `src/lib/supabase/**`, `src/lib/auth/**`, `src/proxy.ts`, `supabase/migrations/**`, `supabase/functions/**` |
+| Tela funcional aprovada | Page Profile em `docs/page-profiles/` e skill local correspondente, quando existir |
+| Governanca e historico | `docs/fase-f0-next-oficial.md`, `handoff_versao_16072026.md`, `docs/archive/**` apenas como contexto historico |
 
-### Arquivos por tipo de tarefa
-| Contexto da tarefa | Arquivos a ler primeiro |
-|---|---|
-| Rotas, menus, navegação | `docs/sitemap-projeto-leo-barros.md`, `src/App.tsx` |
-| UI, componentes, tokens | `docs/DESIGN_SYSTEM.md`, `docs/TOKENS.md`, `src/index.css`, `tailwind.config.ts` |
-| Dados, auth, permissões | `src/integrations/supabase/`, `supabase/migrations/`, `supabase/functions/` |
-| Governança, histórico | `handoff_versao_16072026.md` |
-| Qualquer tarefa visual | Consultar Figma; usar node/frame específico quando possível |
-Não usar como fonte de decisão: `node_modules`, `.git`, `.next`, `dist`, `build`, `storybook-static`, caches, temporários ou arquivos gerados que contradigam arquivos fonte.
+Nao usar como fonte de decisao: `node_modules`, `.git`, `.next`, `dist`, `build`, caches, temporarios ou arquivos gerados que contradigam arquivos fonte.
 
-## 4. Figma como referência visual
-Arquivo principal: `https://www.figma.com/design/vyskvKR1gCzdckeXHR2Ewj/Projeto-Leo-Barros-Atualizado`
-Status da consulta mais recente nesta sessão:
-- Arquivo acessado via MCP.
-- A ferramenta listou apenas uma página de topo: `Design Telas`.
-- A busca por Design System não retornou variáveis, estilos ou componentes pesquisáveis.
-- `get_libraries` não retornou bibliotecas adicionadas ao arquivo.
-Status histórico informado pelo handoff/documentação:
-- O handoff registra páginas `Deisgn Telas`, `Design System` e `Sitemap`.
-- O handoff registra `32` component sets, `3` componentes standalone, `64` variáveis e `12` famílias `Converted/*`.
-- Essa informação histórica é contexto; a disponibilidade atual via MCP deve ser confirmada antes de implementar tela.
-Regras de uso:
-- Usar Figma como fonte visual para telas, dashboards, componentes, espaçamentos, hierarquia, densidade e atmosfera.
-- Sempre que possível, trabalhar com node/frame específico.
-- Não inventar estrutura quando o acesso falhar ou a ferramenta não retornar o node esperado.
-- Registrar bloqueio quando o Figma não puder ser acessado.
-- Para rotas e nomenclatura, validar contra o sitemap Markdown, não apenas contra nomes do Figma.
-Riscos conhecidos: o Figma usa `Paciente`; o handoff cita `Deisgn Telas`, mas a consulta atual retornou `Design Telas`; a documentação local cita `Design System` e `Sitemap`, não confirmados pela consulta MCP atual.
+## Figma e Design System
 
-## 5. Design System
-Identidade alvo: dashboards clínicos escuros, azul como ação principal, tipografia `Rethink Sans`, background `#0B1720`, escala de spacing 4px.
-Estado atual do código: `Inter` e `Plus Jakarta Sans`, background preto via HSL, classes customizadas `glass-card`, `bento-grid`, `btn-primary`. Detalhes em `docs/DESIGN_SYSTEM.md`.
-Regras operacionais:
-- Não aplicar visual padrão shadcn/ui como destino final.
-- Não remover classe visual sem substituto validado.
-- Não usar hex solto quando houver token semântico.
-- Não criar card dentro de card sem necessidade funcional.
-- Preservar estados de loading, erro e vazio em toda alteração.
-- Preservar responsividade.
+Usar Figma como fonte visual para telas, dashboards, componentes, espacamentos, hierarquia, densidade e atmosfera quando a tarefa envolver visual.
 
-## 6. Glossário de perfis
-| Perfil | Prefixo de rota alvo | Nome no código atual | Descrição |
-|---|---|---|---|
-| Cliente | `/cliente` | `patient` / `patients` | Usuário final que recebe atendimento |
-| Parceiro | `/parceiros` | (dentro de `/admin`) | Profissional de saúde que atende clientes |
-| Admin | `/admin` | `/admin` | Operação interna da plataforma |
-Em código novo, usar sempre os termos da coluna "Perfil" e os prefixos de rota alvo. Em código existente, não renomear sem plano de migração explícito e aprovado.
-
-## 7. Sitemap, rotas atuais e rotas alvo
-Fonte alvo: `docs/sitemap-projeto-leo-barros.md`.
-Perfis e prefixos oficiais alvo: Cliente `/cliente`; Parceiros `/parceiros`; Admin `/admin`.
-Rotas reais atuais em `src/App.tsx`:
-- Pública: `/`.
-- Tecnicamente pública, porém legada/provisória: `/form/:token`. O destino correto de produto é um fluxo autenticado do Cliente/Paciente, ainda sem rota alvo definida.
-- Admin atual: `/admin`, `/admin/dashboard`, `/admin/patients`, `/admin/patients/:id`, `/admin/diets`, `/admin/workouts`, `/admin/exams`, `/admin/prescriptions`, `/admin/foods`, `/admin/exercises`, `/admin/techniques`, `/admin/forms`, `/admin/forms/new`, `/admin/forms/:id/edit`, `/admin/materials`, `/admin/agenda`.
-- Paciente atual: `/patient`, `/patient/diet`, `/patient/workout`, `/patient/evolution`, `/patient/exams`, `/patient/prescriptions`.
-Inconsistência principal:
-- O código atual usa `/patient` e `patients`.
-- O sitemap alvo usa `/cliente`, `/parceiros/clientes` e `/admin/clientes`.
-- O código atual concentra operação de profissional/parceiro dentro de `/admin`.
-- O sitemap alvo separa `Parceiros` de `Admin`.
-Regras de rota:
-- Não criar novas rotas com `/paciente` ou `/profissional`.
-- Em rotas novas, preferir `/cliente`, `/parceiros` e `/admin`.
-- Não remover rotas antigas sem plano de migração/redirect.
-- O menu contextual dentro de `/parceiros/clientes/:id` depende sempre de cliente selecionado.
-- Não migrar `/form/:token` diretamente para `/form/[token]`. O fluxo futuro deve ser redesenhado em fase própria dentro da experiência autenticada do Cliente, considerando auth, ownership, Supabase e RLS.
-
-## 8. Arquitetura atual e futura migração para Next.js
-Estado principal: Vite com `BrowserRouter`; providers globais em `src/App.tsx` (`QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`); alias `@/*` para `src/*`; Vite na porta `8080`.
-Fundação Next.js: App Router técnico em `src/app`, Next na porta `3000`, configuração TypeScript isolada, providers globais, Tailwind e shells técnicos em `/`, `/cliente/inicio`, `/parceiros/dashboard` e `/admin/dashboard`. As Fases 2 e 3 foram validadas por testes e builds em 18 de junho de 2026.
-Objetivo futuro: migrar gradualmente o produto para a fundação Next.js.
 Regras:
-- Não migrar tudo de uma vez.
-- Migrar por camadas: fundação visual, providers, layouts, rotas, páginas, dados.
-- Preservar comportamento Supabase antes de refatorar visual profundamente.
-- Componentes com `useState`, `useEffect`, `localStorage`, `window`, `useNavigate`, `useSearchParams` ou Supabase client-side devem ser client-side no Next.js.
-- Substituir React Router por App Router com cuidado.
-- Cada tela migrada deve ter rota atual, rota alvo, frame do Figma e checklist de estados.
+- sempre que possivel, trabalhar com node/frame especifico;
+- nao inventar estrutura quando o acesso falhar ou a ferramenta nao retornar o node esperado;
+- registrar bloqueio quando o Figma nao puder ser acessado;
+- para rotas e nomenclatura, validar contra o sitemap Markdown;
+- nao aplicar visual padrao shadcn/ui como destino final;
+- reutilizar componentes e tokens existentes antes de criar novos;
+- preservar loading, erro, vazio e responsividade.
 
-## 9. Supabase, auth, banco e integrações
-Implementação identificada:
-- Cliente Supabase em `src/integrations/supabase/client.ts`.
-- Variáveis client-side: `VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`.
-- Edge Functions: `supabase/functions/create-patient/index.ts`, `supabase/functions/create-admin/index.ts`, `supabase/functions/generate-diet/index.ts`.
-- `create-patient` e `create-admin` usam `SUPABASE_SERVICE_ROLE_KEY` no ambiente Deno.
-- `generate-diet` usa `LOVABLE_API_KEY` no ambiente Deno e chama Lovable AI Gateway.
-- Há migrations para pacientes, dietas, treinos, exames, prescrições, formulários, fotos, materiais e outros módulos.
-Riscos: várias policies usam `USING (true)` e `WITH CHECK (true)`; algumas permitem acesso amplo para `public` ou `authenticated`; antes de produção, revisar RLS por perfil, ownership e isolamento entre cliente/parceiro/admin.
-Regras: nunca expor service role key; nunca mover secrets de Edge Function para client-side; não alterar migrations/policies sem entender impacto em telas existentes; não inventar regras de permissão sem arquivos reais e decisão explícita.
+## Perfis e Rotas Oficiais
 
-## 10. Segurança e proteção de informações
-Estado atual: `.env` existe localmente, está ignorado e foi removido do índice Git; `.env.example` contém somente nomes de variáveis.
-Regras obrigatórias:
-- Nunca commitar `.env`, credenciais ou tokens de acesso.
-- Nunca expor segredos em logs, diagnósticos, outputs, documentação ou exemplos de código.
-- Nunca copiar chaves privadas para documentação.
-- Nunca ler ou repetir valores de `.env` em resposta final.
-Quando encontrar segredo real: não repetir o valor; informar apenas o tipo de risco; recomendar rotação quando houver exposição; recomendar mover o valor para ambiente seguro.
-Risco remanescente: avaliar rotação se valores reais já foram expostos no histórico antes da remoção do versionamento.
+| Perfil | Prefixo oficial | Descricao |
+|---|---|---|
+| Cliente | `/cliente` | Usuario final que recebe atendimento |
+| Parceiro | `/parceiros` | Profissional de saude que atende clientes |
+| Admin | `/admin` | Operacao interna da plataforma |
 
-## 11. Componentes e regras de uso
-Componentes base atuais: shadcn/ui em `src/components/ui/**`; componentes de domínio em `src/components/**`; layouts em `src/layouts/**`.
-Componentes e padrões relevantes: `Button`, `Input`, `Select`, `Badge`, `Card`, `Tabs`, `Dialog`, `Toast`, `Table`, `Sidebar`, `Skeleton`, `AdminSidebar`, `PatientLayout`, `MobilePreviewPanel`, abas de cliente/paciente (dieta, treino, cardio, exames, prescrições, fotos, formulários, evolução, anamnese e energia).
+Rotas novas devem usar `/cliente`, `/parceiros` e `/admin`.
+
+Nao criar novas rotas com `/paciente`, `/patient`, `/profissional` ou `/form/[token]` sem plano aprovado. O fluxo legado `/form/:token` nao deve ser migrado diretamente; deve ser redesenhado dentro da experiencia autenticada do Cliente.
+
+## Supabase, Auth e Banco
+
+Regras obrigatorias:
+- nunca expor service role key no browser;
+- nunca mover secrets de Edge Function para client-side;
+- nao alterar migrations, triggers, grants ou policies sem entender impacto e obter confirmacao quando necessario;
+- dados estruturais ficam em migrations versionadas;
+- dados de sistema, fixtures e smoke local ficam em `supabase/seed.sql`;
+- a tela deve ler dados via camada server-side quando o Page Profile exigir;
+- Stripe Billing esta arquitetado para homologacao por credenciais. Sem chaves reais, o app deve exibir estado seguro de pagamentos em configuracao e nunca simular sucesso do provedor.
+
+Variaveis publicas client-side:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+## Seguranca
+
+- Nunca commitar `.env`, credenciais ou tokens.
+- Nunca repetir valores reais de secrets em respostas, logs ou documentacao.
+- Se encontrar segredo real, informar apenas o tipo de risco e recomendar rotacao quando houver exposicao.
+- `.env.example` deve conter apenas nomes de variaveis.
+
+## Componentes
+
 Regras:
-- Usar `Button` para comandos e ações.
-- Usar `Input`, `Select`, `Textarea` e controles shadcn apenas para dados editáveis.
-- Usar `Badge` para status e informação curta.
-- Usar `Card` para unidades repetidas significativas, não wrapper genérico.
-- Usar `Tabs` para views irmãs dentro do mesmo contexto.
-- Usar sidebar para navegação global autenticada.
-- Usar tabelas para dados comparáveis.
-- Preferir componente existente, variante e composição antes de duplicar.
-- Usar `cn` de `src/lib/utils.ts`.
+- usar `Button` para comandos;
+- usar `Input`, `Select`, `Textarea` e controles shadcn para dados editaveis;
+- usar `Badge` para status curto;
+- usar `Card` apenas para unidades significativas ou repetidas;
+- usar `Tabs` para views irmas no mesmo contexto;
+- usar tabelas para dados comparaveis;
+- preferir composicao de componentes existentes;
+- usar `cn` de `src/lib/utils.ts`.
 
-## 12. Qualidade e validação
-Scripts identificados: `npm run dev`, `npm run dev:next`, `npm run build`, `npm run build:next`, `npm run build:dev`, `npm run lint`, `npm run preview`, `npm run start:next`, `npm run test`, `npm run test:watch`.
-Não identificado nos arquivos analisados: Storybook local nesta raiz real; script `typecheck` dedicado.
-Baseline de testes em 19 de junho de 2026 após a Fase 4.0: `6` arquivos e `13` testes aprovados. Playwright `1.60.0` está instalado, mas não há configuração E2E versionada nem `@playwright/test` instalado diretamente.
-Regras: para código, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir; para docs, registrar validação por leitura manual; nunca afirmar comando não executado; registrar falha e impacto; TypeScript atual não estrito não equivale a cobertura forte de tipos.
-Checklist final:
-- Respeita este `AGENTS.md`, sitemap quando envolve navegação, Design System ou divergência registrada?
-- Corresponde ao Figma quando envolve visual?
-- Considera loading, erro, vazio e responsividade?
-- Reutiliza componentes e tokens existentes?
-- Preserva rotas antigas sem plano, Supabase, auth e RLS?
-- Executou validações disponíveis ou registrou limitação?
+## Texto Visivel Ao Usuario
 
-## 13. Inconsistências registradas em 16 de junho de 2026
-- `AGENTS.md` anterior e `handoff_versao_16072026.md` descreviam Next.js/Storybook como stack produtiva; o produto real ainda usa Vite/React Router e possui somente uma fundação Next.js paralela.
-- `docs/PROJECT.md`, `docs/IMPLEMENTATION_ROADMAP.md` e `docs/README` de Design System falam de Next.js/Storybook; Next.js agora possui fundação local, mas Storybook continua não identificado.
-- `docs/README.md` aparece no IDE do usuário, mas não foi encontrado no disco durante esta leitura.
-- O Figma atual via MCP mostrou apenas `Design Telas`; `Design System` e `Sitemap` não foram confirmados, embora estejam no handoff.
-- A busca de Design System no Figma não retornou variáveis, estilos ou componentes nesta execução.
-- O sitemap alvo usa `/cliente` e `/parceiros`; o código atual usa `/patient` e concentra operação em `/admin`.
-- O Design System alvo usa `Rethink Sans` e `#0B1720`; o código atual usa `Inter`, `Plus Jakarta Sans` e background preto via HSL.
-- O código e banco ainda usam `patient`/`patients`; o sitemap alvo usa `cliente`/`clientes`.
-- `.env` não está mais rastreado no estado atual, mas pode permanecer no histórico anterior até tratamento específico.
-- Várias policies Supabase usam regras amplas `true`.
-Essas inconsistências não bloqueiam toda evolução, mas devem ser consideradas em tarefas que toquem rotas, design, segurança, banco ou migração para Next.js.
+Nao deixar mensagens de desenvolvimento, arquitetura ou implementacao nas paginas, drawers, modais, tooltips, estados vazios, alertas ou textos de apoio.
 
-## 14. Próximos passos
-Próximos passos técnicos documentados em `docs/IMPLEMENTATION_ROADMAP.md`.
+Evitar termos como `backend`, `Edge Function`, `webhook`, `read model`, `SetupIntent`, `service role`, `fallback`, `ambiente local`, `nesta fase`, `sincronizacao`, `estado reconciliado`, nomes de tabela, nomes de RPC e detalhes internos de seguranca.
 
-## Formato de entrega
-Toda resposta final deve conter estas seções quando aplicável:
-| Seção | Conteúdo esperado |
+Preferir linguagem de produto e estado do usuario:
+- `Em processamento` em vez de `Aguardando sincronizacao da Stripe`;
+- `Pagamentos temporariamente indisponiveis` em vez de explicar credenciais ou configuracao local;
+- `Nenhuma senha sera definida ou exibida nesta etapa` em vez de descrever chamada autenticada ou chave privilegiada;
+- `Consulte no portal de pagamentos` em vez de citar a implementacao do provedor, exceto em selos comerciais como `Processado pela Stripe`.
+
+Termos tecnicos podem aparecer em logs seguros, testes, documentacao tecnica e nomes internos de codigo, mas nao em UI final.
+
+## Qualidade e Validacao
+
+Scripts oficiais:
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
+- `npm run test`
+- `npm run test:watch`
+- `npm run git:local -- diff --check`
+- `npm run db:start`
+- `npm run db:status`
+- `npm run db:reset`
+- `npm run db:stop`
+- `npm run validate:admin-partner-flow`
+
+Quando `git` nao estiver no PATH do PowerShell, usar o wrapper local:
+
+```bash
+npm run git:local -- status --short
+npm run git:local -- diff --check
+```
+
+O wrapper procura `git` no PATH, em caminhos comuns do Git for Windows e tambem aceita `GIT_BINARY` com caminho absoluto.
+
+## MCP Local
+
+O workspace possui configuracao MCP versionada em `.mcp.json`.
+
+Servidores configurados:
+- `playwright`: usa `@playwright/mcp` instalado em `devDependencies`, roda headless e grava saidas em `.playwright-mcp`.
+- `supabase-local`: usa o endpoint local da Supabase CLI em `http://127.0.0.1:54321/mcp`.
+
+Regras:
+- Para inspecionar schema, migrations, tabelas, RLS, dados locais e documentacao Supabase, usar Supabase MCP quando a ferramenta estiver disponivel. A documentacao oficial da Supabase indica que o MCP local fica em `/mcp` na stack local.
+- Para smoke visual/interativo, console, network, foco, teclado e screenshots de rotas web, usar Playwright MCP quando exposto pelo cliente MCP. Se o cliente atual nao expuser o servidor, registrar a limitacao e usar Playwright local/headless apenas como fallback.
+- Validar disponibilidade local com `npm run mcp:playwright:check` e, com Supabase local ativo, `npm run mcp:supabase:check`.
+- Nao conectar MCP a producao nem expor secrets em configuracoes, logs ou relatorios.
+
+Para codigo, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir.
+
+Vitest permanece intencionalmente no projeto como runner de testes. A presenca transitiva de Vite em `node_modules` via Vitest nao significa que a aplicacao use Vite como runtime.
+
+## Inconsistencias Conhecidas
+
+- Documentos em `docs/archive/**` e handoffs antigos podem mencionar Vite/React Router como principal; tratar apenas como historico.
+- O sitemap e o banco ainda podem conter historico terminologico `patient`/`patients`; nao renomear sem plano aprovado.
+- Figma pode ter divergencias de nomenclatura como `Paciente`; validar rotas contra o sitemap.
+- Algumas policies Supabase historicas devem ser revisadas antes de producao.
+
+## Formato de Entrega
+
+Toda resposta final deve conter estas secoes quando aplicavel:
+
+| Secao | Conteudo esperado |
 |---|---|
-| **Resumo** | O que foi feito e por quê |
+| **Resumo** | O que foi feito e por que |
 | **Arquivos alterados** | Lista de arquivos criados, editados ou removidos |
-| **Validação** | Como foi validado (Figma, lint, testes, build ou leitura manual) |
-| **Comandos executados** | Lista dos comandos; registrar falha quando ocorrer |
-| **Limitações** | O que não foi possível validar; nunca afirmar o que não aconteceu |
-| **Riscos** | Impactos, conflitos de fonte, pendências |
-| **Próximos passos** | Recomendações relacionadas ao trabalho entregue |
+| **Validacao** | Como foi validado |
+| **Comandos executados** | Lista de comandos; registrar falha quando ocorrer |
+| **Limitacoes** | O que nao foi possivel validar |
+| **Riscos** | Impactos, conflitos de fonte, pendencias |
+| **Proximos passos** | Recomendacoes relacionadas ao trabalho entregue |

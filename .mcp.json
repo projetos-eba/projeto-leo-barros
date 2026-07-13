@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": [
+        "node_modules/@playwright/mcp/cli.js",
+        "--headless",
+        "--output-dir",
+        ".playwright-mcp",
+        "--output-mode",
+        "file"
+      ]
+    },
+    "supabase-local": {
+      "type": "http",
+      "url": "http://127.0.0.1:54321/mcp"
+    }
+  }
+}

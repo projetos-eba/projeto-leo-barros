@@ -1,0 +1,134 @@
+import { createClient } from "npm:@supabase/supabase-js@2.98.0";
+
+import { getSupabaseAdminEnv } from "../_shared/env.ts";
+
+const jsonHeaders = {
+  "Content-Type": "application/json",
+  "Cache-Control": "no-store",
+};
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function response(status: number, body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...jsonHeaders, ...corsHeaders },
+  });
+}
+
+function randomToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes))
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
+}
+
+async function sha256(value: string) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (request.method !== "POST") {
+    return response(405, {
+      success: false,
+      error: { message: "Metodo nao permitido." },
+    });
+  }
+
+  try {
+    const { serviceRoleKey, supabaseUrl } = getSupabaseAdminEnv();
+
+    let body: { token?: unknown };
+    try {
+      body = (await request.json()) as typeof body;
+    } catch {
+      return response(400, {
+        success: false,
+        error: { message: "Requisicao invalida." },
+      });
+    }
+    const token = typeof body.token === "string" ? body.token : "";
+
+    if (!token) {
+      return response(400, {
+        success: false,
+        error: { message: "Token invalido." },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const tokenHash = await sha256(token);
+    const { data: tokenRow, error: tokenError } = await supabase
+      .from("password_reset_tokens")
+      .select("id, expires_at, consumed_at, validated_at")
+      .eq("token_hash", tokenHash)
+      .maybeSingle();
+
+    if (
+      tokenError ||
+      !tokenRow ||
+      tokenRow.consumed_at ||
+      tokenRow.validated_at ||
+      new Date(tokenRow.expires_at).getTime() < Date.now()
+    ) {
+      return response(400, {
+        success: false,
+        error: { message: "Link invalido ou expirado." },
+      });
+    }
+
+    const resetSessionId = randomToken();
+    const resetSessionHash = await sha256(resetSessionId);
+    const now = new Date().toISOString();
+    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000)
+      .toISOString();
+    const { error: updateError } = await supabase
+      .from("password_reset_tokens")
+      .update({
+        reset_session_hash: resetSessionHash,
+        session_expires_at: sessionExpiresAt,
+        validated_at: now,
+      })
+      .eq("id", tokenRow.id);
+
+    if (updateError) {
+      throw new Error("PASSWORD_RESET_VALIDATE_FAILED");
+    }
+
+    return response(200, {
+      success: true,
+      resetSessionId,
+      sessionExpiresAt,
+    });
+  } catch (error) {
+    console.error(JSON.stringify({
+      code: "VERIFY_PASSWORD_RESET_TOKEN_FAILED",
+      message: error instanceof Error ? error.message : "UNKNOWN",
+    }));
+
+    return response(500, {
+      success: false,
+      error: { message: "Nao foi possivel validar o link." },
+    });
+  }
+});

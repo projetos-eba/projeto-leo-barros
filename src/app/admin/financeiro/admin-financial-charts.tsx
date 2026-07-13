@@ -18,6 +18,7 @@ import type {
   FinancialPlanSlice,
   FinancialRevenuePoint,
 } from "@/lib/admin/financial-metrics";
+import { cn } from "@/lib/utils";
 
 function useMeasuredWidth() {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -48,12 +49,11 @@ const tooltipStyle = {
 
 export function RevenueTrendChart({ data }: { data: FinancialRevenuePoint[] }) {
   const { ref, width } = useMeasuredWidth();
-  const chartWidth = Math.max(width, 340);
 
   return (
     <div className="h-[300px] w-full overflow-hidden" data-testid="revenue-trend-chart" ref={ref}>
       {width > 0 ? (
-        <AreaChart data={data} height={300} margin={{ bottom: 0, left: -8, right: 8, top: 16 }} width={chartWidth}>
+        <AreaChart data={data} height={300} margin={{ bottom: 0, left: -8, right: 8, top: 16 }} width={width}>
           <defs>
             <linearGradient id="mrrGradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="5%" stopColor="#15c8c3" stopOpacity={0.32} />
@@ -77,17 +77,36 @@ export function RevenueTrendChart({ data }: { data: FinancialRevenuePoint[] }) {
 }
 
 export function FinancialPlanChart({ data }: { data: FinancialPlanSlice[] }) {
+  const { ref, width } = useMeasuredWidth();
   const total = data.reduce((sum, item) => sum + item.count, 0);
 
   if (data.length === 0) {
     return <EmptyChart label="Sem assinaturas ativas por plano" />;
   }
 
+  const isHorizontal = width >= 500;
+  const fallbackChartSize = isHorizontal ? 180 : 164;
+  const chartSize = width > 0
+    ? Math.min(180, Math.max(144, Math.floor(width * (isHorizontal ? 0.34 : 0.5))))
+    : fallbackChartSize;
+  const innerRadius = Math.round(chartSize * 0.3);
+  const outerRadius = Math.round(chartSize * 0.46);
+
   return (
-    <div className="grid gap-5 md:grid-cols-[180px_1fr]" data-testid="financial-plan-chart">
-      <div className="relative h-[180px]">
-        <PieChart height={180} width={180}>
-          <Pie cx="50%" cy="50%" data={data} dataKey="value" innerRadius={54} outerRadius={82} paddingAngle={3}>
+    <div
+      className={cn(
+        "grid min-w-0 gap-5",
+        isHorizontal
+          ? "grid-cols-[minmax(144px,180px)_minmax(0,1fr)] items-center"
+          : "grid-cols-1 justify-items-center",
+      )}
+      data-layout={isHorizontal ? "horizontal" : "stacked"}
+      data-testid="financial-plan-chart"
+      ref={ref}
+    >
+      <div className="relative shrink-0" style={{ height: chartSize, width: chartSize }}>
+        <PieChart height={chartSize} width={chartSize}>
+          <Pie cx="50%" cy="50%" data={data} dataKey="value" innerRadius={innerRadius} outerRadius={outerRadius} paddingAngle={3}>
             {data.map((item) => <Cell fill={item.color} key={item.label} />)}
           </Pie>
           <Tooltip contentStyle={tooltipStyle} />
@@ -97,15 +116,15 @@ export function FinancialPlanChart({ data }: { data: FinancialPlanSlice[] }) {
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8195a4]">total</span>
         </div>
       </div>
-      <div className="space-y-3 self-center">
+      <div className="w-full min-w-0 space-y-3 self-center">
         {data.map((item) => (
           <div className="space-y-1" key={item.label}>
-            <div className="flex items-center justify-between gap-3 text-[13px]">
-              <span className="inline-flex min-w-0 items-center gap-2 text-[#a1b0bb]">
-                <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="truncate">{item.label}</span>
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 text-[13px]">
+              <span className="inline-flex min-w-0 items-start gap-2 text-[#a1b0bb]">
+                <span className="mt-[5px] size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="min-w-0 break-words leading-[18px]" title={item.label}>{item.label}</span>
               </span>
-              <span className="font-bold text-[#dde7ee]">{item.count}</span>
+              <span className="shrink-0 font-bold text-[#dde7ee]">{item.count}</span>
             </div>
             <p className="text-[11px] text-[#748999]">{item.percent}% das assinaturas</p>
           </div>

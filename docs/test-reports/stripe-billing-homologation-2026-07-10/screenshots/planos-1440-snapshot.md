@@ -1,0 +1,59 @@
+- generic [active] [ref=e1] [box=0,0,1434,1116]:
+  - region "Notifications (F8)" [box=0,0,1434,0]:
+    - list [box=1014,868,420,32]
+  - region "Notifications alt+T" [box=0,0,1434,0]
+  - main [ref=e2] [box=0,0,1434,1116]:
+    - generic [ref=e3] [box=141,40,1152,1036]:
+      - generic [ref=e4] [box=141,40,768,216]:
+        - paragraph [ref=e5] [box=141,40,768,20]: Planos
+        - heading "Escolha o plano ideal para sua operacao" [level=1] [ref=e6] [box=141,72,768,112]
+        - paragraph [ref=e7] [box=141,200,768,56]: Nutricao e Treinamento em uma unica plataforma. Experimente todos os recursos gratuitamente por 7 dias.
+      - generic [ref=e8] [box=141,292,1152,583]:
+        - article [ref=e9] [box=141,292,544,583]:
+          - generic [ref=e10] [box=166,316,495,396]:
+            - paragraph [ref=e11] [box=166,316,495,20]: Plano Completo
+            - heading "Mensal" [level=2] [ref=e12] [box=166,348,495,31]
+            - generic [ref=e13] [box=166,411,495,67]:
+              - paragraph [ref=e14] [box=166,411,495,38]: R$ 119,90
+              - paragraph [ref=e15] [box=166,457,495,21]: por mes
+            - paragraph [ref=e16] [box=166,502,495,23]: 7 dias gratis
+            - list [ref=e19] [box=166,548,495,120]:
+              - listitem [ref=e20] [box=166,548,495,21]: Nutricao
+              - listitem [ref=e24] [box=166,581,495,21]: Treinamento
+              - listitem [ref=e28] [box=166,614,495,21]: Gestao de Clientes
+              - listitem [ref=e32] [box=166,647,495,21]: Recursos completos da plataforma
+          - generic [ref=e36] [box=166,736,495,114]:
+            - generic [ref=e37] [box=166,736,495,54]: + R$ 1,99/mes por Cliente ativo
+            - link "Comecar teste gratis" [ref=e38] [cursor=pointer] [box=166,805,495,44]:
+              - /url: /login/parceiros?next=/parceiros/checkout?plan=complete-monthly
+        - article [ref=e39] [box=705,292,588,583]:
+          - generic [ref=e40] [box=730,316,538,396]:
+            - generic [ref=e41] [box=1171,308,106,28]: Mais vantajoso
+            - paragraph [ref=e42] [box=730,316,538,20]: Plano Completo
+            - heading "Anual" [level=2] [ref=e43] [box=730,348,538,31]
+            - generic [ref=e44] [box=730,411,538,67]:
+              - paragraph [ref=e45] [box=730,411,538,38]: R$ 99,90/mes
+              - paragraph [ref=e46] [box=730,457,538,21]: R$ 1.198,80 cobrados anualmente
+            - paragraph [ref=e47] [box=730,494,183,28]: Economize cerca de 16,7%
+            - paragraph [ref=e48] [box=730,545,538,23]: 7 dias gratis
+            - list [ref=e51] [box=730,592,538,120]:
+              - listitem [ref=e52] [box=730,592,538,21]: Nutricao
+              - listitem [ref=e56] [box=730,625,538,21]: Treinamento
+              - listitem [ref=e60] [box=730,658,538,21]: Gestao de Clientes
+              - listitem [ref=e64] [box=730,691,538,21]: Recursos completos da plataforma
+          - generic [ref=e68] [box=730,736,538,114]:
+            - generic [ref=e69] [box=730,736,538,54]: + R$ 1,99/mes por Cliente ativo
+            - link "Comecar teste gratis" [ref=e70] [cursor=pointer] [box=730,805,538,44]:
+              - /url: /login/parceiros?next=/parceiros/checkout?plan=complete-annual
+      - generic [ref=e71] [box=141,906,1152,170]:
+        - generic [ref=e72] [box=141,906,373,170]:
+          - heading "Pagamento seguro" [level=2] [ref=e76] [box=162,963,332,24]
+          - paragraph [ref=e77] [box=162,995,332,40]: Seus pagamentos sao realizados em ambiente protegido e com tecnologia de seguranca avancada.
+        - generic [ref=e78] [box=531,906,373,170]:
+          - heading "Processado pela Stripe" [level=2] [ref=e81] [box=551,963,332,24]
+          - paragraph [ref=e82] [box=551,995,332,60]: Os pagamentos sao processados pela Stripe, plataforma global especializada em pagamentos digitais.
+        - generic [ref=e83] [box=920,906,373,170]:
+          - heading "Dados protegidos" [level=2] [ref=e88] [box=941,963,332,24]
+          - paragraph [ref=e89] [box=941,995,332,60]: Os dados do cartao sao enviados diretamente ao provedor de pagamento e nao ficam armazenados na plataforma.
+  - button "Open Next.js Dev Tools" [ref=e95] [cursor=pointer] [box=22,846,32,32]
+  - alert [ref=e99] [box=-1,1115,1,1]

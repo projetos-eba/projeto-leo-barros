@@ -47,7 +47,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 Regras:
 
 - usar somente a URL e a chave publica local destinadas ao browser;
-- nunca expor `SUPABASE_SERVICE_ROLE_KEY` no client;
+- nunca configurar `SUPABASE_SERVICE_ROLE_KEY` no runtime Next;
 - nao registrar chaves, JWTs, senhas ou links em documentacao, logs ou commits.
 
 Variaveis server-side usadas pelas Edge Functions:
@@ -108,12 +108,20 @@ Nao usar:
 
 ## Edge Functions locais
 
-Functions atuais:
+Functions atuais de identidade e provisionamento:
 
+- `signup-partner`;
+- `complete-client-first-access`;
+- `send-verification-email`;
+- `verify-email-token`;
+- `send-password-reset-email`;
+- `verify-password-reset-token`;
+- `update-password-with-token`;
 - `provision-partner`;
 - `provision-client-for-partner`.
 
-O browser chama as funcoes com sessao autenticada:
+O app Next chama as funcoes publicas de auth por Server Action, sem service role
+no Next. O browser chama as funcoes administrativas com sessao autenticada:
 
 ```ts
 const { data, error } = await supabase.functions.invoke("provision-partner", {
@@ -123,12 +131,25 @@ const { data, error } = await supabase.functions.invoke("provision-partner", {
 
 A Edge Function deve:
 
-- validar JWT;
-- carregar `profiles`;
-- conferir role, status e extensao do chamador;
+- validar payload e origem quando publica;
+- validar JWT, `profiles`, role, status e extensao do chamador quando
+  autenticada;
 - usar service role somente depois da autorizacao;
 - aplicar idempotencia;
 - retornar resposta sem senha, token, link de convite ou segredo.
+
+## Supabase MCP local
+
+Com a stack local ativa, a Supabase CLI disponibiliza MCP em:
+
+```text
+http://127.0.0.1:54321/mcp
+```
+
+O workspace tambem registra esse servidor em `.mcp.json` como `supabase-local`.
+Use `npm run mcp:supabase:check` para validar conectividade local antes de
+homologacoes que dependem de schema, RLS, tabelas de billing, ledger de webhook
+ou fixtures. Nunca apontar MCP para producao durante desenvolvimento local.
 
 ## Validacao local Admin -> Parceiro
 

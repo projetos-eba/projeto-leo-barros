@@ -51,6 +51,7 @@ describe("NextLoginForm", () => {
 
     await waitFor(() => {
       expect(loginWithPassword).toHaveBeenCalledWith({
+        expectedRole: "cliente",
         loginId: "parceiro@example.com",
         password: "senha-local",
       });
@@ -79,5 +80,30 @@ describe("NextLoginForm", () => {
       "E-mail ou senha inválidos.",
     );
     expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  it("envia a role esperada do login de parceiro", async () => {
+    vi.mocked(loginWithPassword).mockResolvedValue({
+      ok: true,
+      destination: "/parceiros/dashboard",
+    });
+
+    render(<NextLoginForm expectedRole="parceiro" />);
+
+    fireEvent.change(screen.getByLabelText("E-mail"), {
+      target: { value: "parceiro@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Senha"), {
+      target: { value: "senha-local" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
+
+    await waitFor(() => {
+      expect(loginWithPassword).toHaveBeenCalledWith({
+        expectedRole: "parceiro",
+        loginId: "parceiro@example.com",
+        password: "senha-local",
+      });
+    });
   });
 });

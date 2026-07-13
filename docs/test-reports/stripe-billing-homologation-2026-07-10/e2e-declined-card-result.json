@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "currentUrl": "http://localhost:3011/parceiros/checkout?plan=complete-monthly",
+  "hasDeclineMessage": true,
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 402 ()"
+  ],
+  "runId": "stripe-e2e-decline-1783714027788",
+  "partnerEmail": "stripe-e2e-decline-1783714027788@example.invalid"
+}
