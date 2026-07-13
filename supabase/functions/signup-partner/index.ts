@@ -116,6 +116,10 @@ function stringValue(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function rawStringValue(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
 function isValidEmail(value: string) {
   return value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -388,7 +392,7 @@ Deno.serve(async (request) => {
 
   const displayName = stringValue(rawBody.displayName);
   const email = stringValue(rawBody.email).toLowerCase();
-  const password = stringValue(rawBody.password);
+  const password = rawStringValue(rawBody.password);
   const phone = stringValue(rawBody.phone);
   const professionalRegistryNumber = stringValue(
     rawBody.professionalRegistryNumber,
