@@ -70,6 +70,10 @@ Data de referencia: 2026-07-08.
 
 - Parceiro pode usar `/login/parceiros/cadastro`.
 - Campos minimos: nome, e-mail, telefone, tipo profissional, registro quando aplicavel, senha e confirmacao.
+- Senha nao e campo normalizavel: nunca aplicar `trim()`, lowercase,
+  mascara, transformacao, serializacao em URL/storage ou qualquer mutacao antes
+  de gravar no Supabase Auth ou antes de chamar `loginWithPassword`. O valor
+  usado no auto-login deve ser exatamente o valor aceito na criacao da conta.
 - Registro profissional vazio e aceito e persiste como `null` em `partners.professional_registry_type` e `partners.professional_registry_number`.
 - Quando o registro for informado parcialmente, a UI deve mostrar erro especifico no campo faltante; quando completo, o tipo e normalizado para `cref`, `crn`, `crm` ou `outro`.
 - A Server Action do Next nao usa service role; ela valida o contrato e chama a
@@ -80,8 +84,12 @@ Data de referencia: 2026-07-08.
   `partners`, tokens e ledger de e-mail.
 - Depois da confirmacao, o login valida plano ativo em `partner_subscriptions`.
 - Status aceitos: `active` e `trialing`, com periodo vigente.
-- Sem plano ativo, redireciona para `/planos` no login e no shell protegido
-  `/parceiros/**`.
+- Sem plano ativo, login valido deve retornar sucesso e redirecionar para
+  `/planos`; falta de assinatura nunca deve virar erro de e-mail/senha.
+- A tela pendente so deve tratar o Parceiro como autenticado depois de
+  `loginWithPassword` criar sessao/cookies. Se o auto-login falhar, manter a
+  tela com orientacao segura de novo login/reset, sem redirecionar para
+  `/planos` como se houvesse sessao.
 
 ## Admin
 

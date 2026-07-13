@@ -103,7 +103,7 @@ describe("loginWithPassword", () => {
       }),
     ).resolves.toEqual({
       ok: false,
-      message: "E-mail ou senha invalidos.",
+      message: "Nao foi possivel entrar. Confira seus dados ou redefina a senha.",
     });
   });
 
