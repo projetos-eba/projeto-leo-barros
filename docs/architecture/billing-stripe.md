@@ -83,6 +83,8 @@ As Edge Functions nao criam cliente Stripe no topo do modulo. Sem `STRIPE_SECRET
 
 `stripe-bootstrap-catalog` nao cria Products nem Prices. Em test mode, a funcao valida os IDs oficiais homologados; em live mode, valida Products e Prices ativos por `lookup_key`, valores, moeda, intervalo, tipo de uso e nomes oficiais de Product, gravando os IDs reais do ambiente no catalogo local.
 
+Mensal e anual podem compartilhar o mesmo Stripe Product em `billing_plans.stripe_product_id`. A unicidade operacional do catalogo fica em `stripe_price_id` e `lookup_key`, porque cada plano comercial e representado por um Price distinto.
+
 `test:billing:stripe` executa validacao real do catalogo somente com `RUN_STRIPE_E2E=1` e continua restrito a chaves test mode.
 
 ## Escopo De RPC E RLS

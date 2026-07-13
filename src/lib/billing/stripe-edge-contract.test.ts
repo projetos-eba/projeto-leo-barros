@@ -43,6 +43,19 @@ describe("stripe edge contract", () => {
     expect(bootstrap).not.toContain("products.create");
     expect(bootstrap).not.toContain("prices.create");
     expect(bootstrap).toContain("getValidatedBillingCatalog");
+    expect(bootstrap).toContain('from("billing_plans").upsert');
+    expect(bootstrap).toContain('from("billing_plan_addons")');
+    expect(bootstrap).toContain('slug: "complete-monthly"');
+    expect(bootstrap).toContain('slug: "complete-annual"');
+    expect(bootstrap).toContain('slug: "active-client-monthly"');
+  });
+
+  it("permite que planos mensal e anual compartilhem o mesmo Product Stripe", () => {
+    const migration = read("supabase/migrations/20260713172000_billing_plans_allow_shared_stripe_product.sql");
+
+    expect(migration).toContain("drop index if exists public.billing_plans_stripe_product_key");
+    expect(migration).toContain("billing_plans_stripe_product_idx");
+    expect(migration).not.toContain("create unique index");
   });
 
   it("aceita Stripe live coerente com a chave e rejeita mistura de modos", () => {

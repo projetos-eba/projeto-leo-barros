@@ -1,15 +1,19 @@
 import {
   ADDON_LOOKUP_KEY,
+  ACTIVE_CLIENT_UNIT_CENTS,
   forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
   getValidatedBillingCatalog,
   jsonResponse,
+  OFFICIAL_STRIPE_PRICES,
+  OFFICIAL_STRIPE_PRODUCTS,
   optionsResponse,
   originIsAllowed,
   PLAN_LOOKUP_KEYS,
   requireAdmin,
   stripeNotConfiguredResponse,
+  TRIAL_DAYS,
 } from "../_shared/billing/stripe.ts";
 
 Deno.serve(async (request) => {
@@ -33,20 +37,61 @@ Deno.serve(async (request) => {
       reconcileProductNames: true,
     });
 
-    await supabase.from("billing_plans").update({
-      stripe_price_id: catalog.planPrices["complete-monthly"].id,
-      stripe_product_id: catalog.products.complete.id,
-    }).eq("slug", "complete-monthly");
+    const { error: plansError } = await supabase.from("billing_plans").upsert([
+      {
+        billing_interval: "monthly",
+        currency: OFFICIAL_STRIPE_PRICES["complete-monthly"].currency,
+        is_active: true,
+        lookup_key: PLAN_LOOKUP_KEYS["complete-monthly"],
+        name: OFFICIAL_STRIPE_PRODUCTS.complete.name,
+        price_cents: OFFICIAL_STRIPE_PRICES["complete-monthly"].unitAmount,
+        public_metadata: { commercial: true },
+        slug: "complete-monthly",
+        sort_order: 10,
+        stripe_price_id: catalog.planPrices["complete-monthly"].id,
+        stripe_product_id: catalog.products.complete.id,
+        trial_days: TRIAL_DAYS,
+      },
+      {
+        billing_interval: "yearly",
+        currency: OFFICIAL_STRIPE_PRICES["complete-annual"].currency,
+        is_active: true,
+        lookup_key: PLAN_LOOKUP_KEYS["complete-annual"],
+        name: OFFICIAL_STRIPE_PRODUCTS.complete.name,
+        price_cents: OFFICIAL_STRIPE_PRICES["complete-annual"].unitAmount,
+        public_metadata: {
+          annual_charge_cents: OFFICIAL_STRIPE_PRICES["complete-annual"]
+            .unitAmount,
+          commercial: true,
+          monthly_equivalent_cents: 9990,
+        },
+        slug: "complete-annual",
+        sort_order: 20,
+        stripe_price_id: catalog.planPrices["complete-annual"].id,
+        stripe_product_id: catalog.products.complete.id,
+        trial_days: TRIAL_DAYS,
+      },
+    ], { onConflict: "slug" });
 
-    await supabase.from("billing_plans").update({
-      stripe_price_id: catalog.planPrices["complete-annual"].id,
-      stripe_product_id: catalog.products.complete.id,
-    }).eq("slug", "complete-annual");
+    if (plansError) throw plansError;
 
-    await supabase.from("billing_plan_addons").update({
-      stripe_price_id: catalog.addonPrice.id,
-      stripe_product_id: catalog.products.activeClientAddon.id,
-    }).eq("slug", "active-client-monthly");
+    const { error: addonError } = await supabase.from("billing_plan_addons")
+      .upsert({
+        billing_interval: "monthly",
+        currency: OFFICIAL_STRIPE_PRICES["active-client-monthly"].currency,
+        is_active: true,
+        lookup_key: ADDON_LOOKUP_KEY,
+        name: OFFICIAL_STRIPE_PRODUCTS.activeClientAddon.name,
+        price_cents: ACTIVE_CLIENT_UNIT_CENTS,
+        slug: "active-client-monthly",
+        stripe_interval: OFFICIAL_STRIPE_PRICES["active-client-monthly"]
+          .interval,
+        stripe_price_id: catalog.addonPrice.id,
+        stripe_product_id: catalog.products.activeClientAddon.id,
+        usage_type: OFFICIAL_STRIPE_PRICES["active-client-monthly"].usageType,
+      }, { onConflict: "slug" });
+
+    if (addonError) throw addonError;
 
     return jsonResponse(200, {
       catalog: {
