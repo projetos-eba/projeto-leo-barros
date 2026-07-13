@@ -30,6 +30,18 @@ describe("stripe edge contract", () => {
     expect(bootstrap).toContain("getValidatedBillingCatalog");
   });
 
+  it("aceita Stripe live coerente com a chave e rejeita mistura de modos", () => {
+    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+    const webhook = read("supabase/functions/stripe-webhook/index.ts");
+
+    expect(shared).toContain('return "live"');
+    expect(shared).toContain('return "test"');
+    expect(shared).toContain("STRIPE_MODE_MISMATCH");
+    expect(shared).not.toContain("LIVE_MODE_OBJECT");
+    expect(webhook).toContain("assertStripeRuntimeMode(event.livemode, event.id)");
+    expect(webhook).not.toContain("LIVE_MODE_OBJECT");
+  });
+
   it("mantem atualizacao de quantidade sem proporcionalidade", () => {
     const sync = read("supabase/functions/billing-sync-active-clients/index.ts");
     const subscription = read("supabase/functions/billing-create-subscription/index.ts");
