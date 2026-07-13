@@ -23,10 +23,10 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 
 1. Parceiro seleciona plano em `/planos`.
 2. `/parceiros/checkout` recalcula Clientes ativos no banco.
-3. Edge Function `billing-create-setup-intent` cria ou reutiliza Customer e cria SetupIntent.
+3. Edge Function `billing-create-setup-intent` cria ou reutiliza Customer e cria um SetupIntent novo para a tentativa atual de checkout. A idempotencia fica restrita a `checkout_attempt_id`, nunca a `partner_id + plan_slug`.
 4. Antes do cartao, Edge Function `billing-preview-subscription` valida Promotion Code, recalcula Clientes ativos e usa `stripe.invoices.createPreview` para retornar subtotal, desconto e total seguro para exibicao.
 5. Payment Element confirma o SetupIntent no navegador.
-6. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code. O navegador envia somente o codigo digitavel (`promotionCode`); Coupon ID, Promotion Code ID, percentual, valor e desconto calculado sao rejeitados.
+6. Edge Function `billing-create-subscription` valida SetupIntent, ownership, trial e Promotion Code. Se a assinatura falhar depois do SetupIntent confirmado, o frontend deve retentar apenas esta Edge Function com o mesmo `setupIntentId`, sem reconfirmar o Payment Element. O navegador envia somente o codigo digitavel (`promotionCode`); Coupon ID, Promotion Code ID, percentual, valor e desconto calculado sao rejeitados.
 7. Assinatura e criada server-side via Subscriptions API com `billing_mode[type]=flexible`, API `2026-06-24.dahlia`.
 8. Webhook `stripe-webhook` reconcilia status, invoice, snapshots e o read model `partner_subscription_financial_summaries`.
 9. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
@@ -38,6 +38,8 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 - A ausencia do menu nao altera seguranca: as rotas seguem autenticadas e restritas a Parceiro ativo administrativamente.
 - Payment Element usa Stripe Appearance em tema escuro para integrar inputs, foco, bordas e mensagens ao visual do Projeto Leo Barros.
 - O checkout apresenta a forma de pagamento como opcao selecionavel antes dos campos; a opcao Cartao de credito ou debito abre o Payment Element. A selecao visual nao fixa `payment_method_types`; a elegibilidade real continua vindo dos metodos dinamicos da Stripe.
+- Cada montagem do Payment Element gera uma tentativa propria de checkout. Reutilizar SetupIntent por Parceiro e plano e proibido, pois uma segunda confirmacao de SetupIntent ja concluido falha no Stripe.
+- A tela deve bloquear submissao concorrente e, apos SetupIntent confirmado, deve retentar somente a criacao da assinatura em caso de erro transiente.
 - Codigo promocional fica no card de resumo/subtotal do checkout e continua sendo validado por acao explicita antes da criacao da assinatura.
 - Mensagens de confianca no checkout devem ser comerciais e claras: Pagamento seguro, Processado pela Stripe e Dados protegidos.
 - A tela de assinatura usa `src/lib/billing/presentation.ts` para status pt-BR, datas em formato `dd/MM/yyyy`, pagamentos e periodo de teste. Valores de desconto e total sincronizado vêm de `partner_subscription_financial_summaries` quando disponiveis. Enums tecnicos permanecem apenas no banco, Stripe e logs seguros.

@@ -103,6 +103,8 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - `/parceiros/checkout` com Payment Element real.
 - Preview de cupom antes do cartao: aplicar, remover e reaplicar Promotion Code sem SetupIntent confirmado.
 - SetupIntent confirmado.
+- Repetir o clique apos uma falha simulada de criacao da assinatura: o frontend deve retentar somente `billing-create-subscription` com o `setupIntentId` ja confirmado e nao deve chamar `confirmSetup` novamente.
+- Reabrir o checkout apos um SetupIntent concluido sem assinatura local: a nova montagem deve solicitar outro SetupIntent, nunca reutilizar a chave fixa de Parceiro e plano.
 - Assinatura mensal e anual com `billing_mode=flexible`.
 - Trial de 7 dias uma vez por Parceiro.
 - Cupom valido e invalido.

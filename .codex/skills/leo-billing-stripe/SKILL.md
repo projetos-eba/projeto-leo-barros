@@ -43,6 +43,8 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Quantidade calculada no backend.
 - Sync de quantidade deve coalescer jobs por Parceiro antes de chamar Stripe para evitar atualizacoes e snapshots duplicados.
 - Payment Element + SetupIntent.
+- SetupIntent e tentativa de checkout: idempotencia deve ser unica por `checkout_attempt_id`; nunca por `partner_id + plan_slug`.
+- Apos SetupIntent confirmado, retries de falha transiente devem chamar somente `billing-create-subscription` com o mesmo `setupIntentId`; nao reconfirmar o Payment Element.
 - Assinatura criada pela Subscriptions API.
 - Mixed intervals exigem `billing_mode=flexible`.
 - Webhook reconcilia estado local.
@@ -110,6 +112,8 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Payment Element deve usar Stripe Appearance em `src/lib/billing/stripe-appearance.ts`, tema escuro, foco azul e inputs integrados ao card.
 - Checkout deve apresentar metodos de pagamento como opcoes selecionaveis; Cartao de credito ou debito abre o Payment Element dentro do card, sem botao generico para iniciar metodo de pagamento.
 - A opcao visual de cartao nao autoriza fixar `payment_method_types`; SetupIntent continua omitindo esse campo para preservar metodos dinamicos Stripe.
+- Cada montagem do checkout deve gerar `checkoutAttemptId` proprio para criar SetupIntent. Reutilizar SetupIntent por Parceiro e plano causa erro Stripe ao confirmar objeto ja concluido.
+- Botao de confirmacao do checkout deve ter trava sincronica contra clique concorrente antes de chamar `stripe.confirmSetup`.
 - Checkout deve mostrar Pagamento seguro, Processado pela Stripe e Dados protegidos, sem mensagens tecnicas como SetupIntent, backend, Edge Function, webhook, read model, quantidade recalculada, revalidacao interna ou estado reconciliado.
 - Codigo promocional deve ficar no card de resumo/subtotal e ser validado por acao explicita antes do cartao via `billing-preview-subscription`, usando preview oficial de invoice/subscription na Stripe. O resumo deve atualizar subtotal, desconto e primeira cobranca apos o periodo de teste sem exigir SetupIntent ou PaymentMethod.
 - Zero Clientes ativos exibe adicional `R$ 0,00`; no checkout inicial, a Edge Function nao envia item adicional para Stripe quando a quantidade for `0`.
