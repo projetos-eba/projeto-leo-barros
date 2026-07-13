@@ -73,6 +73,10 @@ Use os prefixos oficiais `/cliente`, `/parceiros` e `/admin`.
   a UI deve autenticar via `loginWithPassword` antes de redirecionar, para criar
   cookies Supabase SSR. Nunca persistir senha em URL, localStorage,
   sessionStorage ou log.
+- Nunca redirecionar para `/planos`, `/cliente/inicio` ou area autenticada como
+  resultado de auto-login falho. Se a confirmacao foi detectada mas o login por
+  senha falhou, manter a tela pendente com mensagem segura e orientar novo
+  login/reset.
 - Quando o fluxo comeca em `/planos`, preservar `next=/parceiros/checkout?...`
   pelo login e pelo cadastro publico de Parceiro.
 - O botao de reenvio deve ter cooldown de 60s no client, e
@@ -97,6 +101,14 @@ Cadastro publico chama `signup-partner`, que cria Auth user,
 deve carregar service role para cadastro publico. Depois envia confirmacao ou
 segue a politica de aprovacao/confirmacao automatica. Falhas parciais devem
 tentar rollback dos registros criados.
+
+Senha nao e campo normalizavel. Nunca aplicar `trim()`, lowercase, mascara,
+transformacao, URL/storage ou qualquer mutacao em senha/confirmacao antes de
+gravar no Supabase Auth, atualizar Auth ou chamar `loginWithPassword`.
+
+Parceiro sem assinatura nao e falha de autenticacao. Apos login valido, sem
+plano ativo deve retornar sucesso e destino `/planos`; nunca mostrar erro de
+e-mail/senha por ausencia de assinatura.
 
 ## Admin
 
