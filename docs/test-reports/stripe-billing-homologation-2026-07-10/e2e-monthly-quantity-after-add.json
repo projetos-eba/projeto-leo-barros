@@ -1,0 +1,9 @@
+{
+  "phase": "after_add",
+  "addonQuantity": 12,
+  "invoiceCount": 2,
+  "invoiceIds": [
+    "in_1TrkbKPELBIpM2MnszWiEQHu",
+    "in_1TrkUwPELBIpM2MnUQ1GjhHJ"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "finalUrl": "http://localhost:3011/parceiros/checkout/sucesso",
+  "consoleErrors": [],
+  "failedRequests": [
+    "GET https://da62d3954bf5.w.hcaptcha.com/logo.png net::ERR_ABORTED"
+  ],
+  "runId": "stripe-e2e-1783713178691",
+  "partnerEmail": "stripe-e2e-1783713178691@example.invalid"
+}

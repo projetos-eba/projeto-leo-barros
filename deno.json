@@ -1,0 +1,15 @@
+{
+  "fmt": {
+    "include": ["supabase/functions/**/*.ts"],
+    "lineWidth": 80,
+    "semiColons": true,
+    "singleQuote": false,
+    "useTabs": false
+  },
+  "lint": {
+    "include": ["supabase/functions/**/*.ts"],
+    "rules": {
+      "exclude": ["no-import-prefix"]
+    }
+  }
+}

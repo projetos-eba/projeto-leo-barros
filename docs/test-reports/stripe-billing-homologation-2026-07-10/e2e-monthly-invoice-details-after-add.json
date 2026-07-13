@@ -1,0 +1,43 @@
+[
+  {
+    "id": "in_1TrkbKPELBIpM2MnszWiEQHu",
+    "status": "paid",
+    "billing_reason": "subscription_update",
+    "amount_due": 0,
+    "amount_paid": 0,
+    "total": 0,
+    "subtotal": 0,
+    "livemode": false,
+    "lineCount": 1,
+    "lines": [
+      {
+        "amount": 0,
+        "quantity": 12,
+        "description": "Free trial for 12 × Cliente ativo adicional"
+      }
+    ]
+  },
+  {
+    "id": "in_1TrkUwPELBIpM2MnUQ1GjhHJ",
+    "status": "paid",
+    "billing_reason": "subscription_create",
+    "amount_due": 0,
+    "amount_paid": 0,
+    "total": 0,
+    "subtotal": 0,
+    "livemode": false,
+    "lineCount": 2,
+    "lines": [
+      {
+        "amount": 0,
+        "quantity": 1,
+        "description": "Free trial for 1 × Plano Completo — Nutrição + Treinamento"
+      },
+      {
+        "amount": 0,
+        "quantity": 10,
+        "description": "Free trial for 10 × Cliente ativo adicional"
+      }
+    ]
+  }
+]

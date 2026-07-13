@@ -1,0 +1,1828 @@
+{
+  "loginResults": {
+    "admin": {
+      "final": "/admin/dashboard",
+      "body": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair ADMIN Super Admin — Visão Geral Acompanhe assinaturas, clientes, suporte e documentos com dados reais do banco local. 30 de jun - 31 de ju"
+    },
+    "partner": {
+      "final": "/parceiros/dashboard",
+      "body": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Antonio Ferrari Acesso Local Parceiro · ativo Olá, Antonio Ferrari 👋 30 de jun - 31 de jul Ver agenda completa Adicionar cliente Clientes ativos 5 0% vs. mês anter"
+    },
+    "client": {
+      "final": "/cliente/inicio",
+      "body": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Home Minha Evolução Configurações Ana Ribeiro A Sair Olá, Ana Bem-vindo ao seu painel central. Escolha por onde deseja iniciar hoje e acompanhe sua evolução entre dieta, treino e saúde. PLANO VENCE EM Plano ativo 11 JUL 2026 ATIVO"
+    }
+  },
+  "results": [
+    {
+      "area": "Público",
+      "role": "visitor",
+      "path": "/",
+      "name": "Home pública",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Shell público preservado",
+      "textSample": "FASE 3 Shell público preservado A fundação da Fase 2 permanece disponível enquanto os shells globais são preparados. Nenhuma tela de negócio foi migrada. App Router ativo TanStack Query e Tooltip conectados Toasters shadcn e Sonner disponíveis Tailwind, tokens e classes customiza",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 385,
+        "buttons": 3,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-home-p-blica.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Público",
+      "role": "visitor",
+      "path": "/",
+      "name": "Home pública",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Shell público preservado",
+      "textSample": "FASE 3 Shell público preservado A fundação da Fase 2 permanece disponível enquanto os shells globais são preparados. Nenhuma tela de negócio foi migrada. App Router ativo TanStack Query e Tooltip conectados Toasters shadcn e Sonner disponíveis Tailwind, tokens e classes customiza",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 385,
+        "buttons": 3,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-home-p-blica.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Público",
+      "role": "visitor",
+      "path": "/login",
+      "name": "Login",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-login.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Público",
+      "role": "visitor",
+      "path": "/login",
+      "name": "Login",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-login.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/dashboard",
+      "name": "Dashboard admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/dashboard",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Super Admin — Visão Geral",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair ADMIN Super Admin — Visão Geral Acompanhe assinaturas, clientes, suporte e documentos com dados reais do banco local. 30 de jun - 31 de ju",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 3070,
+        "buttons": 8,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-dashboard-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/dashboard",
+      "name": "Dashboard admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/dashboard",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Super Admin — Visão Geral",
+      "textSample": "ADMIN Super Admin — Visão Geral Acompanhe assinaturas, clientes, suporte e documentos com dados reais do banco local. 30 de jun - 31 de jul Parceiros ativos 5 +400% vs. mês anterior Clientes ativos 13 +160% vs. mês anterior Receita recorrente mensal (MRR) R$ 1.046 +100% vs. mês a",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 2881,
+        "buttons": 8,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-dashboard-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/profissionais",
+      "name": "Profissionais admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/profissionais",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Parceiros & Profissionais",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair Parceiros & Profissionais Gerencie toda a rede de profissionais da plataforma. Exportar Novo parceiro Profissionais ativos 5 +400% vs. mês",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 3401,
+        "buttons": 32,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-profissionais-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/profissionais",
+      "name": "Profissionais admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/profissionais",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Parceiros & Profissionais",
+      "textSample": "Parceiros & Profissionais Gerencie toda a rede de profissionais da plataforma. Exportar Novo parceiro Profissionais ativos 5 +400% vs. mês anterior Assinaturas ativas 5 +400% vs. mês anterior Receita média por profissional MRR ativo / parceiros ativos R$ 209,20 +100% vs. mês ante",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 3255,
+        "buttons": 32,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-profissionais-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/clientes",
+      "name": "Clientes admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/clientes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Clientes",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair Clientes Acompanhe clientes vinculados aos profissionais com uma visão operacional simples. Exportar Clientes ativos Clientes distintos co",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1477,
+        "bodyLength": 4422,
+        "buttons": 53,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-clientes-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/clientes",
+      "name": "Clientes admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/clientes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Clientes",
+      "textSample": "Clientes Acompanhe clientes vinculados aos profissionais com uma visão operacional simples. Exportar Clientes ativos Clientes distintos com vínculo ativo em profissionais ativos. Clientes distintos com vínculo ativo em profissionais ativos. 13 0% vs. mês anterior Novos clientes (",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 4276,
+        "buttons": 53,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-clientes-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/financeiro",
+      "name": "Financeiro admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/financeiro",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Financeiro & Planos",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair ADMIN Financeiro & Planos Monitore faturamento, assinaturas, inadimplência e performance comercial com dados reais do banco local. 30 de j",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 3541,
+        "buttons": 9,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-financeiro-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/financeiro",
+      "name": "Financeiro admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/financeiro",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Financeiro & Planos",
+      "textSample": "ADMIN Financeiro & Planos Monitore faturamento, assinaturas, inadimplência e performance comercial com dados reais do banco local. 30 de jun - 31 de jul Exportar relatório Criar plano MRR Receita recorrente mensal R$ 1.046 +100% vs. mês anterior ARR Receita recorrente anual R$ 12",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 3352,
+        "buttons": 9,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-financeiro-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/suporte",
+      "name": "Suporte admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/suporte",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Suporte",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair ADMIN Suporte Acompanhe tickets e comunique-se com profissionais que precisam de ajuda. 01 de jul - 31 de jul Novo ticket interno Responde",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1541,
+        "buttons": 13,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-suporte-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/suporte",
+      "name": "Suporte admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/suporte",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Suporte",
+      "textSample": "ADMIN Suporte Acompanhe tickets e comunique-se com profissionais que precisam de ajuda. 01 de jul - 31 de jul Novo ticket interno Responder em massa Tickets abertos Tickets em aberto ou em atendimento 3 +100% vs. mês anterior Em SLA Tickets ativos dentro do prazo de SLA 100% 0 p.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1394,
+        "buttons": 13,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-suporte-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/configuracoes",
+      "name": "Configurações admin",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/admin/configuracoes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Configurações",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Parceiros/Profissionais Clientes Financeiro & Planos Suporte Configurações Sair ADMIN Configurações Ajuste regras, acessos e integrações da plataforma com persistência no banco local. Atualizado agora Geral Usuários & ",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1202,
+        "buttons": 11,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-configura-es-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Admin",
+      "role": "admin",
+      "path": "/admin/configuracoes",
+      "name": "Configurações admin",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/admin/configuracoes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Configurações",
+      "textSample": "ADMIN Configurações Ajuste regras, acessos e integrações da plataforma com persistência no banco local. Atualizado agora Geral Usuários & Permissões Integrações Segurança GERAL Configurações gerais da plataforma Controla dados públicos da plataforma e o aviso usado quando o modo ",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1055,
+        "buttons": 11,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-configura-es-admin.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/dashboard",
+      "name": "Dashboard parceiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/parceiros/dashboard",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Olá, Antonio Ferrari",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Antonio Ferrari Acesso Local Parceiro · ativo Olá, Antonio Ferrari 👋 30 de jun - 31 de jul Ver agenda completa Adicionar cliente Clientes ativos 5 0% vs. mês anter",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1859,
+        "buttons": 11,
+        "links": 12
+      },
+      "screenshot": "screenshots/desktop-dashboard-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/dashboard",
+      "name": "Dashboard parceiro",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/parceiros/dashboard",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Olá, Antonio Ferrari",
+      "textSample": "Olá, Antonio Ferrari 👋 30 de jun - 31 de jul Ver agenda completa Adicionar cliente Clientes ativos 5 0% vs. mês anterior Próximos da Atualização 4 2 pendentes Clientes Inativos 1 Próximos do vencimento 2 Receita do Mês R$ 1.700 0% vs. mês anterior Alertas clínicos 5 Requerem ate",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1711,
+        "buttons": 11,
+        "links": 12
+      },
+      "screenshot": "screenshots/mobile-dashboard-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/agenda",
+      "name": "Agenda parceiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/parceiros/agenda",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Agenda de Parceiros",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Agenda de Parceiros Gerencie compromissos e otimize a colaboração com seus clientes. Antonio Ferrari Profissional A Mês Semana Dia Filtros Todos Online Presencial P",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1461,
+        "buttons": 68,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-agenda-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/agenda",
+      "name": "Agenda parceiro",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/parceiros/agenda",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Agenda de Parceiros",
+      "textSample": "Agenda de Parceiros Gerencie compromissos e otimize a colaboração com seus clientes. A Mês Semana Dia Filtros Julho 2026 Novo compromisso Julho 2026 DOM SEG TER QUA QUI SEX SÁB 28 29 30 1 2 3 Consulta presencial Avaliação de evolução 1 bloqueio +2 compromissos 4 1 bloqueio 5 Reun",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1271,
+        "buttons": 68,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-agenda-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes",
+      "name": "Clientes parceiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/parceiros/clientes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Clientes",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Clientes Gerencie seus clientes. Total: 5 ativos Exportar Novo Cliente Buscar clientes Filtros Avançados Status: Ativos CLIENTE OBJETIVO IDADE ÚLTIMA ATUALIZAÇÃO PL",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1188,
+        "buttons": 28,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-clientes-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes",
+      "name": "Clientes parceiro",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/parceiros/clientes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Clientes",
+      "textSample": "Clientes Gerencie seus clientes. Total: 5 ativos Exportar Novo Cliente Buscar clientes Filtros Avançados Status: Ativos CLIENTE RENOVAÇÃO AÇÕES A Ana Ribeiro cliente.seed.01@example.invalid Hipertrofia · 29 anos · Nutri Fit 8 dias Ver Cliente Copiar e-mail Revisar renovação B Bru",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1015,
+        "buttons": 28,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-clientes-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301",
+      "name": "Cliente parceiro - visão geral",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-vis-o-geral.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301",
+      "name": "Cliente parceiro - visão geral",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-vis-o-geral.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas",
+      "name": "Cliente parceiro - dietas",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-dietas.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas",
+      "name": "Cliente parceiro - dietas",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-dietas.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=dietas"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes",
+      "name": "Cliente parceiro - avaliações",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-avalia-es.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes",
+      "name": "Cliente parceiro - avaliações",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-avalia-es.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=avaliacoes"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos",
+      "name": "Cliente parceiro - treinos",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-treinos.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos",
+      "name": "Cliente parceiro - treinos",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-treinos.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio",
+      "name": "Cliente parceiro - cardio",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-cardio.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio",
+      "name": "Cliente parceiro - cardio",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-cardio.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames",
+      "name": "Cliente parceiro - exames",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-exames.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames",
+      "name": "Cliente parceiro - exames",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-exames.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos",
+      "name": "Cliente parceiro - fotos",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-cliente-parceiro-fotos.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos",
+      "name": "Cliente parceiro - fotos",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-cliente-parceiro-fotos.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=fotos"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/cadastros",
+      "name": "Cadastros parceiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/parceiros/cadastros",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Base de Protocolos",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Base de Protocolos Monte sua base de alimentos, exercícios e blocos reutilizáveis para criar planos com mais rapidez. Novo alimento Novo exercício Importar base 12 ",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 2336,
+        "buttons": 56,
+        "links": 6
+      },
+      "screenshot": "screenshots/desktop-cadastros-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/cadastros",
+      "name": "Cadastros parceiro",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/parceiros/cadastros",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Base de Protocolos",
+      "textSample": "Base de Protocolos Monte sua base de alimentos, exercícios e blocos reutilizáveis para criar planos com mais rapidez. Novo alimento Novo exercício Importar base 12 alimentos ativos 6 exercícios ativos 8 itens importados Base de Alimentos · 12 Biblioteca de Exercícios · 6 Categori",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 2216,
+        "buttons": 56,
+        "links": 6
+      },
+      "screenshot": "screenshots/mobile-cadastros-parceiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/materiais",
+      "name": "Materiais parceiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/parceiros/materiais",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Materiais",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Visão Geral Clientes Agenda Materiais Cadastro Configurações Sair Materiais Organize conteúdos de apoio e compartilhe com seus Clientes. Novo material 2 Materiais ativos 1 Compartilhamentos ativos 0 Formulários 1 Favoritos Todos N",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 805,
+        "buttons": 17,
+        "links": 10
+      },
+      "screenshot": "screenshots/desktop-materiais-parceiro.png",
+      "issues": [
+        "2 resposta(s) 4xx/5xx",
+        "Erro de console/runtime"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000102/arquivo?cover=1",
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000101/arquivo?cover=1"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/materiais",
+      "name": "Materiais parceiro",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/parceiros/materiais",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Materiais",
+      "textSample": "Materiais Organize conteúdos de apoio e compartilhe com seus Clientes. Novo material 2 Materiais ativos 1 Compartilhamentos ativos 0 Formulários 1 Favoritos Todos Nutrição Treino Médico Educativo Formulários Outros Todos os tipos PDF Imagem Office Vídeo Ativos Arquivados Todos Ma",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 685,
+        "buttons": 17,
+        "links": 10
+      },
+      "screenshot": "screenshots/mobile-materiais-parceiro.png",
+      "issues": [
+        "2 resposta(s) 4xx/5xx",
+        "Erro de console/runtime"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000102/arquivo?cover=1",
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000101/arquivo?cover=1"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/materiais/c1000000-0000-4000-8000-000000000101",
+      "name": "Detalhe material parceiro",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/parceiros/materiais/c1000000-0000-4000-8000-000000000101",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-detalhe-material-parceiro.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000101"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Parceiros",
+      "role": "partner",
+      "path": "/parceiros/materiais/c1000000-0000-4000-8000-000000000101",
+      "name": "Detalhe material parceiro",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/parceiros/materiais/c1000000-0000-4000-8000-000000000101",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-detalhe-material-parceiro.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/parceiros/materiais/c1000000-0000-4000-8000-000000000101"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/inicio",
+      "name": "Início cliente",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/cliente/inicio",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Olá, Ana",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Home Minha Evolução Configurações Ana Ribeiro Sair Olá, Ana Bem-vindo ao seu painel central. Escolha por onde deseja iniciar hoje e acompanhe sua evolução entre dieta, treino e saúde. PLANO VENCE EM Plano ativo 11 JUL 2026 ATIVO D",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 999,
+        "buttons": 4,
+        "links": 5
+      },
+      "screenshot": "screenshots/desktop-in-cio-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/inicio",
+      "name": "Início cliente",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/cliente/inicio",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Olá, Ana",
+      "textSample": "lß Olá, Ana Bem-vindo ao seu painel central. Escolha por onde deseja iniciar hoje e acompanhe sua evolução entre dieta, treino e saúde. PLANO VENCE EM Plano ativo 11 JUL 2026 ATIVO Dieta ATIVO Treino ATIVO Saúde Leonardo Barros SAÚDE | NUTRIÇÃO | PERFORMANCE © 2026 Plataforma Leo",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 330,
+        "buttons": 4,
+        "links": 5
+      },
+      "screenshot": "screenshots/mobile-in-cio-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/saude",
+      "name": "Saúde cliente",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/cliente/saude",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Saúde",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Home Minha Evolução Configurações Ana Ribeiro Sair Dieta Treino Saúde Painel de Saúde Acompanhe seus indicadores, mantenha a consistência e evolua todos os dias. Hoje • 03 de julho, sexta-feira Seu cuidado de hoje 2 de 5 ações con",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 2482,
+        "buttons": 8,
+        "links": 7
+      },
+      "screenshot": "screenshots/desktop-sa-de-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/saude",
+      "name": "Saúde cliente",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/cliente/saude",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Saúde",
+      "textSample": "lß Dieta Treino Saúde Painel de Saúde Acompanhe seus indicadores, mantenha a consistência e evolua todos os dias. Hoje • 03 de julho, sexta-feira Seu cuidado de hoje 2 de 5 ações concluídas Você está cuidando bem da sua saúde. Tomar Vitamina D Dose única • Concluída Tomar Ômega 3",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 2380,
+        "buttons": 8,
+        "links": 7
+      },
+      "screenshot": "screenshots/mobile-sa-de-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/dieta",
+      "name": "Dieta cliente",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/cliente/dieta",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Dieta",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Home Minha Evolução Configurações Ana Ribeiro Sair Dieta Treino Saúde Painel de Dieta Seu guia diário para resultados reais. 03 de julho, sexta-feira AGORA Sua próxima refeição Jantar • 19:30 É a sua próxima ação de hoje. Peito de",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 2439,
+        "buttons": 24,
+        "links": 5
+      },
+      "screenshot": "screenshots/desktop-dieta-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/dieta",
+      "name": "Dieta cliente",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/cliente/dieta",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Dieta",
+      "textSample": "lß Dieta Treino Saúde Painel de Dieta Seu guia diário para resultados reais. 03 de julho, sexta-feira AGORA Sua próxima refeição Jantar • 19:30 É a sua próxima ação de hoje. Peito de frango grelhado 120g Arroz branco cozido 100g Calorias 295kcal Proteína 33,5g Carbo 28,1g Gordura",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 568,
+        "bodyLength": 2157,
+        "buttons": 24,
+        "links": 5
+      },
+      "screenshot": "screenshots/mobile-dieta-cliente.png",
+      "issues": [
+        "Overflow horizontal mobile (568px > 390px)"
+      ],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/treino",
+      "name": "Treino cliente",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/cliente/treino",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Treino",
+      "textSample": "lß Leonardo Barros SAUDE | NUTRICAO | PERFORMANCE Home Minha Evolução Configurações Ana Ribeiro Sair Dieta Treino Saúde Painel de Treino Acompanhe seu progresso físico, Ana. 03 de julho, sexta-feira TREINO DO DIA Treino A Peito e Tríceps Hipertrofia e consistência. Registre série",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 1672,
+        "buttons": 11,
+        "links": 8
+      },
+      "screenshot": "screenshots/desktop-treino-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/treino",
+      "name": "Treino cliente",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPath": "/cliente/treino",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Painel de Treino",
+      "textSample": "lß Dieta Treino Saúde Painel de Treino Acompanhe seu progresso físico, Ana. 03 de julho, sexta-feira TREINO DO DIA Treino A Peito e Tríceps Hipertrofia e consistência. Registre séries, carga e repetições para manter seu histórico vivo. Duração 60 min Exercícios 3 Séries 9 Volume ",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 1554,
+        "buttons": 11,
+        "links": 8
+      },
+      "screenshot": "screenshots/mobile-treino-cliente.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/treino/executar/e3000000-0000-4000-8000-000000000101",
+      "name": "Execução treino cliente",
+      "viewport": "desktop",
+      "status": 404,
+      "finalPath": "/cliente/treino/executar/e3000000-0000-4000-8000-000000000101",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-execu-o-treino-cliente.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/cliente/treino/executar/e3000000-0000-4000-8000-000000000101"
+      ],
+      "failedRequests": []
+    },
+    {
+      "area": "Cliente",
+      "role": "client",
+      "path": "/cliente/treino/executar/e3000000-0000-4000-8000-000000000101",
+      "name": "Execução treino cliente",
+      "viewport": "mobile",
+      "status": 404,
+      "finalPath": "/cliente/treino/executar/e3000000-0000-4000-8000-000000000101",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "404",
+      "textSample": "404 This page could not be found.",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "bodyLength": 33,
+        "buttons": 0,
+        "links": 0
+      },
+      "screenshot": "screenshots/mobile-execu-o-treino-cliente.png",
+      "issues": [
+        "Status HTTP inicial 404",
+        "1 resposta(s) 4xx/5xx",
+        "Erro de console/runtime",
+        "Conteúdo visível muito curto ou possível página vazia",
+        "Conteúdo indica 404/não encontrado"
+      ],
+      "consoleEntries": [
+        "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "badResponses": [
+        "404 http://localhost:3000/cliente/treino/executar/e3000000-0000-4000-8000-000000000101"
+      ],
+      "failedRequests": []
+    }
+  ],
+  "visitorProtected": [
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/dashboard",
+      "name": "Visitante em /admin/dashboard",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-dashboard.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/profissionais",
+      "name": "Visitante em /admin/profissionais",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-profissionais.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/clientes",
+      "name": "Visitante em /admin/clientes",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-clientes.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/financeiro",
+      "name": "Visitante em /admin/financeiro",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-financeiro.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/suporte",
+      "name": "Visitante em /admin/suporte",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-suporte.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/admin/configuracoes",
+      "name": "Visitante em /admin/configuracoes",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-admin-configuracoes.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/parceiros/dashboard",
+      "name": "Visitante em /parceiros/dashboard",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-parceiros-dashboard.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/parceiros/agenda",
+      "name": "Visitante em /parceiros/agenda",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-parceiros-agenda.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/parceiros/clientes",
+      "name": "Visitante em /parceiros/clientes",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-parceiros-clientes.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/parceiros/cadastros",
+      "name": "Visitante em /parceiros/cadastros",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-parceiros-cadastros.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/parceiros/materiais",
+      "name": "Visitante em /parceiros/materiais",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-parceiros-materiais.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/cliente/inicio",
+      "name": "Visitante em /cliente/inicio",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-cliente-inicio.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/cliente/saude",
+      "name": "Visitante em /cliente/saude",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-cliente-saude.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/cliente/dieta",
+      "name": "Visitante em /cliente/dieta",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-cliente-dieta.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    },
+    {
+      "area": "Auth",
+      "role": "visitor",
+      "path": "/cliente/treino",
+      "name": "Visitante em /cliente/treino",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPath": "/login",
+      "title": "Projeto Leo Barros - Fundação Next.js",
+      "h1": "Leonardo Barros",
+      "textSample": "Leonardo Barros SAÚDE & PERFORMANCE Bem-vindo Acesse sua conta para continuar E-mail Senha Entrar Acesso local por e-mail e senha",
+      "metrics": {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "bodyLength": 134,
+        "buttons": 1,
+        "links": 0
+      },
+      "screenshot": "screenshots/desktop-visitante-em-cliente-treino.png",
+      "issues": [],
+      "consoleEntries": [],
+      "badResponses": [],
+      "failedRequests": []
+    }
+  ]
+}

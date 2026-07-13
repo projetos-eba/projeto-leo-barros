@@ -1,0 +1,7 @@
+interface:
+  display_name: "Leo Parceiros Cadastros"
+  short_description: "Base de protocolos de Parceiros"
+  brand_color: "#188CEF"
+  default_prompt: "Use $leo-parceiros-cadastros para evoluir a tela Cadastro de Parceiros mantendo banco, RLS, seeds e visual alinhados."
+policy:
+  allow_implicit_invocation: true

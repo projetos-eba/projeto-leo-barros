@@ -1,0 +1,4 @@
+interface:
+  display_name: "Leo Admin Dashboard"
+  short_description: "Mantém a visão geral do Super Admin"
+  default_prompt: "Use -admin-dashboard para evoluir ou validar a tela /admin/dashboard do Projeto Leo Barros."

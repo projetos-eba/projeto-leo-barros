@@ -1,0 +1,7 @@
+interface:
+  display_name: "Leo Cliente Visao Geral"
+  short_description: "Pagina individual do Cliente parceiro"
+  default_prompt: "Use $leo-parceiros-cliente-visao-geral to evolve the partner individual Client overview page."
+
+policy:
+  allow_implicit_invocation: true

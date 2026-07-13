@@ -1,0 +1,11 @@
+{
+  "addonQuantity": 9,
+  "invoiceCount": 6,
+  "nonZeroInvoices": 0,
+  "latestInvoice": {
+    "id": "in_1TrkgTPELBIpM2MnIBxdfwVx",
+    "billing_reason": "subscription_update",
+    "total": 0,
+    "lineCount": 1
+  }
+}
