@@ -6,7 +6,11 @@ import {
   getSupabaseAdminEnv,
 } from "../_shared/env.ts";
 import { sendAuthEmail } from "../_shared/email/email-gateway.ts";
-import { passwordResetTemplate } from "../_shared/email/email-templates.ts";
+import {
+  passwordResetSubject,
+  passwordResetTemplate,
+} from "../_shared/email/email-templates.ts";
+import { resolvePlatformEmailBranding } from "../_shared/platform-branding.ts";
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -129,14 +133,18 @@ Deno.serve(async (request) => {
     }
 
     const resetUrl = buildAppUrl("/auth/redefinir-senha", { token });
+    const branding = await resolvePlatformEmailBranding(supabase);
     await sendAuthEmail({
       authUserId: profile.user_id,
       flow: "password_reset",
-      html: passwordResetTemplate({ resetUrl }),
+      html: passwordResetTemplate({
+        platformName: branding.platformName,
+        resetUrl,
+      }),
       profileId: profile.id,
       requestId: crypto.randomUUID(),
       role: expectedRole as AuthRole,
-      subject: "Redefinicao de senha - Leo Barros",
+      subject: passwordResetSubject(branding.platformName),
       supabase,
       to: email,
     });

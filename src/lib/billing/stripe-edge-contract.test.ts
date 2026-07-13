@@ -8,6 +8,10 @@ function read(relativePath: string) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
 }
 
+function compact(source: string) {
+  return source.replace(/\s+/g, " ");
+}
+
 describe("stripe edge contract", () => {
   it("usa a versao Stripe homologada no dominio Next e nas Edge Functions", () => {
     expect(read("src/lib/billing/catalog.ts")).toContain('STRIPE_API_VERSION = "2026-06-24.dahlia"');
@@ -52,7 +56,7 @@ describe("stripe edge contract", () => {
   });
 
   it("mantem fallback local quando BILLING_ALLOWED_ORIGINS esta vazio", () => {
-    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+    const shared = compact(read("supabase/functions/_shared/billing/stripe.ts"));
 
     expect(shared).toContain('Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() || "http://localhost:3000"');
   });
@@ -68,6 +72,7 @@ describe("stripe edge contract", () => {
   it("resolve Promotion Code no backend e rejeita campos de desconto manipulaveis", () => {
     const shared = read("supabase/functions/_shared/billing/stripe.ts");
     const subscription = read("supabase/functions/billing-create-subscription/index.ts");
+    const compactSubscription = compact(subscription);
     const preview = read("supabase/functions/billing-preview-subscription/index.ts");
     const webhook = read("supabase/functions/stripe-webhook/index.ts");
     const checkout = read("src/app/parceiros/checkout/checkout-payment-element.tsx");
@@ -91,9 +96,9 @@ describe("stripe edge contract", () => {
     expect(shared).toContain('"percentOff"');
     expect(shared).toContain('"discountAmount"');
     expect(subscription).toContain("hasForbiddenClientDiscountField(body)");
-    expect(subscription).toContain("normalizePromotionCode(body.promotionCode ?? body.couponCode)");
-    expect(subscription).toContain("resolveActivePromotionCode(stripe, promotionCodeText)");
-    expect(subscription).toContain("discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined");
+    expect(compactSubscription).toContain("normalizePromotionCode( body.promotionCode ?? body.couponCode, )");
+    expect(compactSubscription).toContain("resolveActivePromotionCode( stripe, promotionCodeText, )");
+    expect(compactSubscription).toContain("discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined");
     expect(subscription).toContain("partner_subscription_financial_summaries");
     expect(subscription).toContain("stripe.invoices.createPreview");
     expect(webhook).toContain("syncFinancialSummaryFromStripeSubscription");

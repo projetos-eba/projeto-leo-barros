@@ -1,8 +1,8 @@
 import {
+  forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
   jsonResponse,
-  forbiddenOriginResponse,
   optionsResponse,
   originIsAllowed,
   parsePlanSlug,
@@ -14,7 +14,9 @@ import {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
@@ -29,7 +31,9 @@ Deno.serve(async (request) => {
     const body = await request.json().catch(() => ({}));
     const planSlug = parsePlanSlug(body.planSlug);
     if (!planSlug) {
-      return jsonResponse(400, { error: { code: "INVALID_PLAN", message: "Plano invalido." } }, request);
+      return jsonResponse(400, {
+        error: { code: "INVALID_PLAN", message: "Plano invalido." },
+      }, request);
     }
 
     const { data: existingSubscription } = await supabase
@@ -40,10 +44,18 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (existingSubscription) {
-      return jsonResponse(409, { error: { code: "SUBSCRIPTION_EXISTS", message: "Ja existe uma assinatura comercial para este Parceiro." } }, request);
+      return jsonResponse(409, {
+        error: {
+          code: "SUBSCRIPTION_EXISTS",
+          message: "Ja existe uma assinatura comercial para este Parceiro.",
+        },
+      }, request);
     }
 
-    const customerId = await resolvePartnerStripeCustomer(stripe, partnerAccess);
+    const customerId = await resolvePartnerStripeCustomer(
+      stripe,
+      partnerAccess,
+    );
 
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
@@ -62,7 +74,17 @@ Deno.serve(async (request) => {
       setupIntentId: setupIntent.id,
     }, request);
   } catch (error) {
-    console.error(JSON.stringify({ code: "BILLING_CREATE_SETUP_INTENT_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "SETUP_INTENT_FAILED", message: "Nao foi possivel preparar o checkout." } }, request);
+    console.error(
+      JSON.stringify({
+        code: "BILLING_CREATE_SETUP_INTENT_FAILED",
+        message: error instanceof Error ? error.message : "UNKNOWN",
+      }),
+    );
+    return jsonResponse(500, {
+      error: {
+        code: "SETUP_INTENT_FAILED",
+        message: "Nao foi possivel preparar o checkout.",
+      },
+    }, request);
   }
 });

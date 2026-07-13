@@ -9,9 +9,12 @@ import {
 } from "../_shared/env.ts";
 import { sendAuthEmail } from "../_shared/email/email-gateway.ts";
 import {
+  adminApprovalSubject,
   adminApprovalTemplate,
+  emailConfirmationSubject,
   emailConfirmationTemplate,
 } from "../_shared/email/email-templates.ts";
+import { resolvePlatformEmailBranding } from "../_shared/platform-branding.ts";
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -175,6 +178,7 @@ Deno.serve(async (request) => {
 
     const approvalMode = flags.adminApprovalEnabled;
     const emailAdmin = approvalMode ? getEmailAdmin() : null;
+    const branding = await resolvePlatformEmailBranding(supabase);
 
     await supabase
       .from("email_verification_tokens")
@@ -208,17 +212,22 @@ Deno.serve(async (request) => {
     const verificationUrl = buildAppUrl("/auth/confirmar-email", { token });
     const to = approvalMode ? emailAdmin! : profile.email;
     const subject = approvalMode
-      ? `[Leo Barros] Confirmacao pendente: ${profile.email}`
-      : "Confirme seu e-mail - Leo Barros";
+      ? adminApprovalSubject({
+        accountEmail: profile.email,
+        platformName: branding.platformName,
+      })
+      : emailConfirmationSubject(branding.platformName);
     const role = profile.role as AuthRole;
     const html = approvalMode
       ? adminApprovalTemplate({
         accountEmail: profile.email,
+        platformName: branding.platformName,
         role,
         verificationUrl,
       })
       : emailConfirmationTemplate({
         displayName: profile.display_name,
+        platformName: branding.platformName,
         verificationUrl,
       });
 

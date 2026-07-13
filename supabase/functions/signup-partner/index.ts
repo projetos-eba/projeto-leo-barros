@@ -9,10 +9,13 @@ import {
 } from "../_shared/env.ts";
 import { sendAuthEmail } from "../_shared/email/email-gateway.ts";
 import {
+  adminApprovalSubject,
   adminApprovalTemplate,
+  emailConfirmationSubject,
   emailConfirmationTemplate,
 } from "../_shared/email/email-templates.ts";
 import type { EdgeDatabase } from "../_shared/edge-database.ts";
+import { resolvePlatformEmailBranding } from "../_shared/platform-branding.ts";
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -276,19 +279,25 @@ async function sendVerification({
   }
 
   const approvalMode = flags.adminApprovalEnabled;
+  const branding = await resolvePlatformEmailBranding(supabase);
   const verificationUrl = buildAppUrl("/auth/confirmar-email", { token });
   const to = approvalMode ? getEmailAdmin() : email;
   const subject = approvalMode
-    ? `[Leo Barros] Confirmacao pendente: ${email}`
-    : "Confirme seu e-mail - Leo Barros";
+    ? adminApprovalSubject({
+      accountEmail: email,
+      platformName: branding.platformName,
+    })
+    : emailConfirmationSubject(branding.platformName);
   const html = approvalMode
     ? adminApprovalTemplate({
       accountEmail: email,
+      platformName: branding.platformName,
       role,
       verificationUrl,
     })
     : emailConfirmationTemplate({
       displayName,
+      platformName: branding.platformName,
       verificationUrl,
     });
 

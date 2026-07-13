@@ -66,6 +66,11 @@ type PlatformActivityEventInsert = {
   title: string;
 };
 
+type PlatformSettingRow = {
+  key: string;
+  value: unknown;
+};
+
 export type EdgeDatabase = {
   public: {
     Tables: {
@@ -89,6 +94,7 @@ export type EdgeDatabase = {
         { id: string },
         PlatformActivityEventInsert
       >;
+      platform_settings: EdgeTable<PlatformSettingRow>;
       profiles: EdgeTable<ProfileRow, ProfileInsert, ProfileUpdate>;
     };
     Views: Record<string, never>;

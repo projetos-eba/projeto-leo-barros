@@ -1,10 +1,10 @@
 import {
-  activeClientCount,
   ACTIVE_CLIENT_UNIT_CENTS,
+  activeClientCount,
   ADDON_LOOKUP_KEY,
-  forbiddenOriginResponse,
   buildBillingFinancialSummary,
   describeCoupon,
+  forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
   getValidatedBillingCatalog,
@@ -25,7 +25,9 @@ import {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
@@ -39,7 +41,9 @@ Deno.serve(async (request) => {
 
     const body = await request.json().catch(() => ({}));
     const planSlug = parsePlanSlug(body.planSlug);
-    const setupIntentId = typeof body.setupIntentId === "string" ? body.setupIntentId : "";
+    const setupIntentId = typeof body.setupIntentId === "string"
+      ? body.setupIntentId
+      : "";
     if (hasForbiddenClientDiscountField(body)) {
       return jsonResponse(400, {
         error: {
@@ -49,14 +53,21 @@ Deno.serve(async (request) => {
       }, request);
     }
 
-    const promotionCodeInput = normalizePromotionCode(body.promotionCode ?? body.couponCode);
+    const promotionCodeInput = normalizePromotionCode(
+      body.promotionCode ?? body.couponCode,
+    );
     if ("error" in promotionCodeInput) {
       return jsonResponse(400, { error: promotionCodeInput.error }, request);
     }
     const promotionCodeText = promotionCodeInput.code;
 
     if (!planSlug || !setupIntentId) {
-      return jsonResponse(400, { error: { code: "INVALID_PAYLOAD", message: "Dados de checkout invalidos." } }, request);
+      return jsonResponse(400, {
+        error: {
+          code: "INVALID_PAYLOAD",
+          message: "Dados de checkout invalidos.",
+        },
+      }, request);
     }
 
     const { data: existingSubscription } = await supabase
@@ -67,26 +78,56 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (existingSubscription) {
-      return jsonResponse(409, { error: { code: "SUBSCRIPTION_EXISTS", message: "Ja existe uma assinatura comercial para este Parceiro." } }, request);
+      return jsonResponse(409, {
+        error: {
+          code: "SUBSCRIPTION_EXISTS",
+          message: "Ja existe uma assinatura comercial para este Parceiro.",
+        },
+      }, request);
     }
 
-    const { data: trialAvailable } = await supabase.rpc("billing_partner_trial_available", {
-      target_partner_id: partnerAccess.partner.id,
-    });
+    const { data: trialAvailable } = await supabase.rpc(
+      "billing_partner_trial_available",
+      {
+        target_partner_id: partnerAccess.partner.id,
+      },
+    );
 
     if (trialAvailable === false) {
-      return jsonResponse(409, { error: { code: "TRIAL_ALREADY_USED", message: "Este Parceiro ja utilizou o teste gratuito." } }, request);
+      return jsonResponse(409, {
+        error: {
+          code: "TRIAL_ALREADY_USED",
+          message: "Este Parceiro ja utilizou o teste gratuito.",
+        },
+      }, request);
     }
 
     const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
-    if (setupIntent.status !== "succeeded" || setupIntent.metadata?.partner_id !== partnerAccess.partner.id) {
-      return jsonResponse(400, { error: { code: "INVALID_SETUP_INTENT", message: "Metodo de pagamento nao confirmado." } }, request);
+    if (
+      setupIntent.status !== "succeeded" ||
+      setupIntent.metadata?.partner_id !== partnerAccess.partner.id
+    ) {
+      return jsonResponse(400, {
+        error: {
+          code: "INVALID_SETUP_INTENT",
+          message: "Metodo de pagamento nao confirmado.",
+        },
+      }, request);
     }
 
-    const customerId = typeof setupIntent.customer === "string" ? setupIntent.customer : setupIntent.customer?.id;
-    const paymentMethodId = typeof setupIntent.payment_method === "string" ? setupIntent.payment_method : setupIntent.payment_method?.id;
+    const customerId = typeof setupIntent.customer === "string"
+      ? setupIntent.customer
+      : setupIntent.customer?.id;
+    const paymentMethodId = typeof setupIntent.payment_method === "string"
+      ? setupIntent.payment_method
+      : setupIntent.payment_method?.id;
     if (!customerId || !paymentMethodId) {
-      return jsonResponse(400, { error: { code: "PAYMENT_METHOD_MISSING", message: "Metodo de pagamento ausente." } }, request);
+      return jsonResponse(400, {
+        error: {
+          code: "PAYMENT_METHOD_MISSING",
+          message: "Metodo de pagamento ausente.",
+        },
+      }, request);
     }
 
     const catalog = await getValidatedBillingCatalog(stripe);
@@ -102,13 +143,26 @@ Deno.serve(async (request) => {
       promotionCodeId: string;
     } | null = null;
     if (promotionCodeText) {
-      const resolvedPromotionCode = await resolveActivePromotionCode(stripe, promotionCodeText);
+      const resolvedPromotionCode = await resolveActivePromotionCode(
+        stripe,
+        promotionCodeText,
+      );
       if (!resolvedPromotionCode) {
-        return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Codigo promocional invalido ou indisponivel." } }, request);
+        return jsonResponse(400, {
+          error: {
+            code: "INVALID_PROMOTION_CODE",
+            message: "Codigo promocional invalido ou indisponivel.",
+          },
+        }, request);
       }
       const coupon = resolvedPromotionCode.promotion.coupon;
       if (!coupon || typeof coupon === "string") {
-        return jsonResponse(400, { error: { code: "INVALID_PROMOTION_CODE", message: "Codigo promocional invalido ou indisponivel." } }, request);
+        return jsonResponse(400, {
+          error: {
+            code: "INVALID_PROMOTION_CODE",
+            message: "Codigo promocional invalido ou indisponivel.",
+          },
+        }, request);
       }
       promotionCodeId = resolvedPromotionCode.id;
       promotionPresentation = {
@@ -120,7 +174,10 @@ Deno.serve(async (request) => {
       };
     }
 
-    const quantity = await activeClientCount(supabase, partnerAccess.partner.id);
+    const quantity = await activeClientCount(
+      supabase,
+      partnerAccess.partner.id,
+    );
     const items = [
       { price: basePrice.id, quantity: 1 },
     ];
@@ -130,7 +187,9 @@ Deno.serve(async (request) => {
 
     const previewInvoice = await stripe.invoices.createPreview({
       customer: customerId,
-      discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined,
+      discounts: promotionCodeId
+        ? [{ promotion_code: promotionCodeId }]
+        : undefined,
       subscription_details: {
         billing_mode: { type: "flexible" },
         items,
@@ -143,7 +202,9 @@ Deno.serve(async (request) => {
       collection_method: "charge_automatically",
       customer: customerId,
       default_payment_method: paymentMethodId,
-      discounts: promotionCodeId ? [{ promotion_code: promotionCodeId }] : undefined,
+      discounts: promotionCodeId
+        ? [{ promotion_code: promotionCodeId }]
+        : undefined,
       items,
       metadata: {
         partner_id: partnerAccess.partner.id,
@@ -154,7 +215,8 @@ Deno.serve(async (request) => {
       trial_period_days: TRIAL_DAYS,
       expand: ["items.data.price"],
     }, {
-      idempotencyKey: `subscription:${partnerAccess.partner.id}:${setupIntentId}`,
+      idempotencyKey:
+        `subscription:${partnerAccess.partner.id}:${setupIntentId}`,
     });
 
     const localPlan = await supabase
@@ -164,7 +226,12 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (!localPlan.data?.id) {
-      return jsonResponse(409, { error: { code: "LOCAL_CATALOG_NOT_READY", message: "Catalogo local ainda nao preparado." } }, request);
+      return jsonResponse(409, {
+        error: {
+          code: "LOCAL_CATALOG_NOT_READY",
+          message: "Catalogo local ainda nao preparado.",
+        },
+      }, request);
     }
 
     const localAddon = await supabase
@@ -174,7 +241,12 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (!localAddon.data?.id) {
-      return jsonResponse(409, { error: { code: "LOCAL_ADDON_NOT_READY", message: "Adicional local ainda nao preparado." } }, request);
+      return jsonResponse(409, {
+        error: {
+          code: "LOCAL_ADDON_NOT_READY",
+          message: "Adicional local ainda nao preparado.",
+        },
+      }, request);
     }
 
     const now = new Date();
@@ -201,8 +273,12 @@ Deno.serve(async (request) => {
 
     if (insertError) throw insertError;
 
-    const baseItem = subscription.items.data.find((item) => item.price.id === basePrice.id);
-    const addonItem = subscription.items.data.find((item) => item.price.id === addonPrice.id);
+    const baseItem = subscription.items.data.find((item) =>
+      item.price.id === basePrice.id
+    );
+    const addonItem = subscription.items.data.find((item) =>
+      item.price.id === addonPrice.id
+    );
 
     const subscriptionItems: Record<string, unknown>[] = [
       {
@@ -236,7 +312,10 @@ Deno.serve(async (request) => {
       });
     }
 
-    await supabase.from("partner_subscription_items").upsert(subscriptionItems, { onConflict: "subscription_id,item_kind" });
+    await supabase.from("partner_subscription_items").upsert(
+      subscriptionItems,
+      { onConflict: "subscription_id,item_kind" },
+    );
 
     await supabase.from("partner_subscription_financial_summaries").upsert({
       ...buildBillingFinancialSummary({
@@ -274,7 +353,17 @@ Deno.serve(async (request) => {
       status: subscription.status,
     }, request);
   } catch (error) {
-    console.error(JSON.stringify({ code: "BILLING_CREATE_SUBSCRIPTION_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "SUBSCRIPTION_CREATE_FAILED", message: "Nao foi possivel criar a assinatura." } }, request);
+    console.error(
+      JSON.stringify({
+        code: "BILLING_CREATE_SUBSCRIPTION_FAILED",
+        message: error instanceof Error ? error.message : "UNKNOWN",
+      }),
+    );
+    return jsonResponse(500, {
+      error: {
+        code: "SUBSCRIPTION_CREATE_FAILED",
+        message: "Nao foi possivel criar a assinatura.",
+      },
+    }, request);
   }
 });

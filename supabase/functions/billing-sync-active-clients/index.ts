@@ -1,6 +1,6 @@
 import {
-  activeClientCount,
   ACTIVE_CLIENT_UNIT_CENTS,
+  activeClientCount,
   ADDON_LOOKUP_KEY,
   forbiddenOriginResponse,
   getAdminClient,
@@ -16,7 +16,9 @@ import {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
   const internalAccess = requireServiceRoleRequest(request);
@@ -57,16 +59,24 @@ Deno.serve(async (request) => {
         .maybeSingle();
 
       if (!subscription?.stripe_subscription_id) {
-        await supabase.from("billing_sync_outbox").update({ processed_at: new Date().toISOString(), status: "succeeded" }).in("id", jobIds);
+        await supabase.from("billing_sync_outbox").update({
+          processed_at: new Date().toISOString(),
+          status: "succeeded",
+        }).in("id", jobIds);
         processed += jobIds.length;
         continue;
       }
 
       const quantity = await activeClientCount(supabase, partnerId);
-      const remoteSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id, {
-        expand: ["items.data.price"],
-      });
-      let addonItem = remoteSubscription.items.data.find((item) => item.price.lookup_key === ADDON_LOOKUP_KEY);
+      const remoteSubscription = await stripe.subscriptions.retrieve(
+        subscription.stripe_subscription_id,
+        {
+          expand: ["items.data.price"],
+        },
+      );
+      let addonItem = remoteSubscription.items.data.find((item) =>
+        item.price.lookup_key === ADDON_LOOKUP_KEY
+      );
 
       if (addonItem) {
         addonItem = await stripe.subscriptionItems.update(addonItem.id, {
@@ -91,7 +101,10 @@ Deno.serve(async (request) => {
         quantity,
         stripe_subscription_item_id: addonItem?.id ?? null,
         unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
-      }).eq("subscription_id", subscription.id).eq("item_kind", "active_client_addon");
+      }).eq("subscription_id", subscription.id).eq(
+        "item_kind",
+        "active_client_addon",
+      );
 
       await supabase.from("billing_active_client_snapshots").insert({
         active_client_quantity: quantity,
@@ -113,7 +126,17 @@ Deno.serve(async (request) => {
 
     return jsonResponse(200, { processed, processedPartners }, request);
   } catch (error) {
-    console.error(JSON.stringify({ code: "BILLING_SYNC_ACTIVE_CLIENTS_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "SYNC_FAILED", message: "Nao foi possivel reconciliar Clientes ativos." } }, request);
+    console.error(
+      JSON.stringify({
+        code: "BILLING_SYNC_ACTIVE_CLIENTS_FAILED",
+        message: error instanceof Error ? error.message : "UNKNOWN",
+      }),
+    );
+    return jsonResponse(500, {
+      error: {
+        code: "SYNC_FAILED",
+        message: "Nao foi possivel reconciliar Clientes ativos.",
+      },
+    }, request);
   }
 });

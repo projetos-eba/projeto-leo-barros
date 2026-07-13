@@ -14,7 +14,7 @@ const LOCAL_SUPABASE_API_URL = "http://127.0.0.1:54321";
 const FUNCTIONS_URL = `${LOCAL_SUPABASE_API_URL}/functions/v1`;
 const STANDALONE_FUNCTION_URL = "http://127.0.0.1:8000";
 const OWNER_INBOX = "viniciusferrari.silva@gmail.com";
-const EMAIL_PREFIX = "auth-matrix";
+const EMAIL_PREFIX = "am";
 const RUN_ID = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const ARTIFACT_ROOT = join(process.cwd(), "artifacts", "auth-e2e", RUN_ID);
 const SCREENSHOT_DIR = join(ARTIFACT_ROOT, "screenshots");
@@ -120,6 +120,17 @@ function parseEnvFile(path) {
   return env;
 }
 
+function validateResendFromForHomologation(value) {
+  if (!value) fail("RESEND_FROM ausente.");
+
+  const match = value.match(/^.+ <([^<>\s@]+@([^<>\s@]+))>$/);
+  if (!match) fail("RESEND_FROM invalido para homologacao.");
+
+  if (match[2].toLowerCase() !== "deloadfit.app") {
+    fail("RESEND_FROM usa dominio nao homologado.");
+  }
+}
+
 function resolveSupabaseContainer(prefix) {
   const output = run("docker", ["ps", "--format", "{{.Names}}"]);
   const containerName = output
@@ -194,8 +205,8 @@ function sanitizeUrl(url) {
 }
 
 function ownerAlias(label) {
-  void label;
-  return OWNER_INBOX;
+  const [name, domain] = OWNER_INBOX.split("@");
+  return `${name}+${EMAIL_PREFIX}-${RUN_ID}-${label}@${domain}`;
 }
 
 async function waitForUrl(
@@ -387,7 +398,10 @@ async function waitForDelivery({ flow, profileId, timeoutMs = 15_000 }) {
 function cleanupFixtures() {
   psql(`
 delete from public.auth_email_deliveries
-where lower(to_email) = lower(${sqlLiteral(OWNER_INBOX)})
+where profile_id in (
+    select id from public.profiles
+    where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  )
    or to_email like ${sqlLiteral(`${OWNER_INBOX.split("@")[0]}+${EMAIL_PREFIX}-${RUN_ID}-%@${OWNER_INBOX.split("@")[1]}`)}
    or request_id like ${sqlLiteral(`${EMAIL_PREFIX}-${RUN_ID}-%`)};
 
@@ -396,8 +410,7 @@ where partner_id in (
   select partner.id
   from public.partners partner
   join public.profiles profile on profile.id = partner.profile_id
-  where lower(profile.email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.partner_subscriptions
@@ -405,8 +418,7 @@ where partner_id in (
   select partner.id
   from public.partners partner
   join public.profiles profile on profile.id = partner.profile_id
-  where lower(profile.email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.partner_clients
@@ -414,48 +426,41 @@ where patient_id in (
   select patient.id
   from public.patients patient
   join public.profiles profile on profile.id = patient.profile_id
-  where lower(profile.email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where profile.email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.admins
 where profile_id in (
   select id from public.profiles
-  where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.partners
 where profile_id in (
   select id from public.profiles
-  where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.patients
 where profile_id in (
   select id from public.profiles
-  where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.email_verification_tokens
 where profile_id in (
   select id from public.profiles
-  where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.password_reset_tokens
 where profile_id in (
   select id from public.profiles
-  where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-     or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
+  where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)}
 );
 
 delete from public.profiles
-where lower(email) = lower(${sqlLiteral(OWNER_INBOX)})
-   or email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)};
+where email like ${sqlLiteral(`%+${EMAIL_PREFIX}-${RUN_ID}-%`)};
 `);
 }
 
@@ -573,6 +578,7 @@ async function openConfirmationLink(browser, link, scenarioId) {
 async function openResetLink(browser, link, scenarioId, password) {
   const page = await browser.newPage();
   await page.goto(link, { waitUntil: "domcontentloaded" });
+  await page.locator("#password").waitFor({ state: "visible", timeout: 90_000 });
   await page.locator("#password").fill(password);
   await page.locator("#confirmPassword").fill(password);
   await page.getByRole("button", { name: /Redefinir senha/i }).click();
@@ -921,9 +927,7 @@ async function main() {
 
   const functionEnv = parseEnvFile("supabase/functions/.env");
   if (!functionEnv.RESEND_API_KEY) fail("RESEND_API_KEY ausente.");
-  if (functionEnv.RESEND_FROM !== "DeLoad Fit <noreply@deloadfit.app>") {
-    fail("RESEND_FROM inesperado para homologacao.");
-  }
+  validateResendFromForHomologation(functionEnv.RESEND_FROM);
 
   const supabaseEnv = getSupabaseLocalEnv();
   const adminClient = createClient(

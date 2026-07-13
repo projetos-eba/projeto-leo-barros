@@ -17,7 +17,9 @@ import {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
@@ -29,7 +31,9 @@ Deno.serve(async (request) => {
     const adminAccess = await requireAdmin(request, supabase);
     if ("error" in adminAccess) return adminAccess.error as Response;
 
-    const catalog = await getValidatedBillingCatalog(stripe, { reconcileProductNames: true });
+    const catalog = await getValidatedBillingCatalog(stripe, {
+      reconcileProductNames: true,
+    });
 
     await supabase.from("billing_plans").update({
       stripe_price_id: catalog.planPrices["complete-monthly"].id,
@@ -52,11 +56,25 @@ Deno.serve(async (request) => {
         annual: OFFICIAL_STRIPE_PRICES["complete-annual"].id,
         monthly: OFFICIAL_STRIPE_PRICES["complete-monthly"].id,
       },
-      lookupKeys: [PLAN_LOOKUP_KEYS["complete-monthly"], PLAN_LOOKUP_KEYS["complete-annual"], ADDON_LOOKUP_KEY],
+      lookupKeys: [
+        PLAN_LOOKUP_KEYS["complete-monthly"],
+        PLAN_LOOKUP_KEYS["complete-annual"],
+        ADDON_LOOKUP_KEY,
+      ],
       success: true,
     }, request);
   } catch (error) {
-    console.error(JSON.stringify({ code: "STRIPE_BOOTSTRAP_CATALOG_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "BOOTSTRAP_FAILED", message: "Nao foi possivel reconciliar o catalogo Stripe." } }, request);
+    console.error(
+      JSON.stringify({
+        code: "STRIPE_BOOTSTRAP_CATALOG_FAILED",
+        message: error instanceof Error ? error.message : "UNKNOWN",
+      }),
+    );
+    return jsonResponse(500, {
+      error: {
+        code: "BOOTSTRAP_FAILED",
+        message: "Nao foi possivel reconciliar o catalogo Stripe.",
+      },
+    }, request);
   }
 });

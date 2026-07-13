@@ -13,7 +13,9 @@ import { buildAppUrl } from "../_shared/env.ts";
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
@@ -35,7 +37,12 @@ Deno.serve(async (request) => {
       .maybeSingle();
 
     if (!subscription?.stripe_customer_id) {
-      return jsonResponse(404, { error: { code: "CUSTOMER_NOT_FOUND", message: "Customer Stripe nao encontrado." } }, request);
+      return jsonResponse(404, {
+        error: {
+          code: "CUSTOMER_NOT_FOUND",
+          message: "Customer Stripe nao encontrado.",
+        },
+      }, request);
     }
 
     const portalSession = await stripe.billingPortal.sessions.create({
@@ -45,7 +52,17 @@ Deno.serve(async (request) => {
 
     return jsonResponse(200, { url: portalSession.url }, request);
   } catch (error) {
-    console.error(JSON.stringify({ code: "BILLING_CUSTOMER_PORTAL_FAILED", message: error instanceof Error ? error.message : "UNKNOWN" }));
-    return jsonResponse(500, { error: { code: "PORTAL_FAILED", message: "Nao foi possivel abrir o portal de cobranca." } }, request);
+    console.error(
+      JSON.stringify({
+        code: "BILLING_CUSTOMER_PORTAL_FAILED",
+        message: error instanceof Error ? error.message : "UNKNOWN",
+      }),
+    );
+    return jsonResponse(500, {
+      error: {
+        code: "PORTAL_FAILED",
+        message: "Nao foi possivel abrir o portal de cobranca.",
+      },
+    }, request);
   }
 });

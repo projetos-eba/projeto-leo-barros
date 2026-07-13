@@ -23,7 +23,9 @@ import {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
   if (request.method !== "POST") {
-    return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." } }, request);
+    return jsonResponse(405, {
+      error: { code: "METHOD_NOT_ALLOWED", message: "Metodo nao permitido." },
+    }, request);
   }
   if (!originIsAllowed(request)) return forbiddenOriginResponse(request);
 
@@ -47,7 +49,9 @@ Deno.serve(async (request) => {
 
     const planSlug = parsePlanSlug(body.planSlug);
     if (!planSlug) {
-      return jsonResponse(400, { error: { code: "INVALID_PLAN", message: "Plano invalido." } }, request);
+      return jsonResponse(400, {
+        error: { code: "INVALID_PLAN", message: "Plano invalido." },
+      }, request);
     }
 
     const promotionCodeInput = normalizePromotionCode(body.promotionCode);
@@ -64,7 +68,10 @@ Deno.serve(async (request) => {
       }, request);
     }
 
-    const promotionCode = await resolveActivePromotionCode(stripe, promotionCodeText);
+    const promotionCode = await resolveActivePromotionCode(
+      stripe,
+      promotionCodeText,
+    );
     if (!promotionCode) {
       return jsonResponse(400, {
         error: {
@@ -84,8 +91,14 @@ Deno.serve(async (request) => {
     }
 
     const catalog = await getValidatedBillingCatalog(stripe);
-    const quantity = await activeClientCount(supabase, partnerAccess.partner.id);
-    const customerId = await resolvePartnerStripeCustomer(stripe, partnerAccess);
+    const quantity = await activeClientCount(
+      supabase,
+      partnerAccess.partner.id,
+    );
+    const customerId = await resolvePartnerStripeCustomer(
+      stripe,
+      partnerAccess,
+    );
     const basePrice = catalog.planPrices[planSlug];
     const items = [
       { price: basePrice.id, quantity: 1 },
@@ -108,7 +121,8 @@ Deno.serve(async (request) => {
     const activeClientSubtotalCents = quantity * ACTIVE_CLIENT_UNIT_CENTS;
     const subtotalCents = baseAmountCents + activeClientSubtotalCents;
     const discountCents = stripeInvoiceDiscountCents(invoice);
-    const totalAfterDiscountCents = invoice.total ?? Math.max(0, subtotalCents - discountCents);
+    const totalAfterDiscountCents = invoice.total ??
+      Math.max(0, subtotalCents - discountCents);
 
     return jsonResponse(200, {
       activeClients: {
@@ -131,7 +145,9 @@ Deno.serve(async (request) => {
     }, request);
   } catch (error) {
     const message = error instanceof Error ? error.message : "UNKNOWN";
-    console.error(JSON.stringify({ code: "BILLING_PREVIEW_SUBSCRIPTION_FAILED", message }));
+    console.error(
+      JSON.stringify({ code: "BILLING_PREVIEW_SUBSCRIPTION_FAILED", message }),
+    );
     return jsonResponse(400, {
       error: {
         code: "PROMOTION_PREVIEW_FAILED",

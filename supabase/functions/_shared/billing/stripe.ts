@@ -1,4 +1,7 @@
-import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.98.0";
+import {
+  createClient,
+  type SupabaseClient,
+} from "npm:@supabase/supabase-js@2.98.0";
 import Stripe from "npm:stripe@22.3.1";
 
 export const STRIPE_API_VERSION = "2026-06-24.dahlia";
@@ -68,7 +71,8 @@ export const OFFICIAL_STRIPE_PRICES = {
 } as const;
 
 function allowedOrigins() {
-  return (Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() || "http://localhost:3000")
+  return (Deno.env.get("BILLING_ALLOWED_ORIGINS")?.trim() ||
+    "http://localhost:3000")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -82,10 +86,13 @@ export function originIsAllowed(request: Request) {
 export function corsHeadersForRequest(request?: Request) {
   const origins = allowedOrigins();
   const origin = request?.headers.get("origin");
-  const allowedOrigin = origin && origins.includes(origin) ? origin : origins[0] ?? "http://localhost:3000";
+  const allowedOrigin = origin && origins.includes(origin)
+    ? origin
+    : origins[0] ?? "http://localhost:3000";
 
   return {
-    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Headers":
+      "authorization, apikey, content-type, x-client-info",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Origin": allowedOrigin,
     "Cache-Control": "no-store",
@@ -95,15 +102,22 @@ export function corsHeadersForRequest(request?: Request) {
 }
 
 export const jsonHeaders = {
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Origin": Deno.env.get("BILLING_ALLOWED_ORIGINS")?.split(",")[0]?.trim() || "http://localhost:3000",
+  "Access-Control-Allow-Origin":
+    Deno.env.get("BILLING_ALLOWED_ORIGINS")?.split(",")[0]?.trim() ||
+    "http://localhost:3000",
   "Cache-Control": "no-store",
   "Content-Type": "application/json",
   "Vary": "Origin",
 };
 
-export function jsonResponse(status: number, body: Record<string, unknown>, request?: Request) {
+export function jsonResponse(
+  status: number,
+  body: Record<string, unknown>,
+  request?: Request,
+) {
   return new Response(JSON.stringify(body), {
     headers: corsHeadersForRequest(request),
     status,
@@ -156,12 +170,17 @@ export function getAdminClient() {
   });
 }
 
-export async function getAuthenticatedProfile(request: Request, supabase: SupabaseClient) {
+export async function getAuthenticatedProfile(
+  request: Request,
+  supabase: SupabaseClient,
+) {
   const authorization = request.headers.get("authorization") ?? "";
   const token = authorization.replace(/^Bearer\s+/i, "");
   if (!token) return null;
 
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  const { data: userData, error: userError } = await supabase.auth.getUser(
+    token,
+  );
   if (userError || !userData.user) return null;
 
   const { data: profile } = await supabase
@@ -173,10 +192,17 @@ export async function getAuthenticatedProfile(request: Request, supabase: Supaba
   return profile;
 }
 
-export async function requirePartner(request: Request, supabase: SupabaseClient) {
+export async function requirePartner(
+  request: Request,
+  supabase: SupabaseClient,
+) {
   const profile = await getAuthenticatedProfile(request, supabase);
   if (!profile || profile.role !== "parceiro" || profile.status !== "active") {
-    return { error: jsonResponse(403, { error: { code: "FORBIDDEN", message: "Acesso nao autorizado." } }) };
+    return {
+      error: jsonResponse(403, {
+        error: { code: "FORBIDDEN", message: "Acesso nao autorizado." },
+      }),
+    };
   }
 
   const { data: partner } = await supabase
@@ -186,7 +212,14 @@ export async function requirePartner(request: Request, supabase: SupabaseClient)
     .maybeSingle();
 
   if (!partner) {
-    return { error: jsonResponse(403, { error: { code: "PARTNER_NOT_FOUND", message: "Parceiro nao encontrado." } }) };
+    return {
+      error: jsonResponse(403, {
+        error: {
+          code: "PARTNER_NOT_FOUND",
+          message: "Parceiro nao encontrado.",
+        },
+      }),
+    };
   }
 
   return { partner, profile };
@@ -195,7 +228,11 @@ export async function requirePartner(request: Request, supabase: SupabaseClient)
 export async function requireAdmin(request: Request, supabase: SupabaseClient) {
   const profile = await getAuthenticatedProfile(request, supabase);
   if (!profile || profile.role !== "admin" || profile.status !== "active") {
-    return { error: jsonResponse(403, { error: { code: "FORBIDDEN", message: "Acesso nao autorizado." } }) };
+    return {
+      error: jsonResponse(403, {
+        error: { code: "FORBIDDEN", message: "Acesso nao autorizado." },
+      }),
+    };
   }
 
   return { profile };
@@ -221,7 +258,9 @@ export function requireServiceRoleRequest(request: Request) {
 }
 
 export function parsePlanSlug(value: unknown): BillingPlanSlug | null {
-  return value === "complete-monthly" || value === "complete-annual" ? value : null;
+  return value === "complete-monthly" || value === "complete-annual"
+    ? value
+    : null;
 }
 
 export function hasForbiddenClientDiscountField(body: Record<string, unknown>) {
@@ -255,7 +294,10 @@ export function normalizePromotionCode(value: unknown) {
   return { code };
 }
 
-export async function activeClientCount(supabase: SupabaseClient, partnerId: string) {
+export async function activeClientCount(
+  supabase: SupabaseClient,
+  partnerId: string,
+) {
   const { data, error } = await supabase.rpc("billing_active_client_count", {
     target_partner_id: partnerId,
   });
@@ -300,10 +342,12 @@ export function describeCoupon(coupon: Stripe.Coupon) {
   }
 
   if (typeof coupon.amount_off === "number") {
-    return `${new Intl.NumberFormat("pt-BR", {
-      currency: (coupon.currency ?? "brl").toUpperCase(),
-      style: "currency",
-    }).format(coupon.amount_off / 100)} de desconto`;
+    return `${
+      new Intl.NumberFormat("pt-BR", {
+        currency: (coupon.currency ?? "brl").toUpperCase(),
+        style: "currency",
+      }).format(coupon.amount_off / 100)
+    } de desconto`;
   }
 
   return "Desconto aplicado";
@@ -328,13 +372,23 @@ export type BillingFinancialSummaryInput = {
   } | null;
 };
 
-export function stripeInvoiceDiscountCents(invoice: { total_discount_amounts?: Array<{ amount?: number | null }> | null }) {
-  return invoice.total_discount_amounts?.reduce((total, discount) => total + (discount.amount ?? 0), 0) ?? 0;
+export function stripeInvoiceDiscountCents(
+  invoice: {
+    total_discount_amounts?: Array<{ amount?: number | null }> | null;
+  },
+) {
+  return invoice.total_discount_amounts?.reduce(
+    (total, discount) => total + (discount.amount ?? 0),
+    0,
+  ) ?? 0;
 }
 
-export function buildBillingFinancialSummary(input: BillingFinancialSummaryInput) {
+export function buildBillingFinancialSummary(
+  input: BillingFinancialSummaryInput,
+) {
   const planBaseAmountCents = OFFICIAL_STRIPE_PRICES[input.planSlug].unitAmount;
-  const activeClientSubtotalCents = input.activeClientQuantity * ACTIVE_CLIENT_UNIT_CENTS;
+  const activeClientSubtotalCents = input.activeClientQuantity *
+    ACTIVE_CLIENT_UNIT_CENTS;
   const localSubtotalCents = planBaseAmountCents + activeClientSubtotalCents;
   const discountAmountCents = Math.max(0, input.discountAmountCents ?? 0);
   const totalAfterDiscountCents = Math.max(
@@ -373,11 +427,16 @@ export async function resolveActivePromotionCode(stripe: Stripe, code: string) {
   });
   const promotionCode = promotionCodes.data[0] ?? null;
   if (!promotionCode) return null;
-  if (promotionCode.livemode) throw new Error(`LIVE_MODE_OBJECT:${promotionCode.id}`);
+  if (promotionCode.livemode) {
+    throw new Error(`LIVE_MODE_OBJECT:${promotionCode.id}`);
+  }
   return promotionCode;
 }
 
-export async function resolvePriceByLookupKey(stripe: Stripe, lookupKey: string) {
+export async function resolvePriceByLookupKey(
+  stripe: Stripe,
+  lookupKey: string,
+) {
   const prices = await stripe.prices.list({
     active: true,
     expand: ["data.product"],
@@ -397,7 +456,12 @@ function assertTestMode(livemode: boolean | undefined, objectId: string) {
   }
 }
 
-async function validateProduct(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_PRODUCTS[keyof typeof OFFICIAL_STRIPE_PRODUCTS], reconcileName: boolean) {
+async function validateProduct(
+  stripe: Stripe,
+  expected:
+    typeof OFFICIAL_STRIPE_PRODUCTS[keyof typeof OFFICIAL_STRIPE_PRODUCTS],
+  reconcileName: boolean,
+) {
   const product = await stripe.products.retrieve(expected.id);
   assertTestMode(product.livemode, expected.id);
   if (!product.active) throw new Error(`INACTIVE_PRODUCT:${expected.id}`);
@@ -410,7 +474,10 @@ async function validateProduct(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_
   return product;
 }
 
-async function validatePrice(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_PRICES[keyof typeof OFFICIAL_STRIPE_PRICES]) {
+async function validatePrice(
+  stripe: Stripe,
+  expected: typeof OFFICIAL_STRIPE_PRICES[keyof typeof OFFICIAL_STRIPE_PRICES],
+) {
   const price = await stripe.prices.retrieve(expected.id);
   assertTestMode(price.livemode, expected.id);
 
@@ -443,13 +510,33 @@ async function validatePrice(stripe: Stripe, expected: typeof OFFICIAL_STRIPE_PR
   return price;
 }
 
-export async function getValidatedBillingCatalog(stripe: Stripe, options: { reconcileProductNames?: boolean } = {}) {
-  await validateProduct(stripe, OFFICIAL_STRIPE_PRODUCTS.complete, Boolean(options.reconcileProductNames));
-  await validateProduct(stripe, OFFICIAL_STRIPE_PRODUCTS.activeClientAddon, Boolean(options.reconcileProductNames));
+export async function getValidatedBillingCatalog(
+  stripe: Stripe,
+  options: { reconcileProductNames?: boolean } = {},
+) {
+  await validateProduct(
+    stripe,
+    OFFICIAL_STRIPE_PRODUCTS.complete,
+    Boolean(options.reconcileProductNames),
+  );
+  await validateProduct(
+    stripe,
+    OFFICIAL_STRIPE_PRODUCTS.activeClientAddon,
+    Boolean(options.reconcileProductNames),
+  );
 
-  const monthly = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["complete-monthly"]);
-  const annual = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["complete-annual"]);
-  const activeClientAddon = await validatePrice(stripe, OFFICIAL_STRIPE_PRICES["active-client-monthly"]);
+  const monthly = await validatePrice(
+    stripe,
+    OFFICIAL_STRIPE_PRICES["complete-monthly"],
+  );
+  const annual = await validatePrice(
+    stripe,
+    OFFICIAL_STRIPE_PRICES["complete-annual"],
+  );
+  const activeClientAddon = await validatePrice(
+    stripe,
+    OFFICIAL_STRIPE_PRICES["active-client-monthly"],
+  );
 
   return {
     addonPrice: activeClientAddon,
