@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_ID="bwyiuwxjzvssbjfzazhe"
+PROJECT_ID="${SUPABASE_PROJECT_ID:-$(sed -n 's/^project_id = "\(.*\)"$/\1/p' supabase/config.toml | head -n 1)}"
 DB_CONTAINER="supabase_db_${PROJECT_ID}"
 PSQL=(docker exec -i "${DB_CONTAINER}" psql -v ON_ERROR_STOP=1 -U postgres -d postgres)
 

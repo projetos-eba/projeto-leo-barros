@@ -13,7 +13,7 @@
     "db:status": "npx supabase status",
     "git:local": "node scripts/dev/git.mjs",
     "lint": "eslint .",
-    "mcp:playwright:check": "playwright-mcp --version",
+    "mcp:playwright:check": "node scripts/dev/check-playwright-mcp.mjs",
     "mcp:supabase:check": "node scripts/dev/check-supabase-mcp.mjs",
     "test": "vitest run",
     "test:e2e:auth": "playwright test tests/e2e/auth",

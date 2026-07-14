@@ -5,8 +5,13 @@ import { Check, CreditCard, LockKeyhole, ShieldCheck, Sparkles } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { getCurrentProfile } from "@/lib/auth/next-guards";
 import { partnerHasActivePlan } from "@/lib/auth/partner-plan-access";
-import { BILLING_PLANS, BILLING_TRIAL_DAYS, normalizeBillingPlanSlug } from "@/lib/billing/catalog";
-import { annualSavingsPercent, formatCurrencyCents } from "@/lib/billing/pricing";
+import { normalizeBillingPlanSlug } from "@/lib/billing/catalog";
+import { getPublicBillingCatalog, type PublicBillingAddon, type PublicBillingPlan } from "@/lib/billing/data";
+import {
+  annualSavingsPercentFromPrices,
+  formatCurrencyCents,
+  monthlyEquivalentCents,
+} from "@/lib/billing/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -58,16 +63,28 @@ async function resolveCtaHref(planSlug: string) {
 }
 
 function PlanCard({
+  addon,
   ctaHref,
   highlighted = false,
-  slug,
+  monthlyPriceCents,
+  plan,
 }: {
+  addon: PublicBillingAddon;
   ctaHref: string;
   highlighted?: boolean;
-  slug: keyof typeof BILLING_PLANS;
+  monthlyPriceCents: number;
+  plan: PublicBillingPlan;
 }) {
-  const plan = BILLING_PLANS[slug];
-  const isAnnual = slug === "complete-annual";
+  const isAnnual = plan.slug === "complete-annual";
+  const planAvailable = plan.isAvailable && addon.isAvailable;
+  const equivalentMonthly = monthlyEquivalentCents({
+    billingInterval: plan.billingInterval,
+    priceCents: plan.priceCents,
+  });
+  const savings = annualSavingsPercentFromPrices({
+    annualPriceCents: plan.priceCents,
+    monthlyPriceCents,
+  });
 
   return (
     <article
@@ -90,20 +107,28 @@ function PlanCard({
         </h2>
         <div className="mt-8">
           <p className="text-[38px] font-bold leading-none text-white">
-            {isAnnual ? "R$ 99,90/mes" : "R$ 119,90"}
+            {plan.isAvailable
+              ? isAnnual
+                ? `${formatCurrencyCents(equivalentMonthly)}/mes`
+                : formatCurrencyCents(plan.priceCents)
+              : "Indisponivel"}
           </p>
           <p className="mt-2 text-[14px] text-[#94aabb]">
-            {isAnnual ? "R$ 1.198,80 cobrados anualmente" : "por mes"}
+            {plan.isAvailable
+              ? isAnnual
+                ? `${formatCurrencyCents(plan.priceCents)} cobrados anualmente`
+                : "por mes"
+              : "Plano temporariamente indisponivel"}
           </p>
         </div>
-        {isAnnual ? (
+        {isAnnual && savings > 0 ? (
           <p className="mt-4 inline-flex w-fit rounded-[6px] bg-[#1d8b46]/20 px-3 py-1 text-[13px] font-semibold text-[#76e199]">
-            Economize cerca de {annualSavingsPercent().toString().replace(".", ",")}%
+            Economize cerca de {savings.toString().replace(".", ",")}%
           </p>
         ) : null}
         <p className="mt-6 flex items-center gap-2 text-[15px] font-semibold text-[#d9e6ee]">
           <Sparkles className="size-4 text-[#58d881]" />
-          {BILLING_TRIAL_DAYS} dias gratis
+          {plan.trialDays} dias gratis
         </p>
         <ul className="mt-6 grid gap-3 text-[14px] text-[#b7c7d2]">
           {benefits.map((benefit) => (
@@ -118,19 +143,32 @@ function PlanCard({
       </div>
       <footer className="mt-6 flex flex-col gap-4">
         <div className="rounded-[8px] border border-[#31536a] bg-[#0b2230] p-4 text-[13px] leading-5 text-[#b8c8d2]">
-          + {formatCurrencyCents(199)}/mes por Cliente ativo
+          {addon.isAvailable
+            ? `+ ${formatCurrencyCents(addon.priceCents)}/mes por Cliente ativo`
+            : "Adicional temporariamente indisponivel"}
         </div>
-        <Button asChild className="h-11 rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]">
-          <Link href={ctaHref}>Comecar teste gratis</Link>
-        </Button>
+        {planAvailable ? (
+          <Button asChild className="h-11 rounded-[8px] bg-[#2d9cff] text-[#04131f] hover:bg-[#6bbcff]">
+            <Link href={ctaHref}>Comecar teste gratis</Link>
+          </Button>
+        ) : (
+          <Button className="h-11 rounded-[8px]" disabled variant="outline">
+            Plano temporariamente indisponivel
+          </Button>
+        )}
       </footer>
     </article>
   );
 }
 
 export default async function PlansPage() {
+  const catalog = await getPublicBillingCatalog();
   const monthlyHref = await resolveCtaHref("complete-monthly");
   const annualHref = await resolveCtaHref("complete-annual");
+  const trialDays = Math.max(
+    catalog.plans["complete-monthly"].trialDays,
+    catalog.plans["complete-annual"].trialDays,
+  );
 
   return (
     <main className="min-h-screen bg-[#0b1720] px-5 py-10 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] md:px-8 lg:px-12">
@@ -143,13 +181,24 @@ export default async function PlansPage() {
             Escolha o plano ideal para sua operacao
           </h1>
           <p className="mt-4 text-[18px] leading-7 text-[#a9bcc9]">
-            Nutricao e Treinamento em uma unica plataforma. Experimente todos os recursos gratuitamente por {BILLING_TRIAL_DAYS} dias.
+            Nutricao e Treinamento em uma unica plataforma. Experimente todos os recursos gratuitamente por {trialDays} dias.
           </p>
         </header>
 
         <div className="mt-9 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
-          <PlanCard ctaHref={monthlyHref} slug="complete-monthly" />
-          <PlanCard ctaHref={annualHref} highlighted slug="complete-annual" />
+          <PlanCard
+            addon={catalog.addon}
+            ctaHref={monthlyHref}
+            monthlyPriceCents={catalog.plans["complete-monthly"].priceCents}
+            plan={catalog.plans["complete-monthly"]}
+          />
+          <PlanCard
+            addon={catalog.addon}
+            ctaHref={annualHref}
+            highlighted
+            monthlyPriceCents={catalog.plans["complete-monthly"].priceCents}
+            plan={catalog.plans["complete-annual"]}
+          />
         </div>
 
         <section className="mt-8 grid gap-4 md:grid-cols-3">

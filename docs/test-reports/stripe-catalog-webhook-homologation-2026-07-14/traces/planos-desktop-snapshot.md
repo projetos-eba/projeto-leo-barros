@@ -1,0 +1,59 @@
+- generic [active] [ref=f106e1]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - main [ref=f106e2]:
+    - generic [ref=f106e3]:
+      - generic [ref=f106e4]:
+        - paragraph [ref=f106e5]: Planos
+        - heading "Escolha o plano ideal para sua operacao" [level=1] [ref=f106e6]
+        - paragraph [ref=f106e7]: Nutricao e Treinamento em uma unica plataforma. Experimente todos os recursos gratuitamente por 7 dias.
+      - generic [ref=f106e8]:
+        - article [ref=f106e9]:
+          - generic [ref=f106e10]:
+            - paragraph [ref=f106e11]: Plano Completo
+            - heading "Mensal" [level=2] [ref=f106e12]
+            - generic [ref=f106e13]:
+              - paragraph [ref=f106e14]: R$ 119,90
+              - paragraph [ref=f106e15]: por mes
+            - paragraph [ref=f106e16]: 7 dias gratis
+            - list [ref=f106e19]:
+              - listitem [ref=f106e20]: Nutricao
+              - listitem [ref=f106e24]: Treinamento
+              - listitem [ref=f106e28]: Gestao de Clientes
+              - listitem [ref=f106e32]: Recursos completos da plataforma
+          - generic [ref=f106e36]:
+            - generic [ref=f106e37]: + R$ 1,99/mes por Cliente ativo
+            - link "Comecar teste gratis" [ref=f106e38] [cursor=pointer]:
+              - /url: /login/parceiros?next=/parceiros/checkout?plan=complete-monthly
+        - article [ref=f106e39]:
+          - generic [ref=f106e40]:
+            - generic [ref=f106e41]: Mais vantajoso
+            - paragraph [ref=f106e42]: Plano Completo
+            - heading "Anual" [level=2] [ref=f106e43]
+            - generic [ref=f106e44]:
+              - paragraph [ref=f106e45]: R$ 99,90/mes
+              - paragraph [ref=f106e46]: R$ 1.198,80 cobrados anualmente
+            - paragraph [ref=f106e47]: Economize cerca de 16,7%
+            - paragraph [ref=f106e48]: 7 dias gratis
+            - list [ref=f106e51]:
+              - listitem [ref=f106e52]: Nutricao
+              - listitem [ref=f106e56]: Treinamento
+              - listitem [ref=f106e60]: Gestao de Clientes
+              - listitem [ref=f106e64]: Recursos completos da plataforma
+          - generic [ref=f106e68]:
+            - generic [ref=f106e69]: + R$ 1,99/mes por Cliente ativo
+            - link "Comecar teste gratis" [ref=f106e70] [cursor=pointer]:
+              - /url: /login/parceiros?next=/parceiros/checkout?plan=complete-annual
+      - generic [ref=f106e71]:
+        - generic [ref=f106e72]:
+          - heading "Pagamento seguro" [level=2] [ref=f106e76]
+          - paragraph [ref=f106e77]: Seus pagamentos sao realizados em ambiente protegido e com tecnologia de seguranca avancada.
+        - generic [ref=f106e78]:
+          - heading "Processado pela Stripe" [level=2] [ref=f106e81]
+          - paragraph [ref=f106e82]: Os pagamentos sao processados pela Stripe, plataforma global especializada em pagamentos digitais.
+        - generic [ref=f106e83]:
+          - heading "Dados protegidos" [level=2] [ref=f106e88]
+          - paragraph [ref=f106e89]: Os dados do cartao sao enviados diretamente ao provedor de pagamento e nao ficam armazenados na plataforma.
+  - button "Open Next.js Dev Tools" [ref=f106e95] [cursor=pointer]
+  - alert [ref=f106e99]

@@ -12,6 +12,8 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 - Plano Completo anual: `complete-annual`, `complete_annual_brl`, R$ 1.198,80 por ano, exibido como R$ 99,90/mes.
 - Cliente ativo adicional: `active-client-monthly`, `active_client_monthly_brl`, R$ 1,99/mes por unidade.
 - Trial: 7 dias, protegido por `partner_billing_trial_usage`.
+- Stripe e a fonte comercial externa de Products e Prices. Supabase guarda o read model local em `billing_products` e `billing_prices`, preservando historico de Prices, lookup key, ativo/inativo e ultimo `event.created` aplicado.
+- `billing_plans` e `billing_plan_addons` continuam como camada compatível para o Price vigente usado por telas, checkout, assinatura e Admin Financeiro.
 - Catalogo Stripe homologado em modo teste:
   - Produto principal: `prod_UrR2wxpxk9UJxV`.
   - Mensal: `price_1TriAiPELBIpM2MneLhOLwW4`.
@@ -48,12 +50,14 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 ## Webhook E Pagamentos
 
 - `customer.subscription.created`, `customer.subscription.updated` e `customer.subscription.deleted` atualizam status local da assinatura.
+- `product.created`, `product.updated`, `product.deleted`, `price.created`, `price.updated` e `price.deleted` sincronizam o catalogo Stripe para Supabase.
 - `invoice.finalized` captura snapshot da quantidade de Clientes ativos usada para cobranca.
 - `customer.subscription.created` e `customer.subscription.updated` atualizam `partner_subscription_financial_summaries` com preview oficial da proxima cobranca da assinatura.
 - `invoice.paid`, `invoice.payment_failed` e `invoice.payment_action_required` atualizam status financeiro e registram `billing_payments` quando o evento traz `payment_intent`.
 - Eventos desconhecidos sao registrados como `ignored`.
 - Eventos duplicados retornam 2xx sem novo efeito de negocio.
 - `partner_subscriptions.stripe_last_event_created_at` impede que evento antigo sobrescreva estado mais recente.
+- `billing_products.last_stripe_event_created_at` e `billing_prices.last_stripe_event_created_at` impedem regressao do catalogo por eventos fora de ordem.
 
 ## Fonte Canonica De Quantidade
 
@@ -81,7 +85,9 @@ As Edge Functions nao criam cliente Stripe no topo do modulo. Sem `STRIPE_SECRET
 
 `BILLING_ALLOWED_ORIGINS` define os origins autorizados a chamar as Edge Functions de billing pelo navegador. O valor e uma lista separada por virgulas, sem barra final e contendo protocolo, host e porta quando houver. Localmente, usar `http://localhost:3000`. Em producao, usar somente o dominio publico HTTPS do app, por exemplo `https://app.exemplo.com`; incluir dominios de preview apenas quando eles precisarem executar checkout real.
 
-`stripe-bootstrap-catalog` nao cria Products nem Prices. Em test mode, a funcao valida os IDs oficiais homologados; em live mode, valida Products e Prices ativos por `lookup_key`, valores, moeda, intervalo, tipo de uso e nomes oficiais de Product, gravando os IDs reais do ambiente no catalogo local.
+`stripe-bootstrap-catalog` nao cria Products nem Prices. Em test mode, a funcao valida os IDs oficiais homologados; em live mode, valida Products e Prices ativos por `lookup_key`, valores, moeda, intervalo, tipo de uso e nomes oficiais de Product, gravando os IDs reais do ambiente no catalogo local e no read model normalizado.
+
+`stripe-reconcile-catalog` e uma funcao administrativa para reconciliar Stripe -> Supabase apos webhook perdido, bootstrap ou auditoria. Ela nao cria Product nem Price na Stripe.
 
 Mensal e anual podem compartilhar o mesmo Stripe Product em `billing_plans.stripe_product_id`. A unicidade operacional do catalogo fica em `stripe_price_id` e `lookup_key`, porque cada plano comercial e representado por um Price distinto.
 

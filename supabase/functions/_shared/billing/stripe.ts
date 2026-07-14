@@ -381,9 +381,11 @@ export function describeCoupon(coupon: Stripe.Coupon) {
 
 export type BillingFinancialSummaryInput = {
   activeClientQuantity: number;
+  activeClientUnitAmountCents?: number;
   currency?: string | null;
   discountAmountCents?: number | null;
   invoiceId?: string | null;
+  planBaseAmountCents?: number;
   planSlug: BillingPlanSlug;
   source: "stripe_preview" | "stripe_webhook" | "manual_reconcile";
   stripeEventCreatedAt?: string | null;
@@ -412,9 +414,12 @@ export function stripeInvoiceDiscountCents(
 export function buildBillingFinancialSummary(
   input: BillingFinancialSummaryInput,
 ) {
-  const planBaseAmountCents = OFFICIAL_STRIPE_PRICES[input.planSlug].unitAmount;
-  const activeClientSubtotalCents = input.activeClientQuantity *
+  const planBaseAmountCents = input.planBaseAmountCents ??
+    OFFICIAL_STRIPE_PRICES[input.planSlug].unitAmount;
+  const activeClientUnitAmountCents = input.activeClientUnitAmountCents ??
     ACTIVE_CLIENT_UNIT_CENTS;
+  const activeClientSubtotalCents = input.activeClientQuantity *
+    activeClientUnitAmountCents;
   const localSubtotalCents = planBaseAmountCents + activeClientSubtotalCents;
   const discountAmountCents = Math.max(0, input.discountAmountCents ?? 0);
   const totalAfterDiscountCents = Math.max(
@@ -425,7 +430,7 @@ export function buildBillingFinancialSummary(
   return {
     active_client_quantity: input.activeClientQuantity,
     active_client_subtotal_cents: activeClientSubtotalCents,
-    active_client_unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
+    active_client_unit_amount_cents: activeClientUnitAmountCents,
     currency: (input.currency ?? "brl").toLowerCase(),
     discount_amount_cents: discountAmountCents,
     discount_code: input.promotion?.code ?? null,
@@ -468,6 +473,154 @@ export async function resolvePriceByLookupKey(
     lookup_keys: [lookupKey],
   });
   return prices.data[0] ?? null;
+}
+
+type LocalPlanCatalogRow = {
+  billing_interval: string;
+  currency: string;
+  id: string;
+  is_active: boolean;
+  lookup_key: string | null;
+  name: string;
+  price_cents: number;
+  slug: string;
+  stripe_price_id: string | null;
+};
+
+type LocalAddonCatalogRow = {
+  currency: string;
+  id: string;
+  is_active: boolean;
+  lookup_key: string | null;
+  price_cents: number;
+  slug: string;
+  stripe_price_id: string | null;
+};
+
+function expectedStripeIntervalForPlan(planSlug: BillingPlanSlug) {
+  return planSlug === "complete-annual" ? "year" : "month";
+}
+
+function assertLocalStripePrice(
+  price: Stripe.Price,
+  expected: {
+    currency: string;
+    interval: string;
+    lookupKey: string;
+    unitAmount: number;
+    usageType: string;
+  },
+) {
+  assertStripeRuntimeMode(price.livemode, price.id);
+  if (
+    !price.active ||
+    price.currency !== expected.currency ||
+    price.lookup_key !== expected.lookupKey ||
+    price.recurring?.interval !== expected.interval ||
+    price.recurring?.usage_type !== expected.usageType ||
+    price.unit_amount !== expected.unitAmount
+  ) {
+    throw new Error(`LOCAL_CATALOG_PRICE_DIVERGENCE:${price.id}`);
+  }
+
+  const expandedProduct = typeof price.product === "string"
+    ? null
+    : price.product;
+  if (!expandedProduct || "deleted" in expandedProduct) {
+    throw new Error(`LOCAL_CATALOG_PRODUCT_UNAVAILABLE:${price.id}`);
+  }
+  assertStripeRuntimeMode(expandedProduct.livemode, expandedProduct.id);
+  if (!expandedProduct.active) {
+    throw new Error(`LOCAL_CATALOG_PRODUCT_INACTIVE:${expandedProduct.id}`);
+  }
+}
+
+async function retrieveAndValidateLocalPrice(
+  stripe: Stripe,
+  input: {
+    currency: string;
+    interval: string;
+    lookupKey: string;
+    priceId: string;
+    unitAmount: number;
+    usageType: string;
+  },
+) {
+  const price = await stripe.prices.retrieve(input.priceId, {
+    expand: ["product"],
+  });
+  assertLocalStripePrice(price, {
+    currency: input.currency,
+    interval: input.interval,
+    lookupKey: input.lookupKey,
+    unitAmount: input.unitAmount,
+    usageType: input.usageType,
+  });
+  return price;
+}
+
+export async function resolveLocalCheckoutCatalog(
+  supabase: SupabaseClient,
+  stripe: Stripe,
+  planSlug: BillingPlanSlug,
+) {
+  const { data: plan, error: planError } = await supabase
+    .from("billing_plans")
+    .select("id, slug, name, billing_interval, price_cents, currency, is_active, lookup_key, stripe_price_id")
+    .eq("slug", planSlug)
+    .maybeSingle();
+  if (planError) throw planError;
+
+  const localPlan = plan as LocalPlanCatalogRow | null;
+  if (
+    !localPlan?.id ||
+    !localPlan.is_active ||
+    localPlan.lookup_key !== PLAN_LOOKUP_KEYS[planSlug] ||
+    !localPlan.stripe_price_id
+  ) {
+    throw new Error(`LOCAL_PLAN_UNAVAILABLE:${planSlug}`);
+  }
+
+  const { data: addon, error: addonError } = await supabase
+    .from("billing_plan_addons")
+    .select("id, slug, price_cents, currency, is_active, lookup_key, stripe_price_id")
+    .eq("slug", "active-client-monthly")
+    .maybeSingle();
+  if (addonError) throw addonError;
+
+  const localAddon = addon as LocalAddonCatalogRow | null;
+  if (
+    !localAddon?.id ||
+    !localAddon.is_active ||
+    localAddon.lookup_key !== ADDON_LOOKUP_KEY ||
+    !localAddon.stripe_price_id
+  ) {
+    throw new Error("LOCAL_ADDON_UNAVAILABLE");
+  }
+
+  const basePrice = await retrieveAndValidateLocalPrice(stripe, {
+    currency: localPlan.currency,
+    interval: expectedStripeIntervalForPlan(planSlug),
+    lookupKey: localPlan.lookup_key,
+    priceId: localPlan.stripe_price_id,
+    unitAmount: localPlan.price_cents,
+    usageType: "licensed",
+  });
+  const addonPrice = await retrieveAndValidateLocalPrice(stripe, {
+    currency: localAddon.currency,
+    interval: "month",
+    lookupKey: ADDON_LOOKUP_KEY,
+    priceId: localAddon.stripe_price_id,
+    unitAmount: localAddon.price_cents,
+    usageType: "licensed",
+  });
+
+  return {
+    addonPrice,
+    basePrice,
+    localAddon,
+    localPlan,
+  };
 }
 
 function productId(value: string | Stripe.Product | Stripe.DeletedProduct) {
@@ -620,12 +773,12 @@ export async function getValidatedBillingCatalog(
     };
   }
 
-  await validateProduct(
+  const completeProduct = await validateProduct(
     stripe,
     OFFICIAL_STRIPE_PRODUCTS.complete,
     Boolean(options.reconcileProductNames),
   );
-  await validateProduct(
+  const addonProduct = await validateProduct(
     stripe,
     OFFICIAL_STRIPE_PRODUCTS.activeClientAddon,
     Boolean(options.reconcileProductNames),
@@ -651,8 +804,8 @@ export async function getValidatedBillingCatalog(
       "complete-annual": annual,
     },
     products: {
-      activeClientAddon: { id: productId(activeClientAddon.product) },
-      complete: { id: productId(monthly.product) },
+      activeClientAddon: addonProduct,
+      complete: completeProduct,
     },
   };
 }

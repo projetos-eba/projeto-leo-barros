@@ -24,6 +24,7 @@ export type BillingCheckoutSummary = {
   activeClientCount: number;
   addonCents: number;
   addonUnitCents: number;
+  billingInterval: "monthly" | "yearly";
   cycleCents: number;
   monthlyEquivalentCents: number;
   planCents: number;

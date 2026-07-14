@@ -48,6 +48,10 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Assinatura criada pela Subscriptions API.
 - Mixed intervals exigem `billing_mode=flexible`.
 - Webhook reconcilia estado local.
+- Webhook sincroniza `product.*` e `price.*` do catalogo Stripe para `billing_products` e `billing_prices`, preservando historico e ignorando eventos fora de ordem.
+- `/planos` e checkout usam o catalogo local sincronizado; Stripe nao e chamado durante renderizacao e Price ID nunca vem do browser.
+- Product entra no catalogo apenas por metadata oficial ou ID oficial homologado; nome mutavel de Product nunca e criterio de pertencimento.
+- `catalog_role=hml-plan` e permitido somente para homologacao local com `BILLING_ALLOW_HML_CATALOG_FIXTURES=1`; nao atualiza `billing_plans`, `billing_plan_addons` nem o catalogo publico.
 - `profiles.status` nao representa inadimplencia.
 - Secrets nunca no browser.
 - `billing-sync-active-clients` e interno e exige Bearer da service role; o browser nao pode acionar sincronizacao global de outbox.
@@ -55,6 +59,7 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - Nunca aceitar do navegador Coupon ID, Promotion Code ID, percentual, valor ou desconto calculado; o client envia apenas codigo promocional digitado e o backend resolve Promotion Code ativo na Stripe.
 - SetupIntent deve omitir `payment_method_types`; usar metodos dinamicos Stripe.
 - `stripe-bootstrap-catalog` valida catalogo oficial existente, nao cria Products/Prices na Stripe e faz upsert idempotente das linhas oficiais locais.
+- `stripe-reconcile-catalog` e administrativa, exige Admin e reconcilia Stripe -> Supabase sem criar Products/Prices remotos.
 - Em producao live, billing deve aceitar objetos Stripe live somente quando a chave server-side for live; em test mode deve rejeitar objetos live e vice-versa.
 - Catalogo live deve ser resolvido por `lookup_key` oficial e validado contra valores, moeda, intervalo, tipo de uso e nomes de Product antes de gravar IDs locais.
 - RPC de trial fica restrito a `service_role`.
@@ -90,18 +95,25 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `supabase/migrations/20260710110622_billing_stripe_rpc_scope_hardening.sql`
 - `supabase/migrations/20260710110939_billing_stripe_policy_performance.sql`
 - `supabase/migrations/20260712150000_partner_subscription_financial_summaries.sql`
+- `supabase/migrations/20260714190000_stripe_catalog_read_model.sql`
 - `supabase/functions/_shared/billing/stripe.ts`
+- `supabase/functions/_shared/billing/catalog-classifier.ts`
+- `supabase/functions/_shared/billing/catalog-repository.ts`
+- `supabase/functions/_shared/billing/product-event-handler.ts`
+- `supabase/functions/_shared/billing/price-event-handler.ts`
 - `supabase/functions/billing-create-setup-intent/index.ts`
 - `supabase/functions/billing-preview-subscription/index.ts`
 - `supabase/functions/billing-create-subscription/index.ts`
 - `supabase/functions/billing-sync-active-clients/index.ts`
 - `supabase/functions/billing-customer-portal/index.ts`
 - `supabase/functions/stripe-bootstrap-catalog/index.ts`
+- `supabase/functions/stripe-reconcile-catalog/index.ts`
 - `supabase/functions/stripe-webhook/index.ts`
 
 ## UI De Planos
 
 - `/planos` deve preservar os slugs `complete-monthly` e `complete-annual` nos CTAs.
+- `/planos` deve ler valores por `billing_public_catalog()` e calcular equivalente anual/economia a partir do catalogo sincronizado.
 - Cards de plano devem manter a faixa `+ R$ 1,99/mes por Cliente ativo` visualmente separada do CTA por estrutura de layout, sem colar no botao em desktop, tablet ou mobile.
 - O rodape de `/planos` deve focar confianca no pagamento: Pagamento seguro, Processado pela Stripe e Dados protegidos, sem prometer seguranca absoluta ou certificacao nao comprovada.
 
@@ -132,14 +144,17 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `invoice.finalized`: registra snapshot de Clientes ativos usado na cobranca.
 - `invoice.payment_failed`: marca assinatura como `past_due` e registra pagamento `failed` quando houver PaymentIntent.
 - `invoice.payment_action_required`: marca assinatura como `past_due` e registra pagamento `pending` quando houver PaymentIntent.
+- `product.created`, `product.updated`, `product.deleted`: sincronizam Product de catalogo ou aplicam soft delete local.
+- `price.created`, `price.updated`, `price.deleted`: sincronizam Price historico/vigente, lookup key, ativo/inativo e camada compativel.
 - Eventos desconhecidos: registrar como `ignored` e retornar 2xx.
 - Eventos duplicados: retornar 2xx sem novo efeito de negocio.
 - Eventos fora de ordem: comparar `event.created` com `partner_subscriptions.stripe_last_event_created_at`.
+- Eventos fora de ordem de catalogo: comparar `event.created` com `billing_products.last_stripe_event_created_at` ou `billing_prices.last_stripe_event_created_at`.
 
 ## Stripe CLI Local
 
 ```bash
-stripe listen --events setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+stripe listen --events product.created,product.updated,product.deleted,price.created,price.updated,price.deleted,setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
 ```
 
 O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o valor; atualizar apenas o runtime local e reiniciar `supabase functions serve --env-file supabase/functions/.env`.
@@ -151,7 +166,9 @@ O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o val
 - Antes de homologar billing, validar `npm run mcp:playwright:check` e, com Supabase local ativo, `npm run mcp:supabase:check`.
 - Use Supabase MCP para inspecionar `partner_subscriptions`, `partner_subscription_items`, `billing_payments`, `stripe_webhook_events`, snapshots e RLS quando as ferramentas estiverem expostas.
 - Use Playwright MCP para smoke real desktop/mobile em `/planos`, `/login`, `/parceiros/checkout`, `/parceiros/checkout/sucesso`, `/parceiros/configuracoes/assinatura` e `/admin/financeiro`.
+- Para cliques, digitacao, preenchimento e cookies, o Playwright MCP esperado deve disponibilizar `browser_click`, `browser_type`, `browser_fill_form` e `browser_cookie_set`. Se a descoberta inicial nao listar essas ferramentas, chamar `tool_search` com `Playwright MCP browser_click browser_type browser_fill_form browser_cookie_set click type fill form set cookie` antes de registrar fallback.
 - Se o cliente MCP da sessao nao expuser Playwright, registrar explicitamente e usar Playwright local/headless apenas como fallback, sem declarar que Playwright MCP foi usado.
+- Se uma limitacao MCP de billing se repetir e for resolvivel, atualizar dependencias/configuracao de desenvolvimento, `docs/runbooks/mcp-local.md`, esta skill e um teste de contrato quando aplicavel.
 
 ## Validacao
 

@@ -10,6 +10,8 @@ Data de referencia: 10 de julho de 2026.
 - Abortar qualquer escrita se uma resposta Stripe retornar `livemode=true`.
 - Usar Supabase MCP local quando disponivel para inspecionar tabelas, webhooks, snapshots e RLS. O endpoint local esperado e `http://127.0.0.1:54321/mcp`.
 - Usar Playwright MCP para cliques reais, console, network, screenshots desktop/mobile e validacao visual. O servidor esta configurado em `.mcp.json` via `@playwright/mcp`; se o cliente MCP da sessao nao expuser o servidor, registrar a limitacao e usar Playwright local/headless somente como fallback.
+- Antes de desistir de clique, preenchimento, digitacao ou cookie no Playwright MCP, executar `npm run mcp:playwright:check` e buscar ferramentas com `tool_search`: `Playwright MCP browser_click browser_type browser_fill_form browser_cookie_set click type fill form set cookie`.
+- Para detalhes e manutencao de limitacoes repetidas de MCP, seguir `docs/runbooks/mcp-local.md`.
 
 ## Catalogo Oficial
 
@@ -141,6 +143,30 @@ Para reconciliar somente nomes mutaveis de Products no Stripe test mode:
 RUN_STRIPE_E2E=1 BILLING_RECONCILE_PRODUCT_NAMES=1 npm run test:billing:stripe
 ```
 
+## Sincronizacao Automatica Do Catalogo
+
+Eventos esperados no listener local:
+
+```bash
+stripe listen --events product.created,product.updated,product.deleted,price.created,price.updated,price.deleted,setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.finalized,invoice.paid,invoice.payment_failed,invoice.payment_action_required --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+```
+
+O webhook sincroniza apenas objetos classificados como catalogo Leo Barros por
+metadata oficial, lookup key conhecida ou compatibilidade com IDs homologados.
+Nome de Product igual ao oficial nao e criterio de pertencimento.
+Fixtures com `purpose = catalog_sync_homologation` sem `catalog_role` oficial
+devem ser ignoradas pela aplicacao.
+
+Para testar eventos aplicados sem alterar o catalogo oficial, habilite
+temporariamente `BILLING_ALLOW_HML_CATALOG_FIXTURES=1` apenas em
+`supabase/functions/.env` local e use `metadata.catalog_role = hml-plan`.
+Essas fixtures entram somente em `billing_products`/`billing_prices` e nao sao
+expostas por `/planos` ou checkout.
+
+Para recuperar divergencias ou fazer bootstrap sem depender de replay de evento,
+usar a Edge Function administrativa `stripe-reconcile-catalog`. Ela exige token
+Admin e sincroniza Stripe -> Supabase sem criar Products ou Prices.
+
 ## Processos Locais
 
 1. `npm run db:start`
@@ -157,7 +183,7 @@ npm run mcp:supabase:check
 6. Iniciar Stripe CLI:
 
 ```bash
-stripe listen --events setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+stripe listen --events product.created,product.updated,product.deleted,price.created,price.updated,price.deleted,setup_intent.succeeded,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed,customer.subscription.trial_will_end,invoice.upcoming,invoice.created,invoice.finalized,invoice.finalization_failed,invoice.paid,invoice.payment_failed,invoice.payment_action_required,invoice.updated --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
 ```
 
 Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo listener e reinicie `supabase functions serve`.
@@ -202,6 +228,7 @@ deno check supabase/functions/billing-create-subscription/index.ts
 deno check supabase/functions/billing-sync-active-clients/index.ts
 deno check supabase/functions/billing-customer-portal/index.ts
 deno check supabase/functions/stripe-bootstrap-catalog/index.ts
+deno check supabase/functions/stripe-reconcile-catalog/index.ts
 deno check supabase/functions/stripe-webhook/index.ts
 ```
 

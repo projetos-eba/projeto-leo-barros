@@ -8,7 +8,6 @@ import { useState, useTransition } from "react";
 import { CheckoutPaymentElement } from "./checkout-payment-element";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BILLING_PLANS } from "@/lib/billing/catalog";
 import type { BillingCheckoutSummary, BillingPromotionPreview } from "@/lib/billing/preview";
 import { formatCurrencyCents } from "@/lib/billing/pricing";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +46,6 @@ export function CheckoutExperience({
   const [status, setStatus] = useState<PromotionStatus>({ kind: "idle" });
   const [showPromotionForm, setShowPromotionForm] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const plan = BILLING_PLANS[initialSummary.planSlug];
 
   function applyPromotion(event?: { preventDefault: () => void }) {
     event?.preventDefault();
@@ -113,7 +111,7 @@ export function CheckoutExperience({
         <h2 className="text-[18px] font-bold text-[#eaf2f7]">Resumo</h2>
         <div className="mt-5 space-y-4 text-[14px]">
           <div className="flex justify-between gap-4">
-            <span className="text-[#9fb1be]">{plan.billingInterval === "yearly" ? "Plano anual" : "Plano mensal"}</span>
+            <span className="text-[#9fb1be]">{initialSummary.billingInterval === "yearly" ? "Plano anual" : "Plano mensal"}</span>
             <span className="font-semibold text-[#f1f6fa]">{formatCurrencyCents(initialSummary.planCents)}</span>
           </div>
           <div className="flex justify-between gap-4">
@@ -199,7 +197,7 @@ export function CheckoutExperience({
                 {formatCurrencyCents(appliedPreview?.totalAfterDiscountCents ?? initialSummary.cycleCents)}
               </span>
             </div>
-            {plan.billingInterval === "yearly" && !appliedPreview ? (
+            {initialSummary.billingInterval === "yearly" && !appliedPreview ? (
               <p className="mt-2 text-[12px] text-[#8ca1af]">
                 Equivalente mensal estimado: {formatCurrencyCents(initialSummary.monthlyEquivalentCents)}.
               </p>

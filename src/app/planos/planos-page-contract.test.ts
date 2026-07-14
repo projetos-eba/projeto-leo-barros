@@ -14,7 +14,8 @@ describe("planos page contract", () => {
 
   it("separa faixa de adicional e CTA em area inferior estruturada", () => {
     expect(pageSource).toContain('<footer className="mt-6 flex flex-col gap-4">');
-    expect(pageSource).toContain("+ {formatCurrencyCents(199)}/mes por Cliente ativo");
+    expect(pageSource).toContain("formatCurrencyCents(addon.priceCents)");
+    expect(pageSource).toContain("Adicional temporariamente indisponivel");
     expect(pageSource).toContain("Comecar teste gratis");
   });
 });

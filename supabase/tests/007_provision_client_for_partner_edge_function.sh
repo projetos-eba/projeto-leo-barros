@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_ID="bwyiuwxjzvssbjfzazhe"
+PROJECT_ID="${SUPABASE_PROJECT_ID:-$(sed -n 's/^project_id = "\(.*\)"$/\1/p' supabase/config.toml | head -n 1)}"
 DB_CONTAINER="supabase_db_${PROJECT_ID}"
 FUNCTION_LOG="/tmp/leo-provision-client-function.log"
 PARTNER_EMAIL="client-edge-partner@example.invalid"
