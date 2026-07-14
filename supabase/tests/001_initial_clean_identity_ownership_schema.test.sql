@@ -14,6 +14,8 @@ select tables_are(
     'billing_payments',
     'billing_plan_addons',
     'billing_plans',
+    'billing_prices',
+    'billing_products',
     'billing_sync_outbox',
     'client_diet_daily_logs',
     'client_diet_events',

@@ -15,6 +15,8 @@ Permitir que o Super Admin acompanhe receita recorrente, assinaturas, inadimplen
 ## Fontes de dados
 
 - `billing_plans`
+- `billing_products`
+- `billing_prices`
 - `partner_subscriptions`
 - `billing_payments`
 - `profiles`
@@ -34,6 +36,7 @@ Permitir que o Super Admin acompanhe receita recorrente, assinaturas, inadimplen
 - KPIs financeiros mantêm cards com altura alinhada.
 - Layout desktop usa duas colunas independentes: coluna principal para evolucao/tabela e coluna lateral para distribuicoes/renovacoes.
 - Stripe possui arquitetura por Edge Functions, webhook e catalogo oficial validado em modo teste. A tela consome o estado local reconciliado.
+- Troca de Price afeta novas assinaturas; assinaturas antigas e pagamentos historicos continuam legiveis pelo plano e itens originais, sem recalcular receita antiga com o Price vigente novo.
 
 ## Estados
 

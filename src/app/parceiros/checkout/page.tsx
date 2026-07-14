@@ -2,9 +2,9 @@ import { CreditCard, Info, LockKeyhole, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CheckoutExperience } from "./checkout-experience";
-import { ACTIVE_CLIENT_ADDON_UNIT_CENTS, BILLING_PLANS, BILLING_TRIAL_DAYS, normalizeBillingPlanSlug } from "@/lib/billing/catalog";
-import { getBillableActiveClientCount, requirePartnerBillingContext, stripeIsConfigured } from "@/lib/billing/data";
-import { estimateBillingCents } from "@/lib/billing/pricing";
+import { normalizeBillingPlanSlug } from "@/lib/billing/catalog";
+import { getBillableActiveClientCount, getPublicBillingCatalog, requirePartnerBillingContext, stripeIsConfigured } from "@/lib/billing/data";
+import { estimateBillingCentsFromCatalog } from "@/lib/billing/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +15,18 @@ export default async function PartnerCheckoutPage({
 }) {
   const params = await searchParams;
   const planSlug = normalizeBillingPlanSlug(params?.plan);
-  const plan = BILLING_PLANS[planSlug];
+  const catalog = await getPublicBillingCatalog();
+  const plan = catalog.plans[planSlug];
   const { partnerId } = await requirePartnerBillingContext();
   const activeClientCount = await getBillableActiveClientCount(partnerId);
-  const estimate = estimateBillingCents({ activeClientCount, planSlug });
+  const estimate = estimateBillingCentsFromCatalog({
+    activeClientCount,
+    addonUnitCents: catalog.addon.priceCents,
+    billingInterval: plan.billingInterval,
+    planPriceCents: plan.priceCents,
+  });
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
-  const configured = stripeIsConfigured();
+  const configured = stripeIsConfigured() && plan.isAvailable && catalog.addon.isAvailable;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-6 text-[#f1f6fa] md:px-8 lg:px-0 lg:py-[35px]">
@@ -30,7 +36,7 @@ export default async function PartnerCheckoutPage({
           Iniciar teste gratis
         </h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
-          Salve um metodo de pagamento para iniciar {BILLING_TRIAL_DAYS} dias gratuitos de periodo de teste. A assinatura sera ativada apos a confirmacao do pagamento.
+          Salve um metodo de pagamento para iniciar {plan.trialDays} dias gratuitos de periodo de teste. A assinatura sera ativada apos a confirmacao do pagamento.
         </p>
       </header>
 
@@ -39,7 +45,8 @@ export default async function PartnerCheckoutPage({
         initialSummary={{
           activeClientCount,
           addonCents: estimate.addonCents,
-          addonUnitCents: ACTIVE_CLIENT_ADDON_UNIT_CENTS,
+          addonUnitCents: catalog.addon.priceCents,
+          billingInterval: plan.billingInterval,
           cycleCents: estimate.cycleCents,
           monthlyEquivalentCents: estimate.monthlyEquivalentCents,
           planCents: estimate.planCents,

@@ -1,0 +1,23 @@
+﻿{
+    "testRunId":  "catalog-webhook-hml-20260714-120322-5f24f57c-applied",
+    "productId":  "prod_UstmWl1b8nHUIP",
+    "productCleanupActive":  false,
+    "priceAId":  "price_1Tt80KPELBIpM2Mnu8yDBH9t",
+    "priceAActive":  false,
+    "priceBId":  "price_1Tt81MPELBIpM2Mn32vnu5a9",
+    "priceBCleanupActive":  false,
+    "lookupA":  "hml_catalog_monthly_catalog_webhook_hml_20260714_120322_5f24f57c_applied",
+    "deletedProductIdBeforeFix":  null,
+    "deletedProductIdAfterFix":  "prod_UstrAG8M7ECbyQ",
+    "missedWebhookProductName":  "HML Aplicado Leo reconciliado 122033",
+    "officialProductIds":  [
+                               "prod_UrR2wxpxk9UJxV",
+                               "prod_UrRGM5chV5eXLU"
+                           ],
+    "officialPriceIds":  [
+                             "price_1TriAiPELBIpM2MneLhOLwW4",
+                             "price_1TriAiPELBIpM2Mn7s4EpKt5",
+                             "price_1TriNoPELBIpM2MnQRkRINCT"
+                         ],
+    "secretsIncluded":  false
+}

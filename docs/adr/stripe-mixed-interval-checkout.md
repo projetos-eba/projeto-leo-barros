@@ -25,7 +25,8 @@ Usar Stripe Payment Element com SetupIntent e criar a assinatura no backend pela
 - Quantidade e sempre recalculada por `billing_active_client_count`.
 - Atualizacoes de quantidade usam `proration_behavior=none`.
 - Webhook assinado e ledger `stripe_webhook_events` cuidam da reconciliacao.
-- Catalogo oficial de teste e validado por IDs e lookup keys antes de criar assinatura.
+- Catalogo oficial de teste e validado por IDs e lookup keys no bootstrap/reconciliacao.
+- Novas assinaturas resolvem o Price ativo pelo catalogo local sincronizado e validam o Price na Stripe antes de criar a Subscription.
 - Bootstrap de catalogo nao cria Product/Price; apenas valida recursos existentes e reconcilia nome mutavel de Product quando seguro.
 - SetupIntent omite `payment_method_types` para preservar metodos dinamicos da Stripe.
 - Webhook registra eventos ignorados e impede regressao por evento antigo usando `stripe_last_event_created_at`.
@@ -33,6 +34,7 @@ Usar Stripe Payment Element com SetupIntent e criar a assinatura no backend pela
 ## Consequencias
 
 - Requer bootstrap do catalogo antes da homologacao real.
+- Requer webhook ou `stripe-reconcile-catalog` para manter Products/Prices sincronizados apos mudancas comerciais.
 - Customer Portal fica restrito a metodo de pagamento, dados de cobranca, faturas e cancelamento conforme configuracao Stripe.
 - A alteracao de plano pelo Portal nao esta liberada ate existir teste especifico para mixed intervals.
 

@@ -43,11 +43,49 @@ describe("stripe edge contract", () => {
     expect(bootstrap).not.toContain("products.create");
     expect(bootstrap).not.toContain("prices.create");
     expect(bootstrap).toContain("getValidatedBillingCatalog");
+    expect(bootstrap).toContain("upsertCatalogProduct");
+    expect(bootstrap).toContain("upsertCatalogPrice");
     expect(bootstrap).toContain('from("billing_plans").upsert');
     expect(bootstrap).toContain('from("billing_plan_addons")');
     expect(bootstrap).toContain('slug: "complete-monthly"');
     expect(bootstrap).toContain('slug: "complete-annual"');
     expect(bootstrap).toContain('slug: "active-client-monthly"');
+  });
+
+  it("sincroniza catalogo Stripe por webhook modular e checkout resolve Price local", () => {
+    const webhook = read("supabase/functions/stripe-webhook/index.ts");
+    const shared = read("supabase/functions/_shared/billing/stripe.ts");
+    const classifier = read("supabase/functions/_shared/billing/catalog-classifier.ts");
+    const repository = read("supabase/functions/_shared/billing/catalog-repository.ts");
+    const subscription = read("supabase/functions/billing-create-subscription/index.ts");
+    const preview = read("supabase/functions/billing-preview-subscription/index.ts");
+
+    expect(webhook).toContain('"product.created"');
+    expect(webhook).toContain('"product.updated"');
+    expect(webhook).toContain('"product.deleted"');
+    expect(webhook).toContain('"price.created"');
+    expect(webhook).toContain('"price.updated"');
+    expect(webhook).toContain('"price.deleted"');
+    expect(webhook).toContain("handleStripeProductCatalogEvent");
+    expect(webhook).toContain("handleStripePriceCatalogEvent");
+    expect(webhook).toContain("eventType: event.type");
+    expect(classifier).toContain("isLeoBillingCatalogProduct");
+    expect(classifier).toContain("isLeoBillingCatalogPrice");
+    expect(classifier).toContain('"hml-plan"');
+    expect(classifier).toContain("BILLING_ALLOW_HML_CATALOG_FIXTURES");
+    expect(repository).toContain("ignored_out_of_order");
+    expect(repository).toContain('if (input.catalogRole === "hml-plan") return');
+    expect(repository).toContain('if (input.kind.kind === "fixture") return');
+    expect(repository).toContain("stripeObjectId: product.id");
+    expect(repository).toContain("stripeObjectId: price.id");
+    expect(repository).toContain('from("billing_prices").upsert');
+    expect(repository).toContain('from("billing_plans")');
+    expect(shared).toContain("resolveLocalCheckoutCatalog");
+    expect(subscription).toContain("resolveLocalCheckoutCatalog");
+    expect(preview).toContain("resolveLocalCheckoutCatalog");
+    expect(classifier).not.toContain("product.name === OFFICIAL_STRIPE_PRODUCTS");
+    expect(subscription).not.toContain("getValidatedBillingCatalog(stripe)");
+    expect(preview).not.toContain("getValidatedBillingCatalog(stripe)");
   });
 
   it("permite que planos mensal e anual compartilhem o mesmo Product Stripe", () => {

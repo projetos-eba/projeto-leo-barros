@@ -18,6 +18,8 @@ Exibir somente dados essenciais da assinatura do Parceiro: status em pt-BR, plan
 - `partner_subscriptions`
 - `partner_subscription_financial_summaries`
 - `billing_plans`
+- `billing_products`
+- `billing_prices`
 - `billing_payments`
 - `billing_active_client_count`
 
@@ -43,6 +45,7 @@ Portal de pagamentos fica preparado via Edge Function, mas depende de credenciai
 - Assinatura sem trial mostra `Sem periodo de teste`.
 - Assinatura `trialing` sem datas mostra `Nao foi possivel carregar o periodo de teste.` e registra inconsistencia estruturada.
 - Nao exibir KPI de `Estimativa proximo ciclo` calculado apenas por `billing_plans.price_cents`.
+- Estimativas locais devem usar o plano historico associado a assinatura e, quando disponivel, o resumo financeiro sincronizado; nao substituir assinatura antiga pelo Price vigente novo.
 - Nao exibir historico local vazio como se fosse fonte completa de faturas.
 - Exibir `Subtotal`, `Desconto ativo` e `Valor apos desconto` usando `partner_subscription_financial_summaries`; quando ainda nao houver dados finais, usar copy de produto como `Em processamento`, sem simular desconto.
 - Nao exibir mensagens de desenvolvimento ou detalhes tecnicos como read model, webhook, credenciais, Stripe nao configurado, sincronizacao, backend ou nomes de tabela em texto visivel ao usuario final.

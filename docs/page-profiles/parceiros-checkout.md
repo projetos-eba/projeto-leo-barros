@@ -13,6 +13,7 @@ Permitir que Parceiro ativo, mesmo sem entitlement financeiro, salve metodo de p
 - Usa layout independente de billing, sem menu operacional de Parceiros.
 - Backend recalcula Clientes ativos.
 - Frontend nao envia valor, Price ID, quantidade, trial, Coupon ID, Promotion Code ID, percentual ou valor de desconto.
+- Backend resolve Price ativo pelo `planSlug` no catalogo local sincronizado e valida o Price na Stripe antes de criar assinatura.
 - Sem Stripe configurado, exibe estado seguro de pagamentos em configuracao.
 - Zero Clientes ativos deve exibir adicional R$ 0,00 e nao criar cobranca ficticia.
 

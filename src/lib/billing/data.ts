@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 
 import {
   ACTIVE_CLIENT_ADDON_UNIT_CENTS,
+  ACTIVE_CLIENT_ADDON,
   BILLING_PLANS,
   BILLING_TRIAL_DAYS,
   type BillingPlanSlug,
 } from "./catalog";
-import { estimateBillingCents } from "./pricing";
+import { estimateBillingCentsFromCatalog } from "./pricing";
 import { getCurrentProfile } from "@/lib/auth/next-guards";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,11 +61,36 @@ type BillingFinancialSummaryRow = {
   total_after_discount_cents: number;
 };
 
+export type PublicBillingPlan = {
+  billingInterval: "monthly" | "yearly";
+  currency: string;
+  isAvailable: boolean;
+  lookupKey: string;
+  name: string;
+  priceCents: number;
+  slug: BillingPlanSlug;
+  trialDays: number;
+};
+
+export type PublicBillingAddon = {
+  currency: string;
+  isAvailable: boolean;
+  lookupKey: string;
+  name: string;
+  priceCents: number;
+  slug: "active-client-monthly";
+};
+
+export type PublicBillingCatalog = {
+  addon: PublicBillingAddon;
+  plans: Record<BillingPlanSlug, PublicBillingPlan>;
+};
+
 export type PartnerBillingOverview = {
   activeClientCount: number;
   addonUnitCents: number;
   currentPlanSlug: BillingPlanSlug | null;
-  estimate: ReturnType<typeof estimateBillingCents> | null;
+  estimate: ReturnType<typeof estimateBillingCentsFromCatalog> | null;
   financialSummary: BillingFinancialSummaryRow | null;
   partnerId: string;
   payments: BillingPaymentRow[];
@@ -79,6 +105,124 @@ export function stripeIsConfigured() {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY &&
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.trim(),
   );
+}
+
+type PublicCatalogRpcRow = {
+  billing_interval: string;
+  currency: string;
+  is_active: boolean;
+  item_kind: "plan" | "addon";
+  lookup_key: string | null;
+  name: string;
+  price_cents: number;
+  slug: string;
+  trial_days: number;
+};
+
+type PublicCatalogRpcClient = {
+  rpc(name: "billing_public_catalog"): PromiseLike<{
+    data: PublicCatalogRpcRow[] | null;
+    error: { message: string } | null;
+  }>;
+};
+
+type BillingAddonReadClient = {
+  from(table: "billing_plan_addons"): {
+    select(columns: "price_cents"): {
+      eq(column: "slug", value: "active-client-monthly"): PromiseLike<{
+        data: { price_cents: number } | null;
+        error: { message: string } | null;
+      }> & {
+        maybeSingle(): PromiseLike<{
+          data: { price_cents: number } | null;
+          error: { message: string } | null;
+        }>;
+      };
+    };
+  };
+};
+
+function unavailablePlan(slug: BillingPlanSlug): PublicBillingPlan {
+  const fallback = BILLING_PLANS[slug];
+  return {
+    billingInterval: fallback.billingInterval,
+    currency: "brl",
+    isAvailable: false,
+    lookupKey: fallback.lookupKey,
+    name: fallback.name,
+    priceCents: 0,
+    slug,
+    trialDays: BILLING_TRIAL_DAYS,
+  };
+}
+
+function unavailableAddon(): PublicBillingAddon {
+  return {
+    currency: "brl",
+    isAvailable: false,
+    lookupKey: ACTIVE_CLIENT_ADDON.lookupKey,
+    name: ACTIVE_CLIENT_ADDON.name,
+    priceCents: 0,
+    slug: "active-client-monthly",
+  };
+}
+
+function rowToPlan(row: PublicCatalogRpcRow): PublicBillingPlan | null {
+  if (row.slug !== "complete-monthly" && row.slug !== "complete-annual") {
+    return null;
+  }
+  const fallback = BILLING_PLANS[row.slug];
+  const billingInterval = row.billing_interval === "yearly" ? "yearly" : "monthly";
+  return {
+    billingInterval,
+    currency: row.currency,
+    isAvailable: Boolean(row.is_active && row.lookup_key && row.price_cents > 0),
+    lookupKey: row.lookup_key ?? fallback.lookupKey,
+    name: row.name || fallback.name,
+    priceCents: row.price_cents,
+    slug: row.slug,
+    trialDays: row.trial_days || BILLING_TRIAL_DAYS,
+  };
+}
+
+function rowToAddon(row: PublicCatalogRpcRow): PublicBillingAddon | null {
+  if (row.slug !== "active-client-monthly") return null;
+  return {
+    currency: row.currency,
+    isAvailable: Boolean(row.is_active && row.lookup_key && row.price_cents > 0),
+    lookupKey: row.lookup_key ?? ACTIVE_CLIENT_ADDON.lookupKey,
+    name: row.name || ACTIVE_CLIENT_ADDON.name,
+    priceCents: row.price_cents,
+    slug: "active-client-monthly",
+  };
+}
+
+export async function getPublicBillingCatalog(): Promise<PublicBillingCatalog> {
+  const supabase = await createClient();
+  const { data, error } = await (supabase as unknown as PublicCatalogRpcClient)
+    .rpc("billing_public_catalog");
+  const catalog: PublicBillingCatalog = {
+    addon: unavailableAddon(),
+    plans: {
+      "complete-annual": unavailablePlan("complete-annual"),
+      "complete-monthly": unavailablePlan("complete-monthly"),
+    },
+  };
+
+  if (error || !Array.isArray(data)) return catalog;
+
+  for (const row of data as PublicCatalogRpcRow[]) {
+    if (row.item_kind === "plan") {
+      const plan = rowToPlan(row);
+      if (plan) catalog.plans[plan.slug] = plan;
+    }
+    if (row.item_kind === "addon") {
+      const addon = rowToAddon(row);
+      if (addon) catalog.addon = addon;
+    }
+  }
+
+  return catalog;
 }
 
 export async function requirePartnerBillingContext() {
@@ -130,6 +274,11 @@ export async function getPartnerBillingOverview(): Promise<PartnerBillingOvervie
     .from("billing_plans")
     .select("id, slug, name, billing_interval, price_cents")
     .eq("is_active", true);
+  const { data: addon } = await (supabase as unknown as BillingAddonReadClient)
+    .from("billing_plan_addons")
+    .select("price_cents")
+    .eq("slug", "active-client-monthly")
+    .maybeSingle();
 
   const plan = subscription
     ? ((plans ?? []).find((candidate) => candidate.id === subscription.plan_id) as BillingPlanRow | undefined) ?? null
@@ -157,9 +306,16 @@ export async function getPartnerBillingOverview(): Promise<PartnerBillingOvervie
 
   return {
     activeClientCount,
-    addonUnitCents: ACTIVE_CLIENT_ADDON_UNIT_CENTS,
+    addonUnitCents: addon?.price_cents ?? ACTIVE_CLIENT_ADDON_UNIT_CENTS,
     currentPlanSlug,
-    estimate: currentPlanSlug ? estimateBillingCents({ activeClientCount, planSlug: currentPlanSlug }) : null,
+    estimate: currentPlanSlug && plan
+      ? estimateBillingCentsFromCatalog({
+        activeClientCount,
+        addonUnitCents: addon?.price_cents ?? ACTIVE_CLIENT_ADDON_UNIT_CENTS,
+        billingInterval: plan.billing_interval,
+        planPriceCents: plan.price_cents,
+      })
+      : null,
     financialSummary: financialSummary as BillingFinancialSummaryRow | null,
     partnerId,
     payments: (payments ?? []) as BillingPaymentRow[],

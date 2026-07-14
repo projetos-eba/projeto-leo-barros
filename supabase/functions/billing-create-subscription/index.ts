@@ -1,5 +1,4 @@
 import {
-  ACTIVE_CLIENT_UNIT_CENTS,
   activeClientCount,
   ADDON_LOOKUP_KEY,
   buildBillingFinancialSummary,
@@ -7,15 +6,14 @@ import {
   forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
-  getValidatedBillingCatalog,
   hasForbiddenClientDiscountField,
   jsonResponse,
   normalizePromotionCode,
-  OFFICIAL_STRIPE_PRICES,
   optionsResponse,
   originIsAllowed,
   parsePlanSlug,
   requirePartner,
+  resolveLocalCheckoutCatalog,
   resolveActivePromotionCode,
   stripeInvoiceDiscountCents,
   stripeNotConfiguredResponse,
@@ -130,8 +128,12 @@ Deno.serve(async (request) => {
       }, request);
     }
 
-    const catalog = await getValidatedBillingCatalog(stripe);
-    const basePrice = catalog.planPrices[planSlug];
+    const catalog = await resolveLocalCheckoutCatalog(
+      supabase,
+      stripe,
+      planSlug,
+    );
+    const basePrice = catalog.basePrice;
     const addonPrice = catalog.addonPrice;
 
     let promotionCodeId: string | undefined;
@@ -219,36 +221,6 @@ Deno.serve(async (request) => {
         `subscription:${partnerAccess.partner.id}:${setupIntentId}`,
     });
 
-    const localPlan = await supabase
-      .from("billing_plans")
-      .select("id, lookup_key, price_cents")
-      .eq("slug", planSlug)
-      .maybeSingle();
-
-    if (!localPlan.data?.id) {
-      return jsonResponse(409, {
-        error: {
-          code: "LOCAL_CATALOG_NOT_READY",
-          message: "Catalogo local ainda nao preparado.",
-        },
-      }, request);
-    }
-
-    const localAddon = await supabase
-      .from("billing_plan_addons")
-      .select("id, lookup_key, price_cents")
-      .eq("slug", "active-client-monthly")
-      .maybeSingle();
-
-    if (!localAddon.data?.id) {
-      return jsonResponse(409, {
-        error: {
-          code: "LOCAL_ADDON_NOT_READY",
-          message: "Adicional local ainda nao preparado.",
-        },
-      }, request);
-    }
-
     const now = new Date();
     const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 86_400_000);
     const { data: localSubscription, error: insertError } = await supabase
@@ -260,7 +232,7 @@ Deno.serve(async (request) => {
         default_payment_method_id: paymentMethodId,
         last_quantity_synced_at: now.toISOString(),
         partner_id: partnerAccess.partner.id,
-        plan_id: localPlan.data.id,
+        plan_id: catalog.localPlan.id,
         status: subscription.status,
         stripe_customer_id: customerId,
         stripe_status: subscription.status,
@@ -282,24 +254,24 @@ Deno.serve(async (request) => {
 
     const subscriptionItems: Record<string, unknown>[] = [
       {
-        billing_plan_id: localPlan.data.id,
-        currency: OFFICIAL_STRIPE_PRICES[planSlug].currency,
+        billing_plan_id: catalog.localPlan.id,
+        currency: catalog.localPlan.currency,
         current_period_end: trialEnd.toISOString(),
         current_period_start: now.toISOString(),
         item_kind: "base_plan",
-        lookup_key: OFFICIAL_STRIPE_PRICES[planSlug].lookupKey,
+        lookup_key: catalog.localPlan.lookup_key,
         partner_id: partnerAccess.partner.id,
         quantity: 1,
         stripe_subscription_item_id: baseItem?.id ?? null,
         subscription_id: localSubscription.id,
-        unit_amount_cents: OFFICIAL_STRIPE_PRICES[planSlug].unitAmount,
+        unit_amount_cents: catalog.localPlan.price_cents,
       },
     ];
 
     if (quantity > 0 || addonItem) {
       subscriptionItems.push({
-        billing_addon_id: localAddon.data.id,
-        currency: "brl",
+        billing_addon_id: catalog.localAddon.id,
+        currency: catalog.localAddon.currency,
         current_period_end: trialEnd.toISOString(),
         current_period_start: now.toISOString(),
         item_kind: "active_client_addon",
@@ -308,7 +280,7 @@ Deno.serve(async (request) => {
         quantity,
         stripe_subscription_item_id: addonItem?.id ?? null,
         subscription_id: localSubscription.id,
-        unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
+        unit_amount_cents: catalog.localAddon.price_cents,
       });
     }
 
@@ -320,8 +292,10 @@ Deno.serve(async (request) => {
     await supabase.from("partner_subscription_financial_summaries").upsert({
       ...buildBillingFinancialSummary({
         activeClientQuantity: quantity,
+        activeClientUnitAmountCents: catalog.localAddon.price_cents,
         currency: previewInvoice.currency,
         discountAmountCents: stripeInvoiceDiscountCents(previewInvoice),
+        planBaseAmountCents: catalog.localPlan.price_cents,
         planSlug,
         promotion: promotionPresentation,
         source: "stripe_preview",
@@ -340,12 +314,12 @@ Deno.serve(async (request) => {
 
     await supabase.from("billing_active_client_snapshots").insert({
       active_client_quantity: quantity,
-      amount_cents: quantity * ACTIVE_CLIENT_UNIT_CENTS,
+      amount_cents: quantity * catalog.localAddon.price_cents,
       partner_id: partnerAccess.partner.id,
       reason: "checkout",
       stripe_subscription_id: subscription.id,
       subscription_id: localSubscription.id,
-      unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
+      unit_amount_cents: catalog.localAddon.price_cents,
     });
 
     return jsonResponse(200, {

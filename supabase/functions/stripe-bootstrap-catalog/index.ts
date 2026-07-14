@@ -15,6 +15,10 @@ import {
   stripeNotConfiguredResponse,
   TRIAL_DAYS,
 } from "../_shared/billing/stripe.ts";
+import {
+  upsertCatalogPrice,
+  upsertCatalogProduct,
+} from "../_shared/billing/catalog-repository.ts";
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return optionsResponse(request);
@@ -36,6 +40,33 @@ Deno.serve(async (request) => {
     const catalog = await getValidatedBillingCatalog(stripe, {
       reconcileProductNames: true,
     });
+    const syntheticEventCreatedAt = Math.floor(Date.now() / 1000);
+
+    await upsertCatalogProduct(
+      supabase,
+      catalog.products.complete,
+      syntheticEventCreatedAt,
+    );
+    await upsertCatalogProduct(
+      supabase,
+      catalog.products.activeClientAddon,
+      syntheticEventCreatedAt,
+    );
+    await upsertCatalogPrice(
+      supabase,
+      catalog.planPrices["complete-monthly"],
+      syntheticEventCreatedAt,
+    );
+    await upsertCatalogPrice(
+      supabase,
+      catalog.planPrices["complete-annual"],
+      syntheticEventCreatedAt,
+    );
+    await upsertCatalogPrice(
+      supabase,
+      catalog.addonPrice,
+      syntheticEventCreatedAt,
+    );
 
     const { error: plansError } = await supabase.from("billing_plans").upsert([
       {
