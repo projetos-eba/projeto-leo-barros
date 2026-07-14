@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { annualSavingsPercent, estimateBillingCents, formatCurrencyCents } from "./pricing";
+import {
+  annualSavingsPercent,
+  annualSavingsPercentFromPrices,
+  estimateBillingCents,
+  estimateBillingCentsFromCatalog,
+  formatCurrencyCents,
+  monthlyEquivalentCents,
+} from "./pricing";
 
 describe("billing pricing", () => {
   it("mantem adicional zerado quando Parceiro nao tem Clientes ativos", () => {
@@ -40,5 +47,24 @@ describe("billing pricing", () => {
   it("formata BRL e usa desconto real aproximado", () => {
     expect(formatCurrencyCents(119880)).toBe("R$ 1.198,80");
     expect(annualSavingsPercent()).toBe(16.7);
+  });
+
+  it("calcula valores a partir do catalogo sincronizado", () => {
+    expect(monthlyEquivalentCents({ billingInterval: "yearly", priceCents: 144000 })).toBe(12000);
+    expect(estimateBillingCentsFromCatalog({
+      activeClientCount: 3,
+      addonUnitCents: 250,
+      billingInterval: "yearly",
+      planPriceCents: 144000,
+    })).toMatchObject({
+      addonCents: 750,
+      cycleCents: 144750,
+      monthlyEquivalentCents: 12750,
+      planCents: 144000,
+    });
+    expect(annualSavingsPercentFromPrices({
+      annualPriceCents: 144000,
+      monthlyPriceCents: 15000,
+    })).toBe(20);
   });
 });

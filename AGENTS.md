@@ -106,6 +106,7 @@ Regras obrigatorias:
 - dados de sistema, fixtures e smoke local ficam em `supabase/seed.sql`;
 - a tela deve ler dados via camada server-side quando o Page Profile exigir;
 - Stripe Billing esta arquitetado para homologacao por credenciais. Sem chaves reais, o app deve exibir estado seguro de pagamentos em configuracao e nunca simular sucesso do provedor.
+- Catalogo comercial mutavel de Stripe Billing usa Stripe como fonte externa e Supabase como read model local em `billing_products` e `billing_prices`; telas e checkout devem consumir o catalogo local sincronizado, sem chamar Stripe em renderizacao e sem aceitar Price ID do browser.
 
 Variaveis publicas client-side:
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -181,6 +182,9 @@ Regras:
 - Para inspecionar schema, migrations, tabelas, RLS, dados locais e documentacao Supabase, usar Supabase MCP quando a ferramenta estiver disponivel. A documentacao oficial da Supabase indica que o MCP local fica em `/mcp` na stack local.
 - Para smoke visual/interativo, console, network, foco, teclado e screenshots de rotas web, usar Playwright MCP quando exposto pelo cliente MCP. Se o cliente atual nao expuser o servidor, registrar a limitacao e usar Playwright local/headless apenas como fallback.
 - Validar disponibilidade local com `npm run mcp:playwright:check` e, com Supabase local ativo, `npm run mcp:supabase:check`.
+- O Playwright MCP deve solicitar exposicao completa em `.mcp.json` com `tools: ["*"]` e o check local deve confirmar as ferramentas `browser_click`, `browser_type`, `browser_fill_form` e `browser_cookie_set` no pacote instalado.
+- Se a sessao MCP nao listar clique, preenchimento, digitacao ou cookie na primeira descoberta, chamar `tool_search` com uma consulta especifica antes de declarar fallback: `Playwright MCP browser_click browser_type browser_fill_form browser_cookie_set click type fill form set cookie`.
+- Se uma limitacao MCP se repetir e for resolvivel, atualizar no mesmo trabalho a dependencia/configuracao de desenvolvimento, script de validacao, documentacao, skill operacional afetada e teste de contrato quando aplicavel.
 - Nao conectar MCP a producao nem expor secrets em configuracoes, logs ou relatorios.
 
 Para codigo, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir.

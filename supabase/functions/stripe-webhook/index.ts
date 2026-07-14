@@ -13,6 +13,8 @@ import {
   stripeNotConfiguredResponse,
 } from "../_shared/billing/stripe.ts";
 import type { BillingPlanSlug } from "../_shared/billing/stripe.ts";
+import { handleStripeProductCatalogEvent } from "../_shared/billing/product-event-handler.ts";
+import { handleStripePriceCatalogEvent } from "../_shared/billing/price-event-handler.ts";
 
 type StripeInvoiceEvent = {
   amount_due?: number;
@@ -77,6 +79,36 @@ function activeClientQuantityFromSubscriptionItems(items: unknown) {
   });
   const quantity = asRecord(addonItem)?.quantity;
   return typeof quantity === "number" && quantity > 0 ? quantity : 0;
+}
+
+function basePlanUnitAmountFromSubscriptionItems(
+  items: unknown,
+  planSlug: BillingPlanSlug,
+) {
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return null;
+  const planLookupKey = PLAN_LOOKUP_KEYS[planSlug];
+  const planPriceId = OFFICIAL_STRIPE_PRICES[planSlug].id;
+  const planItem = data.find((item) => {
+    const price = asRecord(asRecord(item)?.price);
+    return textValue(price?.lookup_key) === planLookupKey ||
+      textValue(price?.id) === planPriceId;
+  });
+  const price = asRecord(asRecord(planItem)?.price);
+  return typeof price?.unit_amount === "number" ? price.unit_amount : null;
+}
+
+function addonUnitAmountFromSubscriptionItems(items: unknown) {
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return null;
+  const addonItem = data.find((item) => {
+    const price = asRecord(asRecord(item)?.price);
+    return textValue(price?.lookup_key) === ADDON_LOOKUP_KEY ||
+      textValue(price?.id) ===
+        OFFICIAL_STRIPE_PRICES["active-client-monthly"].id;
+  });
+  const price = asRecord(asRecord(addonItem)?.price);
+  return typeof price?.unit_amount === "number" ? price.unit_amount : null;
 }
 
 function promotionFromDiscounts(subscription: Record<string, unknown>) {
@@ -183,8 +215,16 @@ async function syncFinancialSummaryFromStripeSubscription({
     await supabase.from("partner_subscription_financial_summaries").upsert({
       ...buildBillingFinancialSummary({
         activeClientQuantity: quantity,
+        activeClientUnitAmountCents:
+          addonUnitAmountFromSubscriptionItems(stripeSubscription.items) ??
+            undefined,
         currency: previewInvoice.currency,
         discountAmountCents: stripeInvoiceDiscountCents(previewInvoice),
+        planBaseAmountCents:
+          basePlanUnitAmountFromSubscriptionItems(
+            stripeSubscription.items,
+            planSlug,
+          ) ?? undefined,
         planSlug,
         promotion: promotionHasDisplayData(promotion) ? promotion : null,
         source: "stripe_webhook",
@@ -205,6 +245,12 @@ async function syncFinancialSummaryFromStripeSubscription({
 }
 
 const handledEvents = new Set([
+  "product.created",
+  "product.updated",
+  "product.deleted",
+  "price.created",
+  "price.updated",
+  "price.deleted",
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
@@ -266,6 +312,66 @@ Deno.serve(async (request) => {
         status: "ignored",
       }).eq("stripe_event_id", event.id);
       return jsonResponse(200, { ignored: true, received: true }, request);
+    }
+
+    if (
+      event.type === "product.created" ||
+      event.type === "product.updated" ||
+      event.type === "product.deleted"
+    ) {
+      const result = await handleStripeProductCatalogEvent({
+        eventType: event.type,
+        eventCreatedAt: event.created,
+        product: event.data.object as Parameters<
+          typeof handleStripeProductCatalogEvent
+        >[0]["product"],
+        supabase,
+      });
+      await supabase.from("stripe_webhook_events").update({
+        payload_summary: {
+          decision: result.decision,
+          object: event.data.object.object,
+          stripe_created: event.created,
+          stripe_object_id: result.stripeObjectId,
+        },
+        processed_at: new Date().toISOString(),
+        status: result.decision === "applied" ? "succeeded" : "ignored",
+      }).eq("stripe_event_id", event.id);
+      return jsonResponse(200, {
+        catalog: true,
+        decision: result.decision,
+        received: true,
+      }, request);
+    }
+
+    if (
+      event.type === "price.created" ||
+      event.type === "price.updated" ||
+      event.type === "price.deleted"
+    ) {
+      const result = await handleStripePriceCatalogEvent({
+        eventCreatedAt: event.created,
+        price: event.data.object as Parameters<
+          typeof handleStripePriceCatalogEvent
+        >[0]["price"],
+        stripe,
+        supabase,
+      });
+      await supabase.from("stripe_webhook_events").update({
+        payload_summary: {
+          decision: result.decision,
+          object: event.data.object.object,
+          stripe_created: event.created,
+          stripe_object_id: result.stripeObjectId,
+        },
+        processed_at: new Date().toISOString(),
+        status: result.decision === "applied" ? "succeeded" : "ignored",
+      }).eq("stripe_event_id", event.id);
+      return jsonResponse(200, {
+        catalog: true,
+        decision: result.decision,
+        received: true,
+      }, request);
     }
 
     if (

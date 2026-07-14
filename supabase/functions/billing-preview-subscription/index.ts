@@ -1,19 +1,17 @@
 import {
-  ACTIVE_CLIENT_UNIT_CENTS,
   activeClientCount,
   describeCoupon,
   forbiddenOriginResponse,
   getAdminClient,
   getStripeClient,
-  getValidatedBillingCatalog,
   hasForbiddenClientDiscountField,
   jsonResponse,
   normalizePromotionCode,
-  OFFICIAL_STRIPE_PRICES,
   optionsResponse,
   originIsAllowed,
   parsePlanSlug,
   requirePartner,
+  resolveLocalCheckoutCatalog,
   resolveActivePromotionCode,
   resolvePartnerStripeCustomer,
   stripeInvoiceDiscountCents,
@@ -90,7 +88,11 @@ Deno.serve(async (request) => {
       }, request);
     }
 
-    const catalog = await getValidatedBillingCatalog(stripe);
+    const catalog = await resolveLocalCheckoutCatalog(
+      supabase,
+      stripe,
+      planSlug,
+    );
     const quantity = await activeClientCount(
       supabase,
       partnerAccess.partner.id,
@@ -99,7 +101,7 @@ Deno.serve(async (request) => {
       stripe,
       partnerAccess,
     );
-    const basePrice = catalog.planPrices[planSlug];
+    const basePrice = catalog.basePrice;
     const items = [
       { price: basePrice.id, quantity: 1 },
     ];
@@ -117,8 +119,9 @@ Deno.serve(async (request) => {
       },
     });
 
-    const baseAmountCents = OFFICIAL_STRIPE_PRICES[planSlug].unitAmount;
-    const activeClientSubtotalCents = quantity * ACTIVE_CLIENT_UNIT_CENTS;
+    const baseAmountCents = catalog.localPlan.price_cents;
+    const activeClientSubtotalCents = quantity *
+      catalog.localAddon.price_cents;
     const subtotalCents = baseAmountCents + activeClientSubtotalCents;
     const discountCents = stripeInvoiceDiscountCents(invoice);
     const totalAfterDiscountCents = invoice.total ??
@@ -128,7 +131,7 @@ Deno.serve(async (request) => {
       activeClients: {
         quantity,
         subtotalCents: activeClientSubtotalCents,
-        unitAmountCents: ACTIVE_CLIENT_UNIT_CENTS,
+        unitAmountCents: catalog.localAddon.price_cents,
       },
       plan: {
         baseAmountCents,
