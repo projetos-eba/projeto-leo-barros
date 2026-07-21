@@ -7,6 +7,7 @@ import { isBillingManagementPath, isPartnerSettingsPath } from "@/lib/billing/en
 
 import { AuthenticatedShell } from "./authenticated-shell";
 import { PartnerBillingShell } from "./partner-billing-shell";
+import { PartnerPlansSidebarItem } from "./partner-plans-sidebar-item";
 import { PartnerSettingsShell } from "./partner-settings-shell";
 
 type PartnerShellRouterProps = {
@@ -27,5 +28,10 @@ export function PartnerShellRouter({ children, hasActivePlan }: PartnerShellRout
     return <PartnerBillingShell>{children}</PartnerBillingShell>;
   }
 
-  return <AuthenticatedShell profile="parceiros">{children}</AuthenticatedShell>;
+  return (
+    <AuthenticatedShell profile="parceiros">
+      <PartnerPlansSidebarItem />
+      {children}
+    </AuthenticatedShell>
+  );
 }
