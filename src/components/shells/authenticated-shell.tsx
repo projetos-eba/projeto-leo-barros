@@ -170,14 +170,30 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
               >
                 Minha Evolução
               </Link>
-              <button
-                aria-disabled="true"
-                className="rounded-[10px] px-4 py-2 text-[14px] font-medium text-[#b9c0d0]/45"
-                disabled
-                type="button"
+              <Link
+                aria-current={pathname.startsWith("/cliente/formularios") ? "page" : undefined}
+                className={cn(
+                  "rounded-[10px] px-4 py-2 text-[14px] font-medium transition-colors",
+                  pathname.startsWith("/cliente/formularios")
+                    ? "text-white"
+                    : "text-[#b9c0d0]/70 hover:bg-white/[0.04] hover:text-white",
+                )}
+                href="/cliente/formularios"
+              >
+                Formulários
+              </Link>
+              <Link
+                aria-current={pathname === "/cliente/configuracoes" ? "page" : undefined}
+                className={cn(
+                  "rounded-[10px] px-4 py-2 text-[14px] font-medium transition-colors",
+                  pathname === "/cliente/configuracoes"
+                    ? "text-white"
+                    : "text-[#b9c0d0]/70 hover:bg-white/[0.04] hover:text-white",
+                )}
+                href="/cliente/configuracoes"
               >
                 Configurações
-              </button>
+              </Link>
             </nav>
 
             <div className="flex items-center gap-3">

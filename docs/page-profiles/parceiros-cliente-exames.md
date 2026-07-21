@@ -12,7 +12,7 @@ Aba de exames laboratoriais do Cliente individual, baseada no Figma `1:13744`, c
 
 - O perfil superior e as abas são compartilhados com Visão Geral, Avaliações, Dietas, Treinos e Cardio.
 - A interface usa `Clientes`; `patients` permanece apenas no schema.
-- `Exames` e `Fotos` agora são abas implementadas; Anamnese, Prescrições e Formulários seguem bloqueadas.
+- `Anamnese`, `Prescrições`, `Formulários`, `Exames` e `Fotos` agora são abas implementadas no perfil individual do Cliente.
 - `Configurações` edita o catálogo do parceiro inteiro.
 - Resultados salvos preservam snapshot de exame, categoria, unidade, conversão e referência usada.
 - O catálogo base vem de `exames-catalogo.md`: 72 exames em 11 categorias.

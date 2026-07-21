@@ -481,8 +481,8 @@ export async function testIntegrationAction(payload: IntegrationPayload): Promis
     const configuredFields = Object.values(config).filter((value) => value.length > 0).length;
     const success = configuredFields > 0 || payload.integrationKey === "storage";
     const message = success
-      ? "Teste local concluído. Configuração mínima presente."
-      : "Teste local falhou: preencha pelo menos um campo de configuração.";
+      ? "Teste concluído. Configuração mínima presente."
+      : "Teste falhou: preencha pelo menos um campo de configuração.";
 
     const { error } = await supabase.from("platform_integrations").update({
       config,

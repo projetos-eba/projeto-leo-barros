@@ -848,7 +848,7 @@ export function AdminSettingsView({ settings }: AdminSettingsViewProps) {
           <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Admin</p>
           <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Configurações</h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
-            Ajuste regras, acessos e integrações da plataforma com persistência no banco local.
+            Ajuste regras, acessos e integrações da plataforma com segurança.
           </p>
         </div>
         <div className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-[#2b4a5d] bg-[#0d2635]/80 px-3 text-[13px] font-semibold text-[#629bdb]">

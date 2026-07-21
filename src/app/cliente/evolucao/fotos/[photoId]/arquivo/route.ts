@@ -17,6 +17,16 @@ type PhotoFileDb = {
   from(table: string): PhotoFileQuery;
 };
 
+function placeholderImageResponse(label: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200"><rect width="900" height="1200" fill="#102333"/><rect x="80" y="80" width="740" height="1040" rx="38" fill="#0b1720" stroke="#304354" stroke-width="4"/><text x="450" y="600" fill="#8fcfff" font-family="Arial, sans-serif" font-size="42" font-weight="700" text-anchor="middle">${label}</text><text x="450" y="660" fill="#9fb1c0" font-family="Arial, sans-serif" font-size="24" text-anchor="middle">Arquivo não disponível neste momento</text></svg>`;
+  return new NextResponse(svg, {
+    headers: {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 export async function GET(_request: Request, { params }: PhotoFileRouteProps) {
   const { photoId } = await params;
   const { profile } = await getCurrentProfile();
@@ -47,7 +57,7 @@ export async function GET(_request: Request, { params }: PhotoFileRouteProps) {
     .createSignedUrl(photo.storage_path, 300);
 
   if (error || !data?.signedUrl) {
-    return new NextResponse("Não foi possível abrir a foto.", { status: 500 });
+    return placeholderImageResponse("Foto");
   }
 
   return NextResponse.redirect(data.signedUrl);

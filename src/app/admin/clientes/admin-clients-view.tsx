@@ -448,7 +448,7 @@ export function AdminClientsView({ clients }: AdminClientsViewProps) {
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#91a5b3]">
             <span>Mostrando {filteredRows.length.toLocaleString("pt-BR")} de {clients.clients.length.toLocaleString("pt-BR")} clientes</span>
-            <span>Atualizado pelo banco local</span>
+            <span>Atualizado agora</span>
           </div>
         </AdminPanel>
 

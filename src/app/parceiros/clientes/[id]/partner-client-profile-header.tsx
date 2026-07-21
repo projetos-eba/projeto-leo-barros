@@ -1,25 +1,26 @@
 "use client";
 
-import { ArrowLeft, CalendarPlus, Dumbbell, FileDown, HeartPulse, Lock, MessageCircle, Phone, Target, Utensils, Users } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Dumbbell, FileDown, HeartPulse, MessageCircle, Phone, Target, Utensils, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
 
-type ClientTab = "avaliacoes" | "cardio" | "dietas" | "exames" | "fotos" | "treinos" | "visao-geral";
+type ClientTab = "anamnese" | "avaliacoes" | "cardio" | "dietas" | "exames" | "formularios" | "fotos" | "prescricoes" | "treinos" | "visao-geral";
 
 const tabs: Array<{ id: ClientTab; label: string }> = [
   { id: "visao-geral", label: "Visão Geral" },
+  { id: "anamnese", label: "Anamnese" },
   { id: "avaliacoes", label: "Avaliações" },
+  { id: "prescricoes", label: "Prescrições" },
+  { id: "formularios", label: "Formulários" },
   { id: "dietas", label: "Dietas" },
   { id: "treinos", label: "Treinos" },
   { id: "cardio", label: "Cardio" },
   { id: "exames", label: "Exames" },
   { id: "fotos", label: "Fotos" },
 ];
-
-const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
 
 const moduleIcons = {
   cardio: HeartPulse,
@@ -163,12 +164,6 @@ export function PartnerClientProfileHeader({
           >
             {tab.label}
           </Link>
-        ))}
-        {futureTabs.map((tab) => (
-          <button className="inline-flex h-[47px] shrink-0 cursor-not-allowed items-center gap-2 text-[14px] font-semibold text-[#6f7c89]" disabled key={tab} type="button">
-            <Lock className="size-3.5" />
-            {tab}
-          </button>
         ))}
       </div>
     </>

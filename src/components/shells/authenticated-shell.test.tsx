@@ -69,7 +69,14 @@ describe("AuthenticatedShell", () => {
       "href",
       "/cliente/evolucao",
     );
-    expect(screen.getByRole("button", { name: "Configurações" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Formulários" })).toHaveAttribute(
+      "href",
+      "/cliente/formularios",
+    );
+    expect(screen.getByRole("link", { name: "Configurações" })).toHaveAttribute(
+      "href",
+      "/cliente/configuracoes",
+    );
   });
 
   it("renderiza a navegação de Parceiros com Clientes habilitado", () => {

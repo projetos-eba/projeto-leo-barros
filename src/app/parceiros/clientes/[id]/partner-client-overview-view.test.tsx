@@ -167,13 +167,15 @@ describe("PartnerClientOverviewView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renderiza Visão Geral com abas futuras bloqueadas e Cardio implementado", () => {
+  it("renderiza Visão Geral com abas clínicas e Cardio implementados", () => {
     render(<PartnerClientOverviewView overview={overview} />);
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Visão Geral" })).toHaveAttribute("href", `/parceiros/clientes/${overview.client.id}`);
     expect(screen.queryByRole("button", { name: "Ver plano" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Anamnese/ })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Anamnese" })).toHaveAttribute("href", expect.stringContaining("tab=anamnese"));
+    expect(screen.getByRole("link", { name: "Prescrições" })).toHaveAttribute("href", expect.stringContaining("tab=prescricoes"));
+    expect(screen.getByRole("link", { name: "Formulários" })).toHaveAttribute("href", expect.stringContaining("tab=formularios"));
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByTestId("mock-client-overview-chart")).toHaveTextContent("chart:2");
     expect(screen.getByRole("link", { name: "Mensagem" })).toHaveAttribute(

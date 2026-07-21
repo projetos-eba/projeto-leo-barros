@@ -376,6 +376,35 @@ begin
     'a1000000-0000-4000-8000-000000000812'
   );
 
+  delete from public.partner_form_response_answers
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_form_responses
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_form_assignment_clients
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_form_assignments
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_questions
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_templates
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_prescription_notes
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
+  delete from public.partner_client_anamnesis_entries
+  where partner_id = target_partner_id
+    and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
+
   delete from public.partner_client_plan_modules
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
@@ -2184,6 +2213,181 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('b1000000-0000-4000-8000-000000000601', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'dieta', 'Dieta', 'Hipercalórica controlada', '2.800 kcal/dia'),
     ('b1000000-0000-4000-8000-000000000602', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'treino', 'Treino', 'Hipertrofia 5x/semana', 'Divisão Upper/Lower'),
     ('b1000000-0000-4000-8000-000000000603', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', 'saude', 'Saúde', 'Indicadores e check-ins', 'Sono, pressão e exames');
+
+  insert into public.partner_client_anamnesis_entries (
+    id,
+    partner_id,
+    patient_id,
+    title,
+    summary,
+    content,
+    sections,
+    version_number,
+    is_current,
+    created_by_profile_id,
+    created_at,
+    updated_at
+  )
+  values
+    (
+      'c9000000-0000-4000-8000-000000000101',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      'Anamnese inicial',
+      'Objetivo de hipertrofia com rotina estruturada e boa aderência inicial.',
+      'Queixa principal: aumentar massa magra mantendo percentual de gordura controlado.\nHistórico: treino regular há 18 meses, sem lesões recentes.\nHábitos: sono médio de 6h30, hidratação irregular aos finais de semana.\nPreferências: refeições simples, treino no período da manhã.\nObservações: acompanhar pressão arterial e qualidade do sono.',
+      '{"objetivo":"hipertrofia","sono":"6h30","restricoes":[]}'::jsonb,
+      1,
+      false,
+      target_profile_id,
+      now() - interval '40 days',
+      now() - interval '40 days'
+    ),
+    (
+      'c9000000-0000-4000-8000-000000000102',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      'Revisão de anamnese',
+      'Boa evolução de composição corporal; ajustar sono e carboidratos em dias de treino.',
+      'Queixa principal: manter ganho de massa magra com menos fadiga no fim da semana.\nHistórico: sem intercorrências, aumento progressivo de cargas.\nHábitos: hidratação melhorou durante a semana; sono ainda oscila em dias de trabalho.\nPreferências: manter café da manhã proteico e variações no almoço.\nConduta: reforçar rotina de sono, revisar carboidrato pré-treino e monitorar pressão.',
+      '{"objetivo":"hipertrofia","sono":"oscilante","conduta":"ajuste pré-treino"}'::jsonb,
+      2,
+      true,
+      target_profile_id,
+      now() - interval '7 days',
+      now() - interval '7 days'
+    );
+
+  insert into public.partner_client_prescription_notes (
+    id,
+    partner_id,
+    patient_id,
+    title,
+    prescription_type,
+    status,
+    content,
+    instructions,
+    version_number,
+    published_at,
+    archived_at,
+    created_by_profile_id,
+    created_at,
+    updated_at
+  )
+  values
+    (
+      'c9000000-0000-4000-8000-000000000201',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      'Rotina pré-treino',
+      'nutrition',
+      'published',
+      'Consumir refeição pré-treino 60 a 90 minutos antes do treino.\nPriorizar carboidrato de digestão confortável e proteína magra.\nRegistrar energia percebida após os treinos principais.',
+      'Cliente visualiza como orientação publicada.',
+      1,
+      now() - interval '6 days',
+      null,
+      target_profile_id,
+      now() - interval '6 days',
+      now() - interval '6 days'
+    ),
+    (
+      'c9000000-0000-4000-8000-000000000202',
+      target_partner_id,
+      'a1000000-0000-4000-8000-000000000301',
+      'Ajuste de recuperação',
+      'behavior',
+      'draft',
+      'Avaliar rotina de sono por 7 dias.\nSe a média ficar abaixo de 7h, reduzir uma série dos exercícios acessórios no último treino da semana.',
+      null,
+      2,
+      null,
+      null,
+      target_profile_id,
+      now() - interval '2 days',
+      now() - interval '2 days'
+    );
+
+  insert into public.partner_form_templates (
+    id,
+    partner_id,
+    title,
+    description,
+    status,
+    created_by_profile_id,
+    created_at,
+    updated_at
+  )
+  values (
+    'c9000000-0000-4000-8000-000000000301',
+    target_partner_id,
+    'Check-in semanal',
+    'Questionário rápido de percepção, aderência e recuperação.',
+    'active',
+    target_profile_id,
+    now() - interval '1 day',
+    now() - interval '1 day'
+  );
+
+  insert into public.partner_form_questions (
+    id,
+    template_id,
+    partner_id,
+    sort_order,
+    question_type,
+    prompt,
+    help_text,
+    required,
+    options,
+    scale_min,
+    scale_max,
+    created_at,
+    updated_at
+  )
+  values
+    ('c9000000-0000-4000-8000-000000000311', 'c9000000-0000-4000-8000-000000000301', target_partner_id, 0, 'scale', 'Como foi sua energia nos treinos desta semana?', '0 significa muito baixa; 10 significa excelente.', true, '[]'::jsonb, 0, 10, now() - interval '1 day', now() - interval '1 day'),
+    ('c9000000-0000-4000-8000-000000000312', 'c9000000-0000-4000-8000-000000000301', target_partner_id, 1, 'single_choice', 'Como ficou sua aderência à dieta?', null, true, '["Baixa","Média","Alta"]'::jsonb, null, null, now() - interval '1 day', now() - interval '1 day'),
+    ('c9000000-0000-4000-8000-000000000313', 'c9000000-0000-4000-8000-000000000301', target_partner_id, 2, 'text_long', 'O que dificultou sua rotina nos últimos dias?', null, false, '[]'::jsonb, null, null, now() - interval '1 day', now() - interval '1 day');
+
+  insert into public.partner_form_assignments (
+    id,
+    partner_id,
+    template_id,
+    title,
+    message,
+    status,
+    sent_at,
+    created_by_profile_id,
+    created_at,
+    updated_at
+  )
+  values (
+    'c9000000-0000-4000-8000-000000000321',
+    target_partner_id,
+    'c9000000-0000-4000-8000-000000000301',
+    'Check-in semanal',
+    'Responda antes da próxima consulta para ajustarmos o plano.',
+    'sent',
+    now() - interval '1 day',
+    target_profile_id,
+    now() - interval '1 day',
+    now() - interval '1 day'
+  );
+
+  insert into public.partner_form_assignment_clients (
+    id,
+    assignment_id,
+    partner_id,
+    patient_id,
+    status,
+    opened_at,
+    submitted_at,
+    created_at,
+    updated_at
+  )
+  values
+    ('c9000000-0000-4000-8000-000000000331', 'c9000000-0000-4000-8000-000000000321', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'assigned', null, null, now() - interval '1 day', now() - interval '1 day'),
+    ('c9000000-0000-4000-8000-000000000332', 'c9000000-0000-4000-8000-000000000321', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'assigned', null, null, now() - interval '1 day', now() - interval '1 day');
 
   insert into public.support_tickets (
     id,
