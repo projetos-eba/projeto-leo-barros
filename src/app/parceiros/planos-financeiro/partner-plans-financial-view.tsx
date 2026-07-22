@@ -35,6 +35,7 @@ import {
   createPartnerServicePlan,
   duplicatePartnerServicePlan,
   recordReceivablePayment,
+  renewClientPlanContract,
   revertReceivablePayment,
 } from "./actions";
 
@@ -102,6 +103,12 @@ function statusLabel(receivable: PartnerClientReceivable) {
   if (receivable.status === "cancelled") return "Cancelado";
   if (new Date(`${receivable.due_date}T00:00:00`) < new Date(new Date().toDateString())) return "Atrasado";
   return "Pendente";
+}
+
+function todayIso() {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 10);
 }
 
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
@@ -243,6 +250,16 @@ export function PartnerPlansFinancialView({ data }: { data: PartnerFinanceData }
     setPaymentReceivableId("");
   }
 
+  function renewContract(contract: PartnerClientPlanContract) {
+    const today = todayIso();
+    runAction(() => renewClientPlanContract({
+      contractId: contract.id,
+      firstDueDate: today,
+      startDate: today,
+      totalInstallments: contract.duration_cycles_snapshot,
+    }));
+  }
+
   return (
     <main className="min-h-screen bg-[#0b1720] px-3 py-4 text-white sm:px-5 sm:py-6">
       <div className="mx-auto grid max-w-[1280px] gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
@@ -302,29 +319,65 @@ export function PartnerPlansFinancialView({ data }: { data: PartnerFinanceData }
           {message ? <p className="mt-3 rounded-[8px] border border-[#2d4354] bg-[#0d1823] px-4 py-3 text-[13px] text-[#8fcfff]">{message}</p> : null}
 
           {tab === "plans" ? (
-            <Panel className="mt-4 overflow-hidden">
-              <FinanceTable
-                headers={["Plano", "Categoria", "Valor", "Periodicidade", "Duração", "Módulos", "Clientes", "Status", "Ações"]}
-                rows={data.servicePlans.map((plan) => [
-                  <div key="name"><p className="font-semibold text-white">{plan.name}</p><p className="text-[12px] text-[#8b92a3]">{plan.description ?? "Sem descrição"}</p></div>,
-                  plan.category,
-                  formatCurrency(plan.price_cents),
-                  intervalLabels[plan.billing_interval] ?? plan.billing_interval,
-                  `${plan.duration_cycles} ${plan.duration_cycles === 1 ? "ciclo" : "ciclos"}`,
-                  <span className="inline-flex gap-1" key="mods">
-                    {plan.includes_diet ? <span className="rounded bg-[#0e2c1e] px-2 py-1 text-[#62d98b]">Dieta</span> : null}
-                    {plan.includes_training ? <span className="rounded bg-[#0a2b48] px-2 py-1 text-[#55b4ff]">Treino</span> : null}
-                  </span>,
-                  String(planClients[plan.id] ?? 0),
-                  <span className={cn("rounded px-2 py-1 text-[12px] font-semibold", plan.status === "active" ? "bg-[#0e2c1e] text-[#62d98b]" : "bg-[#2b313a] text-[#a7b3bf]")} key="status">{plan.status === "active" ? "Ativo" : "Arquivado"}</span>,
-                  <div className="flex gap-1" key="actions">
-                    <IconAction label="Duplicar" disabled={pending} onClick={() => runAction(() => duplicatePartnerServicePlan(plan.id))}><Copy className="size-4" /></IconAction>
-                    <IconAction label="Vincular" disabled={pending || plan.status !== "active"} onClick={() => { setAssignPlanId(plan.id); setTab("contracts"); }}><UserPlus className="size-4" /></IconAction>
-                    <IconAction label="Arquivar" disabled={pending || plan.status !== "active"} onClick={() => runAction(() => archivePartnerServicePlan(plan.id))}><Archive className="size-4" /></IconAction>
-                  </div>,
-                ])}
-                empty="Nenhum plano cadastrado."
-              />
+            <Panel className="mt-4 overflow-hidden p-3 md:p-0">
+              <div className="grid gap-3 md:hidden">
+                {data.servicePlans.length === 0 ? <p className="px-4 py-8 text-center text-[13px] text-[#8b92a3]">Nenhum plano cadastrado.</p> : null}
+                {data.servicePlans.map((plan) => (
+                  <article className="rounded-[9px] border border-[#263846] bg-[#0d1823] p-3" key={plan.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-[14px] font-bold text-white">{plan.name}</h3>
+                        <p className="mt-1 line-clamp-2 text-[12px] text-[#8b92a3]">{plan.description ?? "Sem descrição"}</p>
+                      </div>
+                      <span className={cn("shrink-0 rounded px-2 py-1 text-[11px] font-semibold", plan.status === "active" ? "bg-[#0e2c1e] text-[#62d98b]" : "bg-[#2b313a] text-[#a7b3bf]")}>
+                        {plan.status === "active" ? "Ativo" : "Arquivado"}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
+                      <CompactFact label="Valor" value={formatCurrency(plan.price_cents)} />
+                      <CompactFact label="Clientes" value={String(planClients[plan.id] ?? 0)} />
+                      <CompactFact label="Periodicidade" value={intervalLabels[plan.billing_interval] ?? plan.billing_interval} />
+                      <CompactFact label="Duração" value={`${plan.duration_cycles} ${plan.duration_cycles === 1 ? "ciclo" : "ciclos"}`} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {plan.includes_diet ? <span className="rounded bg-[#0e2c1e] px-2 py-1 text-[11px] font-semibold text-[#62d98b]">Dieta</span> : null}
+                      {plan.includes_training ? <span className="rounded bg-[#0a2b48] px-2 py-1 text-[11px] font-semibold text-[#55b4ff]">Treino</span> : null}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <ActionButton disabled={pending || plan.status !== "active"} onClick={() => { setAssignPlanId(plan.id); setTab("contracts"); }}>
+                        <UserPlus className="size-4" /> Vincular
+                      </ActionButton>
+                      <ActionButton disabled={pending || plan.status !== "active"} onClick={() => runAction(() => archivePartnerServicePlan(plan.id))}>
+                        <Archive className="size-4" /> Arquivar
+                      </ActionButton>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="hidden md:block">
+                <FinanceTable
+                  headers={["Plano", "Categoria", "Valor", "Periodicidade", "Duração", "Módulos", "Clientes", "Status", "Ações"]}
+                  rows={data.servicePlans.map((plan) => [
+                    <div key="name"><p className="font-semibold text-white">{plan.name}</p><p className="text-[12px] text-[#8b92a3]">{plan.description ?? "Sem descrição"}</p></div>,
+                    plan.category,
+                    formatCurrency(plan.price_cents),
+                    intervalLabels[plan.billing_interval] ?? plan.billing_interval,
+                    `${plan.duration_cycles} ${plan.duration_cycles === 1 ? "ciclo" : "ciclos"}`,
+                    <span className="inline-flex gap-1" key="mods">
+                      {plan.includes_diet ? <span className="rounded bg-[#0e2c1e] px-2 py-1 text-[#62d98b]">Dieta</span> : null}
+                      {plan.includes_training ? <span className="rounded bg-[#0a2b48] px-2 py-1 text-[#55b4ff]">Treino</span> : null}
+                    </span>,
+                    String(planClients[plan.id] ?? 0),
+                    <span className={cn("rounded px-2 py-1 text-[12px] font-semibold", plan.status === "active" ? "bg-[#0e2c1e] text-[#62d98b]" : "bg-[#2b313a] text-[#a7b3bf]")} key="status">{plan.status === "active" ? "Ativo" : "Arquivado"}</span>,
+                    <div className="flex gap-1" key="actions">
+                      <IconAction label="Duplicar" disabled={pending} onClick={() => runAction(() => duplicatePartnerServicePlan(plan.id))}><Copy className="size-4" /></IconAction>
+                      <IconAction label="Vincular" disabled={pending || plan.status !== "active"} onClick={() => { setAssignPlanId(plan.id); setTab("contracts"); }}><UserPlus className="size-4" /></IconAction>
+                      <IconAction label="Arquivar" disabled={pending || plan.status !== "active"} onClick={() => runAction(() => archivePartnerServicePlan(plan.id))}><Archive className="size-4" /></IconAction>
+                    </div>,
+                  ])}
+                  empty="Nenhum plano cadastrado."
+                />
+              </div>
             </Panel>
           ) : null}
 
@@ -352,9 +405,36 @@ export function PartnerPlansFinancialView({ data }: { data: PartnerFinanceData }
                   <input className="h-10 rounded-[8px] border border-[#303746] bg-[#081520] px-3 text-[13px]" min={1} type="number" value={assignInstallments} onChange={(event) => setAssignInstallments(Number(event.target.value))} />
                 </Field>
               </div>
-              <div className="mt-4 overflow-hidden rounded-[8px] border border-[#263846]">
+              <div className="mt-4 grid gap-3 md:hidden">
+                {data.contracts.length === 0 ? <p className="rounded-[8px] border border-[#263846] bg-[#0d1823] px-4 py-8 text-center text-[13px] text-[#8b92a3]">Nenhum plano vinculado.</p> : null}
+                {data.contracts.map((contract) => (
+                  <article className="rounded-[9px] border border-[#263846] bg-[#0d1823] p-3" key={contract.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-[14px] font-bold text-white">{clientsById[contract.patient_id]?.name ?? "Cliente"}</h3>
+                        <p className="mt-1 truncate text-[12px] text-[#8b92a3]">{contract.plan_name_snapshot}</p>
+                      </div>
+                      <span className={cn("shrink-0 rounded px-2 py-1 text-[11px] font-semibold", contract.status === "active" ? "bg-[#0e2c1e] text-[#62d98b]" : "bg-[#2b313a] text-[#a7b3bf]")}>
+                        {contract.status === "active" ? "Ativo" : contract.status === "paused" ? "Pausado" : "Encerrado"}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
+                      <CompactFact label="Início" value={formatDate(contract.start_date)} />
+                      <CompactFact label="Próxima cobrança" value={formatDate(contract.first_due_date)} />
+                      <CompactFact label="Valor" value={formatCurrency(contract.price_cents_snapshot)} />
+                      <CompactFact label="Parcelas" value={String(contract.duration_cycles_snapshot)} />
+                    </div>
+                    <div className="mt-3">
+                      <ActionButton disabled={pending || contract.status !== "active"} onClick={() => renewContract(contract)}>
+                        <RefreshCcw className="size-4" /> Renovar contrato
+                      </ActionButton>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="mt-4 hidden overflow-hidden rounded-[8px] border border-[#263846] md:block">
                 <FinanceTable
-                  headers={["Cliente", "Plano", "Início", "Próxima cobrança", "Valor", "Situação"]}
+                  headers={["Cliente", "Plano", "Início", "Próxima cobrança", "Valor", "Situação", "Ações"]}
                   rows={data.contracts.map((contract) => [
                     clientsById[contract.patient_id]?.name ?? "Cliente",
                     contract.plan_name_snapshot,
@@ -362,6 +442,9 @@ export function PartnerPlansFinancialView({ data }: { data: PartnerFinanceData }
                     formatDate(contract.first_due_date),
                     formatCurrency(contract.price_cents_snapshot),
                     contract.status === "active" ? "Ativo" : contract.status === "paused" ? "Pausado" : "Encerrado",
+                    <IconAction label="Renovar contrato" disabled={pending || contract.status !== "active"} onClick={() => renewContract(contract)} key="renew">
+                      <RefreshCcw className="size-4" />
+                    </IconAction>,
                   ])}
                   empty="Nenhum plano vinculado."
                 />
@@ -370,31 +453,68 @@ export function PartnerPlansFinancialView({ data }: { data: PartnerFinanceData }
           ) : null}
 
           {tab === "receivables" ? (
-            <Panel className="mt-4 overflow-hidden">
-              <FinanceTable
-                headers={["Cliente", "Plano", "Parcela", "Vencimento", "Valor", "Situação", "Pagamento", "Ações"]}
-                rows={data.receivables.map((receivable) => {
+            <Panel className="mt-4 overflow-hidden p-3 md:p-0">
+              <div className="grid gap-3 md:hidden">
+                {data.receivables.length === 0 ? <p className="px-4 py-8 text-center text-[13px] text-[#8b92a3]">Nenhuma parcela cadastrada.</p> : null}
+                {data.receivables.map((receivable) => {
                   const contract = data.contracts.find((item) => item.id === receivable.contract_id);
                   const status = statusLabel(receivable);
-                  return [
-                    clientsById[receivable.patient_id]?.name ?? "Cliente",
-                    contract?.plan_name_snapshot ?? "Plano",
-                    `${receivable.installment_number}/${contract?.duration_cycles_snapshot ?? receivable.installment_number}`,
-                    formatDate(receivable.due_date),
-                    formatCurrency(receivable.amount_cents),
-                    <span className={cn("rounded px-2 py-1 text-[12px] font-semibold", status === "Pago" ? "bg-[#0e2c1e] text-[#62d98b]" : status === "Atrasado" ? "bg-[#37171b] text-[#ff6f7d]" : "bg-[#302813] text-[#f2c84b]")} key="status">{status}</span>,
-                    receivable.payment_method ? methodLabels[receivable.payment_method] : "Sem registro",
-                    <div className="flex gap-1" key="actions">
-                      {receivable.status === "paid" ? (
-                        <IconAction label="Desfazer pagamento" disabled={pending} onClick={() => runAction(() => revertReceivablePayment(receivable.id))}><RefreshCcw className="size-4" /></IconAction>
-                      ) : (
-                        <IconAction label="Registrar pagamento" disabled={pending} onClick={() => setPaymentReceivableId(receivable.id)}><CheckCircle2 className="size-4" /></IconAction>
-                      )}
-                    </div>,
-                  ];
+                  return (
+                    <article className="rounded-[9px] border border-[#263846] bg-[#0d1823] p-3" key={receivable.id}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-[14px] font-bold text-white">{clientsById[receivable.patient_id]?.name ?? "Cliente"}</h3>
+                          <p className="mt-1 truncate text-[12px] text-[#8b92a3]">{contract?.plan_name_snapshot ?? "Plano"}</p>
+                        </div>
+                        <span className={cn("shrink-0 rounded px-2 py-1 text-[11px] font-semibold", status === "Pago" ? "bg-[#0e2c1e] text-[#62d98b]" : status === "Atrasado" ? "bg-[#37171b] text-[#ff6f7d]" : "bg-[#302813] text-[#f2c84b]")}>{status}</span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
+                        <CompactFact label="Parcela" value={`${receivable.installment_number}/${contract?.duration_cycles_snapshot ?? receivable.installment_number}`} />
+                        <CompactFact label="Valor" value={formatCurrency(receivable.amount_cents)} />
+                        <CompactFact label="Vencimento" value={formatDate(receivable.due_date)} />
+                        <CompactFact label="Pagamento" value={receivable.payment_method ? methodLabels[receivable.payment_method] : "Sem registro"} />
+                      </div>
+                      <div className="mt-3">
+                        {receivable.status === "paid" ? (
+                          <ActionButton disabled={pending} onClick={() => runAction(() => revertReceivablePayment(receivable.id))}>
+                            <RefreshCcw className="size-4" /> Desfazer pagamento
+                          </ActionButton>
+                        ) : (
+                          <ActionButton disabled={pending} tone="primary" onClick={() => setPaymentReceivableId(receivable.id)}>
+                            <CheckCircle2 className="size-4" /> Registrar pagamento
+                          </ActionButton>
+                        )}
+                      </div>
+                    </article>
+                  );
                 })}
-                empty="Nenhuma parcela cadastrada."
-              />
+              </div>
+              <div className="hidden md:block">
+                <FinanceTable
+                  headers={["Cliente", "Plano", "Parcela", "Vencimento", "Valor", "Situação", "Pagamento", "Ações"]}
+                  rows={data.receivables.map((receivable) => {
+                    const contract = data.contracts.find((item) => item.id === receivable.contract_id);
+                    const status = statusLabel(receivable);
+                    return [
+                      clientsById[receivable.patient_id]?.name ?? "Cliente",
+                      contract?.plan_name_snapshot ?? "Plano",
+                      `${receivable.installment_number}/${contract?.duration_cycles_snapshot ?? receivable.installment_number}`,
+                      formatDate(receivable.due_date),
+                      formatCurrency(receivable.amount_cents),
+                      <span className={cn("rounded px-2 py-1 text-[12px] font-semibold", status === "Pago" ? "bg-[#0e2c1e] text-[#62d98b]" : status === "Atrasado" ? "bg-[#37171b] text-[#ff6f7d]" : "bg-[#302813] text-[#f2c84b]")} key="status">{status}</span>,
+                      receivable.payment_method ? methodLabels[receivable.payment_method] : "Sem registro",
+                      <div className="flex gap-1" key="actions">
+                        {receivable.status === "paid" ? (
+                          <IconAction label="Desfazer pagamento" disabled={pending} onClick={() => runAction(() => revertReceivablePayment(receivable.id))}><RefreshCcw className="size-4" /></IconAction>
+                        ) : (
+                          <IconAction label="Registrar pagamento" disabled={pending} onClick={() => setPaymentReceivableId(receivable.id)}><CheckCircle2 className="size-4" /></IconAction>
+                        )}
+                      </div>,
+                    ];
+                  })}
+                  empty="Nenhuma parcela cadastrada."
+                />
+              </div>
             </Panel>
           ) : null}
         </section>
@@ -544,6 +664,15 @@ function FinanceTable({ empty, headers, rows }: { empty: string; headers: string
         </tbody>
       </table>
     </div>
+  );
+}
+
+function CompactFact({ label, value }: { label: string; value: string }) {
+  return (
+    <p className="min-w-0 rounded-[7px] bg-[#081520] p-2">
+      <span className="block text-[#7f8b98]">{label}</span>
+      <strong className="mt-1 block truncate text-white">{value}</strong>
+    </p>
   );
 }
 

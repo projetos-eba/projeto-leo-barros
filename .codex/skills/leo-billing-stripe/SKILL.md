@@ -120,6 +120,7 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 ## UI De Billing
 
 - `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing, sem menu operacional de Parceiros.
+- `Planos & Financeiro` no ambiente do Parceiro controla contratos e recebimentos manuais dos Clientes atendidos. Isso nao cobra o Cliente pela plataforma nem substitui Stripe Billing do Parceiro; renovacao de contrato financeiro deve ficar separada de publicacao/atualizacao clinica de dieta e treino.
 - Essas rotas continuam protegidas por autenticacao, `profiles.role = parceiro` e `profiles.status = active`, mas nao exigem assinatura ativa para acesso.
 - Payment Element deve usar Stripe Appearance em `src/lib/billing/stripe-appearance.ts`, tema escuro, foco azul e inputs integrados ao card.
 - Checkout deve apresentar metodos de pagamento como opcoes selecionaveis; Cartao de credito ou debito abre o Payment Element dentro do card, sem botao generico para iniciar metodo de pagamento.

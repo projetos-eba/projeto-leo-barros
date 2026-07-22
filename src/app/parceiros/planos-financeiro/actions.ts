@@ -48,6 +48,13 @@ const paymentSchema = z.object({
   receivableId: uuidSchema,
 });
 
+const renewContractSchema = z.object({
+  contractId: uuidSchema,
+  firstDueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  totalInstallments: z.number().int().min(1).max(60),
+});
+
 async function getPartnerContext() {
   const supabase = await createClient();
   const { profile } = await getCurrentProfile();
@@ -88,6 +95,12 @@ function addCycles(firstDueDate: string, interval: string, cycles: number) {
   else if (interval === "quarterly") date.setMonth(date.getMonth() + cycles * 3);
   else if (interval === "one_time") date.setDate(date.getDate() + cycles);
   else date.setMonth(date.getMonth() + cycles);
+  return date.toISOString().slice(0, 10);
+}
+
+function previousDate(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+  date.setDate(date.getDate() - 1);
   return date.toISOString().slice(0, 10);
 }
 
@@ -314,6 +327,107 @@ export async function assignPlanToClient(input: z.input<typeof assignPlanSchema>
     });
     revalidateFinance(parsed.data.patientId);
     return { message: "Plano vinculado ao cliente.", ok: true };
+  } catch (error) {
+    return { error: friendlyError(error), ok: false };
+  }
+}
+
+export async function renewClientPlanContract(input: z.input<typeof renewContractSchema>): Promise<PartnerFinanceActionResult> {
+  const parsed = renewContractSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da renovação.", ok: false };
+
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  type LooseInsertBuilder = PromiseLike<{ error: unknown }> & {
+    select(columns: string): { single(): Promise<{ data: { id: string }; error: unknown }> };
+  };
+  const db = context.supabase as unknown as {
+    from(table: string): {
+      insert(values: Record<string, unknown> | Array<Record<string, unknown>>): LooseInsertBuilder;
+      select(columns: string): {
+        eq(column: string, value: string): {
+          eq(column: string, value: string): { single(): Promise<{ data: {
+            billing_interval_snapshot: string;
+            category_snapshot: string;
+            duration_cycles_snapshot: number;
+            id: string;
+            includes_diet_snapshot: boolean;
+            includes_training_snapshot: boolean;
+            notes: string | null;
+            patient_id: string;
+            plan_name_snapshot: string;
+            price_cents_snapshot: number;
+            service_plan_id: string | null;
+          }; error: unknown }> };
+        };
+      };
+      update(values: Record<string, unknown>): {
+        eq(column: string, value: string): { eq(column: string, value: string): Promise<{ error: unknown }> };
+      };
+    };
+  };
+
+  try {
+    const { data: contract, error: readError } = await db
+      .from("partner_client_plan_contracts")
+      .select("id, patient_id, service_plan_id, plan_name_snapshot, category_snapshot, price_cents_snapshot, billing_interval_snapshot, duration_cycles_snapshot, includes_diet_snapshot, includes_training_snapshot, notes")
+      .eq("id", parsed.data.contractId)
+      .eq("partner_id", context.partnerId)
+      .single();
+    if (readError) throw readError;
+
+    const { error: closeError } = await db
+      .from("partner_client_plan_contracts")
+      .update({
+        end_date: previousDate(parsed.data.startDate),
+        status: "completed",
+      })
+      .eq("id", contract.id)
+      .eq("partner_id", context.partnerId);
+    if (closeError) throw closeError;
+
+    const { data: renewedContract, error: contractError } = await db
+      .from("partner_client_plan_contracts")
+      .insert({
+        billing_interval_snapshot: contract.billing_interval_snapshot,
+        category_snapshot: contract.category_snapshot,
+        duration_cycles_snapshot: parsed.data.totalInstallments,
+        first_due_date: parsed.data.firstDueDate,
+        includes_diet_snapshot: contract.includes_diet_snapshot,
+        includes_training_snapshot: contract.includes_training_snapshot,
+        notes: contract.notes,
+        partner_id: context.partnerId,
+        patient_id: contract.patient_id,
+        plan_name_snapshot: contract.plan_name_snapshot,
+        price_cents_snapshot: contract.price_cents_snapshot,
+        renewal_reminder: true,
+        service_plan_id: contract.service_plan_id,
+        start_date: parsed.data.startDate,
+        status: "active",
+      })
+      .select("id")
+      .single();
+    if (contractError) throw contractError;
+
+    const receivables = Array.from({ length: parsed.data.totalInstallments }, (_, index) => ({
+      amount_cents: contract.price_cents_snapshot,
+      contract_id: renewedContract.id,
+      due_date: addCycles(parsed.data.firstDueDate, contract.billing_interval_snapshot, index),
+      installment_number: index + 1,
+      partner_id: context.partnerId,
+      patient_id: contract.patient_id,
+      status: "pending",
+    }));
+    const { error: receivablesError } = await db.from("partner_client_receivables").insert(receivables) as { error: unknown };
+    if (receivablesError) throw receivablesError;
+
+    await recordEvent(context, "contract_renewed", "Contrato financeiro renovado.", {
+      contractId: renewedContract.id,
+      patientId: contract.patient_id,
+      servicePlanId: contract.service_plan_id,
+    });
+    revalidateFinance(contract.patient_id);
+    return { message: "Contrato renovado.", ok: true };
   } catch (error) {
     return { error: friendlyError(error), ok: false };
   }

@@ -122,10 +122,10 @@ const dashboard: PartnerDashboardData = {
     },
     {
       chartKey: "adherentClients",
-      description: "Clientes aderentes.",
+      description: "Clientes com contrato financeiro vigente.",
       icon: "users",
       id: "adherentClients",
-      label: "Clientes aderentes (≥80%)",
+      label: "Clientes com plano",
       unit: "number",
       value: "112",
     },

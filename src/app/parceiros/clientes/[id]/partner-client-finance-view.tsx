@@ -9,7 +9,7 @@ import type { PartnerClientReceivable, PartnerFinanceData } from "@/lib/partners
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
 
-import { recordReceivablePayment, revertReceivablePayment } from "../../planos-financeiro/actions";
+import { recordReceivablePayment, renewClientPlanContract, revertReceivablePayment } from "../../planos-financeiro/actions";
 import { PartnerClientProfileHeader } from "./partner-client-profile-header";
 
 type ReceivableFilter = "all" | "pending" | "paid" | "overdue";
@@ -134,6 +134,16 @@ export function PartnerClientFinanceView({ finance, overview }: { finance: Partn
     setPaymentReceivableId("");
   }
 
+  function renewContract(contractId: string, totalInstallments: number) {
+    const today = todayInputValue();
+    runAction(() => renewClientPlanContract({
+      contractId,
+      firstDueDate: today,
+      startDate: today,
+      totalInstallments,
+    }));
+  }
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#0b1720] pb-10 text-white sm:pb-12">
       <div className="mx-auto w-full max-w-[1240px] px-3 py-4 sm:px-6 sm:py-6">
@@ -164,6 +174,15 @@ export function PartnerClientFinanceView({ finance, overview }: { finance: Partn
                   <h3 className="mt-3 text-[15px] font-bold">{contract.plan_name_snapshot}</h3>
                   <p className="mt-2 text-[13px] text-[#62d98b]">{formatCurrency(contract.price_cents_snapshot)} / {contract.billing_interval_snapshot === "monthly" ? "mês" : "ciclo"}</p>
                   <p className="mt-1 text-[12px] text-[#8b92a3]">Início em {formatDate(contract.start_date)}</p>
+                  <button
+                    className="mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-[7px] border border-[#334656] bg-[#0d1823] px-2.5 text-[12px] font-semibold text-[#d8e5ee] transition hover:border-[#3b97e3] disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={pending || contract.status !== "active"}
+                    type="button"
+                    onClick={() => renewContract(contract.id, contract.duration_cycles_snapshot)}
+                  >
+                    <RefreshCcw className="size-4" />
+                    Renovar contrato
+                  </button>
                 </article>
               ))}
             </div>
@@ -202,7 +221,46 @@ export function PartnerClientFinanceView({ finance, overview }: { finance: Partn
               <SmallSummary label="Pagas" value={String(paidReceivables.length)} subtext={formatCurrency(paidYearCents)} tone="green" />
             </div>
 
-            <div className="mt-3 w-full max-w-full overflow-x-auto rounded-[8px] border border-[#263846]">
+            <div className="mt-3 grid gap-3 md:hidden">
+              {filteredReceivables.length === 0 ? (
+                <p className="rounded-[8px] border border-[#263846] bg-[#0d1823] px-4 py-8 text-center text-[13px] text-[#8b92a3]">Nenhum recebimento encontrado.</p>
+              ) : filteredReceivables.map((receivable) => {
+                const contract = contractFor(receivable);
+                const status = receivableStatus(receivable.status, receivable.due_date);
+                return (
+                  <article className="rounded-[9px] border border-[#263846] bg-[#0d1823] p-3" key={receivable.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-bold text-white">{contract?.plan_name_snapshot ?? "Plano"}</p>
+                        <p className="mt-1 text-[12px] text-[#8b92a3]">Parcela {receivable.installment_number}/{contract?.duration_cycles_snapshot ?? receivable.installment_number}</p>
+                      </div>
+                      <span className={cn("shrink-0 rounded px-2 py-1 text-[11px] font-semibold", receivableTone(status))}>{status}</span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
+                      <p className="rounded-[7px] bg-[#081520] p-2"><span className="block text-[#7f8b98]">Vencimento</span><strong className="mt-1 block text-white">{formatDate(receivable.due_date)}</strong></p>
+                      <p className="rounded-[7px] bg-[#081520] p-2"><span className="block text-[#7f8b98]">Valor</span><strong className="mt-1 block text-white">{formatCurrency(receivable.amount_cents)}</strong></p>
+                      <p className="rounded-[7px] bg-[#081520] p-2"><span className="block text-[#7f8b98]">Pagamento</span><strong className="mt-1 block truncate text-white">{formatPaidDate(receivable.paid_at)}</strong></p>
+                      <p className="rounded-[7px] bg-[#081520] p-2"><span className="block text-[#7f8b98]">Forma</span><strong className="mt-1 block truncate text-white">{receivable.payment_method ? methodLabels[receivable.payment_method as PaymentMethod] ?? "Outro" : "Sem registro"}</strong></p>
+                    </div>
+                    <div className="mt-3">
+                      {receivable.status === "paid" ? (
+                        <ActionButton disabled={pending} label="Desfazer pagamento" onClick={() => runAction(() => revertReceivablePayment(receivable.id))}>
+                          <RefreshCcw className="size-4" />
+                          Desfazer pagamento
+                        </ActionButton>
+                      ) : (
+                        <ActionButton disabled={pending || receivable.status === "cancelled"} label="Marcar como pago" tone="primary" onClick={() => openPayment(receivable.id)}>
+                          <CheckCircle2 className="size-4" />
+                          Marcar como pago
+                        </ActionButton>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 hidden w-full max-w-full overflow-x-auto rounded-[8px] border border-[#263846] md:block">
               <table className="w-full min-w-[760px] text-left text-[12px] sm:min-w-[980px] sm:text-[13px]">
                 <thead className="bg-[#0c1823] text-[#8b92a3]">
                   <tr>

@@ -1,10 +1,14 @@
 export type PartnerClientOverviewRawData = {
   adherence: Array<{
+    dietCompleted?: number | null;
     dietPercentage: number | null;
+    dietPlanned?: number | null;
     id: string;
     periodEnd: string;
     periodStart: string;
+    trainingCompleted?: number | null;
     trainingPercentage: number | null;
+    trainingPlanned?: number | null;
   }>;
   appointments: Array<{
     endsAt: string;
@@ -114,13 +118,17 @@ export type PartnerClientOverviewTask = {
 export type PartnerClientOverviewData = {
   adherenceTarget: number;
   adherenceWeeks: Array<{
+    dietCompleted: number | null;
     dietDelta: number | null;
     dietPercentage: number | null;
+    dietPlanned: number | null;
     id: string;
     label: string;
     periodStart: string;
+    trainingCompleted: number | null;
     trainingDelta: number | null;
     trainingPercentage: number | null;
+    trainingPlanned: number | null;
   }>;
   alerts: PartnerClientOverviewAlert[];
   bodyFat: {
@@ -413,13 +421,17 @@ export function buildPartnerClientOverview(
   return {
     adherenceTarget,
     adherenceWeeks: adherence.map((snapshot, index) => ({
+      dietCompleted: snapshot.dietCompleted ?? null,
       dietDelta: delta(snapshot.dietPercentage, adherence[index - 1]?.dietPercentage ?? null),
       dietPercentage: snapshot.dietPercentage,
+      dietPlanned: snapshot.dietPlanned ?? null,
       id: snapshot.id,
       label: index === adherence.length - 1 ? "Esta semana" : `Semana de ${dateFormatter.format(new Date(`${snapshot.periodStart}T12:00:00`))}`,
       periodStart: snapshot.periodStart,
+      trainingCompleted: snapshot.trainingCompleted ?? null,
       trainingDelta: delta(snapshot.trainingPercentage, adherence[index - 1]?.trainingPercentage ?? null),
       trainingPercentage: snapshot.trainingPercentage,
+      trainingPlanned: snapshot.trainingPlanned ?? null,
     })),
     alerts,
     bodyFat: {

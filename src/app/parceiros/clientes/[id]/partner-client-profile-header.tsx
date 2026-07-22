@@ -51,10 +51,10 @@ function ContractedPlan({ overview }: { overview: PartnerClientOverviewData }) {
 
   return (
     <section className="min-w-0 rounded-[10px] border border-[#2f82bf]/45 bg-[rgba(10,44,72,0.26)] p-3 sm:p-4">
-      <p className="text-[10px] font-semibold uppercase leading-3 tracking-[0.05em] text-[#9aa5b6] sm:text-[11px] sm:leading-[14px]">Plano contratado</p>
+      <p className="text-[10px] font-semibold uppercase leading-3 tracking-[0.05em] text-[#9aa5b6] sm:text-[11px] sm:leading-[14px]">Plano clínico atual</p>
       <p className="mt-1 truncate text-[14px] font-bold leading-5 text-white sm:text-[15px]">{plan?.name ?? "Sem plano vigente"}</p>
       <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#8fcfff] sm:text-[12px]">
-        {plan ? `Renovação: ${plan.renewalLabel}` : "Vincule um plano para acompanhar entregas e recebimentos."}
+        {plan ? `Atualização: ${plan.renewalLabel}` : "Vincule um plano clínico para acompanhar entregas."}
       </p>
     </section>
   );
