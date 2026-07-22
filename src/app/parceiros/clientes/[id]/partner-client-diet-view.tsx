@@ -2,10 +2,10 @@
 
 import {
   Activity,
+  Beef,
   Check,
   ChevronDown,
   Clock,
-  Copy,
   Droplets,
   Ellipsis,
   Flame,
@@ -41,7 +41,6 @@ import {
   addClientDietMealItem,
   createClientDietMeal,
   createClientDietPlan,
-  duplicateClientDietPlan,
   publishClientDietPlan,
   removeClientDietMeal,
   removeClientDietMealItem,
@@ -141,11 +140,11 @@ function GhostButton({ children, className, disabled, onClick, type = "button" }
   );
 }
 
-function IconButton({ label, children, onClick, disabled }: { children: ReactNode; disabled?: boolean; label: string; onClick?: () => void }) {
+function IconButton({ label, children, className, onClick, disabled }: { children: ReactNode; className?: string; disabled?: boolean; label: string; onClick?: () => void }) {
   return (
     <button
       aria-label={label}
-      className="inline-flex size-9 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923]/70 text-[#b8c7d4] transition hover:border-[#3b97e3] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      className={cn("inline-flex size-9 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923]/70 text-[#b8c7d4] transition hover:border-[#3b97e3] hover:text-white disabled:cursor-not-allowed disabled:opacity-50", className)}
       disabled={disabled}
       type="button"
       onClick={onClick}
@@ -198,21 +197,23 @@ function SummaryStrip({ onConfigure, plan }: { onConfigure: () => void; plan: No
 
   return (
     <Panel className="mt-5 overflow-hidden p-0">
-      <div className="grid gap-0 divide-y divide-[#273847] lg:grid-cols-[1.5fr_1fr_0.58fr_0.95fr] lg:divide-x lg:divide-y-0">
-        <div className="grid gap-4 p-5 sm:grid-cols-[1fr_repeat(3,auto)] sm:items-center">
+      <div className="grid gap-0 divide-y divide-[#273847] md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-[1.35fr_1fr_0.52fr_0.9fr]">
+        <div className="grid gap-3 p-4 sm:grid-cols-[1fr_repeat(3,auto)] sm:items-center sm:p-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Resumo geral</p>
             <div className="mt-2 flex items-baseline gap-2">
-              <p className="text-[32px] font-bold leading-none text-white">{formatNumber(totals.kcal)}</p>
+              <p className="text-[28px] font-bold leading-none text-white sm:text-[32px]">{formatNumber(totals.kcal)}</p>
               <span className="text-[13px] text-[#9aa5b6]">kcal</span>
             </div>
             <p className="mt-1 text-[12px] text-[#6f8090]">Calorias do dia selecionado</p>
           </div>
-          <MacroMetric color="green" icon={<Utensils className="size-4" />} label="Proteínas" value={totals.protein} />
-          <MacroMetric color="yellow" icon={<Wheat className="size-4" />} label="Carboidratos" value={totals.carbs} />
-          <MacroMetric color="red" icon={<Flame className="size-4" />} label="Gorduras" value={totals.fat} />
+          <div className="grid grid-cols-3 gap-2 sm:contents">
+            <MacroMetric color="green" icon={<Beef className="size-4" />} label="Proteínas" value={totals.protein} />
+            <MacroMetric color="yellow" icon={<Wheat className="size-4" />} label="Carboidratos" value={totals.carbs} />
+            <MacroMetric color="red" icon={<Flame className="size-4" />} label="Gorduras" value={totals.fat} />
+          </div>
         </div>
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Distribuição de macronutrientes</p>
           <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-[#07131d]">
             <span className="bg-[#45c777]" style={{ width: `${distribution.proteinPct}%` }} />
@@ -225,11 +226,11 @@ function SummaryStrip({ onConfigure, plan }: { onConfigure: () => void; plan: No
             <span className="text-[#f27882]">{distribution.fatPct}% GORD</span>
           </div>
         </div>
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[#8fcfff]"><Droplets className="size-4" /> Água</p>
-          <p className="mt-2 text-[24px] font-bold text-white">{formatNumber(plan.waterLiters, 1)} L</p>
+          <p className="mt-2 text-[22px] font-bold leading-7 text-white">{formatNumber(plan.waterLiters, 1)} L</p>
         </div>
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Objetivo calórico</p>
@@ -254,11 +255,11 @@ function MacroMetric({ color, icon, label, value }: { color: "green" | "red" | "
       : "bg-[#32171b] text-[#f27882]";
   const valueClass = color === "green" ? "text-[#62d98b]" : color === "yellow" ? "text-[#f2c84b]" : "text-[#f27882]";
   return (
-    <div className="flex items-center gap-3">
-      <span className={cn("flex size-9 items-center justify-center rounded-[9px]", colorClass)}>{icon}</span>
+    <div className="min-w-0 rounded-[8px] bg-[#081722]/60 p-2 sm:flex sm:items-center sm:gap-3 sm:bg-transparent sm:p-0">
+      <span className={cn("hidden size-9 items-center justify-center rounded-[9px] sm:flex", colorClass)}>{icon}</span>
       <div>
-        <p className={cn("text-[16px] font-bold leading-5", valueClass)}>{macroText(value)}</p>
-        <p className="mt-1 text-[12px] text-[#8b92a3]">{label}</p>
+        <p className={cn("truncate text-[13px] font-bold leading-5 sm:text-[16px]", valueClass)}>{macroText(value)}</p>
+        <p className="mt-0.5 truncate text-[10px] text-[#8b92a3] sm:mt-1 sm:text-[12px]">{label}</p>
       </div>
     </div>
   );
@@ -309,24 +310,32 @@ function MealCard({
           {meal.items.length === 0 ? (
             <div className="rounded-[10px] border border-dashed border-[#303746] px-4 py-5 text-[13px] text-[#8b92a3]">Nenhum alimento nesta refeição.</div>
           ) : meal.items.map((item) => (
-            <div className="grid min-h-10 grid-cols-1 gap-2 rounded-[8px] px-1 py-2 text-[13px] text-[#d8e5ee] hover:bg-[#101923]/60 md:grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_44px_36px] md:items-center md:gap-3" key={item.id}>
-              <p className="min-w-0 truncate font-semibold text-white">{item.name}</p>
-              <label className="sr-only" htmlFor={`quantity-${item.id}`}>Quantidade de {item.name}</label>
-              <input
-                className="h-8 rounded-[7px] border border-[#263948] bg-[#0b1720] px-2 text-[12px] text-white outline-none focus:border-[#3b97e3]"
-                id={`quantity-${item.id}`}
-                value={quantityEdits[item.id] ?? String(item.quantity)}
-                onChange={(event) => setQuantityEdits({ ...quantityEdits, [item.id]: event.target.value })}
-                onBlur={() => {
-                  const value = Number((quantityEdits[item.id] ?? item.quantity).toString().replace(",", "."));
-                  if (Number.isFinite(value) && value > 0 && value !== item.quantity) onUpdateItem(item.id, value);
-                }}
-              />
-              <span className="font-semibold text-[#62d98b]">{macroText(item.protein)}</span>
-              <span className="font-semibold text-[#f2c84b]">{macroText(item.carbs)}</span>
-              <span className="font-semibold text-[#f27882]">{macroText(item.fat)}</span>
-              <span>{formatNumber(item.kcal)}</span>
-              <IconButton disabled={pending} label={`Remover ${item.name}`} onClick={() => onRemoveItem(item.id)}><Trash2 className="size-3.5" /></IconButton>
+            <div className="rounded-[8px] px-1 py-2 text-[13px] text-[#d8e5ee] hover:bg-[#101923]/60" key={item.id}>
+              <div className="grid grid-cols-[minmax(0,1fr)_74px_36px] items-center gap-2 md:grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_44px_36px] md:gap-3">
+                <p className="min-w-0 truncate font-semibold text-white">{item.name}</p>
+                <label className="sr-only" htmlFor={`quantity-${item.id}`}>Quantidade de {item.name}</label>
+                <input
+                  className="h-8 rounded-[7px] border border-[#263948] bg-[#0b1720] px-2 text-[12px] text-white outline-none focus:border-[#3b97e3]"
+                  id={`quantity-${item.id}`}
+                  value={quantityEdits[item.id] ?? String(item.quantity)}
+                  onChange={(event) => setQuantityEdits({ ...quantityEdits, [item.id]: event.target.value })}
+                  onBlur={() => {
+                    const value = Number((quantityEdits[item.id] ?? item.quantity).toString().replace(",", "."));
+                    if (Number.isFinite(value) && value > 0 && value !== item.quantity) onUpdateItem(item.id, value);
+                  }}
+                />
+                <span className="hidden font-semibold text-[#62d98b] md:inline">{macroText(item.protein)}</span>
+                <span className="hidden font-semibold text-[#f2c84b] md:inline">{macroText(item.carbs)}</span>
+                <span className="hidden font-semibold text-[#f27882] md:inline">{macroText(item.fat)}</span>
+                <span className="hidden md:inline">{formatNumber(item.kcal)}</span>
+                <IconButton className="justify-self-end max-md:col-start-3 max-md:row-start-1" disabled={pending} label={`Remover ${item.name}`} onClick={() => onRemoveItem(item.id)}><Trash2 className="size-3.5" /></IconButton>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold md:hidden">
+                <span className="rounded-[5px] bg-[#0e2c1e] px-2 py-1 text-[#62d98b]">P {macroText(item.protein)}</span>
+                <span className="rounded-[5px] bg-[#302813] px-2 py-1 text-[#f2c84b]">C {macroText(item.carbs)}</span>
+                <span className="rounded-[5px] bg-[#32171b] px-2 py-1 text-[#f27882]">G {macroText(item.fat)}</span>
+                <span className="rounded-[5px] bg-[#102333] px-2 py-1 text-[#c7d3df]">{formatNumber(item.kcal)} kcal</span>
+              </div>
             </div>
           ))}
         </div>
@@ -447,28 +456,27 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
+    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="dietas" overview={overview} />
 
         {diet.plan ? (
           <>
-            <section className="mt-6 flex flex-wrap items-end justify-between gap-4">
+            <section className="mt-4 flex flex-wrap items-end justify-between gap-4 sm:mt-6">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Dieta atual</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3">
-                  <button className="inline-flex h-9 min-w-[230px] items-center justify-between rounded-[8px] border border-[#303746] bg-[#101923]/70 px-3 text-left text-[20px] font-bold text-white" type="button">
+                  <button className="inline-flex h-9 min-w-0 max-w-full items-center justify-between gap-3 rounded-[8px] border border-[#303746] bg-[#101923]/70 px-3 text-left text-[17px] font-bold text-white sm:min-w-[230px] sm:text-[20px]" type="button">
                     {diet.plan.title}<ChevronDown className="size-4 text-[#8b92a3]" />
                   </button>
                   <span className="inline-flex h-[26px] items-center gap-2 rounded-full border border-[#1d7041] bg-[#102d21] px-3 text-[12px] font-semibold text-[#64db8a]"><span className="size-1.5 rounded-full bg-[#64db8a]" />{diet.plan.statusLabel}</span>
                   <span className="text-[12px] text-[#8b92a3]">Criada em {diet.plan.createdLabel}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <PrimaryButton disabled={pending} onClick={() => setPlanDialogOpen(true)}><Plus className="size-4" /> Nova dieta</PrimaryButton>
-                <GhostButton disabled={pending} onClick={() => runAction(() => duplicateClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Copy className="size-4" /> Duplicar</GhostButton>
+              <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:grid-cols-none sm:flex sm:flex-wrap">
+                <PrimaryButton className="px-3" disabled={pending} onClick={() => setPlanDialogOpen(true)}><Plus className="size-4" /> Nova dieta</PrimaryButton>
                 <GhostButton disabled={pending} onClick={() => runAction(() => publishClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Check className="size-4" /> Publicar</GhostButton>
-                <PrimaryButton disabled={pending} onClick={() => runAction(() => sendClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Send className="size-4" /> Enviar ao Cliente</PrimaryButton>
+                <PrimaryButton className="col-span-2 px-3 sm:col-span-1" disabled={pending} onClick={() => runAction(() => sendClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Send className="size-4" /> Enviar ao Cliente</PrimaryButton>
                 <IconButton label="Mais ações"><Ellipsis className="size-4" /></IconButton>
               </div>
             </section>
@@ -486,10 +494,10 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
               })}
             </div>
 
-            <div className="mt-7 grid gap-4 xl:grid-cols-[0.96fr_1.04fr]">
+            <div className="mt-5 grid gap-4 sm:mt-7 xl:grid-cols-[0.96fr_1.04fr]">
               <div className="min-w-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="text-[28px] font-bold uppercase tracking-[0.01em] text-white">Plano alimentar</h2>
+                  <h2 className="text-[22px] font-bold uppercase tracking-[0.01em] text-white sm:text-[28px]">Plano alimentar</h2>
                   <div className="flex flex-wrap items-center gap-2">
                     {[1, 2].map((option) => (
                       <button
@@ -688,15 +696,20 @@ function MiniInfo({ label, value }: { label: string; value: string }) {
 
 function FoodRow({ disabled, food, onAdd, suggested }: { disabled: boolean; food: PartnerClientDietFood; onAdd: () => void; suggested: boolean }) {
   return (
-    <div className="grid min-h-[49px] grid-cols-1 gap-2 border-b border-[#273847] py-3 text-[13px] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_72px_112px_48px_28px] sm:items-center sm:gap-3">
+    <div className="grid min-h-[49px] grid-cols-[minmax(0,1fr)_36px] gap-2 border-b border-[#273847] py-3 text-[13px] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_72px_112px_48px_28px] sm:items-center sm:gap-3">
       <div className="min-w-0">
         <p className="truncate font-semibold text-white">{food.name}</p>
         <p className="mt-0.5 text-[11px] text-[#6f8090]">{food.categoryLabel}{suggested ? " · sugestão" : ""}</p>
       </div>
-      <span className="text-[#c7d3df]">{food.servingLabel}</span>
-      <span className="text-[#9aa5b6]">P {macroText(food.protein)} · C {macroText(food.carbs)} · G {macroText(food.fat)}</span>
-      <span className="font-semibold text-white">{formatNumber(food.kcal)}</span>
-      <IconButton disabled={disabled} label={`Adicionar ${food.name}`} onClick={onAdd}><Plus className="size-4" /></IconButton>
+      <IconButton className="justify-self-end sm:col-start-5 sm:row-start-1" disabled={disabled} label={`Adicionar ${food.name}`} onClick={onAdd}><Plus className="size-4" /></IconButton>
+      <div className="col-span-2 flex flex-wrap gap-2 text-[11px] font-semibold sm:contents">
+        <span className="rounded-[5px] bg-[#102333] px-2 py-1 text-[#c7d3df] sm:bg-transparent sm:p-0">{food.servingLabel}</span>
+        <span className="hidden text-[#9aa5b6] sm:inline">P {macroText(food.protein)} · C {macroText(food.carbs)} · G {macroText(food.fat)}</span>
+        <span className="rounded-[5px] bg-[#0e2c1e] px-2 py-1 text-[#62d98b] sm:hidden">P {macroText(food.protein)}</span>
+        <span className="rounded-[5px] bg-[#302813] px-2 py-1 text-[#f2c84b] sm:hidden">C {macroText(food.carbs)}</span>
+        <span className="rounded-[5px] bg-[#32171b] px-2 py-1 text-[#f27882] sm:hidden">G {macroText(food.fat)}</span>
+        <span className="rounded-[5px] bg-[#102333] px-2 py-1 font-semibold text-white sm:bg-transparent sm:p-0">{formatNumber(food.kcal)}<span className="sm:hidden"> kcal</span></span>
+      </div>
     </div>
   );
 }

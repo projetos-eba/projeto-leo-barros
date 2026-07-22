@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ChevronDown, UsersRound } from "lucide-react";
+import { Activity, ChevronDown, CircleDollarSign, UsersRound } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
@@ -19,6 +19,7 @@ type PerformanceActiveMetric = "averageAdhesion" | "adherentClients" | "monthlyG
 
 const metricIcons: Record<PartnerPerformanceMetric["icon"], typeof Activity> = {
   activity: Activity,
+  dollar: CircleDollarSign,
   users: UsersRound,
 };
 

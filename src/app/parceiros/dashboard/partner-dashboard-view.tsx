@@ -119,14 +119,14 @@ function ClinicalAlertCard({ metric }: { metric: PartnerSummaryMetric }) {
   return (
     <PartnerPanel className="relative min-h-[118px] overflow-hidden border-[#7d3439]/90 bg-[linear-gradient(138deg,rgba(45,37,43,0.96)_0%,rgba(10,28,38,0.94)_82%)] p-3 shadow-[0_18px_50px_rgba(94,28,36,0.22)] sm:min-h-[170px] sm:p-5">
       <div className="absolute -right-10 -top-10 size-28 rounded-full bg-[#8a2d35]/10 blur-2xl" />
-      <div className="flex items-center gap-2 sm:gap-4">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#260809] text-[#d35b5b] sm:size-[56px]">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#260809] text-[#d35b5b] sm:size-[56px]">
           <TriangleAlert className="size-4 sm:size-7" />
         </span>
-        <p className="text-[12px] font-medium leading-4 text-white sm:text-[15px] sm:leading-5">{metric.label}</p>
+        <p className="text-[11px] font-medium leading-4 text-white sm:text-[15px] sm:leading-5">{metric.label}</p>
       </div>
-      <p className="mt-4 text-[28px] font-bold leading-none text-white sm:mt-7 sm:text-[44px]">{metric.value}</p>
-      <div className="mt-4 flex items-center gap-2 text-[11px] leading-4 text-[#d35b5b] sm:mt-7 sm:gap-3 sm:text-[15px] sm:leading-5">
+      <p className="mt-3 text-[28px] font-bold leading-none text-white sm:mt-7 sm:text-[44px]">{metric.value}</p>
+      <div className="mt-3 flex items-center gap-2 text-[11px] leading-4 text-[#d35b5b] sm:mt-7 sm:gap-3 sm:text-[15px] sm:leading-5">
         <span className="size-2.5 rounded-full bg-[#d35b5b]" />
         <span>{metric.subtext}</span>
       </div>

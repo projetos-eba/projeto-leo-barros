@@ -36,10 +36,11 @@ Dar ao parceiro uma visao operacional da propria carteira: clientes ativos, atua
 ## Painel de Performance
 
 - Referencia visual especifica: Figma node `408:634`, com tres estados de card selecionado.
-- Cards selecionaveis: `Adesão média no período`, `Clientes aderentes (≥80%)` e `Meta do mês de adesão`.
+- Cards selecionaveis: `Adesão média no período`, `Clientes aderentes (≥80%)` e `Receita do mês`.
 - O card selecionado deve ser conectado ao painel por uma camada decorativa SVG absoluta (`PerformanceOutline`), nunca por `border` CSS no grafico ou no card ativo.
 - O contorno usa um unico path azul claro, arredondado, com recortes curvos e estados `averageAdhesion`, `adherentClients` e `monthlyGoal`.
 - O grafico troca a serie conforme o card selecionado, mantendo eixo e tooltip compactos.
+- `Receita do mês` usa recebimentos manuais pagos em `partner_client_receivables`, por data de pagamento, e deve refletir registros feitos em Planos & Financeiro.
 - A meta de adesao padrao desta fase e `80%`.
 
 ## Contrato visual Figma
@@ -51,6 +52,7 @@ Dar ao parceiro uma visao operacional da propria carteira: clientes ativos, atua
 - Fonte preferencial: `Rethink Sans`.
 - Estrutura: saudacao + acoes, KPIs superiores, grafico principal + agenda, tres cards secundarios, tabelas de pendencias e renovacoes.
 - Mobile empilha os paineis e preserva scroll horizontal interno nas tabelas; a pagina nao deve gerar overflow horizontal global.
+- Mobile compacta o card `Alertas clinicos` com icone acima do titulo para economizar largura e manter harmonia com os demais KPIs.
 
 ## Regras
 

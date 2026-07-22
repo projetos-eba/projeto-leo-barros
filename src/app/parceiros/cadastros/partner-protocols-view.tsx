@@ -211,14 +211,14 @@ function ExerciseThumb({ exercise }: { exercise: PartnerProtocolExercise }) {
   );
 }
 
-function Badge({ children, tone = "blue" }: { children: ReactNode; tone?: "blue" | "green" | "purple" | "yellow" }) {
+function Badge({ children, className, tone = "blue" }: { children: ReactNode; className?: string; tone?: "blue" | "green" | "purple" | "yellow" }) {
   const tones = {
     blue: "border-[#1d7ece] bg-[#0c2840] text-[#61b8ff]",
     green: "border-[#1d7041] bg-[#102d21] text-[#64db8a]",
     purple: "border-[#7558d1] bg-[#2a2350] text-[#b294ff]",
     yellow: "border-[#86651c] bg-[#302713] text-[#f2c85b]",
   };
-  return <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-medium", tones[tone])}>{children}</span>;
+  return <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-medium", tones[tone], className)}>{children}</span>;
 }
 
 function MetricCard({ icon: Icon, label, value, tone }: { icon: typeof Database; label: string; tone: string; value: number }) {
@@ -795,21 +795,27 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
   return (
     <div className="divide-y divide-[#223443]">
       {foods.map((food) => (
-        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-center gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_100px_48px_48px_150px] sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={food.id}>
+        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-start gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_100px_48px_48px_150px] sm:items-center sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={food.id}>
           <FoodThumb />
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{food.name}</p>
+            <p className="line-clamp-2 text-[13px] font-semibold leading-5 text-white sm:truncate sm:text-[16px]">{food.name}</p>
             <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{food.categoryLabel} · usado em {food.usageCount} planos</p>
             <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{food.servingLabel}</p>
             <FoodMacroChips food={food} />
           </div>
-          <Badge tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
-          <IconAction label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>
-          <IconAction label={`Editar ${food.name}`} onClick={() => onEdit(food)}><Pencil className="size-4" /></IconAction>
-          <UseButton onClick={() => onUse(food, "food")} />
-          <button className="hidden text-[#8fa0ad] max-lg:flex" onClick={() => onArchive("food", food.id, food.status === "archived")} type="button">
-            {food.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
-          </button>
+          <Badge className="hidden sm:inline-flex" tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
+          <IconAction className="hidden sm:flex" label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>
+          <IconAction className="hidden sm:flex" label={`Editar ${food.name}`} onClick={() => onEdit(food)}><Pencil className="size-4" /></IconAction>
+          <UseButton className="hidden sm:inline-flex" onClick={() => onUse(food, "food")} />
+          <div className="col-span-2 grid grid-cols-[auto_1fr] gap-2 sm:hidden">
+            <div className="flex items-center gap-1.5">
+              <Badge tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
+              <IconAction label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>
+              <IconAction label={`Editar ${food.name}`} onClick={() => onEdit(food)}><Pencil className="size-4" /></IconAction>
+              <IconAction label={food.status === "archived" ? "Restaurar item" : "Arquivar item"} onClick={() => onArchive("food", food.id, food.status === "archived")}>{food.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</IconAction>
+            </div>
+            <UseButton className="w-full" onClick={() => onUse(food, "food")} />
+          </div>
         </div>
       ))}
     </div>
@@ -847,20 +853,26 @@ function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
   return (
     <div className="divide-y divide-[#223443]">
       {exercises.map((exercise) => (
-        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-center gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_116px_48px_48px_150px] sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={exercise.id}>
+        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-start gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_116px_48px_48px_150px] sm:items-center sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={exercise.id}>
           <ExerciseThumb exercise={exercise} />
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-white sm:text-[16px]">{exercise.name}</p>
+            <p className="line-clamp-2 text-[13px] font-semibold leading-5 text-white sm:truncate sm:text-[16px]">{exercise.name}</p>
             <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
             <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
           </div>
-          <Badge tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
-          <IconAction label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
-          <IconAction label={`Editar ${exercise.name}`} onClick={() => onEdit(exercise)}><Pencil className="size-4" /></IconAction>
-          <UseButton onClick={() => onUse(exercise, "exercise")} />
-          <button className="hidden text-[#8fa0ad] max-lg:flex" onClick={() => onArchive("exercise", exercise.id, exercise.status === "archived")} type="button">
-            {exercise.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
-          </button>
+          <Badge className="hidden sm:inline-flex" tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
+          <IconAction className="hidden sm:flex" label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
+          <IconAction className="hidden sm:flex" label={`Editar ${exercise.name}`} onClick={() => onEdit(exercise)}><Pencil className="size-4" /></IconAction>
+          <UseButton className="hidden sm:inline-flex" onClick={() => onUse(exercise, "exercise")} />
+          <div className="col-span-2 grid grid-cols-[auto_1fr] gap-2 sm:hidden">
+            <div className="flex items-center gap-1.5">
+              <Badge tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
+              <IconAction label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
+              <IconAction label={`Editar ${exercise.name}`} onClick={() => onEdit(exercise)}><Pencil className="size-4" /></IconAction>
+              <IconAction label={exercise.status === "archived" ? "Restaurar item" : "Arquivar item"} onClick={() => onArchive("exercise", exercise.id, exercise.status === "archived")}>{exercise.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</IconAction>
+            </div>
+            <UseButton className="w-full" onClick={() => onUse(exercise, "exercise")} />
+          </div>
         </div>
       ))}
     </div>
@@ -871,17 +883,17 @@ function EmptyState({ label }: { label: string }) {
   return <div className="flex min-h-[220px] items-center justify-center text-[14px] text-[#8fa0ad]">{label}</div>;
 }
 
-function UseButton({ onClick }: { onClick: () => void }) {
+function UseButton({ className, onClick }: { className?: string; onClick: () => void }) {
   return (
-    <button className="h-8 rounded-[7px] border border-[#1d7ece] bg-[#0c2840] px-3 text-[12px] font-semibold text-[#c9e8ff] hover:bg-[#123f68] sm:h-10 sm:px-4 sm:text-[13px]" onClick={onClick} type="button">
+    <button className={cn("inline-flex h-8 items-center justify-center rounded-[7px] border border-[#1d7ece] bg-[#0c2840] px-3 text-[12px] font-semibold text-[#c9e8ff] hover:bg-[#123f68] sm:h-10 sm:px-4 sm:text-[13px]", className)} onClick={onClick} type="button">
       Usar em plano
     </button>
   );
 }
 
-function IconAction({ children, label, onClick }: { children: ReactNode; label: string; onClick?: () => void }) {
+function IconAction({ children, className, label, onClick }: { children: ReactNode; className?: string; label: string; onClick?: () => void }) {
   return (
-    <button aria-label={label} className="flex size-8 items-center justify-center rounded-[7px] text-[#b8c4cf] hover:bg-[#172a38] hover:text-white sm:size-10" onClick={onClick} type="button">
+    <button aria-label={label} className={cn("flex size-8 items-center justify-center rounded-[7px] text-[#b8c4cf] hover:bg-[#172a38] hover:text-white sm:size-10", className)} onClick={onClick} type="button">
       {children}
     </button>
   );

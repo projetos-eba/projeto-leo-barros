@@ -6,7 +6,6 @@ import {
   ArrowUp,
   CalendarDays,
   Clock3,
-  Copy,
   Dumbbell,
   EllipsisVertical,
   Flame,
@@ -58,7 +57,6 @@ import {
   combineClientWorkoutBiset,
   createClientWorkoutProgram,
   createClientWorkoutSession,
-  duplicateClientWorkoutProgram,
   publishClientWorkoutProgram,
   removeClientWorkoutExercise,
   reorderClientWorkoutExercises,
@@ -79,7 +77,62 @@ type PartnerClientWorkoutViewProps = {
 const panelClass = "min-w-0 rounded-[8px] border border-[rgba(65,80,92,0.71)] bg-[linear-gradient(153deg,rgba(42,63,79,0.35)_8%,rgba(96,144,181,0)_79%)]";
 const inputClass = "h-9 rounded-[7px] border border-[#2b3b49] bg-[#091722] px-2 text-[12px] text-white outline-none focus:border-[#3b97e3]";
 const setSlotNumbers = [1, 2, 3, 4, 5] as const;
-const workoutTypeOptions = ["Peito e Tríceps", "Costas e Bíceps", "Pernas / Inferiores", "Ombros e Braços"] as const;
+const workoutTypeOptions = [
+  "Peito e Tríceps",
+  "Costas e Bíceps",
+  "Pernas / Inferiores",
+  "Ombros e Braços",
+  "Full body",
+  "Push",
+  "Pull",
+  "Lower",
+  "Core e mobilidade",
+  "Glúteos e Posterior",
+  "Quadríceps e Panturrilhas",
+] as const;
+
+type ProgramSessionDraft = {
+  durationMinutes: number;
+  frequencyPerWeek: number;
+  muscles: string;
+  objective: WorkoutObjective;
+  title: string;
+};
+
+const workoutProgramModels = [
+  {
+    description: "Divisão clássica para hipertrofia, com grupos musculares fáceis de alternar na semana.",
+    id: "abc_hipertrofia",
+    sessions: [
+      { durationMinutes: 60, frequencyPerWeek: 1, muscles: "Peito, ombros e tríceps", objective: "hipertrofia", title: "Treino A - Push" },
+      { durationMinutes: 60, frequencyPerWeek: 1, muscles: "Costas, bíceps e posterior", objective: "hipertrofia", title: "Treino B - Pull" },
+      { durationMinutes: 65, frequencyPerWeek: 1, muscles: "Quadríceps, glúteos e panturrilhas", objective: "hipertrofia", title: "Treino C - Lower" },
+    ],
+    title: "Programa ABC Hipertrofia",
+  },
+  {
+    description: "Alterna membros superiores e inferiores para clientes com rotina de quatro sessões semanais.",
+    id: "upper_lower",
+    sessions: [
+      { durationMinutes: 60, frequencyPerWeek: 2, muscles: "Peito, costas, ombros e braços", objective: "forca", title: "Treino Superior" },
+      { durationMinutes: 60, frequencyPerWeek: 2, muscles: "Quadríceps, posterior, glúteos e panturrilhas", objective: "forca", title: "Treino Inferior" },
+    ],
+    title: "Programa Upper / Lower",
+  },
+  {
+    description: "Estrutura enxuta para adaptação, retorno ou clientes com baixa disponibilidade semanal.",
+    id: "full_body",
+    sessions: [
+      { durationMinutes: 50, frequencyPerWeek: 3, muscles: "Corpo todo, estabilidade e padrões básicos", objective: "resistencia", title: "Treino Full body" },
+    ],
+    title: "Programa Full body",
+  },
+] satisfies Array<{ description: string; id: string; sessions: ProgramSessionDraft[]; title: string }>;
+
+function modelSessions(modelId: string): ProgramSessionDraft[] {
+  const model = workoutProgramModels.find((item) => item.id === modelId) ?? workoutProgramModels[0];
+  return model.sessions.map((session) => ({ ...session }));
+}
 
 const intensityMeta: Record<WorkoutIntensity, { Icon: typeof Dumbbell; className: string; label: string }> = {
   maximum: { Icon: Flame, className: "bg-[#32171b] text-[#ff7b88]", label: "Carga máxima" },
@@ -391,7 +444,9 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   const [programDialog, setProgramDialog] = useState(false);
   const [sessionDialog, setSessionDialog] = useState(false);
   const [templateDialog, setTemplateDialog] = useState(false);
-  const [programTitle, setProgramTitle] = useState("Programa de hipertrofia");
+  const [programModelId, setProgramModelId] = useState(workoutProgramModels[0].id);
+  const [programTitle, setProgramTitle] = useState(workoutProgramModels[0].title);
+  const [programSessions, setProgramSessions] = useState<ProgramSessionDraft[]>(() => modelSessions(workoutProgramModels[0].id));
   const [newSession, setNewSession] = useState({
     durationMinutes: 60,
     frequencyPerWeek: 2,
@@ -458,8 +513,19 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
     runAction(() => reorderClientWorkoutExercises({ exerciseIds: next, patientId: overview.client.id, sessionId: session.id }));
   }
 
+  function selectProgramModel(modelId: string) {
+    const model = workoutProgramModels.find((item) => item.id === modelId) ?? workoutProgramModels[0];
+    setProgramModelId(model.id);
+    setProgramTitle(model.title);
+    setProgramSessions(model.sessions.map((item) => ({ ...item })));
+  }
+
+  function updateProgramSession(index: number, patch: Partial<ProgramSessionDraft>) {
+    setProgramSessions((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  }
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
+    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="treinos" overview={overview} />
 
@@ -469,8 +535,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
             <p className="mt-1 text-[13px] text-[#8b92a3]">Monte, edite e organize os protocolos de treino do Cliente.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button tone="primary" onClick={() => setProgramDialog(true)}><Plus className="size-4" /> Novo treino</Button>
-            <Button disabled={!program || pending} onClick={() => program && runAction(() => duplicateClientWorkoutProgram({ patientId: overview.client.id, programId: program.id }))}><Copy className="size-4" /> Duplicar</Button>
+            <Button tone="primary" onClick={() => setProgramDialog(true)}><Plus className="size-4" /> Novo programa de treino</Button>
             <Button disabled={!program || pending} onClick={() => setTemplateDialog(true)}><Archive className="size-4" /> Usar template</Button>
             <Button disabled={!program || pending} onClick={() => program && runAction(() => sendClientWorkoutProgram({ patientId: overview.client.id, programId: program.id }))}><Send className="size-4" /> Enviar ao Cliente</Button>
             {program ? <span className="inline-flex h-10 items-center rounded-[8px] border border-[#303746] px-3 text-[12px] text-[#8fcfff]">Plano {program.status === "draft" ? "rascunho" : program.status === "published" ? "publicado" : program.status === "sent" ? "enviado" : "arquivado"} v{program.version}.0</span> : null}
@@ -609,11 +674,62 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
       </div>
 
       <Dialog open={programDialog} onOpenChange={setProgramDialog}>
-        <DialogContent className="border-[#303746] bg-[#101923] text-white">
-          <DialogHeader><DialogTitle>Novo programa</DialogTitle><DialogDescription className="text-[#8b92a3]">Crie o programa e sua primeira divisão de treino.</DialogDescription></DialogHeader>
-          <form className="grid gap-4" onSubmit={(event: FormEvent) => { event.preventDefault(); runAction(() => createClientWorkoutProgram({ patientId: overview.client.id, title: programTitle })); setProgramDialog(false); }}>
-            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Nome<input className={inputClass} value={programTitle} onChange={(event) => setProgramTitle(event.target.value)} /></label>
-            <div className="flex justify-end"><Button tone="primary" type="submit"><Plus className="size-4" /> Criar programa</Button></div>
+        <DialogContent className="max-h-[88vh] overflow-y-auto border-[#303746] bg-[#101923] text-white sm:max-w-[760px]">
+          <DialogHeader><DialogTitle>Novo programa de treino</DialogTitle><DialogDescription className="text-[#8b92a3]">Escolha um modelo e ajuste as divisões antes de criar.</DialogDescription></DialogHeader>
+          <form className="grid gap-5" onSubmit={(event: FormEvent) => {
+            event.preventDefault();
+            runAction(() => createClientWorkoutProgram({
+              patientId: overview.client.id,
+              sessions: programSessions.map((sessionDraft) => ({
+                durationMinutes: sessionDraft.durationMinutes,
+                frequencyPerWeek: sessionDraft.frequencyPerWeek,
+                objective: sessionDraft.objective,
+                title: sessionDraft.title,
+              })),
+              title: programTitle,
+            }));
+            setProgramDialog(false);
+          }}>
+            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Nome<input className={cn(inputClass, "w-full")} value={programTitle} onChange={(event) => setProgramTitle(event.target.value)} /></label>
+            <div className="grid gap-2">
+              <p className="text-[12px] font-semibold text-[#9aa5b6]">Modelo inicial</p>
+              <div className="grid gap-2 md:grid-cols-3">
+                {workoutProgramModels.map((model) => (
+                  <button
+                    className={cn(
+                      "grid min-h-[132px] gap-2 rounded-[8px] border p-3 text-left transition",
+                      programModelId === model.id ? "border-[#3b97e3] bg-[#0d2b43]" : "border-[#303746] bg-[#0b1823] hover:border-[#526779]",
+                    )}
+                    key={model.id}
+                    type="button"
+                    onClick={() => selectProgramModel(model.id)}
+                  >
+                    <span className="text-[13px] font-bold text-white">{model.title}</span>
+                    <span className="text-[11px] leading-4 text-[#8b92a3]">{model.description}</span>
+                    <span className="text-[11px] font-semibold text-[#8fcfff]">{model.sessions.length} divisões</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <p className="text-[12px] font-semibold text-[#9aa5b6]">Divisões criadas</p>
+              <div className="grid gap-2">
+                {programSessions.map((sessionDraft, index) => (
+                  <div className="grid gap-3 rounded-[8px] border border-[#263846] bg-[#0b1823] p-3 md:grid-cols-[minmax(0,1.2fr)_110px_110px]" key={`${sessionDraft.title}-${index}`}>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">
+                      Tipo e músculos
+                      <div className="grid gap-1">
+                        <input className={cn(inputClass, "w-full")} value={sessionDraft.title} onChange={(event) => updateProgramSession(index, { title: event.target.value })} />
+                        <span className="text-[11px] leading-4 text-[#718394]">{sessionDraft.muscles}</span>
+                      </div>
+                    </label>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Frequência<input className={cn(inputClass, "w-full")} min="1" type="number" value={sessionDraft.frequencyPerWeek} onChange={(event) => updateProgramSession(index, { frequencyPerWeek: Number(event.target.value) })} /></label>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Duração<input className={cn(inputClass, "w-full")} min="5" type="number" value={sessionDraft.durationMinutes} onChange={(event) => updateProgramSession(index, { durationMinutes: Number(event.target.value) })} /></label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end"><Button disabled={programSessions.length === 0 || pending} tone="primary" type="submit"><Plus className="size-4" /> Criar programa</Button></div>
           </form>
         </DialogContent>
       </Dialog>

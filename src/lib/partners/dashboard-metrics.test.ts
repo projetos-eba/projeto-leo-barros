@@ -124,6 +124,20 @@ const rawFixture: PartnerDashboardRawData = {
       status: "active",
     },
   ],
+  manualReceivables: [
+    {
+      amount_cents: 120000,
+      due_date: "2026-06-10",
+      paid_at: "2026-06-11T10:00:00.000Z",
+      status: "paid",
+    },
+    {
+      amount_cents: 50000,
+      due_date: "2026-05-10",
+      paid_at: "2026-05-11T10:00:00.000Z",
+      status: "paid",
+    },
+  ],
   platformPlans: [
     {
       billing_interval: "monthly",
@@ -188,7 +202,7 @@ describe("partner dashboard metrics", () => {
     expect(dashboard.performanceMetrics).toEqual([
       expect.objectContaining({ id: "adherenceRate", value: "100%" }),
       expect.objectContaining({ id: "adherentClients", value: "2" }),
-      expect.objectContaining({ id: "adherenceTarget", value: "80%" }),
+      expect.objectContaining({ id: "adherenceTarget", value: "R$ 1.200" }),
     ]);
     expect(dashboard.growth.at(-1)).toEqual(
       expect.objectContaining({
@@ -197,6 +211,7 @@ describe("partner dashboard metrics", () => {
         adherentClients: 2,
         forecastMrrCents: 128000,
         inactiveClients: 0,
+        monthlyRevenueCents: 120000,
       }),
     );
     expect(dashboard.objectiveDistribution[0]).toEqual(expect.objectContaining({ label: "Acompanhamento Premium", value: 100 }));

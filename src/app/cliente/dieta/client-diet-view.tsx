@@ -2,6 +2,7 @@
 
 import {
   Camera,
+  Beef,
   Check,
   ChevronRight,
   Droplets,
@@ -213,7 +214,7 @@ function NextMealCard({ diet, meal, onModal }: { diet: ClientDietData; meal: Cli
 
         <div className="mt-8 grid gap-3 sm:grid-cols-4">
           <MacroBadge color="blue" icon={<Flame className="size-4" />} label="Calorias" value={activeMeal.totals.kcal} />
-          <MacroBadge color="green" icon={<Utensils className="size-4" />} label="Proteína" value={activeMeal.totals.protein} />
+          <MacroBadge color="green" icon={<Beef className="size-4" />} label="Proteína" value={activeMeal.totals.protein} />
           <MacroBadge color="yellow" icon={<Wheat className="size-4" />} label="Carbo" value={activeMeal.totals.carbs} />
           <MacroBadge color="red" icon={<Droplets className="size-4" />} label="Gordura" value={activeMeal.totals.fat} />
         </div>

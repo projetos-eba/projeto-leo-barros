@@ -137,7 +137,8 @@ describe("PartnerClientCardioView", () => {
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByRole("heading", { name: "Calculadora de Cardio" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comparativo Calórico" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Zonas de Frequência Cardíaca" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Zonas de Frequência Cardíaca" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Zona-alvo")).not.toBeInTheDocument();
     expect(screen.getByText("Realizado na semana")).toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();

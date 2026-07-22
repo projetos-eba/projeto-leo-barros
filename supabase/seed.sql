@@ -506,6 +506,33 @@ begin
   delete from public.partner_protocol_exercises
   where partner_id = target_partner_id;
 
+  delete from public.partner_financial_events
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_responses
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_assignment_clients
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_assignments
+  where partner_id = target_partner_id;
+
+  delete from public.partner_form_templates
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_notes
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_receivables
+  where partner_id = target_partner_id;
+
+  delete from public.partner_client_plan_contracts
+  where partner_id = target_partner_id;
+
+  delete from public.partner_service_plans
+  where partner_id = target_partner_id;
+
   delete from public.partner_clients
   where partner_id = target_partner_id
     and patient_id between 'a1000000-0000-4000-8000-000000000301' and 'a1000000-0000-4000-8000-000000000306';
@@ -764,6 +791,129 @@ begin
     ('a1000000-0000-4000-8000-000000000704', target_partner_id, 'a1000000-0000-4000-8000-000000000304', 'a1000000-0000-4000-8000-000000000601', 'active', now() - interval '35 days', now() - interval '4 days', false, null, now() - interval '3 months', now()),
     ('a1000000-0000-4000-8000-000000000705', target_partner_id, 'a1000000-0000-4000-8000-000000000305', 'a1000000-0000-4000-8000-000000000602', 'pending', now() - interval '2 days', now() + interval '28 days', false, null, now() - interval '2 days', now()),
     ('a1000000-0000-4000-8000-000000000706', target_partner_id, 'a1000000-0000-4000-8000-000000000306', 'a1000000-0000-4000-8000-000000000601', 'canceled', now() - interval '70 days', now() - interval '35 days', true, now() - interval '35 days', now() - interval '6 months', now() - interval '35 days');
+
+  insert into public.partner_service_plans (
+    id,
+    partner_id,
+    name,
+    description,
+    category,
+    price_cents,
+    billing_interval,
+    duration_cycles,
+    includes_diet,
+    includes_training,
+    status,
+    created_at,
+    updated_at
+  )
+  values
+    ('a1000000-0000-4000-8000-000000000901', target_partner_id, 'Plano Performance', 'Foco em ganho de massa.', 'Hipertrofia', 36000, 'monthly', 3, true, true, 'active', now() - interval '4 months', now()),
+    ('a1000000-0000-4000-8000-000000000902', target_partner_id, 'Plano Emagrecimento 360', 'Déficit calórico e hábitos.', 'Emagrecimento', 29000, 'monthly', 3, true, true, 'active', now() - interval '3 months', now()),
+    ('a1000000-0000-4000-8000-000000000903', target_partner_id, 'Plano Manutenção', 'Manutenção de resultados.', 'Saúde', 22000, 'monthly', 1, true, false, 'archived', now() - interval '2 months', now());
+
+  insert into public.partner_client_plan_contracts (
+    id,
+    partner_id,
+    patient_id,
+    service_plan_id,
+    plan_name_snapshot,
+    category_snapshot,
+    price_cents_snapshot,
+    billing_interval_snapshot,
+    duration_cycles_snapshot,
+    includes_diet_snapshot,
+    includes_training_snapshot,
+    start_date,
+    first_due_date,
+    status,
+    notes
+  )
+  values
+    ('a1000000-0000-4000-8000-000000000911', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000901', 'Plano Performance', 'Hipertrofia', 36000, 'monthly', 3, true, true, current_date - 70, current_date - 40, 'active', 'Acompanhamento trimestral.'),
+    ('a1000000-0000-4000-8000-000000000912', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000902', 'Plano Emagrecimento 360', 'Emagrecimento', 29000, 'monthly', 3, true, true, current_date - 35, current_date - 5, 'active', 'Plano com revisão mensal.');
+
+  insert into public.partner_client_receivables (
+    id,
+    partner_id,
+    patient_id,
+    contract_id,
+    installment_number,
+    amount_cents,
+    due_date,
+    status,
+    paid_at,
+    payment_method
+  )
+  values
+    ('a1000000-0000-4000-8000-000000000921', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000911', 1, 36000, current_date - 40, 'paid', now() - interval '39 days', 'pix_external'),
+    ('a1000000-0000-4000-8000-000000000922', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000911', 2, 36000, current_date - 10, 'paid', now() - interval '9 days', 'bank_transfer'),
+    ('a1000000-0000-4000-8000-000000000923', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000911', 3, 36000, current_date + 20, 'pending', null, null),
+    ('a1000000-0000-4000-8000-000000000924', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000912', 1, 29000, current_date - 5, 'pending', null, null),
+    ('a1000000-0000-4000-8000-000000000925', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000912', 2, 29000, current_date + 25, 'pending', null, null);
+
+  insert into public.partner_client_notes (
+    id,
+    partner_id,
+    patient_id,
+    note_type,
+    title,
+    body,
+    created_at
+  )
+  values
+    ('a1000000-0000-4000-8000-000000000931', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'anamnesis', 'Consulta inicial', 'Cliente relata boa adesao nos dias uteis e maior dificuldade aos fins de semana.', now() - interval '10 days'),
+    ('a1000000-0000-4000-8000-000000000932', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'prescription', 'Ajuste nutricional', 'Manter distribuicao de proteinas e revisar carboidratos no jantar.', now() - interval '4 days');
+
+  insert into public.partner_form_templates (
+    id,
+    partner_id,
+    title,
+    description,
+    questions,
+    status
+  )
+  values (
+    'a1000000-0000-4000-8000-000000000941',
+    target_partner_id,
+    'Check-in semanal',
+    'Responda antes da proxima consulta.',
+    '[{"id":"energia","label":"Como esteve sua energia nesta semana?","type":"long_text"},{"id":"dificuldade","label":"Qual foi a maior dificuldade?","type":"long_text"},{"id":"aderencia","label":"O que funcionou melhor no plano?","type":"long_text"}]'::jsonb,
+    'active'
+  );
+
+  insert into public.partner_form_assignments (
+    id,
+    partner_id,
+    template_id,
+    title_snapshot,
+    description_snapshot,
+    questions_snapshot,
+    status,
+    sent_at
+  )
+  values (
+    'a1000000-0000-4000-8000-000000000942',
+    target_partner_id,
+    'a1000000-0000-4000-8000-000000000941',
+    'Check-in semanal',
+    'Responda antes da proxima consulta.',
+    '[{"id":"energia","label":"Como esteve sua energia nesta semana?","type":"long_text"},{"id":"dificuldade","label":"Qual foi a maior dificuldade?","type":"long_text"},{"id":"aderencia","label":"O que funcionou melhor no plano?","type":"long_text"}]'::jsonb,
+    'sent',
+    now() - interval '2 days'
+  );
+
+  insert into public.partner_form_assignment_clients (
+    id,
+    assignment_id,
+    partner_id,
+    patient_id,
+    status,
+    created_at
+  )
+  values
+    ('a1000000-0000-4000-8000-000000000943', 'a1000000-0000-4000-8000-000000000942', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'sent', now() - interval '2 days'),
+    ('a1000000-0000-4000-8000-000000000944', 'a1000000-0000-4000-8000-000000000942', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'sent', now() - interval '2 days');
 
   insert into public.partner_client_goals (
     id,

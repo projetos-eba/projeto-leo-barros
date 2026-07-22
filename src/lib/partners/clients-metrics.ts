@@ -34,10 +34,22 @@ export type PartnerClientPlanSubscription = {
   status: string;
 };
 
+export type PartnerClientServicePlan = {
+  billing_interval: string;
+  duration_cycles: number;
+  id: string;
+  includes_diet: boolean;
+  includes_training: boolean;
+  name: string;
+  price_cents: number;
+  status: string;
+};
+
 export type PartnerClientsRawData = {
   clientPlanSubscriptions: PartnerClientPlanSubscription[];
   customPlans: PartnerClientPlan[];
   rows: PartnerClientListRow[];
+  servicePlans?: PartnerClientServicePlan[];
 };
 
 export type PartnerClientStatus = "active" | "pending" | "suspended" | "inactive";
@@ -68,6 +80,7 @@ export type PartnerClientsData = {
   activeCount: number;
   generatedAt: string;
   rows: PartnerClientRow[];
+  servicePlans: PartnerClientServicePlan[];
   tabCounts: Record<"all" | PartnerClientStatus, number>;
   totalCount: number;
 };
@@ -158,6 +171,7 @@ function planSummary(plans: string[]) {
 }
 
 export function buildPartnerClientsData(raw: PartnerClientsRawData, now = new Date()): PartnerClientsData {
+  const servicePlans = (raw.servicePlans ?? []).filter((plan) => plan.status === "active");
   const plansById = new Map(raw.customPlans.map((plan) => [plan.id, plan]));
   const subscriptionsByPatientId = new Map<string, PartnerClientPlanSubscription[]>();
 
@@ -239,6 +253,7 @@ export function buildPartnerClientsData(raw: PartnerClientsRawData, now = new Da
     activeCount: tabCounts.active,
     generatedAt: now.toISOString(),
     rows,
+    servicePlans,
     tabCounts,
     totalCount: rows.length,
   };

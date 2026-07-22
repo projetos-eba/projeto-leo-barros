@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  CalendarClock,
   CalendarPlus,
   CheckCircle2,
   ClipboardList,
@@ -9,11 +10,11 @@ import {
   Dumbbell,
   HeartPulse,
   Loader2,
+  Percent,
   Plus,
-  Scale,
   Target,
-  TrendingUp,
   Utensils,
+  Weight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
@@ -156,52 +157,87 @@ function MetricCard({
   return (
     <Panel
       className={cn(
-        "relative h-[124px] overflow-hidden p-5",
+        "relative min-h-[104px] overflow-hidden p-3 sm:h-[124px] sm:p-5",
         tone === "danger" && "border-[#6e3535] bg-[#241116]",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex h-full items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={cn("text-[#68afe9]", tone === "danger" && "text-[#d96975]")}>
               {icon}
             </span>
-            <p className="truncate text-[12px] font-medium uppercase leading-4 tracking-[0.05em] text-white">
+            <p className="line-clamp-2 text-[10px] font-medium uppercase leading-3 tracking-[0.05em] text-white sm:truncate sm:text-[12px] sm:leading-4">
               {label}
             </p>
           </div>
-          <div className="mt-2 flex items-baseline gap-1">
+          <div className="mt-2 flex min-w-0 items-baseline gap-1">
             {splitValue ? (
               <>
-                <p className="text-[32px] font-bold leading-10 text-white">{splitValue.number}</p>
-                {splitValue.suffix ? <span className="text-[14px] leading-5 text-[#9aa5b6]">{splitValue.suffix}</span> : null}
+                <p className="min-w-0 text-[25px] font-bold leading-8 text-white sm:text-[32px] sm:leading-10">{splitValue.number}</p>
+                {splitValue.suffix ? <span className="text-[13px] leading-5 text-[#9aa5b6] sm:text-[14px]">{splitValue.suffix}</span> : null}
               </>
             ) : (
-              <p className={cn("text-[28px] font-bold leading-10 text-white", typeof value === "string" && value.length > 10 && "text-[24px]")}>
+              <p className={cn("min-w-0 break-words text-[22px] font-bold leading-7 text-white sm:text-[28px] sm:leading-10", typeof value === "string" && value.length > 10 && "text-[18px] sm:text-[24px]")}>
                 {value ?? "Sem dados"}
               </p>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[12px] leading-4 text-[#5a6477]">{footer}</p>
+          <p className="mt-0.5 truncate text-[11px] leading-4 text-[#5a6477] sm:text-[12px]">{footer}</p>
         </div>
         {delta !== undefined ? (
-          <div className="mt-[47px] shrink-0 text-right">
+          <div className="mt-[46px] shrink-0 text-right sm:mt-[47px]">
             <span
               className={cn(
-                "inline-flex h-[21px] items-center gap-1 rounded-[4px] px-2 text-[12px] leading-4 text-white",
+                "inline-flex h-[19px] items-center gap-1 rounded-[4px] px-1.5 text-[10px] leading-4 text-white sm:h-[21px] sm:px-2 sm:text-[12px]",
                 badgeTone === false ? "bg-[#e77]" : badgeTone === true ? "bg-[#0a1f19] text-[#58a067]" : "bg-[#162334] text-[#9aa5b6]",
               )}
             >
               <span>{deltaIsGood(delta, inverseDelta) === false ? "↘" : deltaIsGood(delta, inverseDelta) === true ? "↗" : "→"}</span>
               {formatDeltaBadge(delta, deltaSuffix ?? "")}
             </span>
-            <p className="mt-1 text-[10px] leading-[14px] text-[#5a6477]">
+            <p className="mt-1 hidden text-[10px] leading-[14px] text-[#5a6477] sm:block">
               {deltaSuffix === "%" ? "vs semana anterior" : "vs mês anterior"}
             </p>
           </div>
         ) : null}
       </div>
+    </Panel>
+  );
+}
+
+function AlertNotificationCard({
+  count,
+}: {
+  count: number;
+}) {
+  const hasAlerts = count > 0;
+
+  return (
+    <Panel
+      className={cn(
+        "flex min-h-[104px] items-center justify-center p-3 sm:hidden",
+        hasAlerts && "border-[#6e3535] bg-[#241116]",
+      )}
+    >
+      <span
+        className={cn(
+          "relative flex size-14 items-center justify-center rounded-full border bg-[#0b1720]",
+          hasAlerts ? "border-[#d96975] text-[#ff7b8e]" : "border-[#314353] text-[#68afe9]",
+        )}
+      >
+        <AlertTriangle className="size-6" />
+        <span
+          className={cn(
+            "absolute -right-1 -top-1 flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold text-white",
+            hasAlerts ? "bg-[#d93b4b]" : "bg-[#1d7ece]",
+          )}
+        >
+          {count}
+        </span>
+      </span>
+      <span className="sr-only">{hasAlerts ? `${count} alertas clínicos` : "Sem alertas clínicos"}</span>
     </Panel>
   );
 }
@@ -233,7 +269,7 @@ function DeltaPill({
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="text-[20px] font-bold uppercase leading-[30px] text-white">
+    <h2 className="text-[17px] font-bold uppercase leading-6 text-white sm:text-[20px] sm:leading-[30px]">
       {children}
     </h2>
   );
@@ -557,7 +593,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
   }
 
   return (
-    <div className="client-overview-page min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6 lg:py-6">
+    <div className="client-overview-page min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6 lg:py-6">
       <style>{`
         @media print {
           aside,
@@ -586,12 +622,12 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="visao-geral" overview={overview} onScheduleAppointment={() => setAppointmentOpen(true)} />
 
-        <section className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.99fr_1.22fr_0.78fr]">
+        <section className="mt-4 grid grid-cols-2 gap-3 sm:mt-8 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.99fr_1.22fr_0.78fr]">
           <MetricCard
             delta={overview.weight.delta}
             deltaSuffix=" kg"
             footer={overview.weight.target !== null ? `Meta: ${formatNumber(overview.weight.target, " kg")}` : "Sem meta definida"}
-            icon={<Scale className="size-4" />}
+            icon={<Weight className="size-4" />}
             inverseDelta
             label="Peso atual"
             value={overview.weight.value}
@@ -601,7 +637,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
             delta={overview.bodyFat.delta}
             deltaSuffix="%"
             footer={`Meta: ${overview.bodyFat.targetLabel}`}
-            icon={<TrendingUp className="size-4" />}
+            icon={<Percent className="size-4" />}
             inverseDelta
             label="% Gordura Corporal"
             value={overview.bodyFat.value}
@@ -618,27 +654,30 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
           />
           <MetricCard
             footer={overview.nextAppointment ? overview.nextAppointment.timeLabel : "Nenhuma consulta futura"}
-            icon={<Clock3 className="size-4" />}
+            icon={<CalendarClock className="size-4" />}
             label="Próxima Consulta"
             value={overview.nextAppointment?.dateLabel ?? "Sem agenda"}
           />
           <button className="min-w-0 text-left" type="button" onClick={() => setAlertsOpen(true)}>
-            <MetricCard
-              footer={overview.alerts.length > 0 ? "Requerem atenção" : "Sem alertas ativos"}
-              icon={<AlertTriangle className="size-4" />}
-              label="Alertas"
-              tone={overview.alerts.length > 0 ? "danger" : "default"}
-              value={overview.alerts.length}
-            />
+            <AlertNotificationCard count={overview.alerts.length} />
+            <div className="hidden sm:block">
+              <MetricCard
+                footer={overview.alerts.length > 0 ? "Requerem atenção" : "Sem alertas ativos"}
+                icon={<AlertTriangle className="size-4" />}
+                label="Alertas"
+                tone={overview.alerts.length > 0 ? "danger" : "default"}
+                value={overview.alerts.length}
+              />
+            </div>
           </button>
         </section>
 
-        <section className="mt-[22px] grid gap-4 xl:grid-cols-[2.05fr_1fr_1fr]">
-          <Panel className="client-overview-print-panel h-auto p-4 xl:h-[260px]">
-            <div className="flex items-start justify-between gap-3">
+        <section className="mt-4 grid items-stretch gap-4 sm:mt-[22px] xl:grid-cols-[2.05fr_1fr_1fr]">
+          <Panel className="client-overview-print-panel min-h-[260px] p-4 sm:min-h-[300px] sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
                 <SectionTitle>Evolução Corporal</SectionTitle>
-                <div className="flex flex-wrap items-center gap-4 text-[12px] leading-4 text-[#9aa5b6]">
+                <div className="flex flex-wrap items-center gap-3 text-[11px] leading-4 text-[#9aa5b6] sm:gap-4 sm:text-[12px]">
                   <span className="inline-flex items-center gap-2"><span className="h-px w-3 bg-[#238bd7]" /> Peso (kg)</span>
                   <span className="inline-flex items-center gap-2"><span className="h-px w-3 bg-[#5ec66a]" /> Massa magra (kg)</span>
                   <span className="inline-flex items-center gap-2"><span className="h-px w-3 bg-[#ff6f7d]" /> Massa gorda (kg)</span>
@@ -662,7 +701,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
             </div>
           </Panel>
 
-          <Panel className="client-overview-print-panel h-auto p-4 xl:h-[260px]">
+          <Panel className="client-overview-print-panel min-h-[260px] p-4 sm:min-h-[300px] sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <SectionTitle>Desempenho Semanal</SectionTitle>
               <select
@@ -678,7 +717,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
                 ))}
               </select>
             </div>
-            <div className="mt-3 grid gap-5">
+            <div className="mt-5 grid gap-5">
               {weeklyRows.map(({ deltaValue, icon: Icon, label, value }) => {
                 const displayLabel = label === "Dieta" ? "Adesão à dieta" : "Conclusão dos treinos";
                 const barColor = label === "Dieta" ? "bg-[#3b97e3]" : "bg-[#58a067]";
@@ -711,7 +750,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
             </div>
           </Panel>
 
-          <Panel className="client-overview-print-panel h-auto p-4 xl:h-[260px]">
+          <Panel className="client-overview-print-panel min-h-[260px] p-4 sm:min-h-[300px] sm:p-5">
             <SectionTitle>Últimos Registros</SectionTitle>
             <div className="mt-5 grid gap-4">
               {overview.recentRecords.length === 0 ? (

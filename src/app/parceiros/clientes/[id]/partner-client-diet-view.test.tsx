@@ -8,7 +8,6 @@ import {
   addClientDietMealItem,
   createClientDietMeal,
   createClientDietPlan,
-  duplicateClientDietPlan,
   publishClientDietPlan,
   removeClientDietMealItem,
   saveClientDietNotes,
@@ -29,7 +28,6 @@ vi.mock("./actions", () => ({
   archiveClientDietPlan: vi.fn(),
   createClientDietMeal: vi.fn(),
   createClientDietPlan: vi.fn(),
-  duplicateClientDietPlan: vi.fn(),
   publishClientDietPlan: vi.fn(),
   removeClientDietMeal: vi.fn(),
   removeClientDietMealItem: vi.fn(),
@@ -171,7 +169,6 @@ describe("PartnerClientDietView", () => {
     vi.mocked(addClientDietMealItem).mockResolvedValue({ ok: true });
     vi.mocked(createClientDietMeal).mockResolvedValue({ ok: true });
     vi.mocked(createClientDietPlan).mockResolvedValue({ ok: true });
-    vi.mocked(duplicateClientDietPlan).mockResolvedValue({ ok: true });
     vi.mocked(publishClientDietPlan).mockResolvedValue({ ok: true });
     vi.mocked(removeClientDietMealItem).mockResolvedValue({ ok: true });
     vi.mocked(saveClientDietNotes).mockResolvedValue({ ok: true });
@@ -226,8 +223,7 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Salvar considerações/i }));
     await waitFor(() => expect(saveClientDietNotes).toHaveBeenCalledWith({ notes: "Ajustar saladas conforme rotina.", patientId: overview.client.id, planId: rawDiet.plan?.id }));
 
-    fireEvent.click(screen.getByRole("button", { name: /Duplicar/i }));
-    await waitFor(() => expect(duplicateClientDietPlan).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: /Duplicar/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Publicar/i }));
     await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalled());
