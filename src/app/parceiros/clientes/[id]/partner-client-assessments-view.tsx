@@ -11,15 +11,16 @@ import {
   Layers3,
   Loader2,
   Lock,
+  Percent,
   Plus,
   Ruler,
   Save,
-  Scale,
   SlidersHorizontal,
   Target,
   TrendingDown,
   TrendingUp,
   Utensils,
+  Weight,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -144,7 +145,7 @@ function Panel({ children, className }: { children: ReactNode; className?: strin
 }
 
 function SectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className="text-[20px] font-bold uppercase leading-[30px] text-white">{children}</h2>;
+  return <h2 className="text-[17px] font-bold uppercase leading-6 text-white sm:text-[20px] sm:leading-[30px]">{children}</h2>;
 }
 
 function formatNumber(value: number | null, suffix = "") {
@@ -197,21 +198,21 @@ function KpiCard({
   const deltaGood = delta === null || delta === undefined || delta === 0 ? null : inverseDelta ? delta < 0 : delta > 0;
 
   return (
-    <Panel className="min-h-[124px] overflow-hidden p-5">
+    <Panel className="min-h-[104px] overflow-hidden p-3 sm:min-h-[124px] sm:p-5">
       <div className="min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[#68afe9]">
             {icon}
-            <p className="min-w-0 text-[12px] font-medium uppercase leading-4 tracking-[0.05em] text-white">{label}</p>
+            <p className="min-w-0 text-[10px] font-medium uppercase leading-3 tracking-[0.05em] text-white sm:text-[12px] sm:leading-4">{label}</p>
           </div>
-          <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
-            <p className="min-w-0 whitespace-nowrap text-[24px] font-bold leading-7 text-white">
+          <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+            <p className="min-w-0 whitespace-nowrap text-[20px] font-bold leading-6 text-white sm:text-[24px] sm:leading-7">
               {typeof value === "number" ? formatNumber(value, suffix) : value ?? "Sem dados"}
             </p>
             {delta !== undefined ? (
               <span
                 className={cn(
-                  "inline-flex min-h-[22px] shrink-0 items-center rounded-[5px] px-2 text-[11px] font-semibold",
+                  "inline-flex min-h-[20px] shrink-0 items-center rounded-[5px] px-1.5 text-[10px] font-semibold sm:min-h-[22px] sm:px-2 sm:text-[11px]",
                   deltaGood === true && "bg-[#0a1f19] text-[#58a067]",
                   deltaGood === false && "bg-[#31151b] text-[#ff7b8e]",
                   deltaGood === null && "bg-[#162334] text-[#9aa5b6]",
@@ -221,7 +222,7 @@ function KpiCard({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 min-w-0 text-[12px] leading-4 text-[#5a6477]">{helper}</p>
+          <p className="mt-1 min-w-0 text-[11px] leading-4 text-[#5a6477] sm:text-[12px]">{helper}</p>
         </div>
       </div>
     </Panel>
@@ -249,7 +250,7 @@ function FormulaCard({
   return (
     <button
       className={cn(
-        "min-h-[124px] rounded-[12px] border bg-[#101923]/80 p-4 text-left transition hover:border-[#3b97e3]",
+        "min-h-[112px] rounded-[10px] border bg-[#101923]/80 p-3 text-left transition hover:border-[#3b97e3] sm:min-h-[124px] sm:rounded-[12px] sm:p-4",
         active ? "border-[#3b97e3] shadow-[0_0_0_1px_rgba(59,151,227,0.25)]" : "border-[#303746]",
       )}
       type="button"
@@ -257,19 +258,19 @@ function FormulaCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[14px] font-bold leading-5 text-white">{calculation.formulaLabel}</p>
+          <p className="text-[12px] font-bold leading-4 text-white sm:text-[14px] sm:leading-5">{calculation.formulaLabel}</p>
           <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#8b92a3]">{formulaNotes[calculation.formula]}</p>
         </div>
         {active ? <Check className="size-4 text-[#3b97e3]" /> : null}
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.05em] text-[#5a6477]">TMB</p>
-          <p className="text-[17px] font-bold text-white">{calculation.bmrKcal.toLocaleString("pt-BR")}</p>
+          <p className="text-[15px] font-bold text-white sm:text-[17px]">{calculation.bmrKcal.toLocaleString("pt-BR")}</p>
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-[0.05em] text-[#5a6477]">GET</p>
-          <p className="text-[17px] font-bold text-white">{calculation.tdeeKcal.toLocaleString("pt-BR")}</p>
+          <p className="text-[15px] font-bold text-white sm:text-[17px]">{calculation.tdeeKcal.toLocaleString("pt-BR")}</p>
         </div>
       </div>
     </button>
@@ -297,24 +298,60 @@ function useMeasuredWidth() {
   return { ref, width };
 }
 
+type ChartTooltipPayload = Array<{
+  dataKey?: string | number;
+  value?: number | string;
+}>;
+
+function CompactCalorieTooltip({
+  active,
+  label,
+  payload,
+}: {
+  active?: boolean;
+  label?: string | number;
+  payload?: ChartTooltipPayload;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const goal = payload.find((item) => item.dataKey === "goalKcal")?.value;
+  const maintenance = payload.find((item) => item.dataKey === "maintenanceKcal")?.value;
+
+  return (
+    <div className="w-[154px] rounded-[8px] border border-[#2f82bf] bg-[#071827] px-3 py-2 text-[#f4f8fb] shadow-[0_10px_24px_rgba(0,0,0,0.25)] sm:w-[180px]">
+      <p className="text-[14px] font-semibold leading-5 sm:text-[15px]">Dia {label}</p>
+      <div className="mt-2 grid gap-1 text-[12px] leading-4 sm:text-[13px]">
+        <p className="truncate text-[#3b97e3]">Meta: {typeof goal === "number" ? goal.toLocaleString("pt-BR") : goal} kcal</p>
+        <p className="truncate text-[#9aa5b6]">Manter: {typeof maintenance === "number" ? maintenance.toLocaleString("pt-BR") : maintenance} kcal</p>
+      </div>
+    </div>
+  );
+}
+
 function CalorieProjectionChart({ data }: { data: PartnerClientAssessmentsData["calorie"]["projection"] }) {
   const { ref, width } = useMeasuredWidth();
   const domain = buildDynamicNumberDomain(
     data.flatMap((item) => [item.goalKcal, item.maintenanceKcal]),
     0.16,
   );
+  const compact = width > 0 && width < 430;
+  const chartHeight = compact ? 218 : 230;
+  const xTicks = compact ? data.filter((item) => item.day % 30 === 0).map((item) => item.day) : undefined;
+  const tooltipPosition = compact ? { x: Math.max(72, width - 184), y: 58 } : undefined;
 
   return (
-    <div className="h-[230px] min-w-0 overflow-hidden" data-testid="client-assessments-calorie-chart" ref={ref}>
+    <div className="h-[218px] min-w-0 overflow-hidden sm:h-[230px]" data-testid="client-assessments-calorie-chart" ref={ref}>
       {width > 0 && data.length > 0 ? (
-        <LineChart data={data} height={230} margin={{ bottom: 4, left: -6, right: 12, top: 12 }} width={Math.max(width, 360)}>
+        <LineChart data={data} height={chartHeight} margin={{ bottom: 2, left: compact ? -16 : -10, right: compact ? 10 : 6, top: 10 }} width={width}>
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.75} vertical={false} />
-          <XAxis axisLine={false} dataKey="day" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickFormatter={(value) => `${value}d`} tickLine={false} />
-          <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} width={52} />
+          <XAxis axisLine={false} dataKey="day" tick={{ fill: "#9aa5b6", fontSize: compact ? 10 : 11 }} tickFormatter={(value) => `${value}d`} tickLine={false} ticks={xTicks} />
+          <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: compact ? 10 : 11 }} tickLine={false} width={compact ? 46 : 52} />
           <Tooltip
-            contentStyle={{ background: "#071827", border: "1px solid #2f82bf", borderRadius: 8, color: "#f4f8fb" }}
-            formatter={(value, name) => [`${Number(value).toLocaleString("pt-BR")} kcal`, name === "maintenanceKcal" ? "Manter peso" : "Meta"]}
-            labelFormatter={(value) => `Dia ${value}`}
+            allowEscapeViewBox={{ x: false, y: false }}
+            content={<CompactCalorieTooltip />}
+            cursor={{ stroke: "#d7dae0", strokeWidth: 1 }}
+            position={tooltipPosition}
+            wrapperStyle={{ maxWidth: compact ? 160 : 190, zIndex: 20 }}
           />
           <Line dataKey="maintenanceKcal" dot={{ fill: "#5a6477", r: 3 }} name="Manter peso" stroke="#7b8794" strokeDasharray="6 6" strokeWidth={2.2} type="monotone" />
           <Line dataKey="goalKcal" dot={{ fill: "#3b97e3", r: 3 }} name="Chegar à meta" stroke="#3b97e3" strokeWidth={2.8} type="monotone" />
@@ -346,21 +383,22 @@ function CircumferenceChart({
   }));
 
   return (
-    <div className="h-[260px] min-w-0 overflow-hidden" data-testid="client-assessments-circumference-chart" ref={ref}>
+    <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-circumference-chart" ref={ref}>
       {width > 0 && data.length > 0 && metrics.length > 0 ? (
         mode === "radar" ? (
-          <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={82} width={Math.max(width, 420)}>
+          <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={Math.min(82, Math.max(54, width / 5))} width={width}>
             <PolarGrid stroke="#31536b" />
             <PolarAngleAxis dataKey="metric" tick={{ fill: "#9aa5b6", fontSize: 10 }} />
             <PolarRadiusAxis angle={90} domain={buildDynamicNumberDomain(radarData.map((item) => item.value), 0.18)} tick={{ fill: "#9aa5b6", fontSize: 10 }} />
             <Radar dataKey="value" fill="#3b97e3" fillOpacity={0.24} stroke="#3b97e3" strokeWidth={2} />
           </RadarChart>
         ) : (
-        <LineChart data={data} height={260} margin={{ bottom: 4, left: -8, right: 12, top: 12 }} width={Math.max(width, 420)}>
+        <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: 6, top: 12 }} width={width}>
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.7} vertical={false} />
           <XAxis axisLine={false} dataKey="date" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} />
           <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} width={42} />
           <Tooltip
+            wrapperStyle={{ maxWidth: Math.max(180, width - 24), zIndex: 20 }}
             contentStyle={{ background: "#071827", border: "1px solid #2f82bf", borderRadius: 8, color: "#f4f8fb" }}
             formatter={(value, name) => [`${Number(value).toLocaleString("pt-BR")} cm`, circumferenceLabels[String(name)] ?? name]}
           />
@@ -426,13 +464,14 @@ function CompositionChart({
   const domain = buildChartDomain(data, visible.map((metric) => metric.key), 0.14);
 
   return (
-    <div className="h-[260px] min-w-0 overflow-hidden" data-testid="client-assessments-composition-chart" ref={ref}>
+    <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-composition-chart" ref={ref}>
       {width > 0 && data.length > 0 ? (
-        <LineChart data={data} height={260} margin={{ bottom: 4, left: -8, right: 12, top: 12 }} width={Math.max(width, 420)}>
+        <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: 6, top: 12 }} width={width}>
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.7} vertical={false} />
           <XAxis axisLine={false} dataKey="date" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} />
           <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} width={42} />
           <Tooltip
+            wrapperStyle={{ maxWidth: Math.max(180, width - 24), zIndex: 20 }}
             contentStyle={{ background: "#071827", border: "1px solid #2f82bf", borderRadius: 8, color: "#f4f8fb" }}
             formatter={(value, name) => {
               const metric = compositionMetrics.find((item) => item.key === name);
@@ -479,21 +518,22 @@ function SkinfoldChart({
   }));
 
   return (
-    <div className="h-[260px] min-w-0 overflow-hidden" data-testid="client-assessments-skinfold-chart" ref={ref}>
+    <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-skinfold-chart" ref={ref}>
       {width > 0 && data.length > 0 && metrics.length > 0 ? (
         mode === "radar" ? (
-          <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={82} width={Math.max(width, 420)}>
+          <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={Math.min(82, Math.max(54, width / 5))} width={width}>
             <PolarGrid stroke="#31536b" />
             <PolarAngleAxis dataKey="metric" tick={{ fill: "#9aa5b6", fontSize: 10 }} />
             <PolarRadiusAxis angle={90} domain={buildDynamicNumberDomain(radarData.map((item) => item.value), 0.18)} tick={{ fill: "#9aa5b6", fontSize: 10 }} />
             <Radar dataKey="value" fill="#a277ff" fillOpacity={0.24} stroke="#a277ff" strokeWidth={2} />
           </RadarChart>
         ) : (
-          <LineChart data={data} height={260} margin={{ bottom: 4, left: -8, right: 12, top: 12 }} width={Math.max(width, 420)}>
+          <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: 6, top: 12 }} width={width}>
             <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.7} vertical={false} />
             <XAxis axisLine={false} dataKey="date" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} />
             <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} width={42} />
             <Tooltip
+              wrapperStyle={{ maxWidth: Math.max(180, width - 24), zIndex: 20 }}
               contentStyle={{ background: "#071827", border: "1px solid #2f82bf", borderRadius: 8, color: "#f4f8fb" }}
               formatter={(value, name) => [String(Number(value).toLocaleString("pt-BR")) + " mm", skinfoldLabels[String(name)] ?? name]}
             />
@@ -626,14 +666,14 @@ function AssessmentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[760px] sm:rounded-[14px]">
-        <DialogHeader className="border-b border-[#303746] px-6 py-5 text-left">
-          <DialogTitle className="text-[24px] font-bold">Nova avaliação</DialogTitle>
+        <DialogHeader className="border-b border-[#303746] px-4 py-4 text-left sm:px-6 sm:py-5">
+          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">Nova avaliação</DialogTitle>
           <DialogDescription className="text-[#8b92a3]">
             Registre dados corporais, metodologia, dobras cutâneas, circunferências e parâmetros para cálculo calórico.
           </DialogDescription>
         </DialogHeader>
-        <form className="grid gap-5 px-6 py-5" onSubmit={handleSubmit}>
-          <div className="grid gap-4 md:grid-cols-2">
+        <form className="grid gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <Label text="Título"><Input required value={form.title} onChange={(value) => setField("title", value)} /></Label>
             <Label text="Data"><Input required type="date" value={form.assessedAt} onChange={(value) => setField("assessedAt", value)} /></Label>
             <Label text="Altura (cm)"><Input required inputMode="decimal" value={form.heightCm} onChange={(value) => setField("heightCm", value)} /></Label>
@@ -642,15 +682,15 @@ function AssessmentDialog({
             <Label text="Massa muscular (kg)"><Input inputMode="decimal" value={form.muscleMassKg} onChange={(value) => setField("muscleMassKg", value)} /></Label>
             <Label text="Peso meta (kg)"><Input inputMode="decimal" value={form.targetWeightKg} onChange={(value) => setField("targetWeightKg", value)} /></Label>
             <Label text="Prazo (dias)"><Input required inputMode="numeric" value={form.targetDays} onChange={(value) => setField("targetDays", value)} /></Label>
-            <label className="grid gap-2 text-[13px] font-semibold text-[#d7dae0]">
+            <label className="grid gap-2 text-[12px] font-semibold text-[#d7dae0] sm:text-[13px]">
               Nível de atividade
-              <select className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none focus:border-[#3b97e3]" value={form.activityLevel} onChange={(event) => setField("activityLevel", event.target.value)}>
+              <select className="h-10 w-full min-w-0 rounded-[10px] border border-[#303746] bg-[#161a22] px-2 text-[13px] outline-none focus:border-[#3b97e3] sm:px-3 sm:text-[14px]" value={form.activityLevel} onChange={(event) => setField("activityLevel", event.target.value)}>
                 {Object.entries(activityLevels).map(([key, value]) => <option key={key} value={key}>{value.shortLabel}</option>)}
               </select>
             </label>
-            <label className="grid gap-2 text-[13px] font-semibold text-[#d7dae0]">
+            <label className="grid gap-2 text-[12px] font-semibold text-[#d7dae0] sm:text-[13px]">
               Método de avaliação física
-              <select className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none focus:border-[#3b97e3]" value={form.assessmentMethod} onChange={(event) => setField("assessmentMethod", event.target.value)}>
+              <select className="h-10 w-full min-w-0 rounded-[10px] border border-[#303746] bg-[#161a22] px-2 text-[13px] outline-none focus:border-[#3b97e3] sm:px-3 sm:text-[14px]" value={form.assessmentMethod} onChange={(event) => setField("assessmentMethod", event.target.value)}>
                 {Object.entries(assessmentMethodLabels).map(([key, value]) => <option key={key} value={key}>{value}</option>)}
               </select>
             </label>
@@ -658,7 +698,7 @@ function AssessmentDialog({
 
           <div>
             <h3 className="text-[15px] font-bold text-white">Dobras cutâneas</h3>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
               {skinfoldKeys.map((key) => (
                 <Label key={key} text={String(skinfoldLabels[key] ?? key) + " (mm)"}>
                   <Input inputMode="decimal" value={skinfolds[key]} onChange={(value) => setSkinfolds((current) => ({ ...current, [key]: value }))} />
@@ -669,7 +709,7 @@ function AssessmentDialog({
 
           <div>
             <h3 className="text-[15px] font-bold text-white">Circunferências</h3>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3">
               {circumferenceKeys.map((key) => (
                 <Label key={key} text={`${circumferenceLabels[key]} (cm)`}>
                   <Input inputMode="decimal" value={circumferences[key]} onChange={(value) => setCircumferences((current) => ({ ...current, [key]: value }))} />
@@ -684,7 +724,7 @@ function AssessmentDialog({
           </label>
 
           {error ? <p className="rounded-[10px] border border-[#6e3535] bg-[#31151b] px-3 py-2 text-[13px] text-[#ff7b8e]">{error}</p> : null}
-          <div className="flex justify-end gap-3 border-t border-[#303746] pt-5">
+          <div className="grid grid-cols-2 gap-3 border-t border-[#303746] pt-4 sm:flex sm:justify-end sm:pt-5">
             <button className="h-10 rounded-[10px] border border-[#303746] px-5 text-[14px] font-semibold text-white" type="button" onClick={() => onOpenChange(false)}>Cancelar</button>
             <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[14px] font-semibold text-white disabled:opacity-60" disabled={pending} type="submit">
               {pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
@@ -698,7 +738,7 @@ function AssessmentDialog({
 }
 
 function Label({ children, text }: { children: ReactNode; text: string }) {
-  return <label className="grid gap-2 text-[13px] font-semibold text-[#d7dae0]">{text}{children}</label>;
+  return <label className="grid gap-1.5 text-[12px] font-semibold leading-4 text-[#d7dae0] sm:gap-2 sm:text-[13px]">{text}{children}</label>;
 }
 
 function Input({
@@ -716,7 +756,7 @@ function Input({
 }) {
   return (
     <input
-      className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none focus:border-[#3b97e3]"
+      className="h-10 min-w-0 rounded-[10px] border border-[#303746] bg-[#161a22] px-2 text-[13px] outline-none focus:border-[#3b97e3] sm:px-3 sm:text-[14px]"
       inputMode={inputMode}
       required={required}
       type={type}
@@ -839,13 +879,13 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
+    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="avaliacoes" overview={overview} />
 
-        <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          <KpiCard delta={assessments.kpis.weight.delta} helper={assessments.kpis.weight.helper} icon={<Scale className="size-4" />} inverseDelta label="Peso atual" suffix=" kg" value={assessments.kpis.weight.value} />
-          <KpiCard delta={assessments.kpis.bodyFat.delta} helper={assessments.kpis.bodyFat.helper} icon={<TrendingDown className="size-4" />} inverseDelta label="% Gordura" suffix="%" value={assessments.kpis.bodyFat.value} />
+        <section className="mt-4 grid grid-cols-2 gap-3 sm:mt-8 xl:grid-cols-3 2xl:grid-cols-6">
+          <KpiCard delta={assessments.kpis.weight.delta} helper={assessments.kpis.weight.helper} icon={<Weight className="size-4" />} inverseDelta label="Peso atual" suffix=" kg" value={assessments.kpis.weight.value} />
+          <KpiCard delta={assessments.kpis.bodyFat.delta} helper={assessments.kpis.bodyFat.helper} icon={<Percent className="size-4" />} inverseDelta label="% Gordura" suffix="%" value={assessments.kpis.bodyFat.value} />
           <KpiCard delta={assessments.kpis.muscleMass.delta} helper={assessments.kpis.muscleMass.helper} icon={<Dumbbell className="size-4" />} label="Massa muscular" suffix=" kg" value={assessments.kpis.muscleMass.value} />
           <KpiCard delta={assessments.kpis.leanMass.delta} helper={assessments.kpis.leanMass.helper} icon={<Activity className="size-4" />} label="Massa magra" suffix=" kg" value={assessments.kpis.leanMass.value} />
           <KpiCard delta={assessments.kpis.bmi.delta} helper={assessments.kpis.bmi.classification} icon={<Ruler className="size-4" />} label="IMC" value={assessments.kpis.bmi.value} />
@@ -853,26 +893,26 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
         </section>
 
         <Panel className="mt-5 overflow-hidden p-0">
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] px-5 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] px-3 py-4 sm:px-5">
             <div>
               <SectionTitle>Cálculo Calórico</SectionTitle>
-              <p className="mt-1 text-[13px] leading-5 text-[#8b92a3]">Defina fórmula, parâmetros e metas para calcular necessidades calóricas do Cliente.</p>
+              <p className="mt-1 text-[12px] leading-5 text-[#8b92a3] sm:text-[13px]">Defina fórmula, parâmetros e metas para calcular necessidades calóricas do Cliente.</p>
             </div>
-            <label className="grid gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
+            <label className="grid max-w-full gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
               Fórmula selecionada
-              <select className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[13px] normal-case tracking-normal text-white outline-none focus:border-[#3b97e3]" value={selectedFormula} onChange={(event) => setSelectedFormula(event.target.value as AssessmentFormula)}>
+              <select className="h-10 max-w-full rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[13px] normal-case tracking-normal text-white outline-none focus:border-[#3b97e3]" value={selectedFormula} onChange={(event) => setSelectedFormula(event.target.value as AssessmentFormula)}>
                 {Object.entries(formulaLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
               </select>
             </label>
           </div>
 
-          <div className="grid gap-5 p-5">
+          <div className="grid gap-4 p-3 sm:gap-5 sm:p-5">
             <div className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Metodologias</h3>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]"><SlidersHorizontal className="size-3.5" /> {assessmentMethodLabels[assessments.latestAssessment?.assessmentMethod ?? "pollock_7"]}</span>
+                <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]"><SlidersHorizontal className="size-3.5 shrink-0" /> <span className="truncate">{assessmentMethodLabels[assessments.latestAssessment?.assessmentMethod ?? "pollock_7"]}</span></span>
               </div>
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               {calorieComparison.length > 0 ? calorieComparison.map((calculation) => (
                 <FormulaCard active={selectedFormula === calculation.formula} calculation={calculation} key={calculation.formula} onSelect={() => setSelectedFormula(calculation.formula)} />
               )) : (
@@ -882,9 +922,9 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[0.9fr_1.25fr_0.9fr]">
-              <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-4">
+              <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-3 sm:p-4">
                 <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Dados do Cliente</h3>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-4">
                   <MiniInfo label="Gênero" value={overview.client.genderLabel} />
                   <MiniInfo label="Idade" value={overview.client.ageLabel} />
                   <label className="grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
@@ -914,18 +954,18 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
 
               <div className="grid content-start gap-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Panel className="p-4">
+                  <Panel className="p-3 sm:p-4">
                     <div className="flex items-center gap-2 text-[#f0c76a]"><Flame className="size-4" /><p className="text-[12px] font-bold uppercase tracking-[0.05em] text-[#9aa5b6]">Calorias para manutenção</p></div>
-                    <p className="mt-3 whitespace-nowrap text-[30px] font-bold leading-10 text-white">{formatKcal(selectedCalculation?.tdeeKcal ?? null)}</p>
+                    <p className="mt-3 whitespace-nowrap text-[22px] font-bold leading-8 text-white sm:text-[30px] sm:leading-10">{formatKcal(selectedCalculation?.tdeeKcal ?? null)}</p>
                     <p className="mt-1 text-[12px] text-[#5a6477]">TMB {formatKcal(selectedCalculation?.bmrKcal ?? null)}</p>
                   </Panel>
-                  <Panel className="border-[#2f82bf]/70 bg-[linear-gradient(135deg,rgba(33,150,243,0.5),rgba(11,35,58,0.8))] p-4 shadow-[0_0_0_1px_rgba(59,151,227,0.24)]">
+                  <Panel className="border-[#2f82bf]/70 bg-[linear-gradient(135deg,rgba(33,150,243,0.5),rgba(11,35,58,0.8))] p-3 shadow-[0_0_0_1px_rgba(59,151,227,0.24)] sm:p-4">
                     <div className="flex items-center gap-2 text-[#bde5ff]"><Target className="size-4" /><p className="text-[12px] font-bold uppercase tracking-[0.05em] text-[#d9f1ff]">Calorias para objetivo</p></div>
-                    <p className="mt-3 whitespace-nowrap text-[30px] font-bold leading-10 text-white">{formatKcal(selectedCalculation?.targetKcal ?? null)}</p>
+                    <p className="mt-3 whitespace-nowrap text-[22px] font-bold leading-8 text-white sm:text-[30px] sm:leading-10">{formatKcal(selectedCalculation?.targetKcal ?? null)}</p>
                     <p className="mt-1 text-[12px] text-[#c5e7ff]">{selectedCalculation?.strategyLabel ?? "Sem estratégia"}</p>
                   </Panel>
                 </div>
-                <div className="rounded-[12px] border border-[#303746] bg-[#081522]/70 p-4">
+                <div className="rounded-[12px] border border-[#303746] bg-[#081522]/70 p-3 sm:p-4">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                   <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Projeção calórica ao longo do tempo</h3>
                   <div className="flex gap-4 text-[12px] text-[#9aa5b6]">
@@ -937,7 +977,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
                 </div>
               </div>
 
-              <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-4">
+              <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-3 sm:p-4">
                 <h3 className="text-[15px] font-bold uppercase text-white">Resumo da estratégia</h3>
                 <div className="mt-4 grid gap-3">
                 <MiniInfo label="Fórmula" value={selectedCalculation?.formulaLabel ?? "Sem cálculo"} />
@@ -951,7 +991,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#303746] px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#303746] px-3 py-4 sm:px-5">
             {actionMessage ? <p className="text-[13px] text-[#8fcfff]">{actionMessage}</p> : <span />}
             <div className="flex flex-wrap gap-2">
               <button className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#303746] px-4 text-[14px] font-semibold text-white" type="button" onClick={() => setSelectedFormula("mifflin")}>
@@ -971,27 +1011,27 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
         </Panel>
 
         <section className="mt-5 grid gap-4 xl:grid-cols-[1.35fr_0.85fr]">
-          <Panel className="p-5">
+          <Panel className="p-3 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <SectionTitle>Avaliação Física</SectionTitle>
-                <p className="mt-1 text-[13px] leading-5 text-[#8b92a3]">Dobras cutâneas, circunferências e método técnico da última avaliação.</p>
+                <p className="mt-1 text-[12px] leading-5 text-[#8b92a3] sm:text-[13px]">Dobras cutâneas, circunferências e método técnico da última avaliação.</p>
               </div>
-              <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-4 text-[14px] font-semibold text-white" type="button" onClick={() => setAssessmentOpen(true)}>
+              <button className="inline-flex h-9 items-center gap-2 rounded-[9px] bg-[#3b97e3] px-3 text-[13px] font-semibold text-white sm:h-10 sm:rounded-[10px] sm:px-4 sm:text-[14px]" type="button" onClick={() => setAssessmentOpen(true)}>
                 <ClipboardPlus className="size-4" /> Registrar dados
               </button>
             </div>
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-[#8fcfff]"><Layers3 className="size-4" /><h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Dobras cutâneas (mm)</h3></div>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-2">
                   {assessments.skinfolds.latest.map((item) => (
-                    <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-3" key={item.key}>
+                    <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-2.5 sm:p-3" key={item.key}>
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-[12px] font-semibold text-[#d7dae0]">{item.label}</p>
-                        <span className="text-[10px] uppercase text-[#5a6477]">{item.region}</span>
+                        <p className="min-w-0 truncate text-[12px] font-semibold text-[#d7dae0]">{item.label}</p>
+                        <span className="hidden text-[10px] uppercase text-[#5a6477] sm:inline">{item.region}</span>
                       </div>
-                      <p className="mt-2 text-[18px] font-bold text-white">{formatNumber(item.valueMm, " mm")}</p>
+                      <p className="mt-2 text-[17px] font-bold text-white sm:text-[18px]">{formatNumber(item.valueMm, " mm")}</p>
                       <p className="text-[11px] text-[#8b92a3]">{deltaLabel(item.delta, " mm", true)}</p>
                     </div>
                   ))}
@@ -1000,11 +1040,11 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
               </div>
               <div>
                 <div className="mb-3 flex items-center gap-2 text-[#8fcfff]"><Ruler className="size-4" /><h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Circunferências (cm)</h3></div>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-2">
                   {assessments.circumferences.latest.slice(0, 10).map((item) => (
-                    <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-3" key={item.key}>
-                      <p className="text-[12px] font-semibold text-[#d7dae0]">{item.label}</p>
-                      <p className="mt-2 text-[18px] font-bold text-white">{formatNumber(item.valueCm, " cm")}</p>
+                    <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-2.5 sm:p-3" key={item.key}>
+                      <p className="truncate text-[12px] font-semibold text-[#d7dae0]">{item.label}</p>
+                      <p className="mt-2 text-[17px] font-bold text-white sm:text-[18px]">{formatNumber(item.valueCm, " cm")}</p>
                       <p className="text-[11px] text-[#8b92a3]">{deltaLabel(item.delta, " cm", true)}</p>
                     </div>
                   ))}

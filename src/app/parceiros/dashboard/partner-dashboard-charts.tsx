@@ -57,6 +57,13 @@ function useMeasuredWidth() {
 
 function formatChartValue(value: number, unit: PartnerPerformanceMetric["unit"]) {
   if (unit === "percent") return `${Math.round(value)}%`;
+  if (unit === "currency") {
+    return new Intl.NumberFormat("pt-BR", {
+      currency: "BRL",
+      maximumFractionDigits: 0,
+      style: "currency",
+    }).format(value / 100);
+  }
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
 }
 
@@ -89,7 +96,7 @@ export function PerformanceTrendChart({ data, metric }: PerformanceTrendChartPro
             tick={{ fill: "#a7bbca", fontFamily: "Rethink Sans", fontSize: 12 }}
             tickFormatter={(value) => formatChartValue(Number(value), metric.unit)}
             tickLine={false}
-            width={42}
+            width={metric.unit === "currency" ? 72 : 42}
           />
           <Tooltip
             contentStyle={{

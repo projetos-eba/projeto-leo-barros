@@ -70,6 +70,28 @@ const raw: PartnerClientsRawData = {
       started_at: "2026-05-01T00:00:00.000Z",
     },
   ],
+  servicePlans: [
+    {
+      billing_interval: "monthly",
+      duration_cycles: 3,
+      id: "service-plan-1",
+      includes_diet: true,
+      includes_training: true,
+      name: "PowerShape",
+      price_cents: 39000,
+      status: "active",
+    },
+    {
+      billing_interval: "monthly",
+      duration_cycles: 1,
+      id: "service-plan-2",
+      includes_diet: true,
+      includes_training: false,
+      name: "Plano arquivado",
+      price_cents: 19000,
+      status: "archived",
+    },
+  ],
 };
 
 describe("buildPartnerClientsData", () => {
@@ -89,6 +111,8 @@ describe("buildPartnerClientsData", () => {
       serviceScopeLabel: "Treino",
       status: "active",
     });
+    expect(data.servicePlans).toHaveLength(1);
+    expect(data.servicePlans[0]?.name).toBe("PowerShape");
   });
 
   it("usa escopo como fallback de objetivo e ignora assinaturas de outro parceiro sem plano conhecido", () => {

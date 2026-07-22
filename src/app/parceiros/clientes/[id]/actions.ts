@@ -132,6 +132,12 @@ const workoutTechniqueSchema = z.enum(["normal", "biset", "dropset", "rest_pause
 const workoutIntensitySchema = z.enum(["warmup", "moderate", "maximum"]);
 const workoutProgramSchema = z.object({
   patientId: patientIdSchema,
+  sessions: z.array(z.object({
+    durationMinutes: z.number().int().min(5).max(300),
+    frequencyPerWeek: z.number().int().min(1).max(14),
+    objective: workoutObjectiveSchema,
+    title: z.string().trim().min(1).max(80),
+  })).min(1).max(8).optional(),
   title: z.string().trim().min(2).max(140),
 });
 const workoutSessionSchema = z.object({
@@ -258,6 +264,10 @@ const examDefinitionSchema = z.object({
 });
 const examDefinitionIdSchema = z.object({
   definitionId: z.string().uuid(),
+  patientId: patientIdSchema.optional(),
+});
+const examCategorySchema = z.object({
+  name: z.string().trim().min(2).max(120),
   patientId: patientIdSchema.optional(),
 });
 
@@ -432,6 +442,16 @@ export async function setClientTaskCompleted(
 function normalizeNullable(value: string | null | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+}
+
+function slugify(value: string) {
+  const slug = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return slug || "categoria";
 }
 
 function revalidateClient(patientId: string) {
@@ -647,16 +667,21 @@ export async function createClientWorkoutProgram(input: z.input<typeof workoutPr
   }).select("id").single();
   const program = data as { id: string } | null;
   if (error || !program) return { error: "Não foi possível criar o programa.", ok: false };
-  const { error: sessionError } = await db.from("partner_workout_sessions").insert({
-    duration_minutes: 60,
-    frequency_per_week: 2,
-    objective: "hipertrofia",
-    partner_id: context.partnerId,
-    program_id: program.id,
-    sort_order: 0,
-    title: "Treino A",
-  });
-  if (sessionError) return { error: "Programa criado, mas não foi possível criar o Treino A.", ok: false };
+  const sessions = parsed.data.sessions?.length
+    ? parsed.data.sessions
+    : [{ durationMinutes: 60, frequencyPerWeek: 2, objective: "hipertrofia" as const, title: "Treino A" }];
+  const { error: sessionError } = await db.from("partner_workout_sessions").insert(
+    sessions.map((session, index) => ({
+      duration_minutes: session.durationMinutes,
+      frequency_per_week: session.frequencyPerWeek,
+      objective: session.objective,
+      partner_id: context.partnerId,
+      program_id: program.id,
+      sort_order: index,
+      title: session.title,
+    })),
+  );
+  if (sessionError) return { error: "Programa criado, mas não foi possível criar as divisões.", ok: false };
   await recordWorkoutEvent(context, { detail: "Programa de treinos criado.", eventType: "created", patientId: parsed.data.patientId, programId: program.id });
   revalidateClient(parsed.data.patientId);
   return { id: program.id, message: "Programa criado.", ok: true };
@@ -1527,6 +1552,49 @@ export async function savePartnerExamDefinition(
   });
   revalidatePath("/parceiros/clientes");
   return { id: definitionId, message: parsed.data.definitionId ? "Exame atualizado." : "Exame criado.", ok: true };
+}
+
+export async function createPartnerExamCategory(
+  input: z.input<typeof examCategorySchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examCategorySchema.safeParse(input);
+  if (!parsed.success) return { error: "Informe um nome válido para a categoria.", ok: false };
+
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+
+  const { data: rows } = await db.from("partner_exam_categories")
+    .select("slug, sort_order")
+    .eq("partner_id", context.partnerId);
+  const existing = (rows as Array<{ slug: string; sort_order: number }> | null) ?? [];
+  const usedSlugs = new Set(existing.map((category) => category.slug));
+  const baseSlug = slugify(parsed.data.name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (usedSlugs.has(slug)) {
+    slug = `${baseSlug}_${suffix}`;
+    suffix += 1;
+  }
+
+  const sortOrder = existing.reduce((max, category) => Math.max(max, category.sort_order), -1) + 1;
+  const { data, error } = await db.from("partner_exam_categories")
+    .insert({
+      icon_key: "activity",
+      name: parsed.data.name,
+      partner_id: context.partnerId,
+      slug,
+      sort_order: sortOrder,
+      status: "active",
+    })
+    .select("id")
+    .single();
+  const category = data as { id: string } | null;
+  if (error || !category) return { error: "Não foi possível criar a categoria.", ok: false };
+
+  if (parsed.data.patientId) revalidateClient(parsed.data.patientId);
+  revalidatePath("/parceiros/clientes");
+  return { id: category.id, message: "Categoria criada.", ok: true };
 }
 
 export async function archivePartnerExamDefinition(

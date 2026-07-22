@@ -13,6 +13,7 @@ import {
   Search,
   SlidersHorizontal,
   Utensils,
+  WalletCards,
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -29,10 +30,12 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import type {
   PartnerClientRow,
+  PartnerClientServicePlan,
   PartnerClientStatus,
   PartnerClientsData,
 } from "@/lib/partners/clients-metrics";
 import { cn } from "@/lib/utils";
+import { assignPlanToClient } from "../planos-financeiro/actions";
 
 type PartnerClientsViewProps = {
   clients: PartnerClientsData;
@@ -55,10 +58,13 @@ type NewClientFields = {
   cpf: string;
   displayName: string;
   email: string;
+  firstDueDate: string;
   objective: string;
   phone: string;
   phoneCountry: PhoneCountryCode;
-  serviceScopes: ServiceScope[];
+  planId: string;
+  startDate: string;
+  totalInstallments: string;
 };
 
 type FieldErrors = Partial<Record<keyof NewClientFields, string>>;
@@ -73,18 +79,12 @@ type ProvisionClientResponse = {
   invite?: {
     status?: string;
   };
+  client?: {
+    accountStatus?: string;
+    patientId?: string;
+    profileId?: string;
+  };
   status?: string;
-};
-
-const initialNewClientFields: NewClientFields = {
-  birthDate: "",
-  cpf: "",
-  displayName: "",
-  email: "",
-  objective: "",
-  phone: "",
-  phoneCountry: "BR",
-  serviceScopes: ["treino"],
 };
 
 const phoneCountries: PhoneCountry[] = [
@@ -122,7 +122,6 @@ const scopeIcons: Record<string, typeof Activity> = {
   treino: Dumbbell,
 };
 
-const creatableScopes: Array<Extract<ServiceScope, "dieta" | "treino">> = ["dieta", "treino"];
 const visiblePlanScopes: Array<Extract<ServiceScope, "dieta" | "treino">> = ["dieta", "treino"];
 
 const renewalToneClasses: Record<PartnerClientRow["renewalTone"], string> = {
@@ -145,6 +144,57 @@ function createIdempotencyKey() {
         (Number(char) / 4)
     ).toString(16),
   );
+}
+
+function todayInputValue() {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 10);
+}
+
+function buildInitialNewClientFields(planId = ""): NewClientFields {
+  const today = todayInputValue();
+
+  return {
+    birthDate: "",
+    cpf: "",
+    displayName: "",
+    email: "",
+    firstDueDate: today,
+    objective: "",
+    phone: "",
+    phoneCountry: "BR",
+    planId,
+    startDate: today,
+    totalInstallments: "3",
+  };
+}
+
+function formatCurrency(cents: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    currency: "BRL",
+    style: "currency",
+  }).format(cents / 100);
+}
+
+function billingIntervalLabel(interval: string) {
+  const labels: Record<string, string> = {
+    custom: "Personalizado",
+    monthly: "Mensal",
+    one_time: "Único",
+    quarterly: "Trimestral",
+    weekly: "Semanal",
+  };
+
+  return labels[interval] ?? "Personalizado";
+}
+
+function serviceScopesFromPlan(plan: PartnerClientServicePlan | null): ServiceScope[] {
+  if (!plan) return [];
+  const scopes: ServiceScope[] = [];
+  if (plan.includes_diet) scopes.push("dieta");
+  if (plan.includes_training) scopes.push("treino");
+  return scopes;
 }
 
 function escapeCsv(value: string | number) {
@@ -329,7 +379,7 @@ function ScopeIcon({ active, scope }: { active: boolean; scope: ServiceScope }) 
   );
 }
 
-function validateNewClient(fields: NewClientFields): FieldErrors {
+function validateNewClient(fields: NewClientFields, selectedPlan: PartnerClientServicePlan | null): FieldErrors {
   const errors: FieldErrors = {};
   const phoneDigits = digitsOnly(fields.phone);
 
@@ -355,8 +405,23 @@ function validateNewClient(fields: NewClientFields): FieldErrors {
     errors.birthDate = "Data de nascimento não pode ser futura.";
   }
 
-  if (fields.serviceScopes.length === 0) {
-    errors.serviceScopes = "Selecione ao menos um escopo.";
+  if (!selectedPlan) {
+    errors.planId = "Selecione um plano para vincular.";
+  } else if (serviceScopesFromPlan(selectedPlan).length === 0) {
+    errors.planId = "Escolha um plano com Dieta ou Treino.";
+  }
+
+  if (!fields.startDate) {
+    errors.startDate = "Informe a data de início.";
+  }
+
+  if (!fields.firstDueDate) {
+    errors.firstDueDate = "Informe a primeira cobrança.";
+  }
+
+  const totalInstallments = Number(fields.totalInstallments);
+  if (!Number.isInteger(totalInstallments) || totalInstallments < 1 || totalInstallments > 60) {
+    errors.totalInstallments = "Informe de 1 a 60 parcelas.";
   }
 
   return errors;
@@ -366,16 +431,21 @@ function NewClientDrawer({
   onCreated,
   onOpenChange,
   open,
+  servicePlans,
 }: {
   onCreated: (message: string) => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
+  servicePlans: PartnerClientServicePlan[];
 }) {
   const router = useRouter();
-  const [fields, setFields] = useState<NewClientFields>(initialNewClientFields);
+  const defaultPlanId = servicePlans[0]?.id ?? "";
+  const [fields, setFields] = useState<NewClientFields>(() => buildInitialNewClientFields(defaultPlanId));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const selectedPlan = servicePlans.find((plan) => plan.id === fields.planId) ?? null;
+  const selectedPlanScopes = serviceScopesFromPlan(selectedPlan);
 
   function updateField<Key extends keyof NewClientFields>(key: Key, value: NewClientFields[Key]) {
     setFields((current) => ({ ...current, [key]: value }));
@@ -402,20 +472,11 @@ function NewClientDrawer({
     updateField("cpf", formatCpf(value));
   }
 
-  function toggleScope(scope: ServiceScope) {
-    updateField(
-      "serviceScopes",
-      fields.serviceScopes.includes(scope)
-        ? fields.serviceScopes.filter((item) => item !== scope)
-        : [...fields.serviceScopes, scope],
-    );
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitMessage(null);
 
-    const errors = validateNewClient(fields);
+    const errors = validateNewClient(fields, selectedPlan);
     setFieldErrors(errors);
 
     if (Object.keys(errors).length > 0) {
@@ -424,13 +485,14 @@ function NewClientDrawer({
     }
 
     setIsSubmitting(true);
+    const totalInstallments = Number(fields.totalInstallments);
 
     const payload = {
       displayName: fields.displayName.trim(),
       email: fields.email.trim().toLowerCase(),
       idempotencyKey: createIdempotencyKey(),
       phone: phoneToE164(fields),
-      serviceScopes: [...fields.serviceScopes].sort(),
+      serviceScopes: [...selectedPlanScopes].sort(),
       ...(fields.birthDate ? { birthDate: fields.birthDate } : {}),
       ...(fields.objective.trim() ? { objective: fields.objective.trim() } : {}),
       ...(fields.phoneCountry === "BR" && fields.cpf.trim() ? { cpf: digitsOnly(fields.cpf) } : {}),
@@ -448,8 +510,32 @@ function NewClientDrawer({
         return;
       }
 
-      const status = data?.status === "existing" ? "Cliente já existente reconciliado." : "Cliente criado com convite pendente.";
-      setFields(initialNewClientFields);
+      const patientId = data?.client?.patientId;
+      if (!patientId || !selectedPlan) {
+        setSubmitMessage("Cliente criado, mas o plano não foi vinculado. Abra Planos dos clientes para concluir.");
+        router.refresh();
+        return;
+      }
+
+      const assignment = await assignPlanToClient({
+        firstDueDate: fields.firstDueDate,
+        notes: fields.objective.trim() ? `Objetivo: ${fields.objective.trim()}` : null,
+        patientId,
+        priceCents: selectedPlan.price_cents,
+        renewalReminder: true,
+        servicePlanId: selectedPlan.id,
+        startDate: fields.startDate,
+        totalInstallments,
+      });
+
+      if (!assignment.ok) {
+        setSubmitMessage(assignment.error ?? "Cliente criado, mas o plano não foi vinculado.");
+        router.refresh();
+        return;
+      }
+
+      const status = data?.status === "existing" ? "Cliente já existente reconciliado e plano vinculado." : "Cliente criado e plano vinculado.";
+      setFields(buildInitialNewClientFields(defaultPlanId));
       onCreated(status);
       router.refresh();
       onOpenChange(false);
@@ -563,33 +649,104 @@ function NewClientDrawer({
             ) : null}
           </div>
 
-          <div>
-            <p className="text-[13px] font-semibold text-[#d7dae0]">Escopos</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {creatableScopes.map((scope) => (
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-[10px] border px-3 py-2 text-[13px]",
-                    fields.serviceScopes.includes(scope)
-                      ? "border-[#3b97e3] bg-[#0a2c48] text-white"
-                      : "border-[#303746] bg-[#161a22] text-[#bac1ce]",
-                  )}
-                  key={scope}
-                >
-                  <input
-                    checked={fields.serviceScopes.includes(scope)}
-                    className="sr-only"
-                    type="checkbox"
-                    onChange={() => toggleScope(scope)}
-                  />
-                  <ScopeIcon active={fields.serviceScopes.includes(scope)} scope={scope} />
-                  {scopeLabels[scope]}
-                </label>
-              ))}
+          <div className="rounded-[12px] border border-[#303746] bg-[#101b25] p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] border border-[#235f91] bg-[#0a2c48] text-[#68afe9]">
+                <WalletCards className="size-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-[#d7dae0]">Plano do Cliente</p>
+                <p className="mt-1 text-[12px] leading-4 text-[#8b92a3]">
+                  O plano define os módulos liberados para o Cliente.
+                </p>
+              </div>
             </div>
-            {fieldErrors.serviceScopes ? (
-              <p className="mt-2 text-[12px] text-[#ff7b8e]">{fieldErrors.serviceScopes}</p>
-            ) : null}
+
+            <div className="mt-4 grid gap-4">
+              <Field label="Plano" error={fieldErrors.planId} htmlFor="client-plan">
+                <select
+                  className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors focus:border-[#3b97e3]"
+                  id="client-plan"
+                  value={fields.planId}
+                  onChange={(event) => updateField("planId", event.target.value)}
+                >
+                  <option value="">Selecione um plano</option>
+                  {servicePlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              {selectedPlan ? (
+                <div className="rounded-[10px] border border-[#303746] bg-[#161a22] p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[14px] font-semibold text-[#f3f4f7]">{selectedPlan.name}</p>
+                      <p className="mt-1 text-[12px] text-[#8b92a3]">
+                        {billingIntervalLabel(selectedPlan.billing_interval)} · {selectedPlan.duration_cycles} parcelas sugeridas
+                      </p>
+                    </div>
+                    <p className="text-[15px] font-bold text-[#68afe9]">{formatCurrency(selectedPlan.price_cents)}</p>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visiblePlanScopes.map((scope) => (
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[12px]",
+                          selectedPlanScopes.includes(scope)
+                            ? "border-[#3b97e3]/60 bg-[#0a2c48] text-white"
+                            : "border-[#303746] bg-[#1d212b]/50 text-[#6f7c89]",
+                        )}
+                        key={scope}
+                      >
+                        <ScopeIcon active={selectedPlanScopes.includes(scope)} scope={scope} />
+                        {scopeLabels[scope]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : servicePlans.length === 0 ? (
+                <div className="rounded-[10px] border border-[#5a4420] bg-[#2b2417] px-4 py-3 text-[13px] text-[#f0c76a]">
+                  Cadastre um plano ativo em Planos & Financeiro antes de criar o Cliente.
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Início" error={fieldErrors.startDate} htmlFor="client-plan-start">
+                  <input
+                    className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors focus:border-[#3b97e3]"
+                    id="client-plan-start"
+                    type="date"
+                    value={fields.startDate}
+                    onChange={(event) => updateField("startDate", event.target.value)}
+                  />
+                </Field>
+                <Field label="Primeira cobrança" error={fieldErrors.firstDueDate} htmlFor="client-plan-first-due">
+                  <input
+                    className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors focus:border-[#3b97e3]"
+                    id="client-plan-first-due"
+                    type="date"
+                    value={fields.firstDueDate}
+                    onChange={(event) => updateField("firstDueDate", event.target.value)}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Parcelas" error={fieldErrors.totalInstallments} htmlFor="client-plan-installments">
+                <input
+                  className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors placeholder:text-[#6f7c89] focus:border-[#3b97e3]"
+                  id="client-plan-installments"
+                  inputMode="numeric"
+                  min={1}
+                  max={60}
+                  type="number"
+                  value={fields.totalInstallments}
+                  onChange={(event) => updateField("totalInstallments", event.target.value)}
+                />
+              </Field>
+            </div>
           </div>
 
           {submitMessage ? (
@@ -604,7 +761,7 @@ function NewClientDrawer({
             type="submit"
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-            Criar Cliente
+            Criar e vincular Cliente
           </button>
         </form>
       </SheetContent>
@@ -951,6 +1108,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
         open={newClientOpen}
         onCreated={setActionMessage}
         onOpenChange={setNewClientOpen}
+        servicePlans={clients.servicePlans}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import {
   type PartnerClientListRow,
   type PartnerClientPlan,
   type PartnerClientPlanSubscription,
+  type PartnerClientServicePlan,
   type PartnerClientsData,
 } from "./clients-metrics";
 
@@ -69,10 +70,11 @@ export async function fetchPartnerClientsData(): Promise<PartnerClientsData> {
       clientPlanSubscriptions: [],
       customPlans: [],
       rows: [],
+      servicePlans: [],
     });
   }
 
-  const [rows, customPlans, clientPlanSubscriptions] = await Promise.all([
+  const [rows, customPlans, clientPlanSubscriptions, servicePlans] = await Promise.all([
     expectData(
       asQuery<PartnerClientListRow>(supabase.rpc("partner_clients_list")),
       "clientes do parceiro",
@@ -97,11 +99,22 @@ export async function fetchPartnerClientsData(): Promise<PartnerClientsData> {
       ),
       "assinaturas de clientes",
     ),
+    expectData(
+      asQuery<PartnerClientServicePlan>(
+        supabase
+          .from("partner_service_plans")
+          .select("id, name, price_cents, billing_interval, duration_cycles, includes_diet, includes_training, status")
+          .eq("partner_id", partner.id)
+          .order("created_at", { ascending: false }),
+      ),
+      "planos financeiros",
+    ),
   ]);
 
   return buildPartnerClientsData({
     clientPlanSubscriptions,
     customPlans,
     rows,
+    servicePlans,
   });
 }

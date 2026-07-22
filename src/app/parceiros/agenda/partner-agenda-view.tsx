@@ -98,7 +98,9 @@ type BlockFormFields = {
   title: string;
 };
 
-const hours = Array.from({ length: 12 }, (_, index) => index + 7);
+const dayStartHour = 5;
+const dayEndHour = 22;
+const hours = Array.from({ length: dayEndHour - dayStartHour + 1 }, (_, index) => index + dayStartHour);
 const monthWeekdays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
 const weekLegend = [
   { className: "bg-[#2d9cff]", label: "Consulta online" },
@@ -265,11 +267,11 @@ function minutesFromDayStart(value: string) {
 }
 
 function eventTop(value: string) {
-  return Math.max(0, ((minutesFromDayStart(value) - 7 * 60) / (12 * 60)) * 100);
+  return Math.max(0, ((minutesFromDayStart(value) - dayStartHour * 60) / ((dayEndHour - dayStartHour + 1) * 60)) * 100);
 }
 
 function eventHeight(start: string, end: string) {
-  return Math.max(7, ((new Date(end).getTime() - new Date(start).getTime()) / 60_000 / (12 * 60)) * 100);
+  return Math.max(5.5, ((new Date(end).getTime() - new Date(start).getTime()) / 60_000 / ((dayEndHour - dayStartHour + 1) * 60)) * 100);
 }
 
 function defaultAppointmentFields(date: string, clients: PartnerAgendaClient[]): AppointmentFormFields {
@@ -435,21 +437,22 @@ function WeekView({
   const days = buildWeekDays(selectedDate, appointments, blocks);
 
   return (
-    <Panel className="overflow-hidden p-5 lg:p-6">
-      <div className="grid min-w-[860px] grid-cols-[58px_repeat(7,minmax(104px,1fr))]">
+    <Panel className="overflow-hidden p-0 sm:p-5 lg:p-6">
+      <div className="overflow-x-auto p-3 sm:overflow-visible sm:p-0">
+      <div className="grid min-w-[760px] grid-cols-[52px_repeat(7,minmax(96px,1fr))] sm:min-w-[860px] sm:grid-cols-[58px_repeat(7,minmax(104px,1fr))]">
         <div />
         {days.map((day) => (
-          <div className="pb-5 text-center" key={day.date}>
-            <span className="text-[14px] font-semibold capitalize text-white">{day.label}</span>
-            <span className={cn("ml-2 inline-flex size-8 items-center justify-center rounded-full text-[14px] font-bold", day.isSelected || day.isToday ? "bg-[#1d7ece] text-white" : "text-[#cbd7e2]")}>
+          <div className="pb-4 text-center sm:pb-5" key={day.date}>
+            <span className="text-[13px] font-semibold capitalize text-white sm:text-[14px]">{day.label}</span>
+            <span className={cn("ml-1 inline-flex size-7 items-center justify-center rounded-full text-[13px] font-bold sm:ml-2 sm:size-8 sm:text-[14px]", day.isSelected || day.isToday ? "bg-[#1d7ece] text-white" : "text-[#cbd7e2]")}>
               {day.number}
             </span>
           </div>
         ))}
-        <div className="relative col-span-8 grid min-h-[650px] grid-cols-[58px_repeat(7,minmax(104px,1fr))] border-t border-[#253646]">
+        <div className="relative col-span-8 grid min-h-[720px] grid-cols-[52px_repeat(7,minmax(96px,1fr))] border-t border-[#253646] sm:min-h-[760px] sm:grid-cols-[58px_repeat(7,minmax(104px,1fr))]">
           <div className="col-start-1">
             {hours.map((hour) => (
-              <div className="h-[54px] pr-3 pt-1 text-right text-[12px] text-[#8fa0ae]" key={hour}>
+              <div className="h-[42px] pr-2 pt-1 text-right text-[12px] text-[#8fa0ae] sm:h-[44px] sm:pr-3" key={hour}>
                 {String(hour).padStart(2, "0")}:00
               </div>
             ))}
@@ -457,11 +460,11 @@ function WeekView({
           {days.map((day, index) => (
             <div className="relative border-l border-[#203443]" key={day.date}>
               {hours.map((hour) => (
-                <div className="h-[54px] border-b border-[#203443]/70" key={hour} />
+                <div className="h-[42px] border-b border-[#203443]/70 sm:h-[44px]" key={hour} />
               ))}
               {day.blocks.map((block) => (
                 <div
-                  className="absolute left-1 right-1 rounded-[8px] border border-[#53606d] bg-[#1a222c]/90 px-2 py-2 text-[11px] text-[#aeb9c4]"
+                  className="absolute left-1 right-1 overflow-hidden rounded-[8px] border border-[#53606d] bg-[#1a222c]/90 px-2 py-1.5 text-[10px] text-[#aeb9c4] sm:py-2 sm:text-[11px]"
                   key={block.id}
                   style={{ height: `${eventHeight(block.startsAt, block.endsAt)}%`, top: `${eventTop(block.startsAt)}%` }}
                 >
@@ -472,7 +475,7 @@ function WeekView({
               {day.appointments.map((appointment) => (
                 <button
                   className={cn(
-                    "absolute left-1 right-1 overflow-hidden rounded-[8px] border px-2 py-2 text-left text-[11px] text-white",
+                    "absolute left-1 right-1 overflow-hidden rounded-[8px] border px-2 py-1.5 text-left text-[10px] text-white sm:py-2 sm:text-[11px]",
                     appointment.modality === "online" ? "border-[#1d7ece] bg-[#0f4776]/95" : "border-[#7a6232] bg-[#27303a]/95",
                   )}
                   key={appointment.id}
@@ -481,11 +484,11 @@ function WeekView({
                   type="button"
                 >
                   <span className="block text-[#b8dfff]">{appointment.timeLabel}</span>
-                  <strong className="mt-1 block truncate text-white">{appointment.client.name}</strong>
-                  <span className="block truncate text-[#c9d3dc]">{appointment.typeLabel}</span>
-                  <span className="mt-1 flex items-center gap-1 text-[#68afe9]">
+                  <strong className="mt-0.5 block truncate text-white sm:mt-1">{appointment.client.name}</strong>
+                  <span className="hidden truncate text-[#c9d3dc] sm:block">{appointment.typeLabel}</span>
+                  <span className="mt-0.5 flex items-center gap-1 text-[#68afe9] sm:mt-1">
                     <ModalityIcon modality={appointment.modality} />
-                    {appointment.modalityLabel}
+                    <span className="truncate">{appointment.modalityLabel}</span>
                   </span>
                 </button>
               ))}
@@ -493,7 +496,8 @@ function WeekView({
           ))}
         </div>
       </div>
-      <div className="mt-6 flex flex-wrap gap-5 text-[12px] text-[#98a8b7]">
+      </div>
+      <div className="mt-4 flex flex-wrap gap-3 px-3 pb-3 text-[11px] text-[#98a8b7] sm:mt-6 sm:gap-5 sm:px-0 sm:pb-0 sm:text-[12px]">
         {weekLegend.map((item) => (
           <span className="inline-flex items-center gap-2" key={item.label}>
             <span className={cn("size-2.5 rounded-full", item.className)} />
