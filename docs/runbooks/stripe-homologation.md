@@ -27,6 +27,15 @@ Arquivos locais esperados:
 
 - `.env.local`: `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
 - `supabase/functions/.env`: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `BILLING_ALLOWED_ORIGINS`.
+- `.env.production`: variaveis publicas do Next em producao, como `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` e `NEXT_PUBLIC_APP_URL`.
+- `supabase/functions/.env.production`: variaveis privadas de Edge Functions em producao, como `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `BILLING_ALLOWED_ORIGINS`, `APP_URL` e segredos de e-mail.
+
+Regra operacional:
+
+- Para validar UI, app URL e cliente browser, ler `.env.local` ou `.env.production`.
+- Para validar Stripe server-side, webhook, portal, checkout, bootstrap ou reconciliacao de billing, ler `supabase/functions/.env` em local/homologacao e `supabase/functions/.env.production` em producao.
+- Nunca procurar `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` ou service role em `.env.production` da raiz; esse arquivo deve permanecer restrito a variaveis publicas do Next.
+- Ao reportar validacao, citar apenas o arquivo usado e o modo detectado (`test` ou `live`), nunca os valores.
 
 Preenchimento de `BILLING_ALLOWED_ORIGINS`:
 
@@ -203,7 +212,7 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - Cartao aprovado, recusado e 3DS de teste.
 - Webhooks assinados, duplicados, invalidos e desconhecidos.
 - Invoices de assinatura devem gravar `stripe_invoice_id` e `stripe_subscription_id` no ledger usando `invoice.subscription` ou `invoice.parent.subscription_details.subscription`.
-- Apos `invoice.paid`, confirmar que `partner_subscriptions.status`, `current_period_start` e `current_period_end` foram reconciliados com a Subscription Stripe; parceiro pago nao deve ficar preso ao fim do trial local.
+- Apos `invoice.paid`, confirmar que `partner_subscriptions.status`, `current_period_start` e `current_period_end` foram reconciliados com a Subscription Stripe ou com o item base quando `billing_mode=flexible`; parceiro pago nao deve ficar preso ao fim do trial local.
 - Alteracao de Clientes ativos e `billing-sync-active-clients` com `proration_behavior=none`.
 - `billing-sync-active-clients` deve ser chamado apenas por processo interno usando Bearer da service role local; nunca pelo browser.
 - Antes de analisar invoices/snapshots de quantidade, confirmar que o sync processou jobs coalescidos por Parceiro para evitar duplicidade de updates no mesmo run.

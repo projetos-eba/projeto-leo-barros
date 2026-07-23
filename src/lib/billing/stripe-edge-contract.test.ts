@@ -192,7 +192,9 @@ describe("stripe edge contract", () => {
     expect(webhook).toContain("stripeInvoiceSubscriptionId(invoice)");
     expect(webhook).toContain("invoice.parent?.subscription_details?.subscription");
     expect(webhook).toContain("subscriptionPeriodUpdate(stripeSubscription)");
+    expect(webhook).toContain("basePlanPeriodFromSubscriptionItems");
     expect(webhook).toContain("current_period_end: unixSecondsToIso");
+    expect(webhook).toContain("itemPeriod.currentPeriodEnd");
     expect(webhook).toContain("stripe_invoice_id: invoice.id");
     expect(webhook).toContain("stripe_subscription_id: subscriptionId");
     expect(webhook).toContain('event.type === "invoice.paid"');
