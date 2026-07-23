@@ -103,7 +103,7 @@ using (patient_id = public.current_active_patient_id());
 alter table public.client_diet_events
   drop constraint if exists client_diet_events_type_check,
   add constraint client_diet_events_type_check
-    check (event_type in ('meal_marked', 'meal_unmarked', 'water_added', 'water_removed', 'note_saved', 'substitution_requested', 'substitution_applied', 'photo_attached'));
+    check (event_type in ('meal_marked', 'meal_unmarked', 'meal_partial', 'meal_skipped', 'water_added', 'water_removed', 'note_saved', 'substitution_requested', 'substitution_applied', 'photo_attached'));
 
 create or replace function public.client_diet_dashboard(p_date date default current_date)
 returns jsonb
@@ -169,6 +169,10 @@ begin
       'targetFatG', current_plan.target_fat_g,
       'waterLiters', current_plan.water_liters,
       'calorieStrategy', current_plan.calorie_strategy,
+      'publishedAt', current_plan.published_at,
+      'startsOn', current_plan.starts_on,
+      'reviewOn', current_plan.review_on,
+      'version', current_plan.version,
       'updatedAt', current_plan.updated_at,
       'sentAt', current_plan.sent_at,
       'meals', coalesce((
@@ -285,14 +289,18 @@ begin
           and coalesce(meal.menu_option, 1) = 1
       ) as total_meals on true
       left join lateral (
-        select count(*)::integer as completed_count,
-               sum(coalesce(meal_totals.kcal, 0))::numeric as consumed_kcal
+        select count(*) filter (where log.status in ('completed', 'partial'))::integer as completed_count,
+               sum(case
+                 when log.status = 'completed' then coalesce(meal_totals.kcal, 0)
+                 when log.status = 'partial' then coalesce(meal_totals.kcal, 0) * 0.5
+                 else 0
+               end)::numeric as consumed_kcal
         from public.client_diet_meal_logs as log
         left join meal_totals on meal_totals.meal_id = log.meal_id
         where log.plan_id = current_plan.id
           and log.patient_id = current_patient_id
           and log.log_date = days.log_date
-          and log.status = 'completed'
+          and log.status in ('completed', 'partial')
       ) as completed on true
     ), '[]'::jsonb) end,
     'suggestions', case when current_plan.id is null then '[]'::jsonb else coalesce((
@@ -407,7 +415,7 @@ begin
   where item.id = p_item_id
     and item.meal_id = p_meal_id
     and item.patient_id = current_patient_id
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
   limit 1;
 
   if selected_item.id is null then

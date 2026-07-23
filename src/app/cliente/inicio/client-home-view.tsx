@@ -163,8 +163,10 @@ export function ClientHomeView({ home, platformName = DEFAULT_PLATFORM_NAME }: C
             const active = home.modules[module.key];
 
             return (
-              <article
+              <Link
+                aria-label={module.buttonLabel}
                 className="client-module-card group relative min-h-[420px] overflow-hidden rounded-[14px] border border-[#1b212c]/80 bg-[#111923] shadow-[0_25px_50px_rgba(0,0,0,0.25)] lg:min-h-[600px]"
+                href={module.href}
                 key={module.key}
               >
                 <img
@@ -209,17 +211,16 @@ export function ClientHomeView({ home, platformName = DEFAULT_PLATFORM_NAME }: C
 
                       <ModuleScopeCards moduleKey={module.key} home={home} />
 
-                      <Link
+                      <span
                         className="mt-7 inline-flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[15px] font-bold text-white shadow-[0_18px_35px_rgba(59,151,227,0.22)] transition hover:bg-[#4aa8f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fcfff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111720] sm:w-auto sm:min-w-[260px]"
-                        href={module.href}
                       >
                         {module.buttonLabel}
                         <ChevronRight className="size-4" />
-                      </Link>
+                      </span>
                     </div>
                   </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>

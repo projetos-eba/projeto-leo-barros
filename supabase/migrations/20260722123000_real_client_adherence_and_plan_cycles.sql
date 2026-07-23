@@ -75,10 +75,10 @@ as $$
         from public.partner_client_diet_plans as plan
         where plan.partner_id = authorized.partner_id
           and plan.patient_id = p_patient_id
-          and plan.status in ('sent', 'published')
-          and coalesce(plan.sent_at, plan.published_at, plan.created_at)::date <= days.log_date
+          and plan.status = 'active'
+          and coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) <= days.log_date
         order by
-          case plan.status when 'sent' then 0 when 'published' then 1 else 2 end,
+          coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) desc,
           plan.updated_at desc
         limit 1
       ) as diet_plan on true
@@ -89,12 +89,16 @@ as $$
        and meal.day_of_week = extract(isodow from days.log_date)::smallint
     ),
     completed as (
-      select count(distinct log.meal_id)::integer as completed_count
+      select floor(coalesce(sum(case
+        when log.status = 'completed' then 1
+        when log.status = 'partial' then 0.5
+        else 0
+      end), 0))::integer as completed_count
       from public.client_diet_meal_logs as log
       where log.partner_id = authorized.partner_id
         and log.patient_id = p_patient_id
         and log.log_date between week_windows.period_start and week_windows.period_end
-        and log.status = 'completed'
+        and log.status in ('completed', 'partial')
     )
     select
       coalesce(planned.planned_count, 0)::integer as planned_count,

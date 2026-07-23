@@ -22,6 +22,7 @@ import {
   attachClientDietMealPhoto,
   markClientDietMeal,
   saveClientDietMealNote,
+  setClientDietMealStatus,
 } from "./actions";
 
 describe("ações do painel de dieta do Cliente", () => {
@@ -45,12 +46,30 @@ describe("ações do painel de dieta do Cliente", () => {
     const result = await markClientDietMeal("meal-1", "2026-07-03", true);
 
     expect(result).toEqual({ ok: true });
-    expect(mocks.rpc).toHaveBeenCalledWith("client_diet_mark_meal", {
-      p_completed: true,
+    expect(mocks.rpc).toHaveBeenCalledWith("client_diet_set_meal_status", {
       p_log_date: "2026-07-03",
       p_meal_id: "meal-1",
+      p_status: "completed",
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/cliente/dieta");
+  });
+
+  it("marca refeição como parcial ou pulada com status explícito", async () => {
+    const partial = await setClientDietMealStatus("meal-1", "2026-07-03", "partial");
+    const skipped = await setClientDietMealStatus("meal-1", "2026-07-03", "skipped");
+
+    expect(partial).toEqual({ ok: true });
+    expect(skipped).toEqual({ ok: true });
+    expect(mocks.rpc).toHaveBeenCalledWith("client_diet_set_meal_status", {
+      p_log_date: "2026-07-03",
+      p_meal_id: "meal-1",
+      p_status: "partial",
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("client_diet_set_meal_status", {
+      p_log_date: "2026-07-03",
+      p_meal_id: "meal-1",
+      p_status: "skipped",
+    });
   });
 
   it("registra hidratação em passos de 250ml", async () => {

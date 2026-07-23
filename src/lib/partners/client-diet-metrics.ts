@@ -1,6 +1,6 @@
 import { foodCategoryLabels, foodSourceLabels, type PartnerProtocolFoodCategory, type PartnerProtocolFoodSource } from "./protocols-metrics";
 
-export type DietPlanStatus = "archived" | "draft" | "published" | "sent";
+export type DietPlanStatus = "active" | "archived" | "draft" | "scheduled" | "superseded";
 export type DietCalorieStrategy = "deficit" | "maintenance" | "surplus";
 export type DietFoodTab = "favorites" | "recent" | "suggestions";
 
@@ -73,7 +73,9 @@ export type PartnerClientDietRawData = {
     }>;
     notes: string | null;
     publishedAt: string | null;
+    reviewOn?: string | null;
     sentAt: string | null;
+    startsOn?: string | null;
     status: string;
     targetCarbsG: number;
     targetFatG: number;
@@ -84,6 +86,32 @@ export type PartnerClientDietRawData = {
     version: number;
     waterLiters: number;
   } | null;
+  tracking?: {
+    dailyLogs: Array<{
+      logDate: string;
+      waterMl: number | string;
+    }>;
+    events: Array<{
+      createdAt: string;
+      detail: string;
+      eventType: string;
+      id: string;
+      logDate: string;
+      mealId: string | null;
+    }>;
+    mealLogs: Array<{
+      completedAt: string | null;
+      id: string;
+      logDate: string;
+      mealId: string;
+      notes: string | null;
+      photoOriginalFilename: string | null;
+      photoStoragePath: string | null;
+      status: string;
+      updatedAt: string;
+    }>;
+    today: string;
+  };
 };
 
 export type DietNutritionTotals = {
@@ -152,7 +180,11 @@ export type PartnerClientDietPlan = {
   id: string;
   notes: string | null;
   publishedAt: string | null;
+  reviewLabel: string;
+  reviewOn: string | null;
   sentAt: string | null;
+  startsLabel: string;
+  startsOn: string | null;
   status: DietPlanStatus;
   statusLabel: string;
   targetCarbs: number;
@@ -184,6 +216,62 @@ export type PartnerClientDietEvent = {
   version: number;
 };
 
+export type PartnerClientDietTrackingStatus = "completed" | "partial" | "pending" | "skipped";
+
+export type PartnerClientDietTrackingDay = {
+  adherencePct: number;
+  completedMeals: number;
+  dateLabel: string;
+  isoDate: string;
+  partialMeals: number;
+  pendingMeals: number;
+  plannedMeals: number;
+  shortLabel: string;
+  skippedMeals: number;
+  waterMl: number;
+};
+
+export type PartnerClientDietMealLog = {
+  completedAtLabel: string | null;
+  dateLabel: string;
+  id: string;
+  mealTitle: string;
+  notes: string | null;
+  photoLabel: string | null;
+  status: PartnerClientDietTrackingStatus;
+  statusLabel: string;
+  timeLabel: string;
+};
+
+export type PartnerClientDietTrackingEvent = {
+  createdAt: string;
+  detail: string;
+  eventType: string;
+  id: string;
+  logDate: string;
+  mealId: string | null;
+};
+
+export type PartnerClientDietTracking = {
+  days: PartnerClientDietTrackingDay[];
+  events: PartnerClientDietTrackingEvent[];
+  insights: string[];
+  mealLogs: PartnerClientDietMealLog[];
+  periodLabel: string;
+  summary: {
+    adherencePct: number;
+    completedMeals: number;
+    daysWithoutRecords: number;
+    notesCount: number;
+    partialMeals: number;
+    pendingMeals: number;
+    photosCount: number;
+    plannedMeals: number;
+    skippedMeals: number;
+    waterAverageMl: number;
+  };
+};
+
 export type PartnerClientDietData = {
   drafts: PartnerClientDietDraft[];
   events: PartnerClientDietEvent[];
@@ -195,6 +283,7 @@ export type PartnerClientDietData = {
     suggestions: PartnerClientDietFood[];
   };
   plan: PartnerClientDietPlan | null;
+  tracking: PartnerClientDietTracking | null;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -208,6 +297,9 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   minute: "2-digit",
   month: "2-digit",
   year: "numeric",
+});
+const shortWeekdayFormatter = new Intl.DateTimeFormat("pt-BR", {
+  weekday: "short",
 });
 
 export const dietDayLabels = [
@@ -237,8 +329,39 @@ function numberValue(value: number | string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function isoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function shiftIsoDate(value: string, days: number) {
+  const date = new Date(`${value}T12:00:00`);
+  date.setDate(date.getDate() + days);
+  return isoDate(date);
+}
+
+function isoDayOfWeek(value: string) {
+  const day = new Date(`${value}T12:00:00`).getDay();
+  return day === 0 ? 7 : day;
+}
+
+function normalizeTrackingStatus(value: string): PartnerClientDietTrackingStatus {
+  if (value === "completed" || value === "partial" || value === "skipped") return value;
+  return "pending";
+}
+
+function trackingStatusLabel(status: PartnerClientDietTrackingStatus) {
+  return {
+    completed: "Realizada",
+    partial: "Parcial",
+    pending: "Pendente",
+    skipped: "Pulada",
+  }[status];
+}
+
 function normalizeStatus(value: string): DietPlanStatus {
-  return value === "published" || value === "sent" || value === "archived" ? value : "draft";
+  if (value === "active" || value === "scheduled" || value === "superseded" || value === "archived") return value;
+  if (value === "published" || value === "sent") return "active";
+  return "draft";
 }
 
 function normalizeStrategy(value: string): DietCalorieStrategy {
@@ -248,10 +371,11 @@ function normalizeStrategy(value: string): DietCalorieStrategy {
 
 export function dietStatusLabel(status: DietPlanStatus) {
   return {
+    active: "Ativa",
     archived: "Arquivada",
     draft: "Rascunho",
-    published: "Publicada",
-    sent: "Enviada",
+    scheduled: "Programada",
+    superseded: "Substituída",
   }[status];
 }
 
@@ -420,7 +544,11 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     id: rawPlan.id,
     notes: rawPlan.notes,
     publishedAt: rawPlan.publishedAt,
+    reviewLabel: rawPlan.reviewOn ? dateFormatter.format(new Date(`${rawPlan.reviewOn}T12:00:00`)) : "Sem revisão definida",
+    reviewOn: rawPlan.reviewOn ?? null,
     sentAt: rawPlan.sentAt,
+    startsLabel: rawPlan.startsOn ? dateFormatter.format(new Date(`${rawPlan.startsOn}T12:00:00`)) : "Início não definido",
+    startsOn: rawPlan.startsOn ?? null,
     status,
     statusLabel: dietStatusLabel(status),
     targetCarbs: numberValue(rawPlan.targetCarbsG),
@@ -433,6 +561,123 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     waterLiters: numberValue(rawPlan.waterLiters),
     weekDays,
     weekTotals: sumTotals(weekDays.map((day) => day.totals)),
+  };
+}
+
+function plannedMealsForDate(plan: PartnerClientDietPlan, iso: string) {
+  const day = plan.weekDays.find((item) => item.dayOfWeek === isoDayOfWeek(iso));
+  if (!day) return 0;
+  const menuOptionOne = day.meals.filter((meal) => meal.menuOption === 1);
+  return (menuOptionOne.length ? menuOptionOne : day.meals).length;
+}
+
+function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPlan | null): PartnerClientDietTracking | null {
+  if (!plan) return null;
+
+  const tracking = raw.tracking;
+  const today = tracking?.today ?? isoDate(new Date(raw.generatedAt));
+  const days = Array.from({ length: 7 }, (_, index) => shiftIsoDate(today, index - 6));
+  const dailyByDate = new Map((tracking?.dailyLogs ?? []).map((log) => [log.logDate, log]));
+  const mealLogs = (tracking?.mealLogs ?? []).map((log) => ({
+    ...log,
+    status: normalizeTrackingStatus(log.status),
+  }));
+  const logsByDate = new Map<string, typeof mealLogs>();
+  mealLogs.forEach((log) => {
+    const items = logsByDate.get(log.logDate) ?? [];
+    items.push(log);
+    logsByDate.set(log.logDate, items);
+  });
+
+  const trackingDays = days.map<PartnerClientDietTrackingDay>((day) => {
+    const logs = logsByDate.get(day) ?? [];
+    const completedMeals = logs.filter((log) => log.status === "completed").length;
+    const partialMeals = logs.filter((log) => log.status === "partial").length;
+    const skippedMeals = logs.filter((log) => log.status === "skipped").length;
+    const recordedMeals = completedMeals + partialMeals + skippedMeals;
+    const plannedMeals = Math.max(plannedMealsForDate(plan, day), recordedMeals);
+    const pendingMeals = Math.max(0, plannedMeals - recordedMeals);
+    const adherenceBase = completedMeals + partialMeals * 0.5;
+    const adherencePct = plannedMeals > 0 ? Math.round((adherenceBase / plannedMeals) * 100) : 0;
+    const date = new Date(`${day}T12:00:00`);
+
+    return {
+      adherencePct,
+      completedMeals,
+      dateLabel: dateFormatter.format(date),
+      isoDate: day,
+      partialMeals,
+      pendingMeals,
+      plannedMeals,
+      shortLabel: shortWeekdayFormatter.format(date).replace(".", ""),
+      skippedMeals,
+      waterMl: numberValue(dailyByDate.get(day)?.waterMl),
+    };
+  });
+
+  const summary = trackingDays.reduce<PartnerClientDietTracking["summary"]>((total, day) => ({
+    adherencePct: 0,
+    completedMeals: total.completedMeals + day.completedMeals,
+    daysWithoutRecords: total.daysWithoutRecords + (day.completedMeals + day.partialMeals + day.skippedMeals === 0 && day.waterMl === 0 ? 1 : 0),
+    notesCount: total.notesCount,
+    partialMeals: total.partialMeals + day.partialMeals,
+    pendingMeals: total.pendingMeals + day.pendingMeals,
+    photosCount: total.photosCount,
+    plannedMeals: total.plannedMeals + day.plannedMeals,
+    skippedMeals: total.skippedMeals + day.skippedMeals,
+    waterAverageMl: total.waterAverageMl + day.waterMl,
+  }), {
+    adherencePct: 0,
+    completedMeals: 0,
+    daysWithoutRecords: 0,
+    notesCount: mealLogs.filter((log) => Boolean(log.notes)).length,
+    partialMeals: 0,
+    pendingMeals: 0,
+    photosCount: mealLogs.filter((log) => Boolean(log.photoStoragePath || log.photoOriginalFilename)).length,
+    plannedMeals: 0,
+    skippedMeals: 0,
+    waterAverageMl: 0,
+  });
+  summary.adherencePct = summary.plannedMeals > 0
+    ? Math.round(((summary.completedMeals + summary.partialMeals * 0.5) / summary.plannedMeals) * 100)
+    : 0;
+  summary.waterAverageMl = Math.round(summary.waterAverageMl / Math.max(1, trackingDays.length));
+
+  const mealsById = new Map(plan.weekDays.flatMap((day) => day.meals).map((meal) => [meal.id, meal]));
+  const latestMealLogs = mealLogs
+    .slice()
+    .sort((a, b) => new Date(`${b.logDate}T12:00:00`).getTime() - new Date(`${a.logDate}T12:00:00`).getTime() || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 8)
+    .map<PartnerClientDietMealLog>((log) => {
+      const meal = mealsById.get(log.mealId);
+      return {
+        completedAtLabel: log.completedAt ? dateTimeFormatter.format(new Date(log.completedAt)) : null,
+        dateLabel: dateFormatter.format(new Date(`${log.logDate}T12:00:00`)),
+        id: log.id,
+        mealTitle: meal?.title ?? "Refeição",
+        notes: log.notes,
+        photoLabel: log.photoOriginalFilename,
+        status: log.status,
+        statusLabel: trackingStatusLabel(log.status),
+        timeLabel: meal?.mealTime ?? "--:--",
+      };
+    });
+
+  const insights = [
+    summary.daysWithoutRecords > 0 ? `${summary.daysWithoutRecords} dia(s) sem registro no período.` : null,
+    summary.skippedMeals > 0 ? `${summary.skippedMeals} refeição(ões) pulada(s) pelo Cliente.` : null,
+    summary.partialMeals > 0 ? `${summary.partialMeals} refeição(ões) marcadas como parciais.` : null,
+    summary.notesCount > 0 ? `${summary.notesCount} observação(ões) enviadas pelo Cliente.` : null,
+    plan.waterLiters > 0 && summary.waterAverageMl < plan.waterLiters * 1000 * 0.7 ? "Hidratação média abaixo da meta definida." : null,
+  ].filter(Boolean) as string[];
+
+  return {
+    days: trackingDays,
+    events: tracking?.events ?? [],
+    insights,
+    mealLogs: latestMealLogs,
+    periodLabel: "Últimos 7 dias",
+    summary,
   };
 }
 
@@ -452,6 +697,8 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
   const popularFoods = [...foods].sort((a, b) => b.usageCount - a.usageCount).slice(0, 8);
   const suggestions = [...draftFoods, ...popularFoods.filter((food) => !suggestionIds.has(food.id))].slice(0, 8);
 
+  const plan = raw.plan ? mapPlan(raw.plan) : null;
+
   return {
     drafts,
     events: raw.events.map((event) => ({
@@ -470,6 +717,7 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
       recent: [...foods].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 8),
       suggestions,
     },
-    plan: raw.plan ? mapPlan(raw.plan) : null,
+    plan,
+    tracking: buildTracking(raw, plan),
   };
 }

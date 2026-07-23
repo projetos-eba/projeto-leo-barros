@@ -114,18 +114,24 @@ insert into public.partner_client_diet_plans (
   target_protein_g,
   target_carbs_g,
   target_fat_g,
-  sent_at
+  sent_at,
+  starts_on,
+  review_on,
+  published_at
 )
 values (
   'ab100000-0000-4000-8000-000000000401',
   'ab100000-0000-4000-8000-000000000201',
   'ab100000-0000-4000-8000-000000000301',
   'Dieta real',
-  'sent',
+  'active',
   2200,
   160,
   220,
   70,
+  '2026-07-01T12:00:00.000Z',
+  '2026-07-01',
+  '2026-07-31',
   '2026-07-01T12:00:00.000Z'
 );
 

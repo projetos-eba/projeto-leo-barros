@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import type { ClientWorkoutExecution } from "@/lib/clients/workout-metrics";
-import { workoutMuscleLabels } from "@/lib/partners/client-workout-metrics";
+import { workoutMuscleLabels, workoutTechniqueLabels } from "@/lib/partners/client-workout-metrics";
 import { cn } from "@/lib/utils";
 
 import { finishClientWorkoutSession, logClientWorkoutSet, skipClientWorkoutExercise } from "../../actions";
@@ -61,6 +61,9 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
   const nextSet = exerciseSets.find((set) => set.log?.status !== "completed") ?? null;
   const completedSets = exerciseSets.filter((set) => set.log?.status === "completed").length;
   const progressPercent = execution.exercises.length > 0 ? Math.round(((exerciseIndex + completedSets / Math.max(1, exerciseSets.length)) / execution.exercises.length) * 100) : 0;
+  const bisetPair = exercise.bisetGroupId
+    ? execution.exercises.filter((item) => item.bisetGroupId === exercise.bisetGroupId).sort((left, right) => (left.bisetPosition ?? 0) - (right.bisetPosition ?? 0))
+    : [];
 
   useEffect(() => {
     if (restSeconds <= 0) return undefined;
@@ -152,6 +155,36 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
               </div>
               <h2 className="mt-5 max-w-[780px] text-[42px] font-black leading-[1.02] tracking-[-0.01em] text-white sm:text-[64px]">{exercise.name}</h2>
               <p className="mt-4 max-w-[620px] text-[15px] leading-6 text-[#a9bdcc]">{exercise.notes ?? "Execute com técnica controlada, registre a carga real e respeite o descanso prescrito."}</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[13px] border border-[#223646] bg-[#0d1822]/82 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">Técnica</p>
+                  <p className="mt-1 text-[15px] font-black text-white">{workoutTechniqueLabels[exercise.technique]}</p>
+                </div>
+                <div className="rounded-[13px] border border-[#223646] bg-[#0d1822]/82 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">Cadência</p>
+                  <p className="mt-1 text-[15px] font-black text-white">{exercise.cadence ?? "Controlada"}</p>
+                </div>
+                <div className="rounded-[13px] border border-[#223646] bg-[#0d1822]/82 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">Execução</p>
+                  <p className="mt-1 text-[15px] font-black text-white">
+                    {exercise.bisetGroupId ? `Bi-set ${exercise.bisetPosition === 2 ? "B" : "A"}` : "Individual"}
+                  </p>
+                </div>
+              </div>
+              {bisetPair.length > 1 ? (
+                <div className="mt-4 rounded-[14px] border border-[#1f8dff]/35 bg-[#071d32]/78 p-4">
+                  <p className="text-[12px] font-black uppercase tracking-[0.14em] text-[#8fcfff]">Bi-set prescrito</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {bisetPair.map((item) => (
+                      <div className="rounded-[10px] bg-[#081824] px-3 py-2" key={item.id}>
+                        <span className="text-[11px] font-black text-[#74c5ff]">{item.bisetPosition === 2 ? "B" : "A"}</span>
+                        <p className="truncate text-[14px] font-bold text-white">{item.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[13px] leading-5 text-[#a9bdcc]">Execute os dois exercícios em sequência e descanse após completar o par.</p>
+                </div>
+              ) : null}
               <div className="mt-7 grid gap-3 sm:grid-cols-4">
                 <div className="rounded-[14px] border border-[#223646] bg-[#0d1822]/80 p-4 text-center"><Dumbbell className="mx-auto size-5 text-[#1f8dff]" /><b className="mt-2 block text-[25px]">{exercise.sets.length}</b><span className="text-[13px] text-[#a8bac8]">séries</span></div>
                 <div className="rounded-[14px] border border-[#223646] bg-[#0d1822]/80 p-4 text-center"><RotateCcw className="mx-auto size-5 text-[#1f8dff]" /><b className="mt-2 block text-[25px]">{prescribedRange(exercise.sets.map((set) => set.reps))}</b><span className="text-[13px] text-[#a8bac8]">repetições</span></div>
@@ -252,6 +285,37 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
               <PauseCircle className="size-5" />
               Finalizar treino
             </button>
+
+            <section className="rounded-[18px] border border-[#213444] bg-[#101a25]/94 p-5">
+              <h3 className="text-[18px] font-bold text-white">Sequência do treino</h3>
+              <div className="mt-4 grid gap-2">
+                {execution.exercises.map((item, index) => {
+                  const active = item.id === exercise.id;
+                  const completed = item.logStatus === "completed";
+                  const skipped = item.logStatus === "skipped";
+                  return (
+                    <button
+                      className={cn(
+                        "grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 rounded-[11px] border px-3 py-2 text-left transition",
+                        active ? "border-[#1f8dff] bg-[#071d32]" : "border-[#243746] bg-[#07141d]",
+                      )}
+                      key={item.id}
+                      type="button"
+                      onClick={() => setExerciseIndex(index)}
+                    >
+                      <span className={cn("flex size-8 items-center justify-center rounded-full text-[12px] font-black", completed ? "bg-[#0e3c25] text-[#69e994]" : skipped ? "bg-[#341117] text-[#ff9a9a]" : "bg-[#12385a] text-[#8fcfff]")}>
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[13px] font-bold text-white">{item.name}</span>
+                        <span className="block truncate text-[11px] text-[#8fa3b4]">{item.sets.length} séries · {item.prescribedRepsLabel}</span>
+                      </span>
+                      {item.bisetGroupId ? <span className="rounded-full bg-[#0a2c48] px-2 py-1 text-[10px] font-bold text-[#8fcfff]">Bi-set</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
           </aside>
         </main>
       </div>

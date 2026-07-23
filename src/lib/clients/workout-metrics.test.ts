@@ -3,6 +3,27 @@ import { describe, expect, it } from "vitest";
 import { buildClientWorkout, type ClientWorkoutRawData } from "./workout-metrics";
 
 const raw: ClientWorkoutRawData = {
+  cardio: {
+    plan: {
+      activityKey: "corrida_moderada",
+      comparisonActivityKey: "caminhada_leve",
+      id: "cardio-plan-1",
+      notes: null,
+      publishedAt: "2026-07-01T12:00:00.000Z",
+      sentAt: "2026-07-01T12:30:00.000Z",
+      status: "sent",
+      targetZone: "z3",
+      title: "Cardio base semanal",
+      updatedAt: "2026-07-01T12:00:00.000Z",
+      version: 1,
+      weeklyTargetMinutes: 180,
+      weightKg: 70,
+    },
+    sessions: [
+      { activityKey: "corrida_moderada", durationMinutes: 45, id: "cardio-session-1", kcalEstimate: 315, met: 7, notes: null, performedAt: "2026-07-03T10:00:00.000Z", targetZone: "z3" },
+      { activityKey: "corrida_moderada", durationMinutes: 30, id: "cardio-session-2", kcalEstimate: 210, met: 7, notes: null, performedAt: "2026-07-01T10:00:00.000Z", targetZone: "z3" },
+    ],
+  },
   client: {
     avatarUrl: "/avatars/ana-ribeiro-seed.png",
     id: "a1000000-0000-4000-8000-000000000301",
@@ -80,5 +101,61 @@ describe("buildClientWorkout", () => {
     expect(workout.summary.totalVolumeKg).toBe(1080);
     expect(workout.history[0]?.statusLabel).toBe("Concluído");
     expect(workout.executionSessions[0]?.currentSet).toBeNull();
+    expect(workout.cardio).toMatchObject({
+      activityLabel: "Corrida moderada",
+      completedKcal: 525,
+      completedMinutes: 75,
+      planTitle: "Cardio base semanal",
+      progressPercent: 42,
+      statusLabel: "Ativo",
+      targetMinutes: 180,
+      targetZoneLabel: "Z3",
+    });
+  });
+
+  it("sugere o próximo treino do ciclo após o último treino concluído", () => {
+    const workout = buildClientWorkout({
+      ...raw,
+      program: raw.program ? {
+        ...raw.program,
+        sessions: [
+          ...raw.program.sessions,
+          {
+            durationMinutes: 55,
+            exercises: [
+              {
+                bisetGroupId: null,
+                bisetPosition: null,
+                cadence: null,
+                exerciseId: "library-2",
+                id: "exercise-2",
+                muscleGroup: "costas",
+                name: "Remada baixa",
+                notes: null,
+                restSeconds: 75,
+                secondaryMuscleGroups: ["biceps"],
+                sets: [
+                  { id: "set-3", intensity: "moderate", loadKg: 45, reps: 12, setNumber: 1 },
+                  { id: "set-4", intensity: "moderate", loadKg: 45, reps: 12, setNumber: 2 },
+                ],
+                sortOrder: 0,
+                technique: "normal",
+                thumbnailUrl: null,
+                variationName: null,
+              },
+            ],
+            frequencyPerWeek: 2,
+            id: "session-2",
+            objective: "hipertrofia",
+            sortOrder: 1,
+            title: "Treino B",
+          },
+        ],
+      } : null,
+    });
+
+    expect(workout.todaySession?.id).toBe("session-2");
+    expect(workout.routine.nextSessionLabel).toBe("Treino B · Costas e Bíceps");
+    expect(workout.routine.reasonLabel).toBe("Próximo treino do ciclo");
   });
 });

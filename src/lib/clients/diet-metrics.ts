@@ -62,7 +62,10 @@ export type ClientDietRawData = {
     id: string;
     meals: ClientDietRawMeal[];
     partnerId: string;
+    publishedAt?: string | null;
+    reviewOn?: string | null;
     sentAt: string | null;
+    startsOn?: string | null;
     status: string;
     targetCarbsG: number | string;
     targetFatG: number | string;
@@ -70,6 +73,7 @@ export type ClientDietRawData = {
     targetProteinG: number | string;
     title: string;
     updatedAt: string;
+    version?: number | string;
     waterLiters: number | string;
   } | null;
   selectedDate: string;
@@ -117,7 +121,7 @@ export type ClientDietMeal = {
   notes: string | null;
   optionLabel: string;
   photoLabel: string | null;
-  status: "completed" | "pending" | "skipped";
+  status: "completed" | "partial" | "pending" | "skipped";
   statusLabel: string;
   timeLabel: string;
   title: string;
@@ -157,12 +161,16 @@ export type ClientDietData = {
   plan: {
     id: string;
     partnerId: string;
+    reviewLabel: string;
+    startsLabel: string;
     statusLabel: string;
     targetCarbs: number;
     targetFat: number;
     targetKcal: number;
     targetProtein: number;
     title: string;
+    updatedLabel: string;
+    versionLabel: string;
   } | null;
   progress: {
     consumed: MacroTotals;
@@ -193,10 +201,13 @@ export type ClientDietData = {
     adherenceDays: number;
     averageKcal: number;
     points: Array<{
+      completedMeals: number;
       date: string;
       kcal: number;
       label: string;
       percent: number;
+      totalMeals: number;
+      waterMl: number;
     }>;
     registeredMeals: number;
     totalMeals: number;
@@ -256,13 +267,14 @@ function mealTotals(meal: ClientDietRawMeal): MacroTotals {
 
 function sumMeals(meals: ClientDietMeal[]): MacroTotals {
   return meals.reduce<MacroTotals>((totals, meal) => {
-    if (meal.status !== "completed") return totals;
+    if (meal.status !== "completed" && meal.status !== "partial") return totals;
+    const multiplier = meal.status === "partial" ? 0.5 : 1;
     return {
-      carbs: totals.carbs + meal.totals.carbs,
-      fat: totals.fat + meal.totals.fat,
-      fiber: totals.fiber + meal.totals.fiber,
-      kcal: totals.kcal + meal.totals.kcal,
-      protein: totals.protein + meal.totals.protein,
+      carbs: totals.carbs + meal.totals.carbs * multiplier,
+      fat: totals.fat + meal.totals.fat * multiplier,
+      fiber: totals.fiber + meal.totals.fiber * multiplier,
+      kcal: totals.kcal + meal.totals.kcal * multiplier,
+      protein: totals.protein + meal.totals.protein * multiplier,
     };
   }, { carbs: 0, fat: 0, fiber: 0, kcal: 0, protein: 0 });
 }
@@ -274,15 +286,23 @@ function percent(value: number, target: number) {
 
 function statusLabel(status: ClientDietMeal["status"], isNext: boolean) {
   if (status === "completed") return "Realizada";
+  if (status === "partial") return "Parcial";
   if (status === "skipped") return "Pulada";
   return isNext ? "Próxima" : "Pendente";
 }
 
 function planStatusLabel(status: string) {
   return {
-    published: "Plano publicado",
+    active: "Plano ativo",
+    published: "Plano ativo",
+    scheduled: "Plano programado",
     sent: "Plano ativo",
   }[status] ?? "Plano alimentar";
+}
+
+function dateLabel(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
+  return shortDateFormatter.format(new Date(`${value.slice(0, 10)}T12:00:00`));
 }
 
 function mealImageSrc(title: string) {
@@ -311,14 +331,17 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
 
   const nextMealId = defaultMeals.find((meal) => {
     const log = logs.get(meal.id);
-    if (log?.status === "completed") return false;
+    if (log?.status === "completed" || log?.status === "partial" || log?.status === "skipped") return false;
     return mealDate(selectedDate, meal.mealTime).getTime() >= now.getTime();
-  })?.id ?? defaultMeals.find((meal) => logs.get(meal.id)?.status !== "completed")?.id ?? null;
+  })?.id ?? defaultMeals.find((meal) => {
+    const status = logs.get(meal.id)?.status;
+    return status !== "completed" && status !== "partial" && status !== "skipped";
+  })?.id ?? null;
 
   const meals = rawMeals.map<ClientDietMeal>((meal) => {
     const log = logs.get(meal.id);
-    const status = (log?.status === "completed" || log?.status === "skipped" ? log.status : "pending") as ClientDietMeal["status"];
-    const isNext = meal.id === nextMealId && status !== "completed";
+    const status = (log?.status === "completed" || log?.status === "partial" || log?.status === "skipped" ? log.status : "pending") as ClientDietMeal["status"];
+    const isNext = meal.id === nextMealId && status === "pending";
     const completedAt = log?.completedAt ? new Date(log.completedAt) : null;
 
     return {
@@ -383,7 +406,6 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
   const prescribedMeals = raw.weekLogs.reduce((total, item) => total + numberValue(item.totalMeals), 0);
   const totalMeals = Math.max(prescribedMeals, registeredMeals);
   const kcalValues = raw.weekLogs.map((item) => numberValue(item.consumedKcal));
-  const peakKcal = Math.max(targetKcal, ...kcalValues, 1);
 
   return {
     client: {
@@ -407,12 +429,16 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
     plan: plan ? {
       id: plan.id,
       partnerId: plan.partnerId,
+      reviewLabel: dateLabel(plan.reviewOn, "Sem revisão"),
+      startsLabel: dateLabel(plan.startsOn ?? plan.publishedAt ?? plan.sentAt ?? plan.updatedAt, "Sem início"),
       statusLabel: planStatusLabel(plan.status),
       targetCarbs,
       targetFat,
       targetKcal,
       targetProtein,
       title: plan.title,
+      updatedLabel: dateLabel(plan.updatedAt, "Sem atualização"),
+      versionLabel: `v${Math.max(1, Math.round(numberValue((plan as { version?: number | string }).version ?? 1)))}`,
     } : null,
     progress: {
       consumed,
@@ -450,12 +476,17 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
       averageKcal: kcalValues.length ? Math.round(kcalValues.reduce((total, item) => total + item, 0) / kcalValues.length) : 0,
       points: raw.weekLogs.map((item) => {
         const date = new Date(`${item.date}T12:00:00`);
+        const completedMeals = numberValue(item.completedMeals);
+        const totalDayMeals = Math.max(completedMeals, numberValue(item.totalMeals), 1);
         const kcal = numberValue(item.consumedKcal);
         return {
+          completedMeals,
           date: item.date,
           kcal,
           label: `${weekdayFormatter.format(date)} ${shortDateFormatter.format(date)}`,
-          percent: percent(kcal, peakKcal),
+          percent: percent(completedMeals, totalDayMeals),
+          totalMeals: totalDayMeals,
+          waterMl: numberValue(item.waterMl),
         };
       }),
       registeredMeals,

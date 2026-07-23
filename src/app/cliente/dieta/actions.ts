@@ -10,7 +10,7 @@ type ActionResult = {
 };
 
 type DietActionRpc = {
-  rpc(name: "client_diet_mark_meal", params: { p_completed: boolean; p_log_date: string; p_meal_id: string }): PromiseLike<{ error: { message: string } | null }>;
+  rpc(name: "client_diet_set_meal_status", params: { p_log_date: string; p_meal_id: string; p_status: ClientDietMealStatus }): PromiseLike<{ error: { message: string } | null }>;
   rpc(name: "client_diet_add_water", params: { p_amount_ml: number; p_log_date: string }): PromiseLike<{ error: { message: string } | null }>;
   rpc(name: "client_diet_apply_substitution", params: { p_food_id: string; p_item_id: string; p_log_date: string; p_meal_id: string }): PromiseLike<{ error: { message: string } | null }>;
   rpc(name: "client_diet_save_meal_note", params: { p_log_date: string; p_meal_id: string; p_notes: string }): PromiseLike<{ error: { message: string } | null }>;
@@ -18,6 +18,8 @@ type DietActionRpc = {
   rpc(name: "client_diet_attach_meal_photo", params: { p_log_date: string; p_meal_id: string; p_mime_type: string; p_original_filename: string; p_storage_path: string }): PromiseLike<{ error: { message: string } | null }>;
   rpc(name: "current_active_patient_id", params?: Record<string, never>): PromiseLike<{ data: string | null; error: { message: string } | null }>;
 };
+
+export type ClientDietMealStatus = "completed" | "partial" | "pending" | "skipped";
 
 function revalidateDiet() {
   revalidatePath("/cliente/dieta");
@@ -66,14 +68,21 @@ function safeFileName(name: string) {
 }
 
 export async function markClientDietMeal(mealId: string, logDate: string, completed: boolean): Promise<ActionResult> {
+  return setClientDietMealStatus(mealId, logDate, completed ? "completed" : "pending");
+}
+
+export async function setClientDietMealStatus(mealId: string, logDate: string, status: ClientDietMealStatus): Promise<ActionResult> {
   const fieldError = validateActionFields(mealId, logDate);
   if (fieldError) return { error: fieldError, ok: false };
+  if (!["completed", "partial", "pending", "skipped"].includes(status)) {
+    return { error: "Status da refeição inválido.", ok: false };
+  }
 
   const supabase = await createClient();
-  const { error } = await (supabase as unknown as DietActionRpc).rpc("client_diet_mark_meal", {
-    p_completed: completed,
+  const { error } = await (supabase as unknown as DietActionRpc).rpc("client_diet_set_meal_status", {
     p_log_date: logDate,
     p_meal_id: mealId,
+    p_status: status,
   });
 
   if (error) return { error: error.message, ok: false };
