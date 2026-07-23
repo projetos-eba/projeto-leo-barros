@@ -1099,7 +1099,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
         </PartnerPanel>
 
         <div className="mt-6 flex flex-wrap gap-4 text-[12px] text-[#728697]">
-          <span className="inline-flex items-center gap-2"><CheckCircle2 className="size-4" /> Dados conectados ao Supabase local</span>
+          <span className="inline-flex items-center gap-2"><CheckCircle2 className="size-4" /> Dados atualizados da plataforma</span>
           <span className="inline-flex items-center gap-2"><XCircle className="size-4" /> CPF fora da listagem e exportação</span>
         </div>
       </div>

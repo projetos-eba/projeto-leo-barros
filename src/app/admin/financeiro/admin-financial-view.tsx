@@ -165,7 +165,7 @@ export function AdminFinancialView({ financial, platformName = DEFAULT_PLATFORM_
           <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Admin</p>
           <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Financeiro & Planos</h1>
           <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
-            Monitore faturamento, assinaturas, inadimplência e performance comercial com dados reais do banco local.
+            Monitore faturamento, assinaturas, inadimplência e performance comercial com dados atualizados da plataforma.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap xl:justify-end">
@@ -247,7 +247,7 @@ export function AdminFinancialView({ financial, platformName = DEFAULT_PLATFORM_
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
         <span>{platformName} — Financeiro Admin</span>
-        <span>Atualizado pelo banco local em {new Date(financial.generatedAt).toLocaleString("pt-BR")}</span>
+        <span>Atualizado em {new Date(financial.generatedAt).toLocaleString("pt-BR")}</span>
       </footer>
     </div>
   );

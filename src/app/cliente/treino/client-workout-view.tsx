@@ -70,13 +70,14 @@ function clampPercent(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function Panel({ children, className }: { children: ReactNode; className?: string }) {
+function Panel({ children, className, dataTestId }: { children: ReactNode; className?: string; dataTestId?: string }) {
   return (
     <section
       className={cn(
         "min-w-0 rounded-[18px] border border-[#213444] bg-[linear-gradient(146deg,rgba(17,31,43,0.96)_0%,rgba(8,18,27,0.94)_100%)] shadow-[0_22px_70px_rgba(0,0,0,0.28)]",
         className,
       )}
+      data-testid={dataTestId}
     >
       {children}
     </section>
@@ -209,7 +210,17 @@ function EmptyWorkout() {
   );
 }
 
-function WorkoutHero({ session, workout }: { session: ClientWorkoutSession; workout: ClientWorkoutData }) {
+function WorkoutHero({
+  badgeLabel,
+  detailLabel,
+  session,
+  workout,
+}: {
+  badgeLabel: string;
+  detailLabel: string;
+  session: ClientWorkoutSession;
+  workout: ClientWorkoutData;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const nextExercise = session.exercises.find((exercise) => exercise.logStatus !== "completed" && exercise.logStatus !== "skipped") ?? session.exercises[0] ?? null;
@@ -226,14 +237,17 @@ function WorkoutHero({ session, workout }: { session: ClientWorkoutSession; work
   }
 
   return (
-    <Panel className="relative overflow-hidden border-[#1f8dff]/70 bg-[#0a2338] p-5 shadow-[0_0_0_1px_rgba(31,141,255,0.22),0_24px_80px_rgba(31,141,255,0.16)] sm:p-6 lg:min-h-[430px]">
+    <Panel
+      className="relative overflow-hidden border-[#1f8dff]/70 bg-[#0a2338] p-5 shadow-[0_0_0_1px_rgba(31,141,255,0.22),0_24px_80px_rgba(31,141,255,0.16)] sm:p-6 lg:min-h-[430px]"
+      dataTestId="client-workout-hero"
+    >
       <img alt="" className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-cover opacity-62 lg:block" src="/cliente/inicio/capa-treino.png" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_34%,rgba(31,141,255,0.38),transparent_27%),linear-gradient(90deg,#07141d_0%,rgba(8,23,35,0.98)_50%,rgba(8,23,35,0.58)_100%)]" />
       <div className="relative z-10 flex h-full max-w-[720px] flex-col">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full bg-[#0d57a6] px-3 py-1.5 text-[12px] font-black uppercase tracking-[0.08em] text-white">
             <Dumbbell className="size-4" />
-            Treino do dia
+            {badgeLabel}
           </span>
           <span className="rounded-full border border-[#2b5c80] bg-[#0b1c2b]/80 px-3 py-1.5 text-[12px] font-bold text-[#b7d9f2]">
             {workout.routine.reasonLabel}
@@ -249,7 +263,7 @@ function WorkoutHero({ session, workout }: { session: ClientWorkoutSession; work
             {session.trainingLabel}
           </h1>
           <p className="mt-3 max-w-[560px] text-[15px] leading-6 text-[#a9bdcc]">
-            {workout.routine.nextSessionLabel}. Registre séries, carga e repetições para acompanhar sua evolução real.
+            {detailLabel}. Registre séries, carga e repetições para acompanhar sua evolução real.
           </p>
         </div>
 
@@ -651,7 +665,12 @@ export function ClientWorkoutView({ workout }: ClientWorkoutViewProps) {
         </header>
 
         <main className="mt-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
-          <WorkoutHero session={workout.todaySession} workout={workout} />
+          <WorkoutHero
+            badgeLabel={selectedSession.id === workout.todaySession.id ? "Treino do dia" : "Treino selecionado"}
+            detailLabel={selectedSession.id === workout.todaySession.id ? workout.routine.nextSessionLabel : `Treino ${selectedSession.letter} · ${selectedSession.trainingLabel}`}
+            session={selectedSession}
+            workout={workout}
+          />
           <div className="grid min-w-0 gap-5 sm:grid-cols-2 xl:grid-cols-1">
             <SessionSelector onSelect={setSelectedSessionId} selectedId={selectedSession.id} suggestedId={workout.routine.nextSessionId} sessions={workout.sessions} />
             <CardioBento workout={workout} />

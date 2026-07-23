@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { fetchPartnerClientAssessments } from "@/lib/partners/client-assessments-data";
 import { fetchPartnerClientCardio } from "@/lib/partners/client-cardio-data";
+import { fetchPartnerClientClinicalWorkspace } from "@/lib/partners/client-clinical-workspace-data";
 import { fetchPartnerClientDiet } from "@/lib/partners/client-diet-data";
 import { fetchPartnerClientExams } from "@/lib/partners/client-exams-data";
 import { fetchPartnerClientOverview } from "@/lib/partners/client-overview-data";
@@ -12,6 +13,7 @@ import { fetchPartnerFinanceData } from "@/lib/partners/finance-data";
 
 import { PartnerClientAssessmentsView } from "./partner-client-assessments-view";
 import { PartnerClientCardioView } from "./partner-client-cardio-view";
+import { PartnerClientClinicalWorkspaceView } from "./partner-client-clinical-workspace-view";
 import { PartnerClientDietView } from "./partner-client-diet-view";
 import { PartnerClientExamsView } from "./partner-client-exams-view";
 import { PartnerClientFinanceView } from "./partner-client-finance-view";
@@ -47,6 +49,21 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
     notFound();
   }
 
+
+  if (tab === "anamnese" || tab === "prescricoes" || tab === "formularios") {
+    const clinicalWorkspace = await fetchPartnerClientClinicalWorkspace(id);
+    if (!clinicalWorkspace) {
+      notFound();
+    }
+
+    return (
+      <PartnerClientClinicalWorkspaceView
+        activeTab={tab}
+        data={clinicalWorkspace}
+        overview={overview}
+      />
+    );
+  }
 
   if (tab === "dietas") {
     const diet = await fetchPartnerClientDiet(id);

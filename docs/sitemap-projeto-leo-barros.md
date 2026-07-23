@@ -21,6 +21,10 @@ Rotas implementadas hoje no app Next:
 - `/cliente/dieta`;
 - `/cliente/evolucao`;
 - `/cliente/formularios`;
+<<<<<<< HEAD
+- `/cliente/formularios/:assignmentClientId`;
+=======
+>>>>>>> origin/main
 - `/parceiros/dashboard`;
 - `/cliente/inicio`;
 - `/cliente/saude`;
@@ -110,7 +114,7 @@ O fluxo correto de produto para formularios e autenticado e contextual:
 
 A antiga implementacao Vite em `/form/:token` permanece apenas como referencia legada/provisoria para compatibilidade historica. Ela nao e uma rota publica alvo do sitemap e nao deve ser migrada diretamente para `/form/[token]`.
 
-A rota autenticada definitiva ainda nao foi definida. Essa decisao exige fase propria envolvendo navegacao, auth, ownership, Supabase e RLS.
+A rota autenticada definitiva no app Next e `/cliente/formularios`, com preenchimento em `/cliente/formularios/:assignmentClientId`.
 
 ## 4. Jornada Parceiros
 

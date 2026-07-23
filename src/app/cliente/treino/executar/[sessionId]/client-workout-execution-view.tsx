@@ -87,8 +87,15 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
   }
 
   function submitSet(formData: FormData) {
+    const payload = {
+      clientSessionId: String(formData.get("clientSessionId") ?? ""),
+      loadKg: String(formData.get("loadKg") ?? ""),
+      reps: String(formData.get("reps") ?? ""),
+      setId: String(formData.get("setId") ?? ""),
+    };
+
     startTransition(async () => {
-      const result = await logClientWorkoutSet(formData);
+      const result = await logClientWorkoutSet(payload);
       if (!result.ok) {
         window.alert(result.error ?? "Não foi possível registrar a série.");
         return;

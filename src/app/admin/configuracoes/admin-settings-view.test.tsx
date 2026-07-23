@@ -28,7 +28,7 @@ vi.mock("./actions", () => ({
   saveGeneralSettingsAction: vi.fn(async () => ({ message: "Configuracoes gerais salvas.", ok: true })),
   saveIntegrationAction: vi.fn(async () => ({ message: "Integracao salva.", ok: true })),
   saveSecuritySettingsAction: vi.fn(async () => ({ message: "Configuracoes de seguranca salvas.", ok: true })),
-  testIntegrationAction: vi.fn(async () => ({ message: "Teste local concluido. Configuracao minima presente.", ok: true })),
+  testIntegrationAction: vi.fn(async () => ({ message: "Teste concluido. Configuracao minima presente.", ok: true })),
   updateAdminUserAction: vi.fn(async () => ({ message: "Administrador atualizado.", ok: true })),
 }));
 
@@ -125,7 +125,7 @@ describe("AdminSettingsView", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Testar$/i }));
 
     await waitFor(() => {
-      expect(screen.getAllByText("Teste local concluido. Configuracao minima presente.").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Teste concluido. Configuracao minima presente.").length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole("button", { name: /^Salvar$/i }));

@@ -1,0 +1,13 @@
+[mcp_servers.playwright]
+command = "node"
+args = [
+    "node_modules/@playwright/mcp/cli.js",
+    "--headless",
+    "--output-dir",
+    ".playwright-mcp",
+    "--output-mode",
+    "file",
+]
+
+[mcp_servers.supabase-local]
+url = "http://127.0.0.1:54321/mcp"

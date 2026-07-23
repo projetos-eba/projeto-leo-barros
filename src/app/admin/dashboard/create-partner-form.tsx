@@ -295,7 +295,7 @@ export function CreatePartnerForm() {
           </div>
 
           <Badge className="w-fit border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
-            Supabase local
+            Acesso seguro
           </Badge>
         </div>
 

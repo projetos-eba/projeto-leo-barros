@@ -489,7 +489,7 @@ export function AdminSupportView({ platformName = DEFAULT_PLATFORM_NAME, support
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
         <span>{platformName} — Suporte Admin</span>
-        <span>Atualizado pelo banco local em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(support.generatedAt))}</span>
+        <span>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(support.generatedAt))}</span>
       </footer>
 
       <TicketDrawer open={drawerOpen} onOpenChange={setDrawerOpen} ticket={selectedTicket} />
