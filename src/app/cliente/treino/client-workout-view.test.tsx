@@ -118,14 +118,14 @@ describe("ClientWorkoutView", () => {
     render(<ClientWorkoutView workout={workout} />);
 
     expect(screen.getByText("Treino do dia")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Treino B" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Costas e Bíceps" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Treino B/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^A Peito e Tríceps/i }));
 
     const hero = within(screen.getByTestId("client-workout-hero"));
 
     expect(hero.getByText("Treino selecionado")).toBeInTheDocument();
-    expect(hero.getByText("Treino B")).toBeInTheDocument();
-    expect(hero.getByRole("heading", { name: "Costas e Bíceps" })).toBeInTheDocument();
+    expect(hero.getByText("Treino A")).toBeInTheDocument();
+    expect(hero.getByRole("heading", { name: "Peito e Tríceps" })).toBeInTheDocument();
   });
 });

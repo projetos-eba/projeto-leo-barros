@@ -1,19 +1,12 @@
 "use client";
 
-<<<<<<< HEAD
-import { ArrowLeft, CalendarPlus, Dumbbell, FileDown, HeartPulse, MessageCircle, Phone, Target, Utensils, Users } from "lucide-react";
-=======
 import { ArrowLeft, CalendarPlus, FileDown, MessageCircle, Phone, Target, Users } from "lucide-react";
->>>>>>> origin/main
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
 
-<<<<<<< HEAD
-type ClientTab = "anamnese" | "avaliacoes" | "cardio" | "dietas" | "exames" | "formularios" | "fotos" | "prescricoes" | "treinos" | "visao-geral";
-=======
 type ClientTab =
   | "anamnese"
   | "avaliacoes"
@@ -26,7 +19,6 @@ type ClientTab =
   | "prescricoes"
   | "treinos"
   | "visao-geral";
->>>>>>> origin/main
 
 const tabs: Array<{ id: ClientTab; label: string }> = [
   { id: "visao-geral", label: "Visão Geral" },
@@ -38,32 +30,11 @@ const tabs: Array<{ id: ClientTab; label: string }> = [
   { id: "treinos", label: "Treinos" },
   { id: "cardio", label: "Cardio" },
   { id: "exames", label: "Exames" },
-  { id: "prescricoes", label: "Prescrições" },
   { id: "fotos", label: "Fotos" },
-  { id: "formularios", label: "Formulários" },
-  { id: "anamnese", label: "Anamnese" },
   { id: "planos-financeiro", label: "Planos & Financeiro" },
 ];
 
-<<<<<<< HEAD
-const moduleIcons = {
-  cardio: HeartPulse,
-  dieta: Utensils,
-  saude: Target,
-  treino: Dumbbell,
-};
-
-const moduleLabels: Record<string, string> = {
-  cardio: "Cardio",
-  dieta: "Dieta",
-  saude: "Saúde",
-  treino: "Treino",
-};
-
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-=======
 function InfoItem({ className, icon, label, value }: { className?: string; icon: React.ReactNode; label: string; value: string }) {
->>>>>>> origin/main
   return (
     <div className={cn("grid min-w-0 grid-cols-[26px_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[32px_minmax(0,1fr)] sm:gap-3", className)}>
       <span className="flex size-[26px] items-center justify-center rounded-[7px] bg-[#082a43] text-[#68afe9] sm:size-8 sm:rounded-[8px]">{icon}</span>
@@ -80,10 +51,10 @@ function ContractedPlan({ overview }: { overview: PartnerClientOverviewData }) {
 
   return (
     <section className="min-w-0 rounded-[10px] border border-[#2f82bf]/45 bg-[rgba(10,44,72,0.26)] p-3 sm:p-4">
-      <p className="text-[10px] font-semibold uppercase leading-3 tracking-[0.05em] text-[#9aa5b6] sm:text-[11px] sm:leading-[14px]">Plano clínico atual</p>
+      <p className="text-[10px] font-semibold uppercase leading-3 tracking-[0.05em] text-[#9aa5b6] sm:text-[11px] sm:leading-[14px]">Plano contratado</p>
       <p className="mt-1 truncate text-[14px] font-bold leading-5 text-white sm:text-[15px]">{plan?.name ?? "Sem plano vigente"}</p>
       <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#8fcfff] sm:text-[12px]">
-        {plan ? `Atualização: ${plan.renewalLabel}` : "Vincule um plano clínico para acompanhar entregas."}
+        {plan ? `Atualização: ${plan.renewalLabel}` : "Vincule um plano para acompanhar entregas."}
       </p>
     </section>
   );
@@ -160,7 +131,7 @@ export function PartnerClientProfileHeader({
             <InfoItem icon={<CalendarPlus className="size-4" />} label="Idade" value={overview.client.ageLabel} />
             <InfoItem icon={<Users className="size-4" />} label="Gênero" value={overview.client.genderLabel} />
             <InfoItem icon={<CalendarPlus className="size-4" />} label="Nascimento" value={overview.client.birthDateLabel} />
-            <InfoItem icon={<Phone className="size-4" />} label="Telefone" value={overview.client.phoneLabel} className="sm:col-span-1" />
+            <InfoItem className="sm:col-span-1" icon={<Phone className="size-4" />} label="Telefone" value={overview.client.phoneLabel} />
             <InfoItem className="col-span-2 sm:col-span-1" icon={<Target className="size-4" />} label="Período do plano" value={overview.client.planPeriodLabel} />
             <InfoItem className="col-span-2 sm:col-span-1" icon={<Target className="size-4" />} label="Objetivo principal" value={overview.client.objectiveLabel} />
           </div>
