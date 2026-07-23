@@ -202,6 +202,8 @@ Atualize `STRIPE_WEBHOOK_SECRET` do runtime local com o secret exibido pelo list
 - Cupom valido e invalido.
 - Cartao aprovado, recusado e 3DS de teste.
 - Webhooks assinados, duplicados, invalidos e desconhecidos.
+- Invoices de assinatura devem gravar `stripe_invoice_id` e `stripe_subscription_id` no ledger usando `invoice.subscription` ou `invoice.parent.subscription_details.subscription`.
+- Apos `invoice.paid`, confirmar que `partner_subscriptions.status`, `current_period_start` e `current_period_end` foram reconciliados com a Subscription Stripe; parceiro pago nao deve ficar preso ao fim do trial local.
 - Alteracao de Clientes ativos e `billing-sync-active-clients` com `proration_behavior=none`.
 - `billing-sync-active-clients` deve ser chamado apenas por processo interno usando Bearer da service role local; nunca pelo browser.
 - Antes de analisar invoices/snapshots de quantidade, confirmar que o sync processou jobs coalescidos por Parceiro para evitar duplicidade de updates no mesmo run.
