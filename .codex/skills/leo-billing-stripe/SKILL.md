@@ -143,8 +143,9 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `customer.subscription.updated`: atualiza status, periodos, trial, cancelamento e `partner_subscription_financial_summaries`.
 - `customer.subscription.deleted`: marca assinatura cancelada.
 - `invoice.finalized`: registra snapshot de Clientes ativos usado na cobranca.
-- `invoice.payment_failed`: marca assinatura como `past_due` e registra pagamento `failed` quando houver PaymentIntent.
-- `invoice.payment_action_required`: marca assinatura como `past_due` e registra pagamento `pending` quando houver PaymentIntent.
+- `invoice.paid`: marca assinatura como paga, extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe e registra pagamento `succeeded` quando houver PaymentIntent.
+- `invoice.payment_failed`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe, marca inadimplencia e registra pagamento `failed` quando houver PaymentIntent.
+- `invoice.payment_action_required`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe, marca pendencia e registra pagamento `pending` quando houver PaymentIntent.
 - `product.created`, `product.updated`, `product.deleted`: sincronizam Product de catalogo ou aplicam soft delete local.
 - `price.created`, `price.updated`, `price.deleted`: sincronizam Price historico/vigente, lookup key, ativo/inativo e camada compativel.
 - Eventos desconhecidos: registrar como `ignored` e retornar 2xx.
@@ -159,7 +160,6 @@ stripe listen --events product.created,product.updated,product.deleted,price.cre
 ```
 
 O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o valor; atualizar apenas o runtime local e reiniciar `supabase functions serve --env-file supabase/functions/.env`.
-- `invoice.paid`: marca assinatura como `active` e registra pagamento `succeeded` quando houver PaymentIntent.
 
 ## MCP Local
 

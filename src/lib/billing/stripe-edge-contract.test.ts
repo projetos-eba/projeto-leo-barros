@@ -184,4 +184,20 @@ describe("stripe edge contract", () => {
     expect(webhook).toContain("stripe.invoices.createPreview");
     expect(webhook).toContain("persistedSummary?.discount_code");
   });
+
+  it("invoice.paid reconcilia periodo corrente da assinatura antes do gate de acesso", () => {
+    const webhook = read("supabase/functions/stripe-webhook/index.ts");
+
+    expect(webhook).toContain("retrieveStripeSubscriptionSnapshot");
+    expect(webhook).toContain("stripeInvoiceSubscriptionId(invoice)");
+    expect(webhook).toContain("invoice.parent?.subscription_details?.subscription");
+    expect(webhook).toContain("subscriptionPeriodUpdate(stripeSubscription)");
+    expect(webhook).toContain("current_period_end: unixSecondsToIso");
+    expect(webhook).toContain("stripe_invoice_id: invoice.id");
+    expect(webhook).toContain("stripe_subscription_id: subscriptionId");
+    expect(webhook).toContain('event.type === "invoice.paid"');
+    expect(webhook).toContain('stripeStatus ?? "active"');
+    expect(webhook).toContain("stripe_last_event_created_at");
+    expect(webhook).toContain("syncFinancialSummaryFromStripeSubscription");
+  });
 });
