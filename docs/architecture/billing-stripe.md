@@ -57,7 +57,7 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 - `product.created`, `product.updated`, `product.deleted`, `price.created`, `price.updated` e `price.deleted` sincronizam o catalogo Stripe para Supabase.
 - `invoice.finalized` captura snapshot da quantidade de Clientes ativos usada para cobranca.
 - `customer.subscription.created` e `customer.subscription.updated` atualizam `partner_subscription_financial_summaries` com preview oficial da proxima cobranca da assinatura.
-- `invoice.paid`, `invoice.payment_failed` e `invoice.payment_action_required` extraem a assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, gravam contexto no ledger, atualizam status e periodo corrente da Subscription Stripe e registram `billing_payments` quando o evento traz `payment_intent`.
+- `invoice.paid`, `invoice.payment_failed` e `invoice.payment_action_required` extraem a assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, gravam contexto no ledger, atualizam status e periodo corrente da Subscription Stripe ou do item base em billing flexible e registram `billing_payments` quando o evento traz `payment_intent`.
 - Eventos desconhecidos sao registrados como `ignored`.
 - Eventos duplicados retornam 2xx sem novo efeito de negocio.
 - `partner_subscriptions.stripe_last_event_created_at` impede que evento antigo sobrescreva estado mais recente.
