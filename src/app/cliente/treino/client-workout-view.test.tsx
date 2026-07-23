@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { forwardRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -110,5 +110,22 @@ describe("ClientWorkoutView", () => {
     expect(screen.getByRole("link", { name: /Saúde/i })).toHaveAttribute("href", "/cliente/saude");
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Pacientes/i)).not.toBeInTheDocument();
+  });
+
+  it("atualiza o hero quando o Cliente seleciona outra divisão", () => {
+    const workout = buildClientWorkout(raw);
+
+    render(<ClientWorkoutView workout={workout} />);
+
+    expect(screen.getByText("Treino do dia")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Costas e Bíceps" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^A Peito e Tríceps/i }));
+
+    const hero = within(screen.getByTestId("client-workout-hero"));
+
+    expect(hero.getByText("Treino selecionado")).toBeInTheDocument();
+    expect(hero.getByText("Treino A")).toBeInTheDocument();
+    expect(hero.getByRole("heading", { name: "Peito e Tríceps" })).toBeInTheDocument();
   });
 });

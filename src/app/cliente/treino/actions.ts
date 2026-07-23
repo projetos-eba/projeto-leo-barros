@@ -10,6 +10,13 @@ type ActionResult = {
   ok: boolean;
 };
 
+type WorkoutSetInput = {
+  clientSessionId: string;
+  loadKg: number | string | null;
+  reps: number | string | null;
+  setId: string;
+};
+
 type WorkoutActionRpc = {
   rpc(name: "client_workout_start_session", params: { p_session_id: string }): PromiseLike<{ data: unknown; error: { message: string } | null }>;
   rpc(name: "client_workout_log_set", params: { p_client_session_id: string; p_completed: boolean; p_load_kg: number | null; p_reps: number | null; p_set_id: string }): PromiseLike<{ error: { message: string } | null }>;
@@ -35,6 +42,13 @@ function numberField(formData: FormData, key: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function numberValue(value: number | string | null) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string") return null;
+  const parsed = Number(value.trim().replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function clientSessionIdFromRpc(data: unknown) {
   if (!data || typeof data !== "object") return null;
   const value = (data as { clientSessionId?: unknown }).clientSessionId;
@@ -55,11 +69,12 @@ export async function startClientWorkoutSession(prescribedSessionId: string): Pr
   return { clientSessionId: clientSessionId ?? undefined, ok: true };
 }
 
-export async function logClientWorkoutSet(formData: FormData): Promise<ActionResult> {
-  const clientSessionId = stringField(formData, "clientSessionId");
-  const setId = stringField(formData, "setId");
-  const loadKg = numberField(formData, "loadKg");
-  const reps = numberField(formData, "reps");
+export async function logClientWorkoutSet(input: FormData | WorkoutSetInput): Promise<ActionResult> {
+  const fromFormData = input instanceof FormData;
+  const clientSessionId = fromFormData ? stringField(input, "clientSessionId") : input.clientSessionId.trim();
+  const setId = fromFormData ? stringField(input, "setId") : input.setId.trim();
+  const loadKg = fromFormData ? numberField(input, "loadKg") : numberValue(input.loadKg);
+  const reps = fromFormData ? numberField(input, "reps") : numberValue(input.reps);
 
   if (!clientSessionId || !setId) return { error: "Dados da série incompletos.", ok: false };
 

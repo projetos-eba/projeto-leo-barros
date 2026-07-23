@@ -265,7 +265,7 @@ export function AdminDashboardView({ dashboard, platformName = DEFAULT_PLATFORM_
         <div>
           <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Admin</p>
           <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Super Admin — Visão Geral</h1>
-          <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">Acompanhe assinaturas, clientes, suporte e documentos com dados reais do banco local.</p>
+          <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">Acompanhe assinaturas, clientes, suporte e documentos com dados atualizados da plataforma.</p>
         </div>
         <div className="flex items-center gap-3 rounded-[8px] border border-[#2b4a5d] bg-[#0d2635]/80 px-4 py-3 text-[13px] font-semibold text-[#b5c7d2]">
           <CalendarDays className="size-4 text-[#5db7ef]" />
@@ -325,7 +325,7 @@ export function AdminDashboardView({ dashboard, platformName = DEFAULT_PLATFORM_
 
       <footer className="mt-7 flex flex-col gap-2 border-t border-[#244454]/70 pt-5 text-[12px] text-[#718795] md:flex-row md:items-center md:justify-between">
         <span>{platformName} — Plataforma Admin</span>
-        <span>Atualizado pelo banco local em {new Date(dashboard.generatedAt).toLocaleString("pt-BR")}</span>
+        <span>Atualizado em {new Date(dashboard.generatedAt).toLocaleString("pt-BR")}</span>
       </footer>
     </div>
   );

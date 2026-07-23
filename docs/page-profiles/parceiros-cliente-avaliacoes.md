@@ -12,7 +12,7 @@
 
 - A interface usa sempre `Clientes`; `patients` permanece apenas como nome técnico do schema.
 - `Cardio` é uma aba própria do perfil do Cliente; esta aba de Avaliações não mistura dados de Cardio.
-- `Cardio`, `Exames` e `Fotos` agora são abas implementadas; Anamnese, Prescrições e Formulários continuam bloqueadas até implementação específica.
+- `Anamnese`, `Prescrições`, `Formulários`, `Cardio`, `Exames` e `Fotos` agora são abas implementadas no perfil individual do Cliente.
 - `Aplicar ao plano` salva um snapshot aplicado como referência do plano atual; não cria editor de dieta nesta etapa.
 
 ## Dados
