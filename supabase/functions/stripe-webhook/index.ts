@@ -23,6 +23,11 @@ type StripeInvoiceEvent = {
   customer?: string;
   due_date?: number | null;
   id: string;
+  parent?: {
+    subscription_details?: {
+      subscription?: string | { id?: string } | null;
+    } | null;
+  } | null;
   payment_intent?: string | { id?: string } | null;
   subscription?: string | { id?: string } | null;
   total?: number;
@@ -31,6 +36,17 @@ type StripeInvoiceEvent = {
 
 function stripeId(value: string | { id?: string } | null | undefined) {
   return typeof value === "string" ? value : value?.id ?? null;
+}
+
+function stripeInvoiceSubscriptionId(invoice: StripeInvoiceEvent) {
+  return stripeId(invoice.subscription) ??
+    stripeId(invoice.parent?.subscription_details?.subscription);
+}
+
+function unixSecondsToIso(value: unknown) {
+  return typeof value === "number"
+    ? new Date(value * 1000).toISOString()
+    : undefined;
 }
 
 function asRecord(value: unknown) {
@@ -242,6 +258,70 @@ async function syncFinancialSummaryFromStripeSubscription({
       stripeSubscriptionId,
     }));
   }
+}
+
+async function retrieveStripeSubscriptionSnapshot({
+  stripe,
+  stripeSubscriptionId,
+}: {
+  stripe: ReturnType<typeof getStripeClient>;
+  stripeSubscriptionId: string;
+}) {
+  if (!stripe) return null;
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(
+      stripeSubscriptionId,
+      {
+        expand: [
+          "items.data.price",
+        ],
+      },
+    ) as unknown as Record<string, unknown>;
+    assertStripeRuntimeMode(
+      Boolean(subscription.livemode),
+      stripeSubscriptionId,
+    );
+    return subscription;
+  } catch (error) {
+    console.warn(JSON.stringify({
+      code: "BILLING_SUBSCRIPTION_SNAPSHOT_SKIPPED",
+      message: error instanceof Error ? error.message.slice(0, 240) : "UNKNOWN",
+      stripeSubscriptionId,
+    }));
+    return null;
+  }
+}
+
+function subscriptionPeriodUpdate(
+  stripeSubscription: Record<string, unknown> | null,
+) {
+  if (!stripeSubscription) return {};
+
+  return {
+    cancel_at_period_end: typeof stripeSubscription.cancel_at_period_end ===
+        "boolean"
+      ? stripeSubscription.cancel_at_period_end
+      : undefined,
+    canceled_at: unixSecondsToIso(stripeSubscription.canceled_at),
+    current_period_end: unixSecondsToIso(
+      stripeSubscription.current_period_end,
+    ),
+    current_period_start: unixSecondsToIso(
+      stripeSubscription.current_period_start,
+    ),
+    ended_at: unixSecondsToIso(stripeSubscription.ended_at),
+    stripe_customer_id: stripeId(
+      stripeSubscription.customer as
+        | string
+        | { id?: string }
+        | null
+        | undefined,
+    ) ?? undefined,
+    stripe_status: textValue(stripeSubscription.status),
+    trial_end: unixSecondsToIso(stripeSubscription.trial_end) ?? null,
+    trial_start: unixSecondsToIso(stripeSubscription.trial_start) ?? null,
+  };
 }
 
 const handledEvents = new Set([
@@ -467,18 +547,29 @@ Deno.serve(async (request) => {
     }
 
     if (event.type === "invoice.finalized") {
-      const invoice = event.data.object as {
-        id: string;
-        subscription?: string;
-        customer?: string;
-        total?: number;
-        metadata?: { partner_id?: string };
-      };
-      const { data: localSubscription } = await supabase
-        .from("partner_subscriptions")
-        .select("id, partner_id, active_client_quantity")
-        .eq("stripe_subscription_id", invoice.subscription)
-        .maybeSingle();
+      const invoice = event.data.object as StripeInvoiceEvent;
+      const subscriptionId = stripeInvoiceSubscriptionId(invoice);
+      await supabase.from("stripe_webhook_events").update({
+        payload_summary: {
+          object: event.data.object.object,
+          stripe_created: event.created,
+          stripe_invoice_id: invoice.id,
+          stripe_subscription_id: subscriptionId,
+        },
+        stripe_customer_id: typeof invoice.customer === "string"
+          ? invoice.customer
+          : null,
+        stripe_invoice_id: invoice.id,
+        stripe_subscription_id: subscriptionId,
+      }).eq("stripe_event_id", event.id);
+
+      const { data: localSubscription } = subscriptionId
+        ? await supabase
+          .from("partner_subscriptions")
+          .select("id, partner_id, active_client_quantity")
+          .eq("stripe_subscription_id", subscriptionId)
+          .maybeSingle()
+        : { data: null };
 
       if (localSubscription) {
         await supabase.from("billing_active_client_snapshots").insert({
@@ -488,9 +579,7 @@ Deno.serve(async (request) => {
           partner_id: localSubscription.partner_id,
           reason: "invoice_finalized",
           stripe_invoice_id: invoice.id,
-          stripe_subscription_id: typeof invoice.subscription === "string"
-            ? invoice.subscription
-            : null,
+          stripe_subscription_id: subscriptionId,
           subscription_id: localSubscription.id,
           unit_amount_cents: ACTIVE_CLIENT_UNIT_CENTS,
         });
@@ -503,21 +592,60 @@ Deno.serve(async (request) => {
       event.type === "invoice.payment_action_required"
     ) {
       const invoice = event.data.object as StripeInvoiceEvent;
-      const subscriptionId = stripeId(invoice.subscription);
+      const subscriptionId = stripeInvoiceSubscriptionId(invoice);
       const paymentIntentId = stripeId(invoice.payment_intent);
+      await supabase.from("stripe_webhook_events").update({
+        payload_summary: {
+          object: event.data.object.object,
+          stripe_created: event.created,
+          stripe_invoice_id: invoice.id,
+          stripe_subscription_id: subscriptionId,
+        },
+        stripe_customer_id: typeof invoice.customer === "string"
+          ? invoice.customer
+          : null,
+        stripe_invoice_id: invoice.id,
+        stripe_subscription_id: subscriptionId,
+      }).eq("stripe_event_id", event.id);
+
       const { data: localSubscription } = subscriptionId
         ? await supabase
           .from("partner_subscriptions")
-          .select("id, partner_id")
+          .select("id, partner_id, stripe_last_event_created_at")
           .eq("stripe_subscription_id", subscriptionId)
           .maybeSingle()
         : { data: null };
 
       if (localSubscription) {
+        const stripeSubscription = subscriptionId
+          ? await retrieveStripeSubscriptionSnapshot({
+            stripe,
+            stripeSubscriptionId: subscriptionId,
+          })
+          : null;
+        const stripeStatus = textValue(stripeSubscription?.status);
+        const statusFromInvoice = event.type === "invoice.paid"
+          ? stripeStatus ?? "active"
+          : stripeStatus ?? "past_due";
+
         await supabase.from("partner_subscriptions").update({
+          ...subscriptionPeriodUpdate(stripeSubscription),
           latest_invoice_id: invoice.id,
-          status: event.type === "invoice.paid" ? "active" : "past_due",
+          status: statusFromInvoice,
+          stripe_last_event_created_at: new Date(event.created * 1000)
+            .toISOString(),
         }).eq("id", localSubscription.id);
+
+        if (subscriptionId) {
+          await syncFinancialSummaryFromStripeSubscription({
+            eventCreatedAt: event.created,
+            localSubscriptionId: localSubscription.id,
+            partnerId: localSubscription.partner_id,
+            stripe,
+            stripeSubscriptionId: subscriptionId,
+            supabase,
+          });
+        }
 
         if (paymentIntentId) {
           const paid = event.type === "invoice.paid";
