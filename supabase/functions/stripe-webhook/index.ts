@@ -97,14 +97,37 @@ function activeClientQuantityFromSubscriptionItems(items: unknown) {
   return typeof quantity === "number" && quantity > 0 ? quantity : 0;
 }
 
+function basePlanItemFromSubscriptionItems(items: unknown) {
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return null;
+
+  return data.find((item) => {
+    const price = asRecord(asRecord(item)?.price);
+    const lookupKey = textValue(price?.lookup_key);
+    const priceId = textValue(price?.id);
+    return lookupKey === PLAN_LOOKUP_KEYS["complete-monthly"] ||
+      lookupKey === PLAN_LOOKUP_KEYS["complete-annual"] ||
+      priceId === OFFICIAL_STRIPE_PRICES["complete-monthly"].id ||
+      priceId === OFFICIAL_STRIPE_PRICES["complete-annual"].id;
+  }) ?? null;
+}
+
+function basePlanPeriodFromSubscriptionItems(items: unknown) {
+  const basePlanItem = asRecord(basePlanItemFromSubscriptionItems(items));
+  return {
+    currentPeriodEnd: unixSecondsToIso(basePlanItem?.current_period_end),
+    currentPeriodStart: unixSecondsToIso(basePlanItem?.current_period_start),
+  };
+}
+
 function basePlanUnitAmountFromSubscriptionItems(
   items: unknown,
   planSlug: BillingPlanSlug,
 ) {
-  const data = asRecord(items)?.data;
-  if (!Array.isArray(data)) return null;
   const planLookupKey = PLAN_LOOKUP_KEYS[planSlug];
   const planPriceId = OFFICIAL_STRIPE_PRICES[planSlug].id;
+  const data = asRecord(items)?.data;
+  if (!Array.isArray(data)) return null;
   const planItem = data.find((item) => {
     const price = asRecord(asRecord(item)?.price);
     return textValue(price?.lookup_key) === planLookupKey ||
@@ -297,6 +320,9 @@ function subscriptionPeriodUpdate(
   stripeSubscription: Record<string, unknown> | null,
 ) {
   if (!stripeSubscription) return {};
+  const itemPeriod = basePlanPeriodFromSubscriptionItems(
+    stripeSubscription.items,
+  );
 
   return {
     cancel_at_period_end: typeof stripeSubscription.cancel_at_period_end ===
@@ -304,12 +330,11 @@ function subscriptionPeriodUpdate(
       ? stripeSubscription.cancel_at_period_end
       : undefined,
     canceled_at: unixSecondsToIso(stripeSubscription.canceled_at),
-    current_period_end: unixSecondsToIso(
-      stripeSubscription.current_period_end,
-    ),
-    current_period_start: unixSecondsToIso(
-      stripeSubscription.current_period_start,
-    ),
+    current_period_end: unixSecondsToIso(stripeSubscription.current_period_end) ??
+      itemPeriod.currentPeriodEnd,
+    current_period_start:
+      unixSecondsToIso(stripeSubscription.current_period_start) ??
+        itemPeriod.currentPeriodStart,
     ended_at: unixSecondsToIso(stripeSubscription.ended_at),
     stripe_customer_id: stripeId(
       stripeSubscription.customer as

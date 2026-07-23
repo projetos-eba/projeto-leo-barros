@@ -143,9 +143,9 @@ Obrigatoria para qualquer alteracao relacionada a planos, preco, trial, checkout
 - `customer.subscription.updated`: atualiza status, periodos, trial, cancelamento e `partner_subscription_financial_summaries`.
 - `customer.subscription.deleted`: marca assinatura cancelada.
 - `invoice.finalized`: registra snapshot de Clientes ativos usado na cobranca.
-- `invoice.paid`: marca assinatura como paga, extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe e registra pagamento `succeeded` quando houver PaymentIntent.
-- `invoice.payment_failed`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe, marca inadimplencia e registra pagamento `failed` quando houver PaymentIntent.
-- `invoice.payment_action_required`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe, marca pendencia e registra pagamento `pending` quando houver PaymentIntent.
+- `invoice.paid`: marca assinatura como paga, extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe ou pelo item base em billing flexible e registra pagamento `succeeded` quando houver PaymentIntent.
+- `invoice.payment_failed`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe ou pelo item base em billing flexible, marca inadimplencia e registra pagamento `failed` quando houver PaymentIntent.
+- `invoice.payment_action_required`: extrai assinatura por `invoice.subscription` ou `invoice.parent.subscription_details.subscription`, atualiza periodo corrente pela Subscription Stripe ou pelo item base em billing flexible, marca pendencia e registra pagamento `pending` quando houver PaymentIntent.
 - `product.created`, `product.updated`, `product.deleted`: sincronizam Product de catalogo ou aplicam soft delete local.
 - `price.created`, `price.updated`, `price.deleted`: sincronizam Price historico/vigente, lookup key, ativo/inativo e camada compativel.
 - Eventos desconhecidos: registrar como `ignored` e retornar 2xx.
@@ -160,6 +160,15 @@ stripe listen --events product.created,product.updated,product.deleted,price.cre
 ```
 
 O `whsec_...` do listener local pode divergir do Dashboard. Nao documentar o valor; atualizar apenas o runtime local e reiniciar `supabase functions serve --env-file supabase/functions/.env`.
+
+## Arquivos De Ambiente
+
+- `.env.local`: variaveis publicas locais do Next, incluindo `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+- `.env.production`: variaveis publicas de producao do Next, incluindo `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` e `NEXT_PUBLIC_APP_URL`.
+- `supabase/functions/.env`: segredos locais/homologacao das Edge Functions, incluindo `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` e `BILLING_ALLOWED_ORIGINS`.
+- `supabase/functions/.env.production`: segredos de producao das Edge Functions, incluindo `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `BILLING_ALLOWED_ORIGINS` e `APP_URL`.
+- Para validar Stripe server-side, webhook, portal, checkout, bootstrap ou reconciliacao de billing, usar sempre o arquivo da pasta `supabase/functions`, nunca `.env.production` da raiz.
+- Ao reportar validacao, citar somente o arquivo usado e o modo detectado (`test` ou `live`); nunca imprimir valores de secrets.
 
 ## MCP Local
 
