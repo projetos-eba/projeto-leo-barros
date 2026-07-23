@@ -146,7 +146,7 @@ function StatPill({ icon, label, value }: { icon: ReactNode; label: string; valu
   );
 }
 
-function WorkoutHero({ session }: { session: ClientWorkoutSession }) {
+function WorkoutHero({ label, session }: { label: string; session: ClientWorkoutSession }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -162,38 +162,40 @@ function WorkoutHero({ session }: { session: ClientWorkoutSession }) {
   }
 
   return (
-    <Panel className="relative overflow-hidden border-[#1f8dff]/70 p-6 shadow-[0_0_0_1px_rgba(31,141,255,0.2),0_24px_80px_rgba(31,141,255,0.16)]">
-      <img alt="" className="absolute inset-y-0 right-0 hidden h-full w-[48%] object-cover opacity-60 lg:block" src="/cliente/inicio/capa-treino.png" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_42%,rgba(31,141,255,0.35),transparent_26%),linear-gradient(90deg,#091722_0%,rgba(9,23,34,0.95)_50%,rgba(9,23,34,0.55)_100%)]" />
-      <div className="relative z-10 max-w-[700px]">
-        <span className="rounded-[8px] bg-[#0876d8] px-3 py-1 text-[11px] font-bold uppercase text-white">Treino do dia</span>
-        <p className="mt-6 text-[14px] font-medium text-[#c8d6e1]">Treino {session.letter}</p>
-        <h2 className="mt-2 text-[38px] font-bold leading-tight text-white">{session.trainingLabel}</h2>
-        <p className="mt-2 max-w-[520px] text-[15px] leading-6 text-[#9fb1c0]">
-          {session.focusLabel}. Registre séries, carga e repetições para manter seu histórico vivo.
-        </p>
-        <div className="mt-7 grid gap-3 sm:grid-cols-4">
-          <StatPill icon={<Timer className="size-4" />} label="Duração" value={`${session.durationMinutes} min`} />
-          <StatPill icon={<Dumbbell className="size-4" />} label="Exercícios" value={`${session.exercises.length}`} />
-          <StatPill icon={<Activity className="size-4" />} label="Séries" value={`${session.totalSets}`} />
-          <StatPill icon={<Weight className="size-4" />} label="Volume" value={`${formatNumber(session.volumeKg)} kg`} />
+    <div data-testid="client-workout-hero">
+      <Panel className="relative overflow-hidden border-[#1f8dff]/70 p-6 shadow-[0_0_0_1px_rgba(31,141,255,0.2),0_24px_80px_rgba(31,141,255,0.16)]">
+        <img alt="" className="absolute inset-y-0 right-0 hidden h-full w-[48%] object-cover opacity-60 lg:block" src="/cliente/inicio/capa-treino.png" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_42%,rgba(31,141,255,0.35),transparent_26%),linear-gradient(90deg,#091722_0%,rgba(9,23,34,0.95)_50%,rgba(9,23,34,0.55)_100%)]" />
+        <div className="relative z-10 max-w-[700px]">
+          <span className="rounded-[8px] bg-[#0876d8] px-3 py-1 text-[11px] font-bold uppercase text-white">{label}</span>
+          <p className="mt-6 text-[14px] font-medium text-[#c8d6e1]">Treino {session.letter}</p>
+          <h2 className="mt-2 text-[38px] font-bold leading-tight text-white">{session.trainingLabel}</h2>
+          <p className="mt-2 max-w-[520px] text-[15px] leading-6 text-[#9fb1c0]">
+            {session.focusLabel}. Registre séries, carga e repetições para manter seu histórico vivo.
+          </p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-4">
+            <StatPill icon={<Timer className="size-4" />} label="Duração" value={`${session.durationMinutes} min`} />
+            <StatPill icon={<Dumbbell className="size-4" />} label="Exercícios" value={`${session.exercises.length}`} />
+            <StatPill icon={<Activity className="size-4" />} label="Séries" value={`${session.totalSets}`} />
+            <StatPill icon={<Weight className="size-4" />} label="Volume" value={`${formatNumber(session.volumeKg)} kg`} />
+          </div>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button
+              className="inline-flex h-12 min-w-[210px] items-center justify-center gap-2 rounded-[10px] bg-[#1f8dff] px-5 text-[14px] font-bold text-white transition hover:bg-[#43a4ff] disabled:opacity-60"
+              disabled={pending}
+              type="button"
+              onClick={startWorkout}
+            >
+              <Play className="size-4 fill-white" />
+              {pending ? "Abrindo treino..." : "Iniciar treino"}
+            </button>
+            <span className="inline-flex h-12 items-center rounded-[10px] border border-[#263949] bg-[#0d1822]/80 px-4 text-[13px] font-semibold text-[#a8bac8]">
+              Status: {session.statusLabel}
+            </span>
+          </div>
         </div>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <button
-            className="inline-flex h-12 min-w-[210px] items-center justify-center gap-2 rounded-[10px] bg-[#1f8dff] px-5 text-[14px] font-bold text-white transition hover:bg-[#43a4ff] disabled:opacity-60"
-            disabled={pending}
-            type="button"
-            onClick={startWorkout}
-          >
-            <Play className="size-4 fill-white" />
-            {pending ? "Abrindo treino..." : "Iniciar treino"}
-          </button>
-          <span className="inline-flex h-12 items-center rounded-[10px] border border-[#263949] bg-[#0d1822]/80 px-4 text-[13px] font-semibold text-[#a8bac8]">
-            Status: {session.statusLabel}
-          </span>
-        </div>
-      </div>
-    </Panel>
+      </Panel>
+    </div>
   );
 }
 
@@ -383,7 +385,10 @@ export function ClientWorkoutView({ workout }: ClientWorkoutViewProps) {
         </header>
 
         <main className="mt-6 grid gap-5">
-          <WorkoutHero session={workout.todaySession} />
+          <WorkoutHero
+            label={selectedSession.id === workout.todaySession.id ? "Treino do dia" : "Treino selecionado"}
+            session={selectedSession}
+          />
           <SessionSelector onSelect={setSelectedSessionId} selectedId={selectedSession.id} sessions={workout.sessions} />
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
             <ExerciseList session={selectedSession} />
