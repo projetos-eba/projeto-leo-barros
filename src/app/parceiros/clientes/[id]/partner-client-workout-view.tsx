@@ -4,9 +4,10 @@ import {
   Archive,
   ArrowDown,
   ArrowUp,
+  BarChart3,
   CalendarDays,
+  CheckCircle2,
   Clock3,
-  Copy,
   Dumbbell,
   EllipsisVertical,
   Flame,
@@ -18,6 +19,7 @@ import {
   Search,
   Send,
   Sparkles,
+  TrendingUp,
   Trash2,
   Unlink,
 } from "lucide-react";
@@ -36,6 +38,7 @@ import {
 import type {
   PartnerClientWorkoutData,
   PartnerClientWorkoutExercise,
+  PartnerWorkoutExecutionSummary,
   PartnerClientWorkoutSet,
   PartnerClientWorkoutSession,
   WorkoutIntensity,
@@ -58,7 +61,6 @@ import {
   combineClientWorkoutBiset,
   createClientWorkoutProgram,
   createClientWorkoutSession,
-  duplicateClientWorkoutProgram,
   publishClientWorkoutProgram,
   removeClientWorkoutExercise,
   reorderClientWorkoutExercises,
@@ -79,7 +81,62 @@ type PartnerClientWorkoutViewProps = {
 const panelClass = "min-w-0 rounded-[8px] border border-[rgba(65,80,92,0.71)] bg-[linear-gradient(153deg,rgba(42,63,79,0.35)_8%,rgba(96,144,181,0)_79%)]";
 const inputClass = "h-9 rounded-[7px] border border-[#2b3b49] bg-[#091722] px-2 text-[12px] text-white outline-none focus:border-[#3b97e3]";
 const setSlotNumbers = [1, 2, 3, 4, 5] as const;
-const workoutTypeOptions = ["Peito e Tríceps", "Costas e Bíceps", "Pernas / Inferiores", "Ombros e Braços"] as const;
+const workoutTypeOptions = [
+  "Peito e Tríceps",
+  "Costas e Bíceps",
+  "Pernas / Inferiores",
+  "Ombros e Braços",
+  "Full body",
+  "Push",
+  "Pull",
+  "Lower",
+  "Core e mobilidade",
+  "Glúteos e Posterior",
+  "Quadríceps e Panturrilhas",
+] as const;
+
+type ProgramSessionDraft = {
+  durationMinutes: number;
+  frequencyPerWeek: number;
+  muscles: string;
+  objective: WorkoutObjective;
+  title: string;
+};
+
+const workoutProgramModels = [
+  {
+    description: "Divisão clássica para hipertrofia, com grupos musculares fáceis de alternar na semana.",
+    id: "abc_hipertrofia",
+    sessions: [
+      { durationMinutes: 60, frequencyPerWeek: 1, muscles: "Peito, ombros e tríceps", objective: "hipertrofia", title: "Treino A - Push" },
+      { durationMinutes: 60, frequencyPerWeek: 1, muscles: "Costas, bíceps e posterior", objective: "hipertrofia", title: "Treino B - Pull" },
+      { durationMinutes: 65, frequencyPerWeek: 1, muscles: "Quadríceps, glúteos e panturrilhas", objective: "hipertrofia", title: "Treino C - Lower" },
+    ],
+    title: "Programa ABC Hipertrofia",
+  },
+  {
+    description: "Alterna membros superiores e inferiores para clientes com rotina de quatro sessões semanais.",
+    id: "upper_lower",
+    sessions: [
+      { durationMinutes: 60, frequencyPerWeek: 2, muscles: "Peito, costas, ombros e braços", objective: "forca", title: "Treino Superior" },
+      { durationMinutes: 60, frequencyPerWeek: 2, muscles: "Quadríceps, posterior, glúteos e panturrilhas", objective: "forca", title: "Treino Inferior" },
+    ],
+    title: "Programa Upper / Lower",
+  },
+  {
+    description: "Estrutura enxuta para adaptação, retorno ou clientes com baixa disponibilidade semanal.",
+    id: "full_body",
+    sessions: [
+      { durationMinutes: 50, frequencyPerWeek: 3, muscles: "Corpo todo, estabilidade e padrões básicos", objective: "resistencia", title: "Treino Full body" },
+    ],
+    title: "Programa Full body",
+  },
+] satisfies Array<{ description: string; id: string; sessions: ProgramSessionDraft[]; title: string }>;
+
+function modelSessions(modelId: string): ProgramSessionDraft[] {
+  const model = workoutProgramModels.find((item) => item.id === modelId) ?? workoutProgramModels[0];
+  return model.sessions.map((session) => ({ ...session }));
+}
 
 const intensityMeta: Record<WorkoutIntensity, { Icon: typeof Dumbbell; className: string; label: string }> = {
   maximum: { Icon: Flame, className: "bg-[#32171b] text-[#ff7b88]", label: "Carga máxima" },
@@ -379,6 +436,171 @@ function MusclePanel({ exercises }: { exercises: PartnerClientWorkoutExercise[] 
   );
 }
 
+function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSummary | null }) {
+  if (!execution || execution.totalSessions === 0) {
+    return (
+      <section className={cn(panelClass, "mt-5 p-5")}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-[17px] font-bold text-white">Acompanhamento real</h3>
+            <p className="mt-1 text-[12px] text-[#8b92a3]">A execução do Cliente aparecerá aqui após o primeiro treino registrado.</p>
+          </div>
+          <span className="inline-flex size-11 items-center justify-center rounded-[8px] bg-[#082239] text-[#68afe9]">
+            <BarChart3 className="size-5" />
+          </span>
+        </div>
+      </section>
+    );
+  }
+
+  const cards = [
+    { Icon: CheckCircle2, label: "Concluídos", value: execution.completedSessions.toString() },
+    { Icon: Clock3, label: "Parciais", value: execution.partialSessions.toString() },
+    { Icon: TrendingUp, label: "Volume realizado", value: `${Math.round(execution.totalVolumeKg).toLocaleString("pt-BR")} kg` },
+    { Icon: Dumbbell, label: "Melhor carga", value: `${Math.round(execution.bestLoadKg).toLocaleString("pt-BR")} kg` },
+  ];
+  const latestSession = execution.recentSessions[0] ?? null;
+
+  return (
+    <section className={cn(panelClass, "mt-5 overflow-hidden")}>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#303746] p-4">
+        <div>
+          <h3 className="text-[17px] font-bold text-white">Acompanhamento real</h3>
+          <p className="mt-1 text-[12px] text-[#8b92a3]">Sessões registradas pelo Cliente nos últimos 90 dias.</p>
+        </div>
+        <div className="min-w-[190px]">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-[#9aa5b6]">
+            <span>Conclusão</span>
+            <span className="text-[#8fcfff]">{execution.completionPercent}%</span>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-[#07131b]">
+            <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, Math.max(0, execution.completionPercent))}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map(({ Icon, label, value }) => (
+          <article className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3" key={label}>
+            <span className="inline-flex size-9 items-center justify-center rounded-[7px] bg-[#0a2c48] text-[#68afe9]">
+              <Icon className="size-4" />
+            </span>
+            <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-[#718394]">{label}</p>
+            <p className="mt-1 text-[20px] font-bold text-white">{value}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="grid gap-4 border-t border-[#273847] p-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h4 className="text-[13px] font-bold text-white">Últimas sessões</h4>
+            {latestSession ? (
+              <span className="rounded-full border border-[#2a5c7d] bg-[#0a2c48]/55 px-3 py-1 text-[11px] font-bold text-[#8fcfff]">
+                Última: {latestSession.setCompletionPercent}% das séries
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-3 grid gap-2 md:hidden">
+            {execution.recentSessions.map((session) => (
+              <article className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3" key={session.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold text-[#9aa5b6]">{session.dateLabel}</p>
+                    <h5 className="mt-1 truncate text-[13px] font-bold text-white">{session.sessionTitle}</h5>
+                  </div>
+                  <span className={cn(
+                    "shrink-0 rounded-[6px] px-2 py-1 text-[10px] font-bold",
+                    session.status === "completed" && "bg-[#0e2c1e] text-[#62d98b]",
+                    session.status === "partial" && "bg-[#302813] text-[#f2c84b]",
+                    session.status === "skipped" && "bg-[#32171b] text-[#ff7b88]",
+                    session.status === "planned" && "bg-[#172433] text-[#9aa5b6]",
+                  )}>{session.statusLabel}</span>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] text-[#8b92a3]">
+                  <span><b className="block text-[13px] text-white">{session.setsDone}/{session.prescribedSets}</b>séries</span>
+                  <span><b className="block text-[13px] text-white">{session.exercisesDone}/{session.prescribedExercises}</b>exercícios</span>
+                  <span><b className="block text-[13px] text-[#8fcfff]">{Math.round(session.totalVolumeKg).toLocaleString("pt-BR")} kg</b>volume</span>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-3 hidden overflow-x-auto md:block">
+            <div className="min-w-[820px] overflow-hidden rounded-[8px] border border-[#273847]">
+              <div className="grid grid-cols-[96px_minmax(180px,1fr)_92px_88px_92px_110px] bg-[#07131b] px-3 py-2 text-[10px] font-bold uppercase text-[#718394]">
+                <span>Data</span>
+                <span>Treino</span>
+                <span>Status</span>
+                <span>Séries</span>
+                <span>Execução</span>
+                <span>Volume</span>
+              </div>
+              {execution.recentSessions.map((session) => (
+                <div className="grid grid-cols-[96px_minmax(180px,1fr)_92px_88px_92px_110px] items-center border-t border-[#273847] px-3 py-2 text-[12px]" key={session.id}>
+                  <span className="text-[#9aa5b6]">{session.dateLabel}</span>
+                  <span className="min-w-0 truncate font-semibold text-white">{session.sessionTitle}</span>
+                  <span className={cn(
+                    "w-fit rounded-[6px] px-2 py-1 text-[10px] font-bold",
+                    session.status === "completed" && "bg-[#0e2c1e] text-[#62d98b]",
+                    session.status === "partial" && "bg-[#302813] text-[#f2c84b]",
+                    session.status === "skipped" && "bg-[#32171b] text-[#ff7b88]",
+                    session.status === "planned" && "bg-[#172433] text-[#9aa5b6]",
+                  )}>{session.statusLabel}</span>
+                  <span className="text-[#c8d4df]">{session.setsDone}/{session.prescribedSets}</span>
+                  <span className="text-[#c8d4df]">{session.setCompletionPercent}%</span>
+                  <span className="font-semibold text-[#8fcfff]">{Math.round(session.totalVolumeKg).toLocaleString("pt-BR")} kg</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <aside className="grid gap-3">
+          {latestSession ? (
+            <div className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-4">
+              <h4 className="text-[13px] font-bold text-white">Realizado vs prescrito</h4>
+              <div className="mt-3 grid gap-3">
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8b92a3]">
+                    <span>Séries</span>
+                    <span>{latestSession.setsDone}/{latestSession.prescribedSets}</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#07131b]">
+                    <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, latestSession.setCompletionPercent)}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8b92a3]">
+                    <span>Exercícios</span>
+                    <span>{latestSession.exercisesDone}/{latestSession.prescribedExercises}</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#07131b]">
+                    <div className="h-full rounded-full bg-[#62d98b]" style={{ width: `${Math.min(100, latestSession.exerciseCompletionPercent)}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-4">
+          <h4 className="text-[13px] font-bold text-white">Pontos de atenção</h4>
+          <p className="mt-1 text-[12px] text-[#8b92a3]">{execution.skippedExercises} exercício(s) pulado(s) no período.</p>
+          <div className="mt-3 grid gap-2">
+            {execution.skippedTop.map((item) => (
+              <div className="flex items-center justify-between gap-3 rounded-[7px] bg-[#101923] px-3 py-2 text-[12px]" key={item.name}>
+                <span className="min-w-0 truncate text-[#d8e5ee]">{item.name}</span>
+                <span className="font-bold text-[#ff7b88]">{item.count}x</span>
+              </div>
+            ))}
+            {execution.skippedTop.length === 0 ? <p className="rounded-[7px] bg-[#101923] px-3 py-2 text-[12px] text-[#8b92a3]">Nenhum exercício pulado recentemente.</p> : null}
+          </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWorkoutViewProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -391,7 +613,9 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   const [programDialog, setProgramDialog] = useState(false);
   const [sessionDialog, setSessionDialog] = useState(false);
   const [templateDialog, setTemplateDialog] = useState(false);
-  const [programTitle, setProgramTitle] = useState("Programa de hipertrofia");
+  const [programModelId, setProgramModelId] = useState(workoutProgramModels[0].id);
+  const [programTitle, setProgramTitle] = useState(workoutProgramModels[0].title);
+  const [programSessions, setProgramSessions] = useState<ProgramSessionDraft[]>(() => modelSessions(workoutProgramModels[0].id));
   const [newSession, setNewSession] = useState({
     durationMinutes: 60,
     frequencyPerWeek: 2,
@@ -458,8 +682,19 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
     runAction(() => reorderClientWorkoutExercises({ exerciseIds: next, patientId: overview.client.id, sessionId: session.id }));
   }
 
+  function selectProgramModel(modelId: string) {
+    const model = workoutProgramModels.find((item) => item.id === modelId) ?? workoutProgramModels[0];
+    setProgramModelId(model.id);
+    setProgramTitle(model.title);
+    setProgramSessions(model.sessions.map((item) => ({ ...item })));
+  }
+
+  function updateProgramSession(index: number, patch: Partial<ProgramSessionDraft>) {
+    setProgramSessions((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  }
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-5 py-6 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] lg:px-6">
+    <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="treinos" overview={overview} />
 
@@ -469,8 +704,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
             <p className="mt-1 text-[13px] text-[#8b92a3]">Monte, edite e organize os protocolos de treino do Cliente.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button tone="primary" onClick={() => setProgramDialog(true)}><Plus className="size-4" /> Novo treino</Button>
-            <Button disabled={!program || pending} onClick={() => program && runAction(() => duplicateClientWorkoutProgram({ patientId: overview.client.id, programId: program.id }))}><Copy className="size-4" /> Duplicar</Button>
+            <Button tone="primary" onClick={() => setProgramDialog(true)}><Plus className="size-4" /> Novo programa de treino</Button>
             <Button disabled={!program || pending} onClick={() => setTemplateDialog(true)}><Archive className="size-4" /> Usar template</Button>
             <Button disabled={!program || pending} onClick={() => program && runAction(() => sendClientWorkoutProgram({ patientId: overview.client.id, programId: program.id }))}><Send className="size-4" /> Enviar ao Cliente</Button>
             {program ? <span className="inline-flex h-10 items-center rounded-[8px] border border-[#303746] px-3 text-[12px] text-[#8fcfff]">Plano {program.status === "draft" ? "rascunho" : program.status === "published" ? "publicado" : program.status === "sent" ? "enviado" : "arquivado"} v{program.version}.0</span> : null}
@@ -483,6 +717,8 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
               {program.sessions.map((item) => <SessionCard active={item.id === session?.id} key={item.id} session={item} onClick={() => selectSession(item.id)} />)}
               <button className="flex h-[142px] min-w-[150px] items-center justify-center gap-2 rounded-[8px] border border-dashed border-[#3b5870] text-[13px] font-semibold text-[#8fcfff]" type="button" onClick={() => setSessionDialog(true)}><Plus className="size-4" /> Divisão</button>
             </div>
+
+            <ExecutionPanel execution={workout.execution} />
 
             {session ? (
               <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
@@ -609,11 +845,62 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
       </div>
 
       <Dialog open={programDialog} onOpenChange={setProgramDialog}>
-        <DialogContent className="border-[#303746] bg-[#101923] text-white">
-          <DialogHeader><DialogTitle>Novo programa</DialogTitle><DialogDescription className="text-[#8b92a3]">Crie o programa e sua primeira divisão de treino.</DialogDescription></DialogHeader>
-          <form className="grid gap-4" onSubmit={(event: FormEvent) => { event.preventDefault(); runAction(() => createClientWorkoutProgram({ patientId: overview.client.id, title: programTitle })); setProgramDialog(false); }}>
-            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Nome<input className={inputClass} value={programTitle} onChange={(event) => setProgramTitle(event.target.value)} /></label>
-            <div className="flex justify-end"><Button tone="primary" type="submit"><Plus className="size-4" /> Criar programa</Button></div>
+        <DialogContent className="max-h-[88vh] overflow-y-auto border-[#303746] bg-[#101923] text-white sm:max-w-[760px]">
+          <DialogHeader><DialogTitle>Novo programa de treino</DialogTitle><DialogDescription className="text-[#8b92a3]">Escolha um modelo e ajuste as divisões antes de criar.</DialogDescription></DialogHeader>
+          <form className="grid gap-5" onSubmit={(event: FormEvent) => {
+            event.preventDefault();
+            runAction(() => createClientWorkoutProgram({
+              patientId: overview.client.id,
+              sessions: programSessions.map((sessionDraft) => ({
+                durationMinutes: sessionDraft.durationMinutes,
+                frequencyPerWeek: sessionDraft.frequencyPerWeek,
+                objective: sessionDraft.objective,
+                title: sessionDraft.title,
+              })),
+              title: programTitle,
+            }));
+            setProgramDialog(false);
+          }}>
+            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Nome<input className={cn(inputClass, "w-full")} value={programTitle} onChange={(event) => setProgramTitle(event.target.value)} /></label>
+            <div className="grid gap-2">
+              <p className="text-[12px] font-semibold text-[#9aa5b6]">Modelo inicial</p>
+              <div className="grid gap-2 md:grid-cols-3">
+                {workoutProgramModels.map((model) => (
+                  <button
+                    className={cn(
+                      "grid min-h-[132px] gap-2 rounded-[8px] border p-3 text-left transition",
+                      programModelId === model.id ? "border-[#3b97e3] bg-[#0d2b43]" : "border-[#303746] bg-[#0b1823] hover:border-[#526779]",
+                    )}
+                    key={model.id}
+                    type="button"
+                    onClick={() => selectProgramModel(model.id)}
+                  >
+                    <span className="text-[13px] font-bold text-white">{model.title}</span>
+                    <span className="text-[11px] leading-4 text-[#8b92a3]">{model.description}</span>
+                    <span className="text-[11px] font-semibold text-[#8fcfff]">{model.sessions.length} divisões</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <p className="text-[12px] font-semibold text-[#9aa5b6]">Divisões criadas</p>
+              <div className="grid gap-2">
+                {programSessions.map((sessionDraft, index) => (
+                  <div className="grid gap-3 rounded-[8px] border border-[#263846] bg-[#0b1823] p-3 md:grid-cols-[minmax(0,1.2fr)_110px_110px]" key={`${sessionDraft.title}-${index}`}>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">
+                      Tipo e músculos
+                      <div className="grid gap-1">
+                        <input className={cn(inputClass, "w-full")} value={sessionDraft.title} onChange={(event) => updateProgramSession(index, { title: event.target.value })} />
+                        <span className="text-[11px] leading-4 text-[#718394]">{sessionDraft.muscles}</span>
+                      </div>
+                    </label>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Frequência<input className={cn(inputClass, "w-full")} min="1" type="number" value={sessionDraft.frequencyPerWeek} onChange={(event) => updateProgramSession(index, { frequencyPerWeek: Number(event.target.value) })} /></label>
+                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Duração<input className={cn(inputClass, "w-full")} min="5" type="number" value={sessionDraft.durationMinutes} onChange={(event) => updateProgramSession(index, { durationMinutes: Number(event.target.value) })} /></label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end"><Button disabled={programSessions.length === 0 || pending} tone="primary" type="submit"><Plus className="size-4" /> Criar programa</Button></div>
           </form>
         </DialogContent>
       </Dialog>

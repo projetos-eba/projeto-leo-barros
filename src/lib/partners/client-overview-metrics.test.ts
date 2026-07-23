@@ -8,18 +8,26 @@ const now = new Date("2026-06-30T12:00:00.000Z");
 const raw: PartnerClientOverviewRawData = {
   adherence: [
     {
+      dietCompleted: 23,
       dietPercentage: 78,
+      dietPlanned: 30,
       id: "adh-1",
       periodEnd: "2026-06-21",
       periodStart: "2026-06-15",
+      trainingCompleted: 36,
       trainingPercentage: 72,
+      trainingPlanned: 50,
     },
     {
+      dietCompleted: 18,
       dietPercentage: 61,
+      dietPlanned: 30,
       id: "adh-2",
       periodEnd: "2026-06-28",
       periodStart: "2026-06-22",
+      trainingCompleted: 30,
       trainingPercentage: 59,
+      trainingPlanned: 51,
     },
   ],
   appointments: [
@@ -138,6 +146,12 @@ describe("buildPartnerClientOverview", () => {
       leanMassKg: 66.3,
     });
     expect(overview.generalAdherence).toMatchObject({ delta: -15, value: 60 });
+    expect(overview.adherenceWeeks.at(-1)).toMatchObject({
+      dietCompleted: 18,
+      dietPlanned: 30,
+      trainingCompleted: 30,
+      trainingPlanned: 51,
+    });
     expect(overview.alerts.map((alert) => alert.title)).toEqual(
       expect.arrayContaining(["Pressão arterial em atenção", "Adesão abaixo da meta", "Enviar check-in"]),
     );

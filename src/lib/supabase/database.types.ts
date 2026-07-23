@@ -920,7 +920,9 @@ export type Database = {
           partner_id: string
           patient_id: string
           published_at: string | null
+          review_on: string | null
           sent_at: string | null
+          starts_on: string | null
           status: string
           target_carbs_g: number
           target_fat_g: number
@@ -939,7 +941,9 @@ export type Database = {
           partner_id: string
           patient_id: string
           published_at?: string | null
+          review_on?: string | null
           sent_at?: string | null
+          starts_on?: string | null
           status?: string
           target_carbs_g?: number
           target_fat_g?: number
@@ -958,7 +962,9 @@ export type Database = {
           partner_id?: string
           patient_id?: string
           published_at?: string | null
+          review_on?: string | null
           sent_at?: string | null
+          starts_on?: string | null
           status?: string
           target_carbs_g?: number
           target_fat_g?: number

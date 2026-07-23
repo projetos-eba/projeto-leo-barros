@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 
 import {
   archivePartnerExamDefinition,
+  createPartnerExamCategory,
   removeClientExamCollection,
   saveClientExamCollection,
   savePartnerExamDefinition,
@@ -232,25 +233,25 @@ function DashboardView({ exams }: { exams: PartnerClientExamsData }) {
 
   return (
     <div className="grid gap-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <section className={cn(panelClass, "p-5")}>
+      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+        <section className={cn(panelClass, "p-3 sm:p-5")}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8b92a3]">Última coleta</p>
-          <p className="mt-3 text-[26px] font-bold leading-8 text-white">{exams.summary.lastCollectionLabel}</p>
+          <p className="mt-2 text-[20px] font-bold leading-6 text-white sm:mt-3 sm:text-[26px] sm:leading-8">{exams.summary.lastCollectionLabel}</p>
           <p className="mt-1 text-[12px] text-[#8b92a3]">{exams.summary.latestResultCount} resultados registrados</p>
         </section>
-        <section className={cn(panelClass, "p-5")}>
+        <section className={cn(panelClass, "p-3 sm:p-5")}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8b92a3]">Catálogo ativo</p>
-          <p className="mt-3 text-[26px] font-bold leading-8 text-white">{exams.summary.totalExams}</p>
+          <p className="mt-2 text-[20px] font-bold leading-6 text-white sm:mt-3 sm:text-[26px] sm:leading-8">{exams.summary.totalExams}</p>
           <p className="mt-1 text-[12px] text-[#8b92a3]">{exams.summary.categoryCount} categorias</p>
         </section>
-        <section className={cn(panelClass, "p-5")}>
+        <section className={cn(panelClass, "p-3 sm:p-5")}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8b92a3]">Alertas críticos</p>
-          <p className="mt-3 text-[26px] font-bold leading-8 text-white">{String(exams.summary.alertCount).padStart(2, "0")}</p>
+          <p className="mt-2 text-[20px] font-bold leading-6 text-white sm:mt-3 sm:text-[26px] sm:leading-8">{String(exams.summary.alertCount).padStart(2, "0")}</p>
           <p className="mt-1 text-[12px] text-[#8b92a3]">fora da faixa de referência</p>
         </section>
-        <section className={cn(panelClass, "p-5")}>
+        <section className={cn(panelClass, "p-3 sm:p-5")}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8b92a3]">Histórico</p>
-          <p className="mt-3 text-[26px] font-bold leading-8 text-white">{exams.collections.length}</p>
+          <p className="mt-2 text-[20px] font-bold leading-6 text-white sm:mt-3 sm:text-[26px] sm:leading-8">{exams.collections.length}</p>
           <p className="mt-1 text-[12px] text-[#8b92a3]">coletas salvas</p>
         </section>
       </section>
@@ -284,34 +285,34 @@ function DashboardView({ exams }: { exams: PartnerClientExamsData }) {
           const Icon = categoryIcons[category.category.slug] ?? FileText;
           return (
             <details className={cn(panelClass, "overflow-hidden")} key={category.category.id} open={index === 0}>
-              <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-4">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-[#082a43] text-[#68afe9]"><Icon className="size-4" /></span>
-                <h2 className="min-w-0 flex-1 text-[18px] font-bold text-white">{category.category.name}</h2>
+                <h2 className="min-w-0 flex-1 truncate text-[15px] font-bold text-white sm:text-[18px]">{category.category.name}</h2>
                 <span className="rounded-full bg-[#252f39] px-3 py-1 text-[11px] font-semibold uppercase text-[#9aa5b6]">{category.examCount} exames</span>
                 {category.alertCount ? <span className="rounded-full border border-[#71313a] bg-[#34141b] px-3 py-1 text-[11px] font-semibold text-[#ff7b88]">{category.alertCount} alertas</span> : null}
                 <ChevronDown className="size-4 text-[#8b92a3]" />
               </summary>
-              <div className="grid gap-4 border-t border-[#263846] p-5 lg:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 border-t border-[#263846] p-3 sm:p-5 lg:grid-cols-2 xl:grid-cols-4">
                 {category.results.slice(0, 7).map((result) => (
-                  <article className="min-h-[238px] rounded-[8px] border border-[#263846] bg-[#0b1823] p-4" key={result.id}>
+                  <article className="min-h-[168px] rounded-[8px] border border-[#263846] bg-[#0b1823] p-3 sm:min-h-[238px] sm:p-4" key={result.id}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="truncate text-[14px] font-bold text-white">{result.snapshotExamName}</h3>
+                        <h3 className="truncate text-[13px] font-bold text-white sm:text-[14px]">{result.snapshotExamName}</h3>
                         <p className="mt-1 text-[11px] font-semibold uppercase text-[#6f7c89]">{result.defaultUnit}</p>
                       </div>
-                      <MoreVertical className="size-4 shrink-0 text-[#6f7c89]" />
+                      <MoreVertical className="hidden size-4 shrink-0 text-[#6f7c89] sm:block" />
                     </div>
-                    <p className="mt-5 text-[30px] font-bold leading-8 text-white">{formatExamNumber(result.valueDefault, 1)}</p>
-                    <p className="mt-2 text-[12px] text-[#8b92a3]">Ref.: {result.referenceLabel}</p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="mt-3 text-[22px] font-bold leading-7 text-white sm:mt-5 sm:text-[30px] sm:leading-8">{formatExamNumber(result.valueDefault, 1)}</p>
+                    <p className="mt-1 line-clamp-1 text-[11px] text-[#8b92a3] sm:mt-2 sm:text-[12px]">Ref.: {result.referenceLabel}</p>
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                       <StatusBadge status={result.status} />
-                      <span className={cn("inline-flex items-center gap-1 text-[12px] font-semibold", result.deltaPct && result.deltaPct > 0 ? "text-[#67dc90]" : "text-[#ff8d98]")}>
+                      <span className={cn("inline-flex items-center gap-1 text-[11px] font-semibold sm:text-[12px]", result.deltaPct && result.deltaPct > 0 ? "text-[#67dc90]" : "text-[#ff8d98]")}>
                         {result.deltaPct && result.deltaPct > 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
                         {result.trendLabel}
                       </span>
                     </div>
-                    <div className="mt-5"><MiniChart results={allResultsByExam.get(result.examId) ?? [result]} /></div>
-                    <div className="mt-2 flex justify-between text-[11px] text-[#8b92a3]">
+                    <div className="mt-5 hidden sm:block"><MiniChart results={allResultsByExam.get(result.examId) ?? [result]} /></div>
+                    <div className="mt-2 flex justify-between gap-2 text-[10px] text-[#8b92a3] sm:text-[11px]">
                       <span>{result.collectedLabel}</span>
                       <span>{result.valueLabel}</span>
                     </div>
@@ -466,6 +467,7 @@ function ConfigView({
   definitions,
   draft,
   onArchive,
+  onCategorySubmit,
   onDraftChange,
   onNew,
   onSelect,
@@ -481,6 +483,7 @@ function ConfigView({
   definitions: PartnerClientExamDefinition[];
   draft: DefinitionDraft;
   onArchive: () => void;
+  onCategorySubmit: (name: string) => void;
   onDraftChange: (draft: DefinitionDraft) => void;
   onNew: () => void;
   onSelect: (definition: PartnerClientExamDefinition) => void;
@@ -492,6 +495,8 @@ function ConfigView({
   setQuery: (value: string) => void;
   setSelectedCategoryId: (value: string) => void;
 }) {
+  const [categoryFormOpen, setCategoryFormOpen] = useState(false);
+  const [categoryName, setCategoryName] = useState("");
   const filtered = definitions.filter((definition) => {
     const matchesQuery = !query.trim() || definition.searchText.includes(query.trim().toLowerCase());
     const matchesCategory = selectedCategoryId === "all" || definition.categoryId === selectedCategoryId;
@@ -517,8 +522,29 @@ function ConfigView({
               <h2 className="text-[16px] font-bold text-white">Catálogo de exames</h2>
               <p className="mt-1 text-[12px] text-[#8b92a3]">{definitions.length} exames ativos</p>
             </div>
-            <ActionButton onClick={onNew}><Plus className="size-4" />Novo</ActionButton>
+            <div className="flex flex-wrap gap-2">
+              <ActionButton onClick={() => setCategoryFormOpen((open) => !open)}><Plus className="size-4" />Categoria</ActionButton>
+              <ActionButton onClick={onNew}><Plus className="size-4" />Novo</ActionButton>
+            </div>
           </div>
+          {categoryFormOpen ? (
+            <form
+              className="mt-4 grid gap-2 rounded-[8px] border border-[#263846] bg-[#0b1823] p-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                onCategorySubmit(categoryName);
+                setCategoryName("");
+                setCategoryFormOpen(false);
+              }}
+            >
+              <Field label="Nova categoria">
+                <input className={inputClass} placeholder="Ex.: Perfil hormonal" value={categoryName} onChange={(event) => setCategoryName(event.target.value)} />
+              </Field>
+              <div className="flex justify-end">
+                <ActionButton disabled={pending || categoryName.trim().length < 2} tone="primary" type="submit"><Save className="size-4" />Salvar categoria</ActionButton>
+              </div>
+            </form>
+          ) : null}
           <div className="relative mt-4">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6f7c89]" />
             <input className={cn(inputClass, "w-full pl-9")} placeholder="Buscar exame..." value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -729,14 +755,14 @@ export function PartnerClientExamsView({ exams, overview }: PartnerClientExamsVi
   }
 
   return (
-    <main className="min-h-screen bg-[#0b1720] pb-12 text-white">
-      <div className="mx-auto w-full max-w-[1240px] px-6 py-6">
+    <main className="min-h-screen bg-[#0b1720] pb-10 text-white sm:pb-12">
+      <div className="mx-auto w-full max-w-[1240px] px-3 py-4 sm:px-6 sm:py-6">
         <PartnerClientProfileHeader activeTab="exames" overview={overview} />
 
-        <section className="mt-8 flex flex-wrap items-end justify-between gap-5">
+        <section className="mt-4 flex flex-wrap items-end justify-between gap-4 sm:mt-8 sm:gap-5">
           <div>
-            <h1 className="text-[24px] font-bold leading-8 text-white">Exames</h1>
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#8b92a3]">Entrada de dados clínicos</p>
+            <h1 className="text-[22px] font-bold leading-8 text-white sm:text-[24px]">Exames</h1>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#8b92a3] sm:text-[11px] sm:tracking-[0.35em]">Entrada de dados clínicos</p>
           </div>
           <div className="grid grid-cols-2 gap-8 text-right text-[12px]">
             <div>
@@ -808,6 +834,7 @@ export function PartnerClientExamsView({ exams, overview }: PartnerClientExamsVi
                 if (!definitionId) return;
                 runAction(() => archivePartnerExamDefinition({ definitionId, patientId: overview.client.id }));
               }}
+              onCategorySubmit={(name) => runAction(() => createPartnerExamCategory({ name, patientId: overview.client.id }))}
               onDraftChange={setDefinitionForm}
               onNew={() => {
                 setSelectedDefinition(null);

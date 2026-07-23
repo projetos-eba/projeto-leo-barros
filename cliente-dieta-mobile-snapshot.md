@@ -1,0 +1,21 @@
+- generic [active] [ref=f1e1] [box=0,0,390,5735]:
+  - region "Notifications (F8)" [box=0,0,390,0]:
+    - list [box=0,0,390,32]
+  - region "Notifications alt+T" [box=0,0,390,0]
+  - generic [ref=f1e2] [box=0,0,390,5735]:
+    - banner [ref=f1e3] [box=0,0,390,82]:
+      - generic [ref=f1e4] [box=0,0,390,81]:
+        - link [ref=f1e5] [cursor=pointer] [box=20,21,40,40]:
+          - /url: /cliente/inicio
+        - button [ref=f1e12] [cursor=pointer] [box=330,21,40,40]
+    - main [ref=f1e17] [box=0,82,390,5653]:
+      - main [ref=f1e19] [box=0,82,390,5653]:
+        - navigation "Módulos do cliente" [ref=f1e20] [box=20,106,350,48]
+        - generic [ref=f1e40] [box=20,174,350,357]
+        - generic [ref=f1e96] [box=20,551,350,1985]
+        - generic [ref=f1e272] [box=33,2569,324,77]
+        - generic [ref=f1e310] [box=20,2679,350,1511]
+        - generic [ref=f1e449] [box=20,4210,350,892]
+        - generic [ref=f1e550] [box=37,5139,316,523]
+  - button "Open Next.js Dev Tools" [ref=f1e586] [cursor=pointer] [box=22,790,32,32]
+  - alert [ref=f1e591] [box=-1,5734,1,1]

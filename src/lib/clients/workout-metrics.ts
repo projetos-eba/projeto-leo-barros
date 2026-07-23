@@ -1,4 +1,10 @@
 import {
+  cardioActivities,
+  cardioZoneLabels,
+  type CardioActivityKey,
+  type CardioZoneKey,
+} from "@/lib/partners/client-cardio-metrics";
+import {
   type MuscleHeat,
   type PartnerClientWorkoutExercise,
   type PartnerClientWorkoutProgram,
@@ -52,6 +58,33 @@ export type ClientWorkoutRawSetLog = {
 };
 
 export type ClientWorkoutRawData = {
+  cardio?: {
+    plan: {
+      activityKey: string;
+      comparisonActivityKey: string;
+      id: string;
+      notes: string | null;
+      publishedAt: string | null;
+      sentAt: string | null;
+      status: string;
+      targetZone: string;
+      title: string;
+      updatedAt: string;
+      version: NumberLike;
+      weeklyTargetMinutes: NumberLike;
+      weightKg: NumberLike;
+    };
+    sessions: Array<{
+      activityKey: string;
+      durationMinutes: NumberLike;
+      id: string;
+      kcalEstimate: NumberLike;
+      met: NumberLike;
+      notes: string | null;
+      performedAt: string;
+      targetZone: string;
+    }>;
+  } | null;
   client: {
     avatarUrl: string | null;
     id: string;
@@ -132,6 +165,17 @@ export type ClientWorkoutExecution = {
 };
 
 export type ClientWorkoutData = {
+  cardio: {
+    activityLabel: string;
+    completedKcal: number;
+    completedMinutes: number;
+    latestSessionLabel: string | null;
+    planTitle: string;
+    progressPercent: number;
+    statusLabel: string;
+    targetMinutes: number;
+    targetZoneLabel: string;
+  } | null;
   client: {
     avatarUrl: string | null;
     firstName: string;
@@ -143,6 +187,13 @@ export type ClientWorkoutData = {
   generatedAt: string;
   history: ClientWorkoutHistoryItem[];
   program: PartnerClientWorkoutProgram | null;
+  routine: {
+    completedToday: number;
+    nextSessionId: string | null;
+    nextSessionLabel: string;
+    reasonLabel: string;
+    totalToday: number;
+  };
   selectedDate: {
     iso: string;
     label: string;
@@ -181,9 +232,24 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   minute: "2-digit",
 });
 
+const shortDateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  month: "2-digit",
+});
+
 function numberValue(value: NumberLike) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function asCardioActivity(value: string | null | undefined): CardioActivityKey {
+  return value && value in cardioActivities ? (value as CardioActivityKey) : "caminhada_leve";
+}
+
+function asCardioZone(value: string | null | undefined): CardioZoneKey {
+  return value && value in cardioZoneLabels ? (value as CardioZoneKey) : "z2";
 }
 
 function firstName(name: string) {
@@ -210,6 +276,49 @@ function statusLabel(status: string, completionPercent = 0) {
   if (status === "skipped") return "Pulado";
   if (status === "in_progress") return completionPercent > 0 ? "Em andamento" : "Iniciado";
   return "Pendente";
+}
+
+function latestProgramLog(logs: ClientWorkoutRawSessionLog[], programId: string | null | undefined) {
+  return logs
+    .filter((log) => !programId || log.programId === programId)
+    .slice()
+    .sort((left, right) => {
+      const dateCompare = right.workoutDate.localeCompare(left.workoutDate);
+      if (dateCompare !== 0) return dateCompare;
+      return (right.startedAt ?? right.completedAt ?? "").localeCompare(left.startedAt ?? left.completedAt ?? "");
+    })[0] ?? null;
+}
+
+function nextSessionAfter(sessions: ClientWorkoutSession[], sessionId: string | null | undefined) {
+  if (!sessions.length) return null;
+  const currentIndex = sessions.findIndex((session) => session.id === sessionId);
+  if (currentIndex < 0) return sessions[0] ?? null;
+  return sessions[(currentIndex + 1) % sessions.length] ?? sessions[0] ?? null;
+}
+
+function suggestedSession(
+  sessions: ClientWorkoutSession[],
+  rawLogs: ClientWorkoutRawSessionLog[],
+  selectedDate: string,
+  programId: string | null | undefined,
+) {
+  if (!sessions.length) return { reasonLabel: "Sem treino disponível", session: null };
+
+  const inProgress = sessions.find((session) => session.log?.status === "in_progress");
+  if (inProgress) return { reasonLabel: "Continuar treino iniciado hoje", session: inProgress };
+
+  const pendingToday = sessions.find((session) => session.log && session.log.status !== "completed" && session.log.status !== "skipped");
+  if (pendingToday) return { reasonLabel: "Retomar treino de hoje", session: pendingToday };
+
+  const untouchedToday = sessions.find((session) => !session.log);
+  const completedToday = sessions.filter((session) => session.log?.status === "completed").length;
+  if (untouchedToday && completedToday > 0) return { reasonLabel: "Próximo treino do ciclo de hoje", session: untouchedToday };
+
+  const latest = latestProgramLog(rawLogs, programId);
+  const nextByCycle = latest ? nextSessionAfter(sessions, latest.prescribedSessionId) : null;
+  if (nextByCycle) return { reasonLabel: latest.status === "completed" ? "Próximo treino do ciclo" : "Sugestão baseada no último registro", session: nextByCycle };
+
+  return { reasonLabel: "Primeiro treino do programa", session: sessions[0] ?? null };
 }
 
 function normalizeSetLogs(logs: ClientWorkoutRawSetLog[]) {
@@ -342,7 +451,8 @@ export function buildClientWorkout(raw: ClientWorkoutRawData): ClientWorkoutData
     };
   });
 
-  const todaySession = sessions.find((session) => session.log?.status === "in_progress") ?? sessions[0] ?? null;
+  const suggestion = suggestedSession(sessions, raw.workoutSessions, selectedDate, program?.id);
+  const todaySession = suggestion.session;
   const selectedSession = todaySession;
   const sessionById = new Map(sessions.map((session) => [session.id, session]));
   const setLogsByClientSession = new Map<string, ClientWorkoutRawSetLog[]>();
@@ -386,8 +496,31 @@ export function buildClientWorkout(raw: ClientWorkoutRawData): ClientWorkoutData
       return session ? buildExecution(session, log, raw.exerciseLogs, raw.setLogs) : null;
     })
     .filter((item): item is ClientWorkoutExecution => Boolean(item));
+  const cardio = raw.cardio?.plan ? (() => {
+    const activityKey = asCardioActivity(raw.cardio?.plan.activityKey);
+    const targetZone = asCardioZone(raw.cardio?.plan.targetZone);
+    const cardioSessions = raw.cardio?.sessions ?? [];
+    const completedMinutes = cardioSessions.reduce((total, session) => total + numberValue(session.durationMinutes), 0);
+    const completedKcal = cardioSessions.reduce((total, session) => total + numberValue(session.kcalEstimate), 0);
+    const targetMinutes = numberValue(raw.cardio?.plan.weeklyTargetMinutes);
+    const latestSession = cardioSessions[0] ?? null;
+    const status = raw.cardio?.plan.status;
+
+    return {
+      activityLabel: cardioActivities[activityKey].label,
+      completedKcal: Math.round(completedKcal),
+      completedMinutes,
+      latestSessionLabel: latestSession ? shortDateTimeFormatter.format(new Date(latestSession.performedAt)) : null,
+      planTitle: raw.cardio?.plan.title ?? "Plano de Cardio",
+      progressPercent: percent(completedMinutes, targetMinutes),
+      statusLabel: status === "sent" ? "Ativo" : status === "published" ? "Publicado" : "Disponível",
+      targetMinutes,
+      targetZoneLabel: cardioZoneLabels[targetZone],
+    };
+  })() : null;
 
   return {
+    cardio,
     client: {
       avatarUrl: raw.client?.avatarUrl ?? null,
       firstName: firstName(clientName),
@@ -399,6 +532,13 @@ export function buildClientWorkout(raw: ClientWorkoutRawData): ClientWorkoutData
     generatedAt: raw.generatedAt,
     history,
     program,
+    routine: {
+      completedToday: sessions.filter((session) => session.log?.status === "completed").length,
+      nextSessionId: todaySession?.id ?? null,
+      nextSessionLabel: todaySession ? `Treino ${todaySession.letter} · ${todaySession.trainingLabel}` : "Sem treino disponível",
+      reasonLabel: suggestion.reasonLabel,
+      totalToday: sessions.length,
+    },
     selectedDate: {
       iso: selectedDate,
       label: formatDate(selectedDate),

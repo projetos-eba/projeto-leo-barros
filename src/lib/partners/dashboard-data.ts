@@ -38,6 +38,18 @@ async function expectData<T>(result: PromiseLike<QueryResult<T>>, label: string)
   return data ?? [];
 }
 
+function isMissingManualFinanceTable(error: { message: string } | null) {
+  if (!error) return false;
+  return /schema cache|Could not find the table|does not exist/i.test(error.message);
+}
+
+async function safeManualFinanceData<T>(result: PromiseLike<QueryResult<T>>) {
+  const { data, error } = await result;
+  if (isMissingManualFinanceTable(error)) return [];
+  if (error) throw new Error(`Falha ao carregar financeiro manual: ${error.message}`);
+  return data ?? [];
+}
+
 export async function fetchPartnerDashboardData(): Promise<PartnerDashboardData> {
   const supabase = (await createClient()) as unknown as SupabaseReadClient;
   const { profile } = await getCurrentProfile();
@@ -75,6 +87,7 @@ export async function fetchPartnerDashboardData(): Promise<PartnerDashboardData>
       customPlans: [],
       documents: [],
       events: [],
+      manualReceivables: [],
       partner,
       partnerClients: [],
       platformPlans: [],
@@ -93,6 +106,7 @@ export async function fetchPartnerDashboardData(): Promise<PartnerDashboardData>
     tickets,
     documents,
     events,
+    manualReceivables,
   ] = await Promise.all([
     expectData(
       asQuery<import("./dashboard-metrics").PartnerClientLink>(
@@ -174,6 +188,15 @@ export async function fetchPartnerDashboardData(): Promise<PartnerDashboardData>
       ),
       "movimentações",
     ),
+    safeManualFinanceData(
+      asQuery<import("./dashboard-metrics").PartnerManualReceivable>(
+        supabase
+          .from("partner_client_receivables")
+          .select("amount_cents, due_date, paid_at, status")
+          .eq("partner_id", partner.id)
+          .order("due_date", { ascending: false }),
+      ),
+    ),
   ]);
 
   const raw: PartnerDashboardRawData = {
@@ -181,6 +204,7 @@ export async function fetchPartnerDashboardData(): Promise<PartnerDashboardData>
     customPlans,
     documents,
     events,
+    manualReceivables,
     partner,
     partnerClients,
     platformPlans,

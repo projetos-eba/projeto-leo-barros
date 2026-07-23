@@ -92,6 +92,13 @@ export type PartnerActivityEvent = {
   title: string;
 };
 
+export type PartnerManualReceivable = {
+  amount_cents: number;
+  due_date: string;
+  paid_at: string | null;
+  status: string;
+};
+
 export type PartnerDashboardRawData = {
   clientPlanSubscriptions: ClientPlanSubscription[];
   customPlans: PartnerCustomPlan[];
@@ -99,6 +106,7 @@ export type PartnerDashboardRawData = {
   events: PartnerActivityEvent[];
   partner: PartnerRecord | null;
   partnerClients: PartnerClientLink[];
+  manualReceivables?: PartnerManualReceivable[];
   platformPlans: PlatformPlan[];
   platformSubscriptions: PlatformSubscription[];
   profile: PartnerProfile | null;
@@ -123,6 +131,7 @@ export type PartnerDashboardGrowthPoint = {
   forecastMrrCents: number;
   inactiveClients: number;
   label: string;
+  monthlyRevenueCents: number;
   month: string;
   newClients: number;
 };
@@ -193,12 +202,12 @@ export type PartnerAdherenceMetric = {
 };
 
 export type PartnerPerformanceMetric = {
-  chartKey: "adherenceRate" | "adherentClients" | "adherenceTarget";
+  chartKey: "adherenceRate" | "adherentClients" | "monthlyRevenueCents";
   description: string;
-  icon: "activity" | "users";
+  icon: "activity" | "dollar" | "users";
   id: "adherenceRate" | "adherentClients" | "adherenceTarget";
   label: string;
-  unit: "number" | "percent";
+  unit: "currency" | "number" | "percent";
   value: string;
 };
 
@@ -500,6 +509,15 @@ function platformPlanLabel(raw: PartnerDashboardRawData, now: Date) {
   return `${plan?.name ?? "Plano"} · ${statusLabels[currentSubscription.status] ?? currentSubscription.status}`;
 }
 
+function manualRevenueBetween(receivables: PartnerManualReceivable[] | undefined, start: Date, end: Date) {
+  return (receivables ?? []).reduce((total, receivable) => {
+    if (receivable.status !== "paid" || !receivable.paid_at) return total;
+    const paidAt = parseDate(receivable.paid_at);
+    if (!paidAt || paidAt < start || paidAt > end) return total;
+    return total + receivable.amount_cents;
+  }, 0);
+}
+
 export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = new Date()): PartnerDashboardData {
   const currentStart = startOfMonth(now);
   const currentEnd = endOfMonth(now);
@@ -515,6 +533,8 @@ export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = ne
   const previousNewClients = newClientIdsWithin(raw.partnerClients, previousStart, previousEnd);
   const forecastMrr = subscriptionRevenueAt(raw.clientPlanSubscriptions, plansById, now);
   const previousForecastMrr = subscriptionRevenueAt(raw.clientPlanSubscriptions, plansById, previousEnd);
+  const manualRevenueMonth = manualRevenueBetween(raw.manualReceivables, currentStart, currentEnd);
+  const previousManualRevenueMonth = manualRevenueBetween(raw.manualReceivables, previousStart, previousEnd);
   const openTickets = raw.tickets.filter((ticket) => openTicketStatuses.has(ticket.status));
   const previousOpenTickets = raw.tickets.filter((ticket) => {
     const createdAt = parseDate(ticket.created_at);
@@ -549,6 +569,7 @@ export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = ne
       forecastMrrCents: subscriptionRevenueAt(raw.clientPlanSubscriptions, plansById, monthEnd),
       inactiveClients: Math.max(0, monthKnownClients.size - monthActiveClients.size),
       label: formatMonthLabel(monthStart),
+      monthlyRevenueCents: manualRevenueBetween(raw.manualReceivables, monthStart, monthEnd),
       month: monthStart.toISOString().slice(0, 7),
       newClients: newClientIdsWithin(raw.partnerClients, monthStart, monthEnd).size,
     };
@@ -817,21 +838,21 @@ export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = ne
       },
       {
         chartKey: "adherentClients",
-        description: "Clientes ativos que possuem plano personalizado vigente.",
+        description: "Clientes ativos que possuem contrato financeiro vigente.",
         icon: "users",
         id: "adherentClients",
-        label: "Clientes aderentes (≥80%)",
+        label: "Clientes com plano",
         unit: "number",
         value: formatInteger(activePlanPatientIds.size),
       },
       {
-        chartKey: "adherenceTarget",
-        description: "Meta operacional mensal de adesão definida para acompanhamento.",
-        icon: "activity",
+        chartKey: "monthlyRevenueCents",
+        description: "Recebimentos manuais registrados no mês atual.",
+        icon: "dollar",
         id: "adherenceTarget",
-        label: "Meta do mês de adesão",
-        unit: "percent",
-        value: formatPercent(adherenceTarget),
+        label: "Receita do mês",
+        unit: "currency",
+        value: formatCurrencyCents(manualRevenueMonth),
       },
     ],
     periodLabel: periodLabel(currentStart, currentEnd),
@@ -876,14 +897,14 @@ export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = ne
         value: formatInteger(dueRenewals.length),
       },
       {
-        delta: formatDelta(forecastMrr, previousForecastMrr),
-        description: "Receita mensalizada prevista dos planos personalizados ativos ou pendentes de cobrança.",
+        delta: formatDelta(manualRevenueMonth, previousManualRevenueMonth),
+        description: "Recebimentos manuais registrados no mês atual.",
         id: "forecastMrr",
         label: "Receita do Mês",
         subtext: "vs. mês anterior",
         tone: "green",
-        trend: forecastMrr >= previousForecastMrr ? "good" : "bad",
-        value: formatCurrencyCents(forecastMrr),
+        trend: manualRevenueMonth >= previousManualRevenueMonth ? "good" : "bad",
+        value: formatCurrencyCents(manualRevenueMonth),
       },
       {
         description: "Soma de renovações vencidas, documentos pendentes e tickets abertos do parceiro.",

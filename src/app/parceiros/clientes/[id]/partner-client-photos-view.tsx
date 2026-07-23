@@ -335,11 +335,11 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
   }
 
   return (
-    <main className="min-h-screen bg-[#0b1720] pb-12 text-white">
-      <div className="mx-auto w-full max-w-[1240px] px-6 py-6">
+    <main className="min-h-screen bg-[#0b1720] pb-10 text-white sm:pb-12">
+      <div className="mx-auto w-full max-w-[1240px] px-3 py-4 sm:px-6 sm:py-6">
       <PartnerClientProfileHeader activeTab="fotos" overview={overview} />
 
-      <div className="client-overview-print-panel mt-8 grid gap-6 pb-12">
+      <div className="client-overview-print-panel mt-4 grid gap-4 pb-10 sm:mt-8 sm:gap-6 sm:pb-12">
         {message ? <p className="rounded-[8px] border border-[#303746] bg-[#101923] px-4 py-3 text-[13px] text-[#d8e5ee]">{message}</p> : null}
 
         <section className={cn(panelClass, "p-5")}>

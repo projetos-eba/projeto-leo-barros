@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Link from "next/link";
 import { CheckCircle2, FileText, Send } from "lucide-react";
 
@@ -16,11 +17,17 @@ const statusLabels: Record<string, string> = {
   opened: "Aberto",
   submitted: "Respondido",
 };
+=======
+import { fetchClientForms } from "@/lib/clients/forms-data";
+
+import { ClientFormsView } from "./client-forms-view";
+>>>>>>> origin/main
 
 export const dynamic = "force-dynamic";
 
 export default async function ClienteFormulariosPage() {
   const forms = await fetchClientForms();
+<<<<<<< HEAD
   const pendingCount = forms.filter((form) => form.status !== "submitted").length;
 
   return (
@@ -82,4 +89,7 @@ export default async function ClienteFormulariosPage() {
       </div>
     </div>
   );
+=======
+  return <ClientFormsView forms={forms} />;
+>>>>>>> origin/main
 }

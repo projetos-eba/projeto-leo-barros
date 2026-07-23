@@ -8,12 +8,16 @@ import { fetchPartnerClientExams } from "@/lib/partners/client-exams-data";
 import { fetchPartnerClientOverview } from "@/lib/partners/client-overview-data";
 import { fetchPartnerClientPhotos } from "@/lib/partners/client-photos-data";
 import { fetchPartnerClientWorkout } from "@/lib/partners/client-workout-data";
+import { fetchPartnerClientClinicalData } from "@/lib/partners/client-clinical-data";
+import { fetchPartnerFinanceData } from "@/lib/partners/finance-data";
 
 import { PartnerClientAssessmentsView } from "./partner-client-assessments-view";
 import { PartnerClientCardioView } from "./partner-client-cardio-view";
 import { PartnerClientClinicalWorkspaceView } from "./partner-client-clinical-workspace-view";
 import { PartnerClientDietView } from "./partner-client-diet-view";
 import { PartnerClientExamsView } from "./partner-client-exams-view";
+import { PartnerClientFinanceView } from "./partner-client-finance-view";
+import { PartnerClientNotesWorkspaceView } from "./partner-client-notes-workspace-view";
 import { PartnerClientOverviewView } from "./partner-client-overview-view";
 import { PartnerClientPhotosView } from "./partner-client-photos-view";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
@@ -113,6 +117,16 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
     }
 
     return <PartnerClientPhotosView overview={overview} photos={photos} />;
+  }
+
+  if (tab === "anamnese" || tab === "prescricoes" || tab === "formularios") {
+    const clinical = await fetchPartnerClientClinicalData(id);
+    return <PartnerClientNotesWorkspaceView clinical={clinical} overview={overview} tab={tab} />;
+  }
+
+  if (tab === "planos-financeiro") {
+    const finance = await fetchPartnerFinanceData();
+    return <PartnerClientFinanceView finance={finance} overview={overview} />;
   }
 
   return <PartnerClientOverviewView overview={overview} />;

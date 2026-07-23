@@ -26,6 +26,8 @@ Before editing or validating the page, read:
 - Use `Clientes` in UI copy; keep `patients` only for technical schema/type names.
 - Do not expose CPF, `user_id`, auth identifiers, or other partners' data in the page, RPC, drawers, print view, tests, or docs.
 - Use `partner_client_overview(patient_id)` for overview reads; do not query clinical tables directly from browser components.
+- Weekly performance must use real Client execution data through `partner_client_real_adherence(patient_id, reference_date, weeks)` when available. `partner_client_adherence_snapshots` is only a legacy/fallback source.
+- Keep financial renewal separate from clinical plan updates: contract/receivable renewal belongs to Planos & Financeiro; publishing diet/workout versions belongs to the clinical tabs.
 - Mutations for appointments and tasks must use server actions plus Supabase RLS.
 - Keep future tabs disabled until each tab is implemented deliberately.
 - `Cardio` and `Exames` are now deliberate Client profile tabs. Outside Cardio, keep legacy `cardio` scopes grouped as `Treino`.

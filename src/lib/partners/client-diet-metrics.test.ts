@@ -67,7 +67,9 @@ const raw: PartnerClientDietRawData = {
     notes: "Priorizar alimentos naturais.",
     publishedAt: null,
     sentAt: null,
-    status: "published",
+    reviewOn: "2026-07-30",
+    startsOn: "2026-06-20",
+    status: "active",
     targetCarbsG: 240,
     targetFatG: 70,
     targetKcal: 2450,
@@ -76,6 +78,38 @@ const raw: PartnerClientDietRawData = {
     updatedAt: "2026-07-01T12:00:00.000Z",
     version: 2,
     waterLiters: 3,
+  },
+  tracking: {
+    dailyLogs: [
+      { logDate: "2026-07-13", waterMl: 2100 },
+      { logDate: "2026-07-20", waterMl: 2500 },
+    ],
+    events: [{ createdAt: "2026-07-20T12:40:00.000Z", detail: "Refeição marcada como parcial.", eventType: "meal_partial", id: "client-event-1", logDate: "2026-07-20", mealId: "meal-1" }],
+    mealLogs: [
+      {
+        completedAt: "2026-07-20T12:40:00.000Z",
+        id: "log-1",
+        logDate: "2026-07-20",
+        mealId: "meal-1",
+        notes: "Comi metade.",
+        photoOriginalFilename: "almoco.webp",
+        photoStoragePath: "client/almoco.webp",
+        status: "partial",
+        updatedAt: "2026-07-20T12:45:00.000Z",
+      },
+      {
+        completedAt: "2026-07-13T12:30:00.000Z",
+        id: "log-2",
+        logDate: "2026-07-13",
+        mealId: "meal-1",
+        notes: null,
+        photoOriginalFilename: null,
+        photoStoragePath: null,
+        status: "completed",
+        updatedAt: "2026-07-13T12:35:00.000Z",
+      },
+    ],
+    today: "2026-07-20",
   },
 };
 
@@ -107,5 +141,9 @@ describe("client-diet-metrics", () => {
     expect(data.library.suggestions[0].name).toBe("Arroz branco cozido");
     expect(data.drafts[0].notes).toBe("Usar no almoço");
     expect(data.events[0].detail).toBe("Dieta criada");
+    expect(data.tracking?.summary.adherencePct).toBe(50);
+    expect(data.tracking?.summary.partialMeals).toBe(1);
+    expect(data.tracking?.summary.notesCount).toBe(1);
+    expect(data.tracking?.mealLogs[0]).toMatchObject({ mealTitle: "Almoço", statusLabel: "Parcial" });
   });
 });

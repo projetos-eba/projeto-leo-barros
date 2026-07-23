@@ -74,6 +74,7 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
       { href: "/cliente/dieta", icon: Utensils, label: "Dieta" },
       { href: "/cliente/treino", icon: Dumbbell, label: "Treino" },
       { href: "/cliente/saude", icon: HeartPulse, label: "Saúde" },
+      { href: "/cliente/formularios", icon: FileText, label: "Formulários", implemented: true },
       { href: "/cliente/evolucao", icon: TrendingUp, label: "Minha Evolução", implemented: true },
       { href: "/cliente/configuracoes", icon: Settings, label: "Configurações" },
     ],
@@ -85,6 +86,7 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
     navigation: [
       { href: "/parceiros/dashboard", icon: Activity, label: "Visão Geral", implemented: true },
       { href: "/parceiros/clientes", icon: Users, label: "Clientes", implemented: true },
+      { href: "/parceiros/planos-financeiro", icon: WalletCards, label: "Planos & Financeiro", implemented: true },
       { href: "/parceiros/agenda", icon: CalendarDays, label: "Agenda", implemented: true },
       { href: "/parceiros/materiais", icon: Library, label: "Materiais", implemented: true },
       { href: "/parceiros/cadastros", icon: FileText, label: "Cadastro", implemented: true },

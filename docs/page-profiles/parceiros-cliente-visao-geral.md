@@ -25,12 +25,17 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 - `partner_clients`: vinculo, status e escopos.
 - `partner_client_goals`: metas de peso, gordura e adesao.
 - `partner_client_body_measurements`: peso e gordura corporal; massa magra/gorda sao calculadas no frontend/data layer.
-- `partner_client_adherence_snapshots`: adesao semanal de dieta e treino.
+- RPC `partner_client_real_adherence(patient_id, reference_date, weeks)`: adesao semanal real calculada a partir dos registros do Cliente.
+- `client_diet_meal_logs`: refeições marcadas pelo Cliente na área `/cliente/dieta`.
+- `client_workout_sessions`, `client_workout_exercise_logs` e `client_workout_set_logs`: execução real de treinos na área `/cliente/treino`.
+- `partner_client_adherence_snapshots`: legado/fallback local para dados historicos nao consolidados.
 - `partner_client_appointments`: consultas agendadas e concluidas.
 - `partner_client_observations`: registros resumidos e alertas.
 - `partner_client_tasks`: checklist operacional.
 - `partner_client_plan_modules`: resumo dos modulos do plano personalizado.
 - `partner_client_plan_subscriptions`: assinatura personalizada e renovacao.
+- `partner_client_plan_contracts`: contratos manuais exibidos na aba Planos & Financeiro.
+- `partner_client_receivables`: parcelas, vencimentos e pagamentos manuais do Cliente.
 
 ## Privacidade
 
@@ -41,12 +46,15 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 
 ## Experiencia
 
-- Cabecalho com avatar, nome, status, idade, genero, nascimento, telefone, periodo do plano, objetivo e modulos ativos.
+- Cabecalho com avatar, nome, status, idade, genero, nascimento, telefone, periodo do plano, objetivo e plano contratado.
 - KPIs: peso atual, gordura corporal, adesao geral, proxima consulta e alertas.
 - Blocos: evolucao corporal, desempenho semanal, ultimos registros, resumo do plano atual e checklist de tarefas.
 - Acoes: Historico completo, Exportar PDF, Mensagem via WhatsApp e Agendar consulta.
 - Tarefas podem ser criadas e concluidas/reabertas.
 - Alertas abrem drawer com observacoes de atencao, baixa adesao e tarefas relevantes.
+- A aba Planos & Financeiro permite filtrar parcelas, marcar recebimentos como pagos, informar forma/data/referencia, desfazer registro de pagamento e renovar contrato financeiro sem publicar nova dieta ou treino.
+- Renovação de plano financeiro é contrato/recebimento. Atualização de plano clínico é publicação de nova dieta ou treino e deve permanecer separada do financeiro.
+- Mobile compacta avatar e identidade em linha, dados cadastrais em duas colunas, acoes padronizadas abaixo do perfil, plano contratado no lugar dos escopos e abas com scroll interno; a aba Planos & Financeiro deve manter tabela com scroll interno e resumo financeiro sem overflow horizontal.
 
 ## Estados
 
@@ -55,12 +63,13 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 - Cliente inexistente ou nao autorizado: `not-found`.
 - Loading de navegacao.
 - Erro de validacao em agendamento e tarefa.
-- Mobile: abas com scroll interno e grids reorganizados sem overflow global.
+- Mobile: abas com scroll interno, KPIs em duas colunas quando houver espaco, cards compactos e grids reorganizados sem overflow global.
 
 ## Arquivos
 
 - `src/app/parceiros/clientes/[id]/page.tsx`
 - `src/app/parceiros/clientes/[id]/partner-client-overview-view.tsx`
+- `src/app/parceiros/clientes/[id]/partner-client-finance-view.tsx`
 - `src/app/parceiros/clientes/[id]/client-overview-chart.tsx`
 - `src/app/parceiros/clientes/[id]/actions.ts`
 - `src/lib/partners/client-overview-data.ts`

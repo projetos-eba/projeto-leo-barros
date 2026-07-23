@@ -78,6 +78,10 @@ describe("client workout metrics", () => {
     const data = buildPartnerClientWorkout({
       events: [],
       exercises: [],
+      exerciseLogs: [
+        { clientSessionId: "client-session-1", completedAt: "2026-07-02T13:00:00Z", id: "exercise-log-1", notes: null, prescribedExerciseId: "prescribed-1", startedAt: "2026-07-02T12:00:00Z", status: "completed" },
+        { clientSessionId: "client-session-2", completedAt: null, id: "exercise-log-2", notes: null, prescribedExerciseId: "prescribed-1", startedAt: "2026-07-03T12:00:00Z", status: "skipped" },
+      ],
       programs: [{
         createdAt: "2026-07-01T00:00:00Z",
         id: "program-1",
@@ -98,10 +102,29 @@ describe("client workout metrics", () => {
         updatedAt: "2026-07-01T00:00:00Z",
         version: 1,
       }],
+      setLogs: [
+        { clientSessionId: "client-session-1", completedAt: "2026-07-02T12:20:00Z", exerciseLogId: "exercise-log-1", id: "set-log-1", loadKg: 50, prescribedExerciseId: "prescribed-1", prescribedSetId: "set-1", reps: 10, setNumber: 1, status: "completed" },
+        { clientSessionId: "client-session-1", completedAt: "2026-07-02T12:35:00Z", exerciseLogId: "exercise-log-1", id: "set-log-2", loadKg: 60, prescribedExerciseId: "prescribed-1", prescribedSetId: "set-2", reps: 8, setNumber: 2, status: "completed" },
+      ],
       templates: [],
+      workoutSessions: [
+        { completedAt: "2026-07-02T13:00:00Z", durationMinutes: 60, id: "client-session-1", notes: null, prescribedSessionId: "session-1", programId: "program-1", startedAt: "2026-07-02T12:00:00Z", status: "completed", totalVolumeKg: 980, workoutDate: "2026-07-02" },
+        { completedAt: null, durationMinutes: 15, id: "client-session-2", notes: null, prescribedSessionId: "session-1", programId: "program-1", startedAt: "2026-07-03T12:00:00Z", status: "in_progress", totalVolumeKg: 0, workoutDate: "2026-07-03" },
+      ],
     });
     expect(data.activeProgram?.id).toBe("program-1");
     expect(data.activeProgram?.sessions[0].volumeKg).toBe(980);
+    expect(data.execution).toMatchObject({
+      bestLoadKg: 60,
+      completedMinutes: 75,
+      completedSessions: 1,
+      completionPercent: 50,
+      partialSessions: 1,
+      skippedExercises: 1,
+      totalSessions: 2,
+      totalVolumeKg: 980,
+    });
+    expect(data.execution?.skippedTop[0]).toMatchObject({ count: 1, name: "Supino reto" });
     expect(parseDefaultReps("8-12")).toBe(8);
   });
 });

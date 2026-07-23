@@ -36,6 +36,8 @@ create table public.partner_client_diet_plans (
   version integer not null default 1,
   published_at timestamptz,
   sent_at timestamptz,
+  starts_on date,
+  review_on date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
@@ -47,7 +49,7 @@ create table public.partner_client_diet_plans (
   constraint partner_client_diet_plans_title_not_blank
     check (length(btrim(title)) between 2 and 140),
   constraint partner_client_diet_plans_status_check
-    check (status in ('draft', 'published', 'sent', 'archived')),
+    check (status in ('draft', 'scheduled', 'active', 'superseded', 'archived')),
   constraint partner_client_diet_plans_targets_check
     check (
       target_kcal >= 0
@@ -165,7 +167,7 @@ create table public.partner_client_diet_events (
     references public.partner_client_diet_plans(id, partner_id, patient_id)
     on delete cascade,
   constraint partner_client_diet_events_type_check
-    check (event_type in ('created', 'updated', 'duplicated', 'published', 'sent', 'archived', 'notes_saved', 'meal_added', 'meal_removed', 'item_added', 'item_updated', 'item_removed')),
+    check (event_type in ('created', 'updated', 'targets_updated', 'duplicated', 'published', 'sent', 'archived', 'notes_saved', 'meal_added', 'meal_removed', 'item_added', 'item_updated', 'item_removed')),
   constraint partner_client_diet_events_actor_not_blank
     check (actor_name is null or length(btrim(actor_name)) > 0),
   constraint partner_client_diet_events_detail_not_blank
@@ -290,7 +292,7 @@ begin
     and plan.patient_id = p_patient_id
     and plan.status <> 'archived'
   order by
-    case plan.status when 'sent' then 0 when 'published' then 1 when 'draft' then 2 else 3 end,
+    case plan.status when 'active' then 0 when 'scheduled' then 1 when 'draft' then 2 when 'superseded' then 3 else 4 end,
     plan.updated_at desc
   limit 1;
 
@@ -309,6 +311,8 @@ begin
       'version', current_plan.version,
       'publishedAt', current_plan.published_at,
       'sentAt', current_plan.sent_at,
+      'startsOn', current_plan.starts_on,
+      'reviewOn', current_plan.review_on,
       'createdAt', current_plan.created_at,
       'updatedAt', current_plan.updated_at,
       'meals', coalesce((

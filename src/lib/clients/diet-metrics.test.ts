@@ -21,6 +21,15 @@ const raw: ClientDietRawData = {
       photoStoragePath: null,
       status: "completed",
     },
+    {
+      completedAt: null,
+      mealId: "meal-lunch",
+      notes: "Fiz metade da refeição.",
+      photoMimeType: null,
+      photoOriginalFilename: null,
+      photoStoragePath: null,
+      status: "partial",
+    },
   ],
   plan: {
     calorieStrategy: "surplus",
@@ -47,14 +56,18 @@ const raw: ClientDietRawData = {
       },
     ],
     partnerId: "partner-1",
+    publishedAt: "2026-07-02T12:00:00.000Z",
+    reviewOn: "2026-08-01",
     sentAt: null,
-    status: "published",
+    startsOn: "2026-07-02",
+    status: "active",
     targetCarbsG: 240,
     targetFatG: 70,
     targetKcal: 2200,
     targetProteinG: 180,
     title: "Dieta de definição",
     updatedAt: "2026-07-02T12:00:00.000Z",
+    version: 2,
     waterLiters: 2,
   },
   selectedDate: "2026-07-03",
@@ -93,13 +106,15 @@ describe("buildClientDiet", () => {
     const diet = buildClientDiet(raw, new Date("2026-07-03T11:00:00.000Z"));
 
     expect(diet.client.firstName).toBe("Ana");
-    expect(diet.nextMeal?.title).toBe("Almoço");
-    expect(diet.progress.consumed.kcal).toBe(118);
-    expect(diet.progress.remainingKcal).toBe(2082);
+    expect(diet.nextMeal?.title).toBeUndefined();
+    expect(diet.meals[1]?.statusLabel).toBe("Parcial");
+    expect(diet.progress.consumed.kcal).toBe(265.5);
+    expect(diet.progress.remainingKcal).toBe(1934.5);
     expect(diet.hydration.label).toBe("0,8L / 2L");
     expect(diet.hydration.remainingCups).toBe(5);
     expect(diet.week.adherenceDays).toBe(6);
     expect(diet.week.registeredMeals).toBe(12);
+    expect(diet.week.points.map((point) => point.percent)).toEqual([25, 50, 0, 75, 25, 100, 25]);
     expect(diet.suggestions[0]?.name).toBe("Batata-doce");
     expect(diet.meals[1]?.items[1]?.name).toBe("Batata-doce");
     expect(diet.meals[1]?.items[1]?.replacementLabel).toBe("Substitui Arroz");

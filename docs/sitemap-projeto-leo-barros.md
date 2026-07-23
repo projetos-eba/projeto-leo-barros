@@ -21,7 +21,10 @@ Rotas implementadas hoje no app Next:
 - `/cliente/dieta`;
 - `/cliente/evolucao`;
 - `/cliente/formularios`;
+<<<<<<< HEAD
 - `/cliente/formularios/:assignmentClientId`;
+=======
+>>>>>>> origin/main
 - `/parceiros/dashboard`;
 - `/cliente/inicio`;
 - `/cliente/saude`;
@@ -36,7 +39,8 @@ Rotas implementadas hoje no app Next:
 - `/parceiros/configuracoes/geral`;
 - `/parceiros/configuracoes/assinatura`;
 - `/parceiros/materiais`;
-- `/parceiros/materiais/:id`.
+- `/parceiros/materiais/:id`;
+- `/parceiros/planos-financeiro`.
 
 As demais rotas continuam como direcao de produto. Para telas ja implementadas, os documentos em `docs/page-profiles` e o codigo em `src/app` prevalecem sobre qualquer detalhe antigo deste mapa.
 
@@ -132,7 +136,8 @@ Objetivo: dar ao parceiro uma operacao clara para acompanhar clientes, prescreve
 | N2 Menu | Rota | Subniveis otimizados |
 | --- | --- | --- |
 | Dashboard | `/parceiros/dashboard` | N3 Visao geral `/parceiros/dashboard/visao-geral`; N3 Indicadores da carteira `/parceiros/dashboard/indicadores`; N4 Alertas prioritarios `/parceiros/dashboard/alertas`. |
-| Clientes | `/parceiros/clientes` | N3 Lista e filtros `/parceiros/clientes`; N3 Cliente selecionado `/parceiros/clientes/:id`; N4 Visao geral `/parceiros/clientes/:id/visao-geral`; N4 Anamnese `/parceiros/clientes/:id/anamnese`; N4 Avaliacoes `/parceiros/clientes/:id/avaliacoes`; N4 Dietas `/parceiros/clientes/:id/dietas`; N5 Editor de plano `/parceiros/clientes/:id/dietas/editor`; N4 Treino `/parceiros/clientes/:id/treino`; N5 Editor de programa `/parceiros/clientes/:id/treino/editor`; N4 Cardio `/parceiros/clientes/:id/cardio`; N4 Exames `/parceiros/clientes/:id/exames`; N4 Planos/Financeiro `/parceiros/clientes/:id/financeiro`. |
+| Clientes | `/parceiros/clientes` | N3 Lista e filtros `/parceiros/clientes`; N3 Cliente selecionado `/parceiros/clientes/:id`; N4 abas por `?tab=`: anamnese, avaliacoes, dietas, treinos, cardio, exames, prescricoes, fotos, formularios e planos-financeiro. |
+| Planos & Financeiro | `/parceiros/planos-financeiro` | N3 Catalogo de planos; N3 Planos dos clientes; N3 Contas a receber. |
 | Agenda | `/parceiros/agenda` | N3 Calendario `/parceiros/agenda/calendario`; N4 Atendimento `/parceiros/agenda/:id`; N5 Detalhe do atendimento `/parceiros/agenda/:id/detalhes`. |
 | Materiais | `/parceiros/materiais` | N3 Biblioteca `/parceiros/materiais/biblioteca`; N4 Material educativo `/parceiros/materiais/:id`; N5 Enviar para cliente `/parceiros/materiais/:id/enviar`. |
 | Cadastros | `/parceiros/cadastros` | N3 Alimentos `/parceiros/cadastros/alimentos`; N4 Importacao nutricional `/parceiros/cadastros/alimentos/importar`; N5 TACO/TCBIO `/parceiros/cadastros/alimentos/importar/taco-tcbio`; N3 Treinos `/parceiros/cadastros/treinos`; N4 Exercicios `/parceiros/cadastros/treinos/exercicios`; N5 Novo exercicio `/parceiros/cadastros/treinos/exercicios/novo`. |
