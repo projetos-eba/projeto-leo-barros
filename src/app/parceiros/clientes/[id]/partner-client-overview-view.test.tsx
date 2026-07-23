@@ -28,13 +28,17 @@ const overview: PartnerClientOverviewData = {
   adherenceTarget: 80,
   adherenceWeeks: [
     {
+      dietCompleted: 14,
       dietDelta: -3,
       dietPercentage: 70,
+      dietPlanned: 20,
       id: "week-1",
       label: "Esta semana",
       periodStart: "2026-06-22",
+      trainingCompleted: 43,
       trainingDelta: 6,
       trainingPercentage: 86,
+      trainingPlanned: 50,
     },
   ],
   alerts: [

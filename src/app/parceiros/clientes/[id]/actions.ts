@@ -2051,7 +2051,7 @@ export async function saveClientDietNotes(
 
   const { error } = await context.supabase
     .from("partner_client_diet_plans")
-    .update({ notes: normalizeNullable(parsed.data.notes), status: "draft" })
+    .update({ notes: normalizeNullable(parsed.data.notes) })
     .eq("id", parsed.data.planId)
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId);
@@ -2389,25 +2389,42 @@ export async function publishClientDietPlan(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
+  await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ status: "superseded" })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .neq("id", parsed.data.planId)
+    .in("status", ["active", "scheduled"]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const reviewDate = new Date();
+  reviewDate.setDate(reviewDate.getDate() + 30);
+
   const { error } = await context.supabase
     .from("partner_client_diet_plans")
-    .update({ published_at: new Date().toISOString(), status: "published" })
+    .update({
+      published_at: new Date().toISOString(),
+      review_on: reviewDate.toISOString().slice(0, 10),
+      starts_on: today,
+      status: "active",
+    })
     .eq("id", parsed.data.planId)
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId);
-  if (error) return { error: "Não foi possível publicar a dieta.", ok: false };
+  if (error) return { error: "Não foi possível ativar a dieta.", ok: false };
 
   const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
   await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
   await recordDietEvent(context, {
-    detail: "Dieta publicada internamente.",
+    detail: "Plano alimentar ativado para o Cliente.",
     eventType: "published",
     patientId: parsed.data.patientId,
     planId: parsed.data.planId,
     version,
   });
   revalidateClient(parsed.data.patientId);
-  return { message: "Dieta publicada.", ok: true };
+  return { message: "Plano alimentar ativado.", ok: true };
 }
 
 export async function sendClientDietPlan(
@@ -2421,20 +2438,18 @@ export async function sendClientDietPlan(
 
   const { error } = await context.supabase
     .from("partner_client_diet_plans")
-    .update({ sent_at: new Date().toISOString(), status: "sent" })
+    .update({ sent_at: new Date().toISOString() })
     .eq("id", parsed.data.planId)
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId);
   if (error) return { error: "Não foi possível registrar o envio.", ok: false };
 
-  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
   await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
   await recordDietEvent(context, {
-    detail: "Dieta marcada como enviada ao Cliente.",
+    detail: "Aviso do plano alimentar enviado ao Cliente.",
     eventType: "sent",
     patientId: parsed.data.patientId,
     planId: parsed.data.planId,
-    version,
   });
   revalidateClient(parsed.data.patientId);
   return { message: "Envio registrado.", ok: true };

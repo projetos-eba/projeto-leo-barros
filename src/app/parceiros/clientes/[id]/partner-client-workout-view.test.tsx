@@ -81,6 +81,45 @@ const workout: PartnerClientWorkoutData = {
     version: 1,
   },
   events: [],
+  execution: {
+    bestLoadKg: 60,
+    completedMinutes: 65,
+    completedSessions: 1,
+    completionPercent: 50,
+    partialSessions: 1,
+    recentSessions: [
+      {
+        bestLoadKg: 60,
+        dateLabel: "qui., 02/07",
+        durationMinutes: 65,
+        exercisesDone: 2,
+        id: "client-session-1",
+        sessionTitle: "Treino A · Peito e Tríceps",
+        setsDone: 4,
+        skippedExercises: 0,
+        status: "completed",
+        statusLabel: "Concluído",
+        totalVolumeKg: 1200,
+      },
+      {
+        bestLoadKg: 0,
+        dateLabel: "sex., 03/07",
+        durationMinutes: 0,
+        exercisesDone: 0,
+        id: "client-session-2",
+        sessionTitle: "Treino A · Peito e Tríceps",
+        setsDone: 0,
+        skippedExercises: 1,
+        status: "partial",
+        statusLabel: "Parcial",
+        totalVolumeKg: 0,
+      },
+    ],
+    skippedExercises: 1,
+    skippedTop: [{ count: 1, name: "Desenvolvimento" }],
+    totalSessions: 2,
+    totalVolumeKg: 1200,
+  },
   library: [{
     cadence: "2-0-2-0", defaultReps: "8-12", defaultSets: 4, equipment: "barra",
     id: "d1000000-0000-4000-8000-000000000203", muscleGroup: "costas", name: "Remada curvada",
@@ -107,6 +146,9 @@ describe("PartnerClientWorkoutView", () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
     expect(screen.getByText("Prescrição de Treinos")).toBeInTheDocument();
     expect(screen.getByText("Biblioteca de exercícios")).toBeInTheDocument();
+    expect(screen.getByText("Acompanhamento real")).toBeInTheDocument();
+    expect(screen.getByText("Volume realizado")).toBeInTheDocument();
+    expect(screen.getAllByText("Desenvolvimento").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Peito e Tríceps").length).toBeGreaterThan(0);
     expect(screen.getByLabelText("Mapa muscular anterior")).toBeInTheDocument();

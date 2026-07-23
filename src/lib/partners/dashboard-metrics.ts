@@ -838,10 +838,10 @@ export function buildPartnerDashboardData(raw: PartnerDashboardRawData, now = ne
       },
       {
         chartKey: "adherentClients",
-        description: "Clientes ativos que possuem plano personalizado vigente.",
+        description: "Clientes ativos que possuem contrato financeiro vigente.",
         icon: "users",
         id: "adherentClients",
-        label: "Clientes aderentes (≥80%)",
+        label: "Clientes com plano",
         unit: "number",
         value: formatInteger(activePlanPatientIds.size),
       },

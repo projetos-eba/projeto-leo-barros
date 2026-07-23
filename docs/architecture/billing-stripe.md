@@ -33,6 +33,10 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 8. Webhook `stripe-webhook` reconcilia status, invoice, snapshots e o read model `partner_subscription_financial_summaries`.
 9. `billing-sync-active-clients` processa outbox somente com Bearer da service role e atualiza quantidade com `proration_behavior=none`.
 
+## Financeiro Manual Do Cliente
+
+`/parceiros/planos-financeiro` e a aba `Planos & Financeiro` do Cliente controlam contratos, parcelas, vencimentos e recebimentos manuais entre o profissional e seus Clientes. Esse fluxo nao processa pagamento pela plataforma e nao altera a assinatura Stripe do Parceiro. Renovar contrato financeiro cria novo ciclo de recebimentos; publicar nova dieta ou treino é atualização clínica separada.
+
 ## Layout E UI
 
 - `/parceiros/checkout`, `/parceiros/checkout/sucesso` e `/parceiros/configuracoes/assinatura` usam shell independente de billing quando nao ha entitlement financeiro, sem menu operacional de Parceiros.

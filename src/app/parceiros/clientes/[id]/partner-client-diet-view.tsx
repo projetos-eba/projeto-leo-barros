@@ -2,7 +2,9 @@
 
 import {
   Activity,
+  AlertTriangle,
   Beef,
+  Camera,
   Check,
   ChevronDown,
   Clock,
@@ -11,6 +13,7 @@ import {
   Flame,
   History,
   Lock,
+  MessageSquareText,
   Plus,
   Save,
   Search,
@@ -32,7 +35,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { PartnerClientDietData, PartnerClientDietFood, PartnerClientDietMeal } from "@/lib/partners/client-diet-metrics";
+import type { PartnerClientDietData, PartnerClientDietFood, PartnerClientDietMeal, PartnerClientDietMealLog, PartnerClientDietTrackingStatus } from "@/lib/partners/client-diet-metrics";
 import { dietDayLabels, macroDistribution, type DietFoodTab } from "@/lib/partners/client-diet-metrics";
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import { cn } from "@/lib/utils";
@@ -265,6 +268,110 @@ function MacroMetric({ color, icon, label, value }: { color: "green" | "red" | "
   );
 }
 
+function statusTone(status: PartnerClientDietTrackingStatus) {
+  return {
+    completed: "border-[#1d7041] bg-[#102d21] text-[#73e59b]",
+    partial: "border-[#2f82bf] bg-[#0a2c48] text-[#8fcfff]",
+    pending: "border-[#6b5420] bg-[#2f260d] text-[#ffd45a]",
+    skipped: "border-[#8a2c3a] bg-[#35141b] text-[#ff8f9a]",
+  }[status];
+}
+
+function TrackingMetric({ icon, label, value, hint }: { hint: string; icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="min-w-0 rounded-[12px] border border-[#273847] bg-[#081722]/70 p-3">
+      <div className="flex items-center gap-2 text-[#8fcfff]">
+        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[#08243a]">{icon}</span>
+        <p className="truncate text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">{label}</p>
+      </div>
+      <p className="mt-3 text-[24px] font-bold leading-none text-white">{value}</p>
+      <p className="mt-1 truncate text-[11px] text-[#7f91a1]">{hint}</p>
+    </div>
+  );
+}
+
+function TrackingLogRow({ log }: { log: PartnerClientDietMealLog }) {
+  return (
+    <div className="grid gap-2 border-b border-[#273847] px-4 py-3 text-[13px] last:border-b-0 sm:grid-cols-[100px_minmax(0,1fr)_86px_90px] sm:items-center">
+      <div className="text-[#9aa5b6]">{log.dateLabel}</div>
+      <div className="min-w-0">
+        <p className="truncate font-bold text-white">{log.mealTitle}</p>
+        <p className="text-[11px] text-[#7f91a1]">{log.timeLabel}{log.completedAtLabel ? ` · ${log.completedAtLabel}` : ""}</p>
+        {log.notes ? <p className="mt-1 line-clamp-2 text-[12px] text-[#c7d3df]">{log.notes}</p> : null}
+      </div>
+      <span className={cn("inline-flex h-7 w-fit items-center rounded-full border px-2.5 text-[11px] font-bold", statusTone(log.status))}>{log.statusLabel}</span>
+      <span className="inline-flex items-center gap-1 text-[11px] text-[#8b92a3]">
+        {log.photoLabel ? <><Camera className="size-3.5 text-[#8fcfff]" /> Foto</> : log.notes ? <><MessageSquareText className="size-3.5 text-[#8fcfff]" /> Nota</> : "Sem anexo"}
+      </span>
+    </div>
+  );
+}
+
+function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
+  const tracking = diet.tracking;
+  if (!tracking) return null;
+
+  const summary = tracking.summary;
+  const waterTarget = diet.plan?.waterLiters ? `${formatNumber(diet.plan.waterLiters, 1)} L/dia` : "meta não definida";
+
+  return (
+    <Panel className="mt-5 overflow-hidden p-0">
+      <div className="grid gap-0 divide-y divide-[#273847] xl:grid-cols-[1fr_0.82fr] xl:divide-x xl:divide-y-0">
+        <div className="p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Acompanhamento da execução</p>
+              <h2 className="mt-1 text-[22px] font-bold text-white sm:text-[26px]">{tracking.periodLabel}</h2>
+            </div>
+            <span className="rounded-full border border-[#2f82bf] bg-[#0a2c48] px-3 py-1 text-[11px] font-bold text-[#8fcfff]">Dados do Cliente</span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <TrackingMetric icon={<Check className="size-4" />} label="Adesão" value={`${summary.adherencePct}%`} hint={`${summary.completedMeals} realizadas · ${summary.partialMeals} parciais`} />
+            <TrackingMetric icon={<AlertTriangle className="size-4" />} label="Pendências" value={formatNumber(summary.pendingMeals)} hint={`${summary.skippedMeals} puladas no período`} />
+            <TrackingMetric icon={<Droplets className="size-4" />} label="Água média" value={`${formatNumber(summary.waterAverageMl)} ml`} hint={waterTarget} />
+            <TrackingMetric icon={<MessageSquareText className="size-4" />} label="Retornos" value={formatNumber(summary.notesCount + summary.photosCount)} hint={`${summary.notesCount} notas · ${summary.photosCount} fotos`} />
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+            {tracking.days.map((day) => (
+              <div className="rounded-[10px] border border-[#273847] bg-[#081722]/70 p-2" key={day.isoDate}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-bold uppercase text-[#8b92a3]">{day.shortLabel}</p>
+                  <span className={cn("size-2 rounded-full", day.adherencePct >= 80 ? "bg-[#62d98b]" : day.adherencePct > 0 ? "bg-[#f2c84b]" : "bg-[#f0616d]")} />
+                </div>
+                <p className="mt-1 text-[16px] font-bold text-white">{day.adherencePct}%</p>
+                <p className="text-[10px] text-[#7f91a1]">{day.completedMeals + day.partialMeals}/{day.plannedMeals} refeições</p>
+                <p className="mt-1 text-[10px] text-[#8fcfff]">{formatNumber(day.waterMl)} ml</p>
+              </div>
+            ))}
+          </div>
+
+          {tracking.insights.length ? (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {tracking.insights.map((insight) => (
+                <div className="flex items-start gap-2 rounded-[10px] border border-[#303746] bg-[#101923]/65 p-3 text-[12px] text-[#c7d3df]" key={insight}>
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#f2c84b]" />
+                  <span>{insight}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="p-4 sm:p-5">
+          <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Últimos registros do Cliente</h3>
+          <div className="mt-4 overflow-hidden rounded-[12px] border border-[#273847]">
+            {tracking.mealLogs.length ? tracking.mealLogs.map((log) => <TrackingLogRow key={log.id} log={log} />) : (
+              <div className="p-5 text-[13px] text-[#8b92a3]">Nenhum registro diário recebido no período.</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
 function MealCard({
   meal,
   onAddFood,
@@ -463,7 +570,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
         {diet.plan ? (
           <>
             <section className="mt-4 flex flex-wrap items-end justify-between gap-4 sm:mt-6">
-              <div>
+              <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Dieta atual</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3">
                   <button className="inline-flex h-9 min-w-0 max-w-full items-center justify-between gap-3 rounded-[8px] border border-[#303746] bg-[#101923]/70 px-3 text-left text-[17px] font-bold text-white sm:min-w-[230px] sm:text-[20px]" type="button">
@@ -472,16 +579,23 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                   <span className="inline-flex h-[26px] items-center gap-2 rounded-full border border-[#1d7041] bg-[#102d21] px-3 text-[12px] font-semibold text-[#64db8a]"><span className="size-1.5 rounded-full bg-[#64db8a]" />{diet.plan.statusLabel}</span>
                   <span className="text-[12px] text-[#8b92a3]">Criada em {diet.plan.createdLabel}</span>
                 </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  <MiniInfo label="Início" value={diet.plan.startsLabel} />
+                  <MiniInfo label="Próxima revisão" value={diet.plan.reviewLabel} />
+                  <MiniInfo label="Versão" value={`v${diet.plan.version}.0`} />
+                </div>
               </div>
               <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:grid-cols-none sm:flex sm:flex-wrap">
                 <PrimaryButton className="px-3" disabled={pending} onClick={() => setPlanDialogOpen(true)}><Plus className="size-4" /> Nova dieta</PrimaryButton>
-                <GhostButton disabled={pending} onClick={() => runAction(() => publishClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Check className="size-4" /> Publicar</GhostButton>
-                <PrimaryButton className="col-span-2 px-3 sm:col-span-1" disabled={pending} onClick={() => runAction(() => sendClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Send className="size-4" /> Enviar ao Cliente</PrimaryButton>
+                <GhostButton disabled={pending} onClick={() => runAction(() => publishClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Check className="size-4" /> Ativar plano</GhostButton>
+                <PrimaryButton className="col-span-2 px-3 sm:col-span-1" disabled={pending} onClick={() => runAction(() => sendClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Send className="size-4" /> Enviar aviso</PrimaryButton>
                 <IconButton label="Mais ações"><Ellipsis className="size-4" /></IconButton>
               </div>
             </section>
 
             <SummaryStrip plan={diet.plan} onConfigure={() => setObjectiveDialogOpen(true)} />
+
+            <DietTrackingPanel diet={diet} />
 
             <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
               {dietDayLabels.map((day) => {

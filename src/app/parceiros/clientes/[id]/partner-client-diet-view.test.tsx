@@ -150,7 +150,9 @@ const rawDiet: PartnerClientDietRawData = {
     notes: "Manter hidratação adequada.",
     publishedAt: "2026-06-20T12:00:00.000Z",
     sentAt: null,
-    status: "published",
+    reviewOn: "2026-07-30",
+    startsOn: "2026-06-20",
+    status: "active",
     targetCarbsG: 240,
     targetFatG: 70,
     targetKcal: 2450,
@@ -159,6 +161,29 @@ const rawDiet: PartnerClientDietRawData = {
     updatedAt: "2026-07-01T12:00:00.000Z",
     version: 2,
     waterLiters: 3,
+  },
+  tracking: {
+    dailyLogs: [
+      { logDate: "2026-07-20", waterMl: 2250 },
+      { logDate: "2026-07-19", waterMl: 1500 },
+    ],
+    events: [
+      { createdAt: "2026-07-20T12:40:00.000Z", detail: "Refeição marcada como parcial.", eventType: "meal_partial", id: "client-event-1", logDate: "2026-07-20", mealId: "meal-1" },
+    ],
+    mealLogs: [
+      {
+        completedAt: "2026-07-20T12:40:00.000Z",
+        id: "log-1",
+        logDate: "2026-07-20",
+        mealId: "meal-1",
+        notes: "Almoço parcial por falta de apetite.",
+        photoOriginalFilename: "almoco.webp",
+        photoStoragePath: "ana/almoco.webp",
+        status: "partial",
+        updatedAt: "2026-07-20T12:45:00.000Z",
+      },
+    ],
+    today: "2026-07-20",
   },
 };
 
@@ -189,6 +214,10 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByText("Dieta atual")).toBeInTheDocument();
     expect(screen.getByText("Resumo geral")).toBeInTheDocument();
+    expect(screen.getByText("Acompanhamento da execução")).toBeInTheDocument();
+    expect(screen.getByText("Dados do Cliente")).toBeInTheDocument();
+    expect(screen.getByText("Últimos registros do Cliente")).toBeInTheDocument();
+    expect(screen.getByText("Parcial")).toBeInTheDocument();
     expect(screen.getByText("Água")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Plano alimentar" })).toBeInTheDocument();
     expect(screen.getByText("Adicionar alimentos")).toBeInTheDocument();
@@ -225,10 +254,10 @@ describe("PartnerClientDietView", () => {
 
     expect(screen.queryByRole("button", { name: /Duplicar/i })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Publicar/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Ativar plano/i }));
     await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalled());
 
-    fireEvent.click(screen.getByRole("button", { name: /Enviar ao Cliente/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Enviar aviso/i }));
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
 
     expect(screen.getByRole("button", { name: /Exportar PDF/i })).toBeInTheDocument();

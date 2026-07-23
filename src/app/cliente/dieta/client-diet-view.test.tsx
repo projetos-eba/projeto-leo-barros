@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { forwardRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { buildClientDiet, type ClientDietRawData } from "@/lib/clients/diet-metrics";
 
+import { setClientDietMealStatus } from "./actions";
 import { ClientDietView } from "./client-diet-view";
 
 vi.mock("next/link", () => ({
@@ -26,8 +27,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("./actions", () => ({
   addClientDietWater: vi.fn(async () => ({ ok: true })),
   applyClientDietMealSubstitution: vi.fn(async () => ({ ok: true })),
-  attachClientDietMealPhoto: vi.fn(async () => ({ ok: true })),
-  markClientDietMeal: vi.fn(async () => ({ ok: true })),
+  saveClientDietMealNote: vi.fn(async () => ({ ok: true })),
+  setClientDietMealStatus: vi.fn(async () => ({ ok: true })),
 }));
 
 const raw: ClientDietRawData = {
@@ -78,14 +79,18 @@ const raw: ClientDietRawData = {
       },
     ],
     partnerId: "partner",
+    publishedAt: "2026-07-02T12:00:00.000Z",
+    reviewOn: "2026-08-01",
     sentAt: null,
-    status: "published",
+    startsOn: "2026-07-02",
+    status: "active",
     targetCarbsG: 240,
     targetFatG: 70,
     targetKcal: 2200,
     targetProteinG: 180,
     title: "Dieta de definição",
     updatedAt: "2026-07-02T12:00:00.000Z",
+    version: 2,
     waterLiters: 2,
   },
   selectedDate: "2026-07-03",
@@ -107,17 +112,22 @@ describe("ClientDietView", () => {
 
     render(<ClientDietView diet={diet} />);
 
-    expect(screen.getByRole("heading", { name: "Painel de Dieta" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Minha Dieta" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Plano do dia" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Evolução da semana" })).toBeInTheDocument();
-    expect(screen.getByText("Seu progresso hoje")).toBeInTheDocument();
-    expect(screen.getByText("Hidratação")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Evolução e consistência" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Aderência hoje" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Orientações do profissional" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hidratação" })).toBeInTheDocument();
     expect(screen.getAllByText("Almoço").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Café da manhã").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Lanche").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Jantar").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Ceia").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Registrar como realizada/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Realizei/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Parcial/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Pulei/i }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: /Anexar foto/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: /Navegação por data/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /\+ 250ml/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /- 250ml/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Nota/i })).not.toBeInTheDocument();
@@ -128,5 +138,32 @@ describe("ClientDietView", () => {
     expect(screen.getByRole("link", { name: /Saúde/i })).toHaveAttribute("href", "/cliente/saude");
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Pacientes/i)).not.toBeInTheDocument();
+  });
+
+  it("mantém a refeição alterada em foco para observação antes de avançar", async () => {
+    const diet = buildClientDiet(raw, new Date("2026-07-03T11:00:00.000Z"));
+    const { rerender } = render(<ClientDietView diet={diet} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Registrar refeição/i }));
+
+    await waitFor(() => {
+      expect(setClientDietMealStatus).toHaveBeenCalledWith("lunch", "2026-07-03", "completed");
+    });
+
+    const updatedDiet = buildClientDiet(
+      {
+        ...raw,
+        mealLogs: [
+          ...raw.mealLogs,
+          { completedAt: "2026-07-03T12:10:00.000Z", mealId: "lunch", notes: null, photoMimeType: null, photoOriginalFilename: null, photoStoragePath: null, status: "completed" },
+        ],
+      },
+      new Date("2026-07-03T11:00:00.000Z"),
+    );
+
+    rerender(<ClientDietView diet={updatedDiet} />);
+
+    expect(screen.getByText("Refeição mantida em foco para registrar observação ou ajuste.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ver próxima refeição" })).toBeInTheDocument();
   });
 });

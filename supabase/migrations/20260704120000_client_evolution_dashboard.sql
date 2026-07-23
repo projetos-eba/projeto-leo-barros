@@ -141,9 +141,10 @@ begin
     select plan.*
     from public.partner_client_diet_plans plan
     where plan.patient_id = current_patient_id
-      and plan.status in ('sent', 'published')
+      and plan.status = 'active'
+      and coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) <= current_date
     order by
-      case plan.status when 'sent' then 0 when 'published' then 1 else 2 end,
+      coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) desc,
       plan.updated_at desc
     limit 1
   ),

@@ -565,15 +565,19 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
     null;
   const weeklyRows = [
     {
+      completed: selectedWeek?.dietCompleted ?? null,
       deltaValue: selectedWeek?.dietDelta ?? null,
       icon: Utensils,
       label: "Dieta",
+      planned: selectedWeek?.dietPlanned ?? null,
       value: selectedWeek?.dietPercentage ?? null,
     },
     {
+      completed: selectedWeek?.trainingCompleted ?? null,
       deltaValue: selectedWeek?.trainingDelta ?? null,
       icon: Dumbbell,
       label: "Treino",
+      planned: selectedWeek?.trainingPlanned ?? null,
       value: selectedWeek?.trainingPercentage ?? null,
     },
   ];
@@ -718,9 +722,14 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
               </select>
             </div>
             <div className="mt-5 grid gap-5">
-              {weeklyRows.map(({ deltaValue, icon: Icon, label, value }) => {
+              {weeklyRows.map(({ completed, deltaValue, icon: Icon, label, planned, value }) => {
                 const displayLabel = label === "Dieta" ? "Adesão à dieta" : "Conclusão dos treinos";
                 const barColor = label === "Dieta" ? "bg-[#3b97e3]" : "bg-[#58a067]";
+                const detailLabel = planned !== null && completed !== null
+                  ? label === "Dieta"
+                    ? `${completed}/${planned} refeições concluídas`
+                    : `${completed}/${planned} séries concluídas`
+                  : "Sem plano publicado";
                 return (
                   <div className="min-w-0" key={label}>
                     <div className="flex items-start justify-between gap-3">
@@ -731,6 +740,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
                         <div className="min-w-0">
                           <p className="truncate text-[14px] font-medium leading-5 text-white">{displayLabel}</p>
                           <p className="text-[12px] leading-4 text-[#5a6477]">Meta: &gt;= {overview.adherenceTarget}%</p>
+                          <p className="mt-0.5 text-[11px] leading-4 text-[#8b92a3]">{detailLabel}</p>
                         </div>
                       </div>
                       <div className="shrink-0 text-right">
@@ -776,7 +786,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
         <section className="mt-[22px] grid gap-4 xl:grid-cols-[1.75fr_1fr]">
           <Panel className="client-overview-print-panel min-h-[235px] overflow-hidden p-0">
             <div className="flex min-h-[56px] items-center justify-between gap-6 border-b border-[#303746] px-5 py-3">
-              <SectionTitle>Resumo do Plano Atual</SectionTitle>
+              <SectionTitle>Resumo do Plano Clínico Atual</SectionTitle>
             </div>
             {overview.plan ? (
               <div className="p-4">
@@ -797,7 +807,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
                   })}
                 </div>
                 <p className="mt-5 text-[13px] text-[#8b92a3]">
-                  Renovação: <span className="font-semibold text-white">{overview.plan.renewalLabel}</span>
+                  Atualização: <span className="font-semibold text-white">{overview.plan.renewalLabel}</span>
                 </p>
               </div>
             ) : (

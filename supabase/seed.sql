@@ -2051,6 +2051,8 @@ begin
     version,
     published_at,
     sent_at,
+    starts_on,
+    review_on,
     created_at,
     updated_at
   )
@@ -2059,7 +2061,7 @@ begin
     target_partner_id,
     'a1000000-0000-4000-8000-000000000301',
     'Dieta de definição',
-    'published',
+    'active',
     2450,
     190,
     240,
@@ -2074,6 +2076,8 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     2,
     now() - interval '8 days',
     null,
+    current_date - 8,
+    current_date + 22,
     now() - interval '12 days',
     now() - interval '2 days'
   );

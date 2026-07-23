@@ -36,7 +36,7 @@ Dar ao parceiro uma visao operacional da propria carteira: clientes ativos, atua
 ## Painel de Performance
 
 - Referencia visual especifica: Figma node `408:634`, com tres estados de card selecionado.
-- Cards selecionaveis: `Adesão média no período`, `Clientes aderentes (≥80%)` e `Receita do mês`.
+- Cards selecionaveis: `Adesão média no período`, `Clientes com plano` e `Receita do mês`.
 - O card selecionado deve ser conectado ao painel por uma camada decorativa SVG absoluta (`PerformanceOutline`), nunca por `border` CSS no grafico ou no card ativo.
 - O contorno usa um unico path azul claro, arredondado, com recortes curvos e estados `averageAdhesion`, `adherentClients` e `monthlyGoal`.
 - O grafico troca a serie conforme o card selecionado, mantendo eixo e tooltip compactos.

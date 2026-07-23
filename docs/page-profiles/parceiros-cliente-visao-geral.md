@@ -25,7 +25,10 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 - `partner_clients`: vinculo, status e escopos.
 - `partner_client_goals`: metas de peso, gordura e adesao.
 - `partner_client_body_measurements`: peso e gordura corporal; massa magra/gorda sao calculadas no frontend/data layer.
-- `partner_client_adherence_snapshots`: adesao semanal de dieta e treino.
+- RPC `partner_client_real_adherence(patient_id, reference_date, weeks)`: adesao semanal real calculada a partir dos registros do Cliente.
+- `client_diet_meal_logs`: refeições marcadas pelo Cliente na área `/cliente/dieta`.
+- `client_workout_sessions`, `client_workout_exercise_logs` e `client_workout_set_logs`: execução real de treinos na área `/cliente/treino`.
+- `partner_client_adherence_snapshots`: legado/fallback local para dados historicos nao consolidados.
 - `partner_client_appointments`: consultas agendadas e concluidas.
 - `partner_client_observations`: registros resumidos e alertas.
 - `partner_client_tasks`: checklist operacional.
@@ -49,7 +52,8 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 - Acoes: Historico completo, Exportar PDF, Mensagem via WhatsApp e Agendar consulta.
 - Tarefas podem ser criadas e concluidas/reabertas.
 - Alertas abrem drawer com observacoes de atencao, baixa adesao e tarefas relevantes.
-- A aba Planos & Financeiro permite filtrar parcelas, marcar recebimentos como pagos, informar forma/data/referencia e desfazer registro de pagamento.
+- A aba Planos & Financeiro permite filtrar parcelas, marcar recebimentos como pagos, informar forma/data/referencia, desfazer registro de pagamento e renovar contrato financeiro sem publicar nova dieta ou treino.
+- Renovação de plano financeiro é contrato/recebimento. Atualização de plano clínico é publicação de nova dieta ou treino e deve permanecer separada do financeiro.
 - Mobile compacta avatar e identidade em linha, dados cadastrais em duas colunas, acoes padronizadas abaixo do perfil, plano contratado no lugar dos escopos e abas com scroll interno; a aba Planos & Financeiro deve manter tabela com scroll interno e resumo financeiro sem overflow horizontal.
 
 ## Estados

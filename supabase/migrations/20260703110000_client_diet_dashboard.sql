@@ -42,7 +42,7 @@ create table public.client_diet_meal_logs (
     references public.partner_client_diet_meals(id, plan_id, partner_id, patient_id)
     on delete cascade,
   constraint client_diet_meal_logs_status_check
-    check (status in ('pending', 'completed', 'skipped')),
+    check (status in ('pending', 'completed', 'partial', 'skipped')),
   constraint client_diet_meal_logs_completed_check
     check ((status = 'completed' and completed_at is not null) or status <> 'completed'),
   constraint client_diet_meal_logs_notes_not_blank
@@ -74,7 +74,7 @@ create table public.client_diet_events (
     references public.partner_client_diet_meals(id, plan_id, partner_id, patient_id)
     on delete cascade,
   constraint client_diet_events_type_check
-    check (event_type in ('meal_marked', 'meal_unmarked', 'water_added', 'note_saved', 'substitution_requested', 'photo_attached')),
+    check (event_type in ('meal_marked', 'meal_unmarked', 'meal_partial', 'meal_skipped', 'water_added', 'note_saved', 'substitution_requested', 'photo_attached')),
   constraint client_diet_events_detail_not_blank
     check (length(btrim(detail)) > 0),
   constraint client_diet_events_details_object_check
@@ -215,9 +215,10 @@ as $$
   select plan.*
   from public.partner_client_diet_plans as plan
   where plan.patient_id = public.current_active_patient_id()
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
+    and coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) <= coalesce(target_date, current_date)
   order by
-    case plan.status when 'sent' then 0 when 'published' then 1 else 2 end,
+    coalesce(plan.starts_on, plan.published_at::date, plan.created_at::date) desc,
     plan.updated_at desc
   limit 1;
 $$;
@@ -289,6 +290,10 @@ begin
       'targetFatG', current_plan.target_fat_g,
       'waterLiters', current_plan.water_liters,
       'calorieStrategy', current_plan.calorie_strategy,
+      'publishedAt', current_plan.published_at,
+      'startsOn', current_plan.starts_on,
+      'reviewOn', current_plan.review_on,
+      'version', current_plan.version,
       'updatedAt', current_plan.updated_at,
       'sentAt', current_plan.sent_at,
       'meals', coalesce((
@@ -380,14 +385,18 @@ begin
           and meal.day_of_week = extract(isodow from days.log_date)::smallint
       ) as total_meals on true
       left join lateral (
-        select count(*)::integer as completed_count,
-               sum(coalesce(meal_totals.kcal, 0))::numeric as consumed_kcal
+        select count(*) filter (where log.status in ('completed', 'partial'))::integer as completed_count,
+               sum(case
+                 when log.status = 'completed' then coalesce(meal_totals.kcal, 0)
+                 when log.status = 'partial' then coalesce(meal_totals.kcal, 0) * 0.5
+                 else 0
+               end)::numeric as consumed_kcal
         from public.client_diet_meal_logs as log
         left join meal_totals on meal_totals.meal_id = log.meal_id
         where log.plan_id = current_plan.id
           and log.patient_id = current_patient_id
           and log.log_date = days.log_date
-          and log.status = 'completed'
+          and log.status in ('completed', 'partial')
       ) as completed on true
     ), '[]'::jsonb) end,
     'suggestions', case when current_plan.id is null then '[]'::jsonb else coalesce((
@@ -443,7 +452,7 @@ begin
   join public.partner_client_diet_plans as plan on plan.id = meal.plan_id
   where meal.id = p_meal_id
     and meal.patient_id = current_patient_id
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
   limit 1;
 
   if selected_meal.id is null then
@@ -566,7 +575,7 @@ begin
   join public.partner_client_diet_plans as plan on plan.id = meal.plan_id
   where meal.id = p_meal_id
     and meal.patient_id = current_patient_id
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
   limit 1;
 
   if selected_meal.id is null then
@@ -631,7 +640,7 @@ begin
   join public.partner_client_diet_plans as plan on plan.id = meal.plan_id
   where meal.id = p_meal_id
     and meal.patient_id = current_patient_id
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
   limit 1;
 
   if selected_meal.id is null then
@@ -686,7 +695,7 @@ begin
   join public.partner_client_diet_plans as plan on plan.id = meal.plan_id
   where meal.id = p_meal_id
     and meal.patient_id = current_patient_id
-    and plan.status in ('sent', 'published')
+    and plan.status = 'active'
   limit 1;
 
   if selected_meal.id is null then

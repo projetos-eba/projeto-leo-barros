@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
 import type { PartnerFinanceData } from "@/lib/partners/finance-data";
 
-import { recordReceivablePayment, revertReceivablePayment } from "../../planos-financeiro/actions";
+import { recordReceivablePayment, renewClientPlanContract, revertReceivablePayment } from "../../planos-financeiro/actions";
 import { PartnerClientFinanceView } from "./partner-client-finance-view";
 
 const refresh = vi.fn();
@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../../planos-financeiro/actions", () => ({
   recordReceivablePayment: vi.fn(),
+  renewClientPlanContract: vi.fn(),
   revertReceivablePayment: vi.fn(),
 }));
 
@@ -46,6 +47,7 @@ const finance: PartnerFinanceData = {
       category_snapshot: "Acompanhamento",
       created_at: "2026-07-22T12:00:00.000Z",
       duration_cycles_snapshot: 3,
+      end_date: null,
       first_due_date: "2026-07-22",
       id: "c1000000-0000-4000-8000-000000000301",
       includes_diet_snapshot: true,
@@ -104,6 +106,7 @@ const finance: PartnerFinanceData = {
 describe("PartnerClientFinanceView", () => {
   beforeEach(() => {
     vi.mocked(recordReceivablePayment).mockResolvedValue({ message: "Pagamento registrado.", ok: true });
+    vi.mocked(renewClientPlanContract).mockResolvedValue({ message: "Contrato renovado.", ok: true });
     vi.mocked(revertReceivablePayment).mockResolvedValue({ message: "Pagamento desfeito.", ok: true });
     refresh.mockReset();
   });
@@ -117,7 +120,7 @@ describe("PartnerClientFinanceView", () => {
     render(<PartnerClientFinanceView finance={finance} overview={overview} />);
 
     expect(screen.getByRole("heading", { name: "Gestão de recebimentos" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Marcar como pago" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Marcar como pago" })[0]);
 
     expect(screen.getByRole("heading", { name: "Registrar pagamento" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Forma de recebimento"), {
@@ -143,8 +146,19 @@ describe("PartnerClientFinanceView", () => {
   it("permite desfazer um pagamento registrado", async () => {
     render(<PartnerClientFinanceView finance={finance} overview={overview} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Desfazer pagamento" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Desfazer pagamento" })[0]);
 
     await waitFor(() => expect(revertReceivablePayment).toHaveBeenCalledWith("r2000000-0000-4000-8000-000000000301"));
+  });
+
+  it("renova o contrato financeiro sem publicar novo plano clínico", async () => {
+    render(<PartnerClientFinanceView finance={finance} overview={overview} />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Renovar contrato" })[0]);
+
+    await waitFor(() => expect(renewClientPlanContract).toHaveBeenCalledWith(expect.objectContaining({
+      contractId: "c1000000-0000-4000-8000-000000000301",
+      totalInstallments: 3,
+    })));
   });
 });

@@ -50,20 +50,23 @@ select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', 'cd100000-0000-4000-8000-000000000001', true);
 
 insert into public.partner_client_diet_plans (
-  id, partner_id, patient_id, title, status, target_kcal, target_protein_g, target_carbs_g, target_fat_g, water_liters, calorie_strategy
+  id, partner_id, patient_id, title, status, target_kcal, target_protein_g, target_carbs_g, target_fat_g, water_liters, calorie_strategy, starts_on, review_on, published_at
 )
 values (
   'cd100000-0000-4000-8000-000000000401',
   'cd100000-0000-4000-8000-000000000201',
   'cd100000-0000-4000-8000-000000000301',
   'Dieta Cliente',
-  'published',
+  'active',
   2200,
   180,
   240,
   70,
   2,
-  'surplus'
+  'surplus',
+  current_date,
+  current_date + 30,
+  now()
 );
 
 insert into public.partner_client_diet_meals (

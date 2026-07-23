@@ -49,6 +49,7 @@ export type PartnerClientPlanContract = {
   category_snapshot: string;
   created_at: string;
   duration_cycles_snapshot: number;
+  end_date: string | null;
   first_due_date: string;
   id: string;
   includes_diet_snapshot: boolean;
@@ -216,7 +217,7 @@ export async function fetchPartnerFinanceData(): Promise<PartnerFinanceData> {
       asQuery<PartnerClientPlanContract>(
         supabase
           .from("partner_client_plan_contracts")
-          .select("id, partner_id, patient_id, service_plan_id, plan_name_snapshot, category_snapshot, price_cents_snapshot, billing_interval_snapshot, duration_cycles_snapshot, includes_diet_snapshot, includes_training_snapshot, start_date, first_due_date, status, notes, created_at, updated_at")
+          .select("id, partner_id, patient_id, service_plan_id, plan_name_snapshot, category_snapshot, price_cents_snapshot, billing_interval_snapshot, duration_cycles_snapshot, includes_diet_snapshot, includes_training_snapshot, start_date, end_date, first_due_date, status, notes, created_at, updated_at")
           .eq("partner_id", partner.id)
           .order("updated_at", { ascending: false }),
       ),

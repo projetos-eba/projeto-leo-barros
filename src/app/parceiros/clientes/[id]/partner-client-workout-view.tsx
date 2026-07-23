@@ -4,7 +4,9 @@ import {
   Archive,
   ArrowDown,
   ArrowUp,
+  BarChart3,
   CalendarDays,
+  CheckCircle2,
   Clock3,
   Dumbbell,
   EllipsisVertical,
@@ -17,6 +19,7 @@ import {
   Search,
   Send,
   Sparkles,
+  TrendingUp,
   Trash2,
   Unlink,
 } from "lucide-react";
@@ -35,6 +38,7 @@ import {
 import type {
   PartnerClientWorkoutData,
   PartnerClientWorkoutExercise,
+  PartnerWorkoutExecutionSummary,
   PartnerClientWorkoutSet,
   PartnerClientWorkoutSession,
   WorkoutIntensity,
@@ -432,6 +436,171 @@ function MusclePanel({ exercises }: { exercises: PartnerClientWorkoutExercise[] 
   );
 }
 
+function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSummary | null }) {
+  if (!execution || execution.totalSessions === 0) {
+    return (
+      <section className={cn(panelClass, "mt-5 p-5")}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-[17px] font-bold text-white">Acompanhamento real</h3>
+            <p className="mt-1 text-[12px] text-[#8b92a3]">A execução do Cliente aparecerá aqui após o primeiro treino registrado.</p>
+          </div>
+          <span className="inline-flex size-11 items-center justify-center rounded-[8px] bg-[#082239] text-[#68afe9]">
+            <BarChart3 className="size-5" />
+          </span>
+        </div>
+      </section>
+    );
+  }
+
+  const cards = [
+    { Icon: CheckCircle2, label: "Concluídos", value: execution.completedSessions.toString() },
+    { Icon: Clock3, label: "Parciais", value: execution.partialSessions.toString() },
+    { Icon: TrendingUp, label: "Volume realizado", value: `${Math.round(execution.totalVolumeKg).toLocaleString("pt-BR")} kg` },
+    { Icon: Dumbbell, label: "Melhor carga", value: `${Math.round(execution.bestLoadKg).toLocaleString("pt-BR")} kg` },
+  ];
+  const latestSession = execution.recentSessions[0] ?? null;
+
+  return (
+    <section className={cn(panelClass, "mt-5 overflow-hidden")}>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#303746] p-4">
+        <div>
+          <h3 className="text-[17px] font-bold text-white">Acompanhamento real</h3>
+          <p className="mt-1 text-[12px] text-[#8b92a3]">Sessões registradas pelo Cliente nos últimos 90 dias.</p>
+        </div>
+        <div className="min-w-[190px]">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-[#9aa5b6]">
+            <span>Conclusão</span>
+            <span className="text-[#8fcfff]">{execution.completionPercent}%</span>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-[#07131b]">
+            <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, Math.max(0, execution.completionPercent))}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map(({ Icon, label, value }) => (
+          <article className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3" key={label}>
+            <span className="inline-flex size-9 items-center justify-center rounded-[7px] bg-[#0a2c48] text-[#68afe9]">
+              <Icon className="size-4" />
+            </span>
+            <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-[#718394]">{label}</p>
+            <p className="mt-1 text-[20px] font-bold text-white">{value}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="grid gap-4 border-t border-[#273847] p-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h4 className="text-[13px] font-bold text-white">Últimas sessões</h4>
+            {latestSession ? (
+              <span className="rounded-full border border-[#2a5c7d] bg-[#0a2c48]/55 px-3 py-1 text-[11px] font-bold text-[#8fcfff]">
+                Última: {latestSession.setCompletionPercent}% das séries
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-3 grid gap-2 md:hidden">
+            {execution.recentSessions.map((session) => (
+              <article className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3" key={session.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold text-[#9aa5b6]">{session.dateLabel}</p>
+                    <h5 className="mt-1 truncate text-[13px] font-bold text-white">{session.sessionTitle}</h5>
+                  </div>
+                  <span className={cn(
+                    "shrink-0 rounded-[6px] px-2 py-1 text-[10px] font-bold",
+                    session.status === "completed" && "bg-[#0e2c1e] text-[#62d98b]",
+                    session.status === "partial" && "bg-[#302813] text-[#f2c84b]",
+                    session.status === "skipped" && "bg-[#32171b] text-[#ff7b88]",
+                    session.status === "planned" && "bg-[#172433] text-[#9aa5b6]",
+                  )}>{session.statusLabel}</span>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] text-[#8b92a3]">
+                  <span><b className="block text-[13px] text-white">{session.setsDone}/{session.prescribedSets}</b>séries</span>
+                  <span><b className="block text-[13px] text-white">{session.exercisesDone}/{session.prescribedExercises}</b>exercícios</span>
+                  <span><b className="block text-[13px] text-[#8fcfff]">{Math.round(session.totalVolumeKg).toLocaleString("pt-BR")} kg</b>volume</span>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-3 hidden overflow-x-auto md:block">
+            <div className="min-w-[820px] overflow-hidden rounded-[8px] border border-[#273847]">
+              <div className="grid grid-cols-[96px_minmax(180px,1fr)_92px_88px_92px_110px] bg-[#07131b] px-3 py-2 text-[10px] font-bold uppercase text-[#718394]">
+                <span>Data</span>
+                <span>Treino</span>
+                <span>Status</span>
+                <span>Séries</span>
+                <span>Execução</span>
+                <span>Volume</span>
+              </div>
+              {execution.recentSessions.map((session) => (
+                <div className="grid grid-cols-[96px_minmax(180px,1fr)_92px_88px_92px_110px] items-center border-t border-[#273847] px-3 py-2 text-[12px]" key={session.id}>
+                  <span className="text-[#9aa5b6]">{session.dateLabel}</span>
+                  <span className="min-w-0 truncate font-semibold text-white">{session.sessionTitle}</span>
+                  <span className={cn(
+                    "w-fit rounded-[6px] px-2 py-1 text-[10px] font-bold",
+                    session.status === "completed" && "bg-[#0e2c1e] text-[#62d98b]",
+                    session.status === "partial" && "bg-[#302813] text-[#f2c84b]",
+                    session.status === "skipped" && "bg-[#32171b] text-[#ff7b88]",
+                    session.status === "planned" && "bg-[#172433] text-[#9aa5b6]",
+                  )}>{session.statusLabel}</span>
+                  <span className="text-[#c8d4df]">{session.setsDone}/{session.prescribedSets}</span>
+                  <span className="text-[#c8d4df]">{session.setCompletionPercent}%</span>
+                  <span className="font-semibold text-[#8fcfff]">{Math.round(session.totalVolumeKg).toLocaleString("pt-BR")} kg</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <aside className="grid gap-3">
+          {latestSession ? (
+            <div className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-4">
+              <h4 className="text-[13px] font-bold text-white">Realizado vs prescrito</h4>
+              <div className="mt-3 grid gap-3">
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8b92a3]">
+                    <span>Séries</span>
+                    <span>{latestSession.setsDone}/{latestSession.prescribedSets}</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#07131b]">
+                    <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, latestSession.setCompletionPercent)}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8b92a3]">
+                    <span>Exercícios</span>
+                    <span>{latestSession.exercisesDone}/{latestSession.prescribedExercises}</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#07131b]">
+                    <div className="h-full rounded-full bg-[#62d98b]" style={{ width: `${Math.min(100, latestSession.exerciseCompletionPercent)}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="rounded-[8px] border border-[#273847] bg-[#081520]/75 p-4">
+          <h4 className="text-[13px] font-bold text-white">Pontos de atenção</h4>
+          <p className="mt-1 text-[12px] text-[#8b92a3]">{execution.skippedExercises} exercício(s) pulado(s) no período.</p>
+          <div className="mt-3 grid gap-2">
+            {execution.skippedTop.map((item) => (
+              <div className="flex items-center justify-between gap-3 rounded-[7px] bg-[#101923] px-3 py-2 text-[12px]" key={item.name}>
+                <span className="min-w-0 truncate text-[#d8e5ee]">{item.name}</span>
+                <span className="font-bold text-[#ff7b88]">{item.count}x</span>
+              </div>
+            ))}
+            {execution.skippedTop.length === 0 ? <p className="rounded-[7px] bg-[#101923] px-3 py-2 text-[12px] text-[#8b92a3]">Nenhum exercício pulado recentemente.</p> : null}
+          </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWorkoutViewProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -548,6 +717,8 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
               {program.sessions.map((item) => <SessionCard active={item.id === session?.id} key={item.id} session={item} onClick={() => selectSession(item.id)} />)}
               <button className="flex h-[142px] min-w-[150px] items-center justify-center gap-2 rounded-[8px] border border-dashed border-[#3b5870] text-[13px] font-semibold text-[#8fcfff]" type="button" onClick={() => setSessionDialog(true)}><Plus className="size-4" /> Divisão</button>
             </div>
+
+            <ExecutionPanel execution={workout.execution} />
 
             {session ? (
               <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
