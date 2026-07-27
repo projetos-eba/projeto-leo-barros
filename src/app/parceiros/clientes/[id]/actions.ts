@@ -12,6 +12,11 @@ import {
   type CardioZoneKey,
 } from "@/lib/partners/client-cardio-metrics";
 import {
+  getFormulaEligibility,
+  type AssessmentActivityLevel,
+  type AssessmentBiologicalSex,
+} from "@/lib/partners/client-assessments-metrics";
+import {
   classifyExamValue,
   convertExamValueToDefault,
   patientReferenceSex,
@@ -120,6 +125,13 @@ const calorieCalculationSchema = z.object({
   targetWeightKg: z.number().min(20).max(350).nullable(),
   tdeeKcal: z.number().int().positive(),
   weeklyEnergyDeltaKcal: z.number().int(),
+});
+
+const completeClientProfileSchema = z.object({
+  biologicalSex: z.enum(["female", "male", "not_informed"]),
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  objective: z.string().trim().min(2).max(120),
+  patientId: patientIdSchema,
 });
 
 const applyCalculationSchema = z.object({
@@ -577,6 +589,53 @@ export async function saveClientCalorieCalculation(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
+  const [{ data: patient, error: patientError }, { data: relationship, error: relationshipError }] = await Promise.all([
+    context.supabase
+    .from("patients")
+    .select("biological_sex")
+    .eq("id", parsed.data.patientId)
+    .maybeSingle(),
+    context.supabase
+      .from("partner_clients")
+      .select("id")
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("status", "active")
+      .maybeSingle(),
+  ]);
+  if (patientError || relationshipError) return { error: "Não foi possível validar os dados do Cliente.", ok: false };
+  if (!patient || !relationship) return { error: "Cliente não encontrado.", ok: false };
+
+  let bodyFatPercentage: number | null = null;
+  if (parsed.data.assessmentId) {
+    const { data: assessment, error: assessmentError } = await context.supabase
+      .from("partner_client_assessments")
+      .select("body_fat_percentage")
+      .eq("id", parsed.data.assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .maybeSingle();
+    if (assessmentError) return { error: "Não foi possível validar a avaliação.", ok: false };
+    if (!assessment) return { error: "Avaliação não encontrada.", ok: false };
+    bodyFatPercentage = assessment.body_fat_percentage;
+  }
+  const inputs = parsed.data.inputs as {
+    activityLevel?: AssessmentActivityLevel;
+  };
+  const eligibility = getFormulaEligibility({
+    activityLevel: inputs.activityLevel ?? "moderate",
+    age: 1,
+    biologicalSex: (patient?.biological_sex ?? "not_informed") as AssessmentBiologicalSex,
+    bodyFatPercentage,
+    heightCm: 100,
+    targetDays: parsed.data.targetDays,
+    targetWeightKg: parsed.data.targetWeightKg,
+    weightKg: 20,
+  });
+  if (eligibility[parsed.data.formula].status !== "available") {
+    return { error: eligibility[parsed.data.formula].reason ?? "Dados insuficientes para esta fórmula.", ok: false };
+  }
+
   const { data, error } = await context.supabase
     .from("partner_client_calorie_calculations")
     .insert({
@@ -603,6 +662,26 @@ export async function saveClientCalorieCalculation(
 
   revalidateClient(parsed.data.patientId);
   return { id: data.id, message: "Cálculo salvo.", ok: true };
+}
+
+export async function completePartnerClientProfile(
+  input: z.input<typeof completeClientProfileSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = completeClientProfileSchema.safeParse(input);
+  if (!parsed.success || new Date(`${parsed.data?.birthDate ?? ""}T12:00:00`) > new Date()) {
+    return { error: "Revise os dados cadastrais do Cliente.", ok: false };
+  }
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { data, error } = await context.supabase.rpc("complete_partner_client_profile", {
+    p_biological_sex: parsed.data.biologicalSex,
+    p_birth_date: parsed.data.birthDate,
+    p_objective: parsed.data.objective,
+    p_patient_id: parsed.data.patientId,
+  });
+  if (error || !data) return { error: "Não foi possível atualizar o cadastro do Cliente.", ok: false };
+  revalidateClient(parsed.data.patientId);
+  return { message: "Cadastro atualizado.", ok: true };
 }
 
 export async function applyClientCalorieCalculation(

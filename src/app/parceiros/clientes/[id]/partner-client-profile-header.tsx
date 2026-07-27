@@ -25,7 +25,7 @@ const tabs: Array<{ id: ClientTab; label: string }> = [
   { id: "anamnese", label: "Anamnese" },
   { id: "avaliacoes", label: "Avaliações" },
   { id: "prescricoes", label: "Prescrições" },
-  { id: "formularios", label: "Formulários" },
+  { id: "formularios", label: "Formulários e respostas" },
   { id: "dietas", label: "Dietas" },
   { id: "treinos", label: "Treinos" },
   { id: "cardio", label: "Cardio" },
@@ -129,7 +129,7 @@ export function PartnerClientProfileHeader({
 
           <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 sm:mt-7 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
             <InfoItem icon={<CalendarPlus className="size-4" />} label="Idade" value={overview.client.ageLabel} />
-            <InfoItem icon={<Users className="size-4" />} label="Gênero" value={overview.client.genderLabel} />
+            <InfoItem icon={<Users className="size-4" />} label="Sexo biológico" value={overview.client.biologicalSexLabel} />
             <InfoItem icon={<CalendarPlus className="size-4" />} label="Nascimento" value={overview.client.birthDateLabel} />
             <InfoItem className="sm:col-span-1" icon={<Phone className="size-4" />} label="Telefone" value={overview.client.phoneLabel} />
             <InfoItem className="col-span-2 sm:col-span-1" icon={<Target className="size-4" />} label="Período do plano" value={overview.client.planPeriodLabel} />

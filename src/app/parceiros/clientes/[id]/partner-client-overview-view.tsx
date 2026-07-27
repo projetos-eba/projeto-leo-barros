@@ -217,13 +217,13 @@ function AlertNotificationCard({
   return (
     <Panel
       className={cn(
-        "flex min-h-[104px] items-center justify-center p-3 sm:hidden",
+        "flex h-[104px] w-full items-center justify-center p-0 sm:hidden",
         hasAlerts && "border-[#6e3535] bg-[#241116]",
       )}
     >
       <span
         className={cn(
-          "relative flex size-14 items-center justify-center rounded-full border bg-[#0b1720]",
+          "relative flex size-[58px] items-center justify-center rounded-full border bg-[#0b1720]",
           hasAlerts ? "border-[#d96975] text-[#ff7b8e]" : "border-[#314353] text-[#68afe9]",
         )}
       >
@@ -662,7 +662,7 @@ export function PartnerClientOverviewView({ overview }: PartnerClientOverviewVie
             label="Próxima Consulta"
             value={overview.nextAppointment?.dateLabel ?? "Sem agenda"}
           />
-          <button className="min-w-0 text-left" type="button" onClick={() => setAlertsOpen(true)}>
+          <button className="h-[104px] w-full min-w-0 text-left" type="button" onClick={() => setAlertsOpen(true)}>
             <AlertNotificationCard count={overview.alerts.length} />
             <div className="hidden sm:block">
               <MetricCard

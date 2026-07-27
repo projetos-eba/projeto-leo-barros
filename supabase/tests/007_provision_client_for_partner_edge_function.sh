@@ -395,6 +395,8 @@ valid_payload="$(
       serviceScopes: ["dieta", "treino"],
       cpf: "12345678901",
       birthDate: "1992-06-15",
+      biologicalSex: "female",
+      objective: "Hipertrofia",
       idempotencyKey: $idempotencyKey
     }'
 )"
@@ -456,6 +458,8 @@ select
   profile.phone || '|' ||
   patient.cpf || '|' ||
   patient.birth_date::text || '|' ||
+  patient.biological_sex || '|' ||
+  patient.objective || '|' ||
   (
     select array_agg(link.service_scope order by link.service_scope)::text
     from public.partner_clients as link
@@ -472,7 +476,7 @@ SQL
 )"
 
 if [[ "${stored_tuple}" != \
-  "cliente|active|+5511991234567|12345678901|1992-06-15|{dieta,treino}|completed|pending_delivery" ]]; then
+  "cliente|active|+5511991234567|12345678901|1992-06-15|female|Hipertrofia|{dieta,treino}|completed|pending_delivery" ]]; then
   echo "FAIL: dados relacionais não correspondem ao contrato."
   exit 1
 fi

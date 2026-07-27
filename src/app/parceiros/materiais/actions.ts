@@ -311,7 +311,7 @@ export async function revokePartnerMaterialShare(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_material_shares")
     .update({ revoked_at: new Date().toISOString(), status: "revoked" })
     .eq("material_id", parsed.data.materialId)

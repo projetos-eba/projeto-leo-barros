@@ -52,38 +52,7 @@ const prescriptionStatusSchema = z.object({
   status: z.enum(["published", "archived"]),
 });
 
-const formQuestionSchema = z.object({
-  helpText: z.string().trim().max(240).optional(),
-  options: z.array(z.string().trim().min(1).max(120)).max(10).default([]),
-  prompt: z.string().trim().min(3).max(220),
-  required: z.boolean(),
-  type: z.enum(["text_short", "text_long", "single_choice", "multiple_choice", "scale", "number", "date", "boolean"]),
-});
-
-const formAssignmentSchema = z.object({
-  message: z.string().trim().max(700).optional(),
-  patientIds: z.array(patientIdSchema).min(1).max(100),
-  questions: z.array(formQuestionSchema).min(1).max(30),
-  title: z.string().trim().min(3).max(140),
-});
-
-const noteSchema = z.object({
-  body: z.string().trim().min(1).max(12000),
-  noteType: z.enum(["anamnesis", "prescription"]),
-  patientId: patientIdSchema,
-  title: z.string().trim().min(2).max(140),
-});
-
-const simpleFormSchema = z.object({
-  description: z.string().trim().max(500).nullable(),
-  patientIds: z.array(patientIdSchema).min(1).max(100),
-  questions: z.array(z.object({
-    id: z.string().trim().min(1).max(80),
-    label: z.string().trim().min(2).max(220),
-    type: z.enum(["short_text", "long_text"]),
-  })).min(1).max(24),
-  title: z.string().trim().min(2).max(140),
-});
+const existingFormSchema = z.object({ dueAt: z.string().datetime().nullable(), message: z.string().trim().max(700), patientId: patientIdSchema, templateId: z.string().uuid() });
 
 function normalizeNullable(value: string | null | undefined) {
   const trimmed = value?.trim();
@@ -189,113 +158,15 @@ export async function setClientPrescriptionStatus(
   return { message: "Prescrição atualizada.", ok: true };
 }
 
-export async function createAndSendClientForm(
-  input: z.input<typeof formAssignmentSchema>,
-): Promise<ClinicalActionResult> {
-  const parsed = formAssignmentSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise o formulário antes de enviar.", ok: false };
-
+export async function sendExistingFormToClient(input: z.input<typeof existingFormSchema>): Promise<ClinicalActionResult> {
+  const parsed = existingFormSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o modelo e o prazo.", ok: false };
   const context = await getPartnerContext();
   if (!context.partner) return { error: context.error ?? "Acesso indisponível.", ok: false };
-
-  const templateResult = await context.supabase
-    .from("partner_form_templates")
-    .insert({
-      created_by_profile_id: context.profileId,
-      description: normalizeNullable(parsed.data.message),
-      partner_id: context.partner.id,
-      status: "active",
-      title: parsed.data.title,
-    })
-    .select("id")
-    .single();
-  const template = templateResult.data;
-  if (templateResult.error || !template) return { error: "Não foi possível criar o formulário.", ok: false };
-
-  const questionRows = parsed.data.questions.map((question, index) => ({
-    help_text: normalizeNullable(question.helpText),
-    options: question.options,
-    partner_id: context.partner?.id,
-    prompt: question.prompt,
-    question_type: question.type,
-    required: question.required,
-    scale_max: question.type === "scale" ? 10 : null,
-    scale_min: question.type === "scale" ? 0 : null,
-    sort_order: index,
-    template_id: template.id,
-  }));
-  const questionResult = await context.supabase.from("partner_form_questions").insert(questionRows);
-  if (questionResult.error) return { error: "Não foi possível salvar as perguntas.", ok: false };
-
-  const assignmentResult = await context.supabase
-    .from("partner_form_assignments")
-    .insert({
-      created_by_profile_id: context.profileId,
-      message: normalizeNullable(parsed.data.message),
-      partner_id: context.partner.id,
-      sent_at: new Date().toISOString(),
-      status: "sent",
-      template_id: template.id,
-      title: parsed.data.title,
-    })
-    .select("id")
-    .single();
-  const assignment = assignmentResult.data;
-  if (assignmentResult.error || !assignment) return { error: "Não foi possível enviar o formulário.", ok: false };
-
-  const uniquePatientIds = Array.from(new Set(parsed.data.patientIds));
-  const assignedResult = await context.supabase.from("partner_form_assignment_clients").insert(
-    uniquePatientIds.map((patientId) => ({
-      assignment_id: assignment.id,
-      partner_id: context.partner?.id,
-      patient_id: patientId,
-      status: "assigned",
-    })),
-  );
-  if (assignedResult.error) return { error: "Não foi possível entregar o formulário aos Clientes selecionados.", ok: false };
-
-  uniquePatientIds.forEach(revalidateClient);
-  revalidatePath("/cliente/formularios");
-  return { id: assignment.id, message: "Formulário enviado.", ok: true };
-}
-
-export async function createPartnerClientNote(input: z.input<typeof noteSchema>): Promise<ClinicalActionResult> {
-  const parsed = noteSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise a anotação.", ok: false };
-
-  if (parsed.data.noteType === "anamnesis") {
-    return saveClientAnamnesisEntry({
-      content: parsed.data.body,
-      patientId: parsed.data.patientId,
-      summary: "",
-      title: parsed.data.title,
-    });
-  }
-
-  return saveClientPrescriptionNote({
-    content: parsed.data.body,
-    instructions: "",
-    patientId: parsed.data.patientId,
-    prescriptionType: "general",
-    status: "draft",
-    title: parsed.data.title,
-  });
-}
-
-export async function createAndSendPartnerForm(input: z.input<typeof simpleFormSchema>): Promise<ClinicalActionResult> {
-  const parsed = simpleFormSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise o formulário.", ok: false };
-
-  return createAndSendClientForm({
-    message: parsed.data.description ?? "",
-    patientIds: parsed.data.patientIds,
-    questions: parsed.data.questions.map((question) => ({
-      helpText: "",
-      options: [],
-      prompt: question.label,
-      required: true,
-      type: question.type === "long_text" ? "text_long" : "text_short",
-    })),
-    title: parsed.data.title,
-  });
+  // Supabase's generated function type does not encode nullable SQL arguments.
+  const nullableDueAt: string = parsed.data.dueAt!;
+  const { data, error } = await context.supabase.rpc("send_partner_form_template", { p_due_at: nullableDueAt, p_message: parsed.data.message, p_patient_ids: [parsed.data.patientId], p_request_key: crypto.randomUUID(), p_template_id: parsed.data.templateId });
+  if (error || !data) return { error: "Não foi possível enviar o formulário.", ok: false };
+  revalidateClient(parsed.data.patientId);
+  return { id: data, message: "Formulário enviado.", ok: true };
 }

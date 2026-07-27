@@ -37,7 +37,7 @@ vi.mock("./actions", () => ({
 const overview = {
   client: {
     ageLabel: "29 anos", avatarUrl: null, birthDateLabel: "02/07/1997", email: "ana@example.invalid",
-    genderLabel: "Feminino", id: "a1000000-0000-4000-8000-000000000301", initial: "A",
+    biologicalSexLabel: "Feminino", id: "a1000000-0000-4000-8000-000000000301", initial: "A",
     name: "Ana Ribeiro", objectiveLabel: "Hipertrofia", phoneLabel: "+5511999999999",
     planPeriodLabel: "01/07/2026 - 01/08/2026", serviceScopes: ["treino"], statusLabel: "Ativo",
   },

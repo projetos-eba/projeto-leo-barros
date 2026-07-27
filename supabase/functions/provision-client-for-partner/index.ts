@@ -13,6 +13,7 @@ const allowedFields = new Set([
   "cpf",
   "birthDate",
   "objective",
+  "biologicalSex",
   "idempotencyKey",
 ]);
 
@@ -372,6 +373,7 @@ Deno.serve(async (request) => {
   const cpf = normalizeCpf(rawBody.cpf);
   const birthDate = normalizeBirthDate(rawBody.birthDate);
   const objective = normalizeObjective(rawBody.objective);
+  const biologicalSex = stringValue(rawBody.biologicalSex) || "not_informed";
   const suppliedIdempotencyKey = stringValue(rawBody.idempotencyKey);
   const idempotencyKey = suppliedIdempotencyKey || crypto.randomUUID();
   const fields: Record<string, string> = {};
@@ -406,6 +408,7 @@ Deno.serve(async (request) => {
   if (objective === "" || (objective !== null && objective.length > 120)) {
     fields.objective = "invalid";
   }
+  if (!["female", "male", "not_informed"].includes(biologicalSex)) fields.biologicalSex = "invalid";
   if (!isUuid(idempotencyKey)) fields.idempotencyKey = "invalid";
 
   if (Object.keys(fields).length > 0) {
@@ -430,6 +433,7 @@ Deno.serve(async (request) => {
     cpf,
     birthDate,
     objective,
+    biologicalSex,
   };
   const requestHash = await sha256(JSON.stringify(normalizedPayload));
 
@@ -518,6 +522,7 @@ Deno.serve(async (request) => {
         p_cpf: cpf,
         p_birth_date: birthDate,
         p_objective: objective,
+        p_biological_sex: biologicalSex,
         p_service_scopes: sortedScopes,
         p_invite_status: inviteStatus,
       },

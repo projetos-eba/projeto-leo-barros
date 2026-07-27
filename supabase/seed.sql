@@ -678,18 +678,19 @@ begin
     phone,
     birth_date,
     objective,
+    biological_sex,
     gender,
     avatar_url,
     created_at,
     updated_at
   )
   values
-    ('a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', '90000000001', '+5511988800011', current_date - interval '29 years', 'Hipertrofia', 'female', '/avatars/ana-ribeiro-seed.png', now() - interval '6 months', now() - interval '2 days'),
-    ('a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000702', '90000000002', '+5511988800012', current_date - interval '34 years', 'Emagrecimento', 'male', null, now() - interval '5 months', now() - interval '5 days'),
-    ('a1000000-0000-4000-8000-000000000303', 'a1000000-0000-4000-8000-000000000703', '90000000003', '+5511988800013', current_date - interval '41 years', 'Força e mobilidade', 'female', null, now() - interval '4 months', now() - interval '10 days'),
-    ('a1000000-0000-4000-8000-000000000304', 'a1000000-0000-4000-8000-000000000704', '90000000004', '+5511988800014', current_date - interval '26 years', 'Performance', 'male', null, now() - interval '3 months', now() - interval '35 days'),
-    ('a1000000-0000-4000-8000-000000000305', 'a1000000-0000-4000-8000-000000000705', '90000000005', '+5511988800015', current_date - interval '38 years', 'Condicionamento', 'female', null, now() - interval '2 months', now() - interval '1 day'),
-    ('a1000000-0000-4000-8000-000000000306', 'a1000000-0000-4000-8000-000000000706', '90000000006', '+5511988800016', current_date - interval '32 years', 'Retorno gradual', 'male', null, now() - interval '1 month', now() - interval '45 days');
+    ('a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000701', '90000000001', '+5511988800011', current_date - interval '29 years', 'Hipertrofia', 'female', 'female', '/avatars/ana-ribeiro-seed.png', now() - interval '6 months', now() - interval '2 days'),
+    ('a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000702', '90000000002', '+5511988800012', current_date - interval '34 years', 'Emagrecimento', 'male', 'male', null, now() - interval '5 months', now() - interval '5 days'),
+    ('a1000000-0000-4000-8000-000000000303', 'a1000000-0000-4000-8000-000000000703', '90000000003', '+5511988800013', current_date - interval '41 years', 'Força e mobilidade', 'female', 'female', null, now() - interval '4 months', now() - interval '10 days'),
+    ('a1000000-0000-4000-8000-000000000304', 'a1000000-0000-4000-8000-000000000704', '90000000004', '+5511988800014', current_date - interval '26 years', 'Performance', 'male', 'male', null, now() - interval '3 months', now() - interval '35 days'),
+    ('a1000000-0000-4000-8000-000000000305', 'a1000000-0000-4000-8000-000000000705', '90000000005', '+5511988800015', current_date - interval '38 years', 'Condicionamento', 'female', 'female', null, now() - interval '2 months', now() - interval '1 day'),
+    ('a1000000-0000-4000-8000-000000000306', 'a1000000-0000-4000-8000-000000000706', '90000000006', '+5511988800016', current_date - interval '32 years', 'Retorno gradual', 'not_informed', 'male', null, now() - interval '1 month', now() - interval '45 days');
 
   insert into public.partner_clients (
     partner_id,
@@ -2437,10 +2438,50 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('c9000000-0000-4000-8000-000000000312', 'c9000000-0000-4000-8000-000000000301', target_partner_id, 1, 'single_choice', 'Como ficou sua aderência à dieta?', null, true, '["Baixa","Média","Alta"]'::jsonb, null, null, now() - interval '1 day', now() - interval '1 day'),
     ('c9000000-0000-4000-8000-000000000313', 'c9000000-0000-4000-8000-000000000301', target_partner_id, 2, 'text_long', 'O que dificultou sua rotina nos últimos dias?', null, false, '[]'::jsonb, null, null, now() - interval '1 day', now() - interval '1 day');
 
+  insert into public.partner_form_template_versions (
+    id, template_id, partner_id, version_number, title, description,
+    questions_snapshot, status, created_by_profile_id, created_at, published_at
+  )
+  select
+    'c9000000-0000-4000-8000-000000000341',
+    template.id,
+    template.partner_id,
+    1,
+    template.title,
+    template.description,
+    jsonb_agg(
+      jsonb_build_object(
+        'id', question.id,
+        'type', question.question_type,
+        'prompt', question.prompt,
+        'helpText', question.help_text,
+        'required', question.required,
+        'options', question.options,
+        'scaleMin', question.scale_min,
+        'scaleMax', question.scale_max,
+        'settings', question.settings
+      )
+      order by question.sort_order
+    ),
+    'published',
+    target_profile_id,
+    now() - interval '1 day',
+    now() - interval '1 day'
+  from public.partner_form_templates template
+  join public.partner_form_questions question on question.template_id = template.id
+  where template.id = 'c9000000-0000-4000-8000-000000000301'
+  group by template.id, template.partner_id, template.title, template.description;
+
+  update public.partner_form_questions
+  set template_version_id = 'c9000000-0000-4000-8000-000000000341'
+  where template_id = 'c9000000-0000-4000-8000-000000000301';
+
   insert into public.partner_form_assignments (
     id,
     partner_id,
     template_id,
+    template_version_id,
+    template_snapshot,
     title,
     message,
     status,
@@ -2453,6 +2494,18 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     'c9000000-0000-4000-8000-000000000321',
     target_partner_id,
     'c9000000-0000-4000-8000-000000000301',
+    'c9000000-0000-4000-8000-000000000341',
+    (
+      select jsonb_build_object(
+        'title', title,
+        'description', description,
+        'message', 'Responda antes da próxima consulta para ajustarmos o plano.',
+        'questions', questions_snapshot,
+        'version', version_number
+      )
+      from public.partner_form_template_versions
+      where id = 'c9000000-0000-4000-8000-000000000341'
+    ),
     'Check-in semanal',
     'Responda antes da próxima consulta para ajustarmos o plano.',
     'sent',

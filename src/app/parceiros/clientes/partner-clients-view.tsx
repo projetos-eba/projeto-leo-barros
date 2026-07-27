@@ -54,6 +54,7 @@ type PhoneCountry = {
 };
 
 type NewClientFields = {
+  biologicalSex: "female" | "male" | "not_informed";
   birthDate: string;
   cpf: string;
   displayName: string;
@@ -156,6 +157,7 @@ function buildInitialNewClientFields(planId = ""): NewClientFields {
   const today = todayInputValue();
 
   return {
+    biologicalSex: "not_informed",
     birthDate: "",
     cpf: "",
     displayName: "",
@@ -495,6 +497,7 @@ function NewClientDrawer({
       serviceScopes: [...selectedPlanScopes].sort(),
       ...(fields.birthDate ? { birthDate: fields.birthDate } : {}),
       ...(fields.objective.trim() ? { objective: fields.objective.trim() } : {}),
+      biologicalSex: fields.biologicalSex,
       ...(fields.phoneCountry === "BR" && fields.cpf.trim() ? { cpf: digitsOnly(fields.cpf) } : {}),
     };
 
@@ -623,6 +626,13 @@ function NewClientDrawer({
                 </button>
               ))}
             </div>
+          </Field>
+          <Field label="Sexo biológico" htmlFor="client-biological-sex">
+            <select id="client-biological-sex" className="h-10 rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none transition-colors focus:border-[#3b97e3]" value={fields.biologicalSex} onChange={(event) => updateField("biologicalSex", event.target.value as NewClientFields["biologicalSex"])}>
+              <option value="not_informed">Não informado</option>
+              <option value="female">Feminino</option>
+              <option value="male">Masculino</option>
+            </select>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">

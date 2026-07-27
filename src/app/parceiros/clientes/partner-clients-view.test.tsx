@@ -188,6 +188,7 @@ describe("PartnerClientsView", () => {
         email: "novo@example.invalid",
         phone: "+5511988887777",
         cpf: "49261729843",
+        biologicalSex: "not_informed",
         objective: "Hipertrofia",
         serviceScopes: ["dieta", "treino"],
       }),

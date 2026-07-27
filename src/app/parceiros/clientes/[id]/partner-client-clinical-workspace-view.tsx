@@ -7,10 +7,8 @@ import {
   FileText,
   History,
   Loader2,
-  Plus,
   Save,
   Send,
-  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
@@ -23,7 +21,7 @@ import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-m
 import { cn } from "@/lib/utils";
 
 import {
-  createAndSendClientForm,
+  sendExistingFormToClient,
   saveClientAnamnesisEntry,
   saveClientPrescriptionNote,
   setClientPrescriptionStatus,
@@ -31,22 +29,12 @@ import {
 import { PartnerClientProfileHeader } from "./partner-client-profile-header";
 
 type ClinicalTab = "anamnese" | "formularios" | "prescricoes";
-type FormQuestionType = "boolean" | "date" | "multiple_choice" | "number" | "scale" | "single_choice" | "text_long" | "text_short";
 type PrescriptionType = "behavior" | "exam" | "general" | "nutrition" | "supplement" | "training";
 
 type PartnerClientClinicalWorkspaceViewProps = {
   activeTab: ClinicalTab;
   data: PartnerClientClinicalWorkspaceData;
   overview: PartnerClientOverviewData;
-};
-
-type BuilderQuestion = {
-  helpText: string;
-  id: string;
-  optionsText: string;
-  prompt: string;
-  required: boolean;
-  type: FormQuestionType;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -81,17 +69,6 @@ const statusLabels: Record<string, string> = {
   published: "Publicado",
   sent: "Enviado",
   submitted: "Respondido",
-};
-
-const questionTypeLabels: Record<FormQuestionType, string> = {
-  boolean: "Sim/Não",
-  date: "Data",
-  multiple_choice: "Múltipla escolha",
-  number: "Número",
-  scale: "Escala",
-  single_choice: "Escolha única",
-  text_long: "Texto longo",
-  text_short: "Texto curto",
 };
 
 function formatDate(value: string) {
@@ -363,169 +340,92 @@ function PrescriptionsTab({ data, patientId }: { data: PartnerClientClinicalWork
   );
 }
 
-function FormsTab({ data, patientId }: { data: PartnerClientClinicalWorkspaceData["forms"]; patientId: string }) {
+type FormsFilter = "all" | "answered" | "in_progress" | "late" | "waiting";
+
+function ClientFormsAndResponses({ data, patientId }: { data: PartnerClientClinicalWorkspaceData["forms"]; patientId: string }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [templateId, setTemplateId] = useState(data.templates[0]?.id ?? "");
   const [message, setMessage] = useState("");
-  const [questions, setQuestions] = useState<BuilderQuestion[]>([
-    { helpText: "", id: "q-1", optionsText: "", prompt: "Como você avalia sua evolução nesta semana?", required: true, type: "text_long" },
-  ]);
-  const [selectedClientIds, setSelectedClientIds] = useState<string[]>(data.clients.filter((client) => client.selected).map((client) => client.id));
-  const [title, setTitle] = useState("Check-in semanal");
-
-  const selectedCount = selectedClientIds.length;
-  const assignments = useMemo(() => data.assignments, [data.assignments]);
-
-  function updateQuestion(id: string, next: Partial<BuilderQuestion>) {
-    setQuestions((current) => current.map((question) => question.id === id ? { ...question, ...next } : question));
-  }
+  const [dueAt, setDueAt] = useState("");
+  const [filter, setFilter] = useState<FormsFilter>("all");
+  const [detailTab, setDetailTab] = useState<"answers" | "original">("answers");
+  const [pending, startTransition] = useTransition();
+  const [selected, setSelected] = useState<string | null>(data.assignments[0]?.assignmentClientId ?? null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const isLate = (item: PartnerClientClinicalWorkspaceData["forms"]["assignments"][number]) =>
+    item.status !== "submitted" && Boolean(item.dueAt && new Date(item.dueAt).getTime() < Date.now());
+  const metrics = {
+    answered: data.assignments.filter((item) => item.status === "submitted").length,
+    late: data.assignments.filter(isLate).length,
+    sent: data.assignments.length,
+    waiting: data.assignments.filter((item) => item.status !== "submitted").length,
+  };
+  const filtered = data.assignments.filter((item) => {
+    if (filter === "answered") return item.status === "submitted";
+    if (filter === "late") return isLate(item);
+    if (filter === "in_progress") return item.status === "opened" || item.status === "in_progress";
+    if (filter === "waiting") return item.status === "assigned" || item.status === "sent";
+    return true;
+  });
+  const assignment = data.assignments.find((item) => item.assignmentClientId === selected) ?? null;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setActionMessage(null);
     startTransition(async () => {
-      const result = await createAndSendClientForm({
+      const result = await sendExistingFormToClient({
+        dueAt: dueAt ? new Date(`${dueAt}T23:59:59`).toISOString() : null,
         message,
-        patientIds: selectedClientIds,
-        questions: questions.map((question) => ({
-          helpText: question.helpText,
-          options: question.optionsText.split(/\n|,/).map((item) => item.trim()).filter(Boolean),
-          prompt: question.prompt,
-          required: question.required,
-          type: question.type,
-        })),
-        title,
+        patientId,
+        templateId,
       });
-      if (!result.ok) {
-        window.alert(result.error ?? "Não foi possível enviar o formulário.");
-        return;
+      setActionMessage(result.ok ? result.message ?? "Formulário enviado." : result.error ?? "Não foi possível enviar o formulário.");
+      if (result.ok) {
+        setDueAt("");
+        setMessage("");
+        router.refresh();
       }
-      router.refresh();
     });
   }
 
   return (
-    <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,0.98fr)_minmax(0,1.02fr)]">
+    <div className="mt-6 grid gap-4">
       <Panel className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8fcfff]">Estilo Typeform</p>
-            <h2 className="mt-1 text-[22px] font-bold text-white">Criar e enviar formulário</h2>
-          </div>
-          <span className="rounded-[6px] border border-[#303746] px-3 py-1 text-[12px] text-[#9fb1c0]">{selectedCount} selecionado(s)</span>
+          <div><p className="text-[11px] font-semibold uppercase tracking-wider text-[#8fcfff]">Biblioteca de modelos</p><h2 className="mt-1 text-[22px] font-bold">Formulários e respostas</h2></div>
+          <div className="flex flex-wrap gap-3 text-xs"><span>Enviados {metrics.sent}</span><span>Respondidos {metrics.answered}</span><span>Aguardando {metrics.waiting}</span><span>Atrasados {metrics.late}</span><span>Taxa {metrics.sent ? Math.round(metrics.answered / metrics.sent * 100) : 0}%</span></div>
         </div>
-        <form className="mt-5 grid gap-4" onSubmit={submit}>
-          <Field label="Título">
-            <input className={inputClass("h-10")} required value={title} onChange={(event) => setTitle(event.target.value)} />
-          </Field>
-          <Field label="Mensagem para o Cliente">
-            <textarea className={inputClass("min-h-20 py-3")} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Contexto do formulário ou prazo combinado." />
-          </Field>
-
-          <div className="grid gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">Clientes</p>
-            <div className="grid max-h-[210px] gap-2 overflow-y-auto rounded-[8px] border border-[#303746] bg-[#081520] p-3">
-              {data.clients.map((client) => {
-                const checked = selectedClientIds.includes(client.id);
-                return (
-                  <label className="flex items-center gap-3 rounded-[7px] px-2 py-2 text-[13px] text-[#d8e5ee] hover:bg-[#102333]" key={client.id}>
-                    <input
-                      checked={checked}
-                      type="checkbox"
-                      onChange={(event) => {
-                        setSelectedClientIds((current) => event.target.checked
-                          ? Array.from(new Set([...current, client.id]))
-                          : current.filter((id) => id !== client.id));
-                      }}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold text-white">{client.name}</span>
-                      <span className="block truncate text-[11px] text-[#8b92a3]">{client.email}</span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">Perguntas</p>
-              <Button onClick={() => setQuestions((current) => [...current, { helpText: "", id: `q-${Date.now()}`, optionsText: "", prompt: "", required: true, type: "text_short" }])}>
-                <Plus className="size-4" /> Pergunta
-              </Button>
-            </div>
-            {questions.map((question, index) => (
-              <div className="rounded-[8px] border border-[#303746] bg-[#0b1823] p-3" key={question.id}>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[12px] font-semibold text-[#8fcfff]">Pergunta {index + 1}</p>
-                  {questions.length > 1 ? (
-                    <button aria-label="Remover pergunta" className="text-[#ff9aa6]" type="button" onClick={() => setQuestions((current) => current.filter((item) => item.id !== question.id))}>
-                      <Trash2 className="size-4" />
-                    </button>
-                  ) : null}
-                </div>
-                <div className="mt-3 grid gap-3">
-                  <input className={inputClass("h-10")} required value={question.prompt} onChange={(event) => updateQuestion(question.id, { prompt: event.target.value })} placeholder="Digite a pergunta" />
-                  <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                    <select className={inputClass("h-10")} value={question.type} onChange={(event) => updateQuestion(question.id, { type: event.target.value as FormQuestionType })}>
-                      {Object.entries(questionTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                    </select>
-                    <label className="flex h-10 items-center gap-2 rounded-[8px] border border-[#303746] bg-[#081520] px-3 text-[12px] text-[#d8e5ee]">
-                      <input checked={question.required} type="checkbox" onChange={(event) => updateQuestion(question.id, { required: event.target.checked })} />
-                      Obrigatória
-                    </label>
-                  </div>
-                  {question.type === "single_choice" || question.type === "multiple_choice" ? (
-                    <textarea className={inputClass("min-h-20 py-2")} required value={question.optionsText} onChange={(event) => updateQuestion(question.id, { optionsText: event.target.value })} placeholder="Uma opção por linha ou separadas por vírgula" />
-                  ) : null}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-end">
-            <Button disabled={pending || selectedClientIds.length === 0} tone="primary" type="submit">
-              {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              Enviar formulário
-            </Button>
-          </div>
+        <p className="mt-2 text-xs text-[#8b92a3]">Escolha um modelo já publicado. O destinatário permanece fixo neste Cliente.</p>
+        <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_180px_auto]" onSubmit={submit}>
+          <select aria-label="Modelo de formulário" className={inputClass("h-10")} required value={templateId} onChange={(event) => setTemplateId(event.target.value)}><option value="">Escolha um modelo</option>{data.templates.map((template) => <option key={template.id} value={template.id}>{template.title}</option>)}</select>
+          <input aria-label="Mensagem" className={inputClass("h-10")} placeholder="Mensagem opcional" value={message} onChange={(event) => setMessage(event.target.value)} />
+          <input aria-label="Prazo" className={inputClass("h-10")} type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} />
+          <Button disabled={pending || !templateId} tone="primary" type="submit">{pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}Enviar formulário</Button>
         </form>
+        {actionMessage ? <p className="mt-3 text-sm text-[#8fcfff]" role="status">{actionMessage}</p> : null}
       </Panel>
 
-      <Panel className="p-5">
-        <div className="flex items-center gap-2">
-          <FileText className="size-4 text-[#8fcfff]" />
-          <h2 className="text-[18px] font-bold text-white">Respostas deste Cliente</h2>
+      <div className="flex flex-wrap gap-2">
+        {([["all", "Todos"], ["waiting", "Aguardando"], ["in_progress", "Em andamento"], ["answered", "Respondidos"], ["late", "Atrasados"]] as Array<[FormsFilter, string]>).map(([value, label]) => <button className={cn("rounded-full border px-3 py-1.5 text-xs", filter === value ? "border-[#3b97e3] bg-[#15334a] text-white" : "border-[#303746] text-[#9eabb8]")} key={value} onClick={() => setFilter(value)}>{label}</button>)}
+      </div>
+
+      {data.state === "unavailable" ? <Panel className="p-5"><EmptyState>Os formulários estão temporariamente indisponíveis. Tente novamente.</EmptyState></Panel> : (
+        <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
+          <Panel className="p-3">
+            <div className="grid max-h-[620px] gap-2 overflow-y-auto">
+              {filtered.map((item) => <button className={cn("rounded border p-3 text-left", selected === item.assignmentClientId ? "border-[#3b97e3] bg-[#102333]" : "border-[#303746]")} key={item.assignmentClientId} onClick={() => setSelected(item.assignmentClientId)}><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-[#8b92a3]">{formatDate(item.sentAt ?? item.createdAt)} · {isLate(item) ? "Atrasado" : statusLabels[item.status] ?? item.status}</p></button>)}
+              {filtered.length === 0 ? <EmptyState>Nenhum envio neste filtro.</EmptyState> : null}
+            </div>
+          </Panel>
+          <Panel className="p-5">
+            {assignment ? <>
+              <div className="flex flex-wrap justify-between gap-3"><div><h3 className="text-lg font-bold">{assignment.title}</h3><p className="text-xs text-[#8b92a3]">Enviado em {formatDate(assignment.sentAt ?? assignment.createdAt)}{assignment.dueAt ? ` · prazo ${formatDate(assignment.dueAt)}` : ""}{assignment.submittedAt ? ` · respondido em ${formatDate(assignment.submittedAt)}` : ""}</p>{assignment.message ? <p className="mt-2 text-sm text-[#c4d0dc]">{assignment.message}</p> : null}</div><span className="h-fit rounded border border-[#304354] px-2 py-1 text-xs">{isLate(assignment) ? "Atrasado" : statusLabels[assignment.status] ?? assignment.status}</span></div>
+              <div className="mt-5 flex gap-2 border-b border-[#303746]"><button className={cn("px-3 py-2 text-sm", detailTab === "answers" && "border-b-2 border-[#3b97e3] text-white")} onClick={() => setDetailTab("answers")}>Respostas</button><button className={cn("px-3 py-2 text-sm", detailTab === "original" && "border-b-2 border-[#3b97e3] text-white")} onClick={() => setDetailTab("original")}>Formulário original</button></div>
+              {detailTab === "answers" ? <div className="mt-5 grid gap-4">{assignment.questions.map((question) => { const answer = assignment.responseAnswers.find((item) => item.questionId === question.id); return <div className="rounded border border-[#303746] p-3" key={question.id}><p className="text-sm font-semibold">{question.prompt}</p><p className="mt-1 text-sm text-[#c4d0dc]">{answer?.value ?? "Sem resposta"}</p></div>; })}</div> : <div className="mt-5 grid gap-3">{assignment.questions.map((question, index) => <div className="rounded border border-[#303746] p-3" key={question.id}><p className="text-xs text-[#8fcfff]">Pergunta {index + 1} · {question.type}</p><p className="mt-1 text-sm">{question.prompt}{question.required ? " *" : ""}</p>{question.options.length ? <p className="mt-1 text-xs text-[#8b92a3]">{question.options.join(" · ")}</p> : null}</div>)}</div>}
+            </> : <EmptyState>Selecione um envio para visualizar respostas e o formulário original.</EmptyState>}
+          </Panel>
         </div>
-        <div className="mt-4 grid gap-3">
-          {data.state === "unavailable" ? (
-            <EmptyState>Os formulários estão temporariamente indisponíveis. Tente novamente em alguns instantes.</EmptyState>
-          ) : assignments.length === 0 ? (
-            <EmptyState>Nenhum formulário enviado para este Cliente.</EmptyState>
-          ) : assignments.map((assignment) => (
-            <article className="rounded-[8px] border border-[#303746] bg-[#0b1823] p-4" key={assignment.assignmentClientId}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-white">{assignment.title}</p>
-                  <p className="mt-1 text-[12px] text-[#8b92a3]">{formatDate(assignment.createdAt)} • {assignment.questions.length} pergunta(s)</p>
-                </div>
-                <span className="rounded-[6px] border border-[#304354] px-2 py-1 text-[11px] text-[#c4d0dc]">{statusLabels[assignment.status] ?? assignment.status}</span>
-              </div>
-              {assignment.message ? <p className="mt-3 text-[13px] leading-5 text-[#c4d0dc]">{assignment.message}</p> : null}
-              <div className="mt-4 grid gap-2">
-                {assignment.responseAnswers.length === 0 ? (
-                  <p className="rounded-[7px] border border-dashed border-[#304354] px-3 py-2 text-[12px] text-[#8b92a3]">Aguardando resposta.</p>
-                ) : assignment.responseAnswers.map((answer) => (
-                  <div className="rounded-[7px] border border-[#263846] bg-[#081520] p-3" key={`${assignment.assignmentClientId}-${answer.label}`}>
-                    <p className="text-[12px] font-semibold text-[#8fcfff]">{answer.label}</p>
-                    <p className="mt-1 whitespace-pre-line text-[13px] leading-5 text-white">{answer.value}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </Panel>
+      )}
     </div>
   );
 }
@@ -541,7 +441,7 @@ export function PartnerClientClinicalWorkspaceView({
         <PartnerClientProfileHeader activeTab={activeTab} overview={overview} />
         {activeTab === "anamnese" ? <AnamnesisTab data={data.anamnesis} patientId={overview.client.id} /> : null}
         {activeTab === "prescricoes" ? <PrescriptionsTab data={data.prescriptions} patientId={overview.client.id} /> : null}
-        {activeTab === "formularios" ? <FormsTab data={data.forms} patientId={overview.client.id} /> : null}
+        {activeTab === "formularios" ? <ClientFormsAndResponses data={data.forms} patientId={overview.client.id} /> : null}
       </div>
     </div>
   );

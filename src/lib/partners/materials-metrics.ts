@@ -106,8 +106,8 @@ export type PartnerMaterialsData = {
   events: PartnerMaterialEvent[];
   materials: PartnerMaterial[];
   metrics: {
+    archived: number;
     favorites: number;
-    forms: number;
     shared: number;
     total: number;
   };
@@ -264,8 +264,8 @@ export function buildPartnerMaterialsData(raw: PartnerMaterialsRawData): Partner
     events,
     materials,
     metrics: {
+      archived: materials.filter((material) => material.status === "archived").length,
       favorites: active.filter((material) => material.isFavorite).length,
-      forms: active.filter((material) => material.category === "formularios").length,
       shared: active.reduce((total, material) => total + material.shareCount, 0),
       total: active.length,
     },

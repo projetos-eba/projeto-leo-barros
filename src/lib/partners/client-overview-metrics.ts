@@ -33,6 +33,7 @@ export type PartnerClientOverviewRawData = {
   } | null;
   identity: {
     avatarUrl: string | null;
+    biologicalSex: "female" | "male" | "not_informed";
     birthDate: string | null;
     displayName: string;
     email: string;
@@ -150,7 +151,7 @@ export type PartnerClientOverviewData = {
     avatarUrl: string | null;
     birthDateLabel: string;
     email: string;
-    genderLabel: string;
+    biologicalSexLabel: string;
     id: string;
     initial: string;
     name: string;
@@ -237,14 +238,12 @@ function statusLabel(status: PartnerClientOverviewData["client"]["status"]) {
   }[status];
 }
 
-function genderLabel(value: string | null) {
+function biologicalSexLabel(value: PartnerClientOverviewRawData["identity"]["biologicalSex"]) {
   return {
     female: "Feminino",
     male: "Masculino",
-    non_binary: "Não binário",
     not_informed: "Não informado",
-    other: "Outro",
-  }[value ?? "not_informed"] ?? "Não informado";
+  }[value];
 }
 
 function ageLabel(value: string | null, now: Date) {
@@ -465,7 +464,7 @@ export function buildPartnerClientOverview(
         ? dateFormatter.format(new Date(`${raw.identity.birthDate}T12:00:00`))
         : "Não informado",
       email: raw.identity.email,
-      genderLabel: genderLabel(raw.identity.gender),
+      biologicalSexLabel: biologicalSexLabel(raw.identity.biologicalSex),
       id: raw.identity.patientId,
       initial: raw.identity.displayName.trim().charAt(0).toUpperCase() || "C",
       name: raw.identity.displayName,

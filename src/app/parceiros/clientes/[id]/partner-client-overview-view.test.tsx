@@ -80,7 +80,7 @@ const overview: PartnerClientOverviewData = {
     avatarUrl: "/avatars/ana-ribeiro-seed.png",
     birthDateLabel: "12/05/1991",
     email: "ana@example.invalid",
-    genderLabel: "Feminino",
+    biologicalSexLabel: "Feminino",
     id: "a1000000-0000-4000-8000-000000000301",
     initial: "A",
     name: "Ana Ribeiro",
@@ -179,7 +179,7 @@ describe("PartnerClientOverviewView", () => {
     expect(screen.queryByRole("button", { name: "Ver plano" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Anamnese" })).toHaveAttribute("href", expect.stringContaining("tab=anamnese"));
     expect(screen.getByRole("link", { name: "Prescrições" })).toHaveAttribute("href", expect.stringContaining("tab=prescricoes"));
-    expect(screen.getByRole("link", { name: "Formulários" })).toHaveAttribute("href", expect.stringContaining("tab=formularios"));
+    expect(screen.getByRole("link", { name: "Formulários e respostas" })).toHaveAttribute("href", expect.stringContaining("tab=formularios"));
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByTestId("mock-client-overview-chart")).toHaveTextContent("chart:2");
     expect(screen.getByRole("link", { name: "Mensagem" })).toHaveAttribute(

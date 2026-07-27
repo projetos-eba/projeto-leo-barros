@@ -79,6 +79,7 @@ select tables_are(
     'partner_form_response_answers',
     'partner_form_responses',
     'partner_form_templates',
+    'partner_form_template_versions',
     'partner_material_events',
     'partner_material_shares',
     'partner_materials',
