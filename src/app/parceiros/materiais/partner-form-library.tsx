@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, ArrowDown, ArrowUp, Copy, Eye, FilePlus2, RotateCcw, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -46,7 +46,21 @@ function QuestionPreview({ question }: { question: PartnerFormQuestionDraft }) {
   return <div className="grid gap-2"><p className="text-sm font-semibold">{question.prompt || "Nova pergunta"}{question.required ? " *" : ""}</p>{question.helpText ? <p className="text-xs text-[#8b92a3]">{question.helpText}</p> : null}<PreviewField question={question} /></div>;
 }
 
-export function PartnerFormLibrary({ clients, templates, unavailable = false }: { clients: PartnerMaterialClient[]; templates: PartnerFormTemplate[]; unavailable?: boolean }) {
+export type PartnerFormLibraryHandle = {
+  openNewTemplate: () => void;
+};
+
+type PartnerFormLibraryProps = {
+  clients: PartnerMaterialClient[];
+  mode?: "section" | "cards";
+  templates: PartnerFormTemplate[];
+  unavailable?: boolean;
+};
+
+export const PartnerFormLibrary = forwardRef<PartnerFormLibraryHandle, PartnerFormLibraryProps>(function PartnerFormLibrary(
+  { clients, mode = "section", templates, unavailable = false },
+  ref,
+) {
   const router = useRouter();
   const [editing, setEditing] = useState<PartnerFormTemplate | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -67,7 +81,7 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
     [clients, search],
   );
 
-  function openEditor(template?: PartnerFormTemplate, duplicate = false) {
+  const openEditor = useCallback((template?: PartnerFormTemplate, duplicate = false) => {
     setEditing(template && !duplicate ? template : null);
     setTitle(template ? `${template.title}${duplicate ? " (cópia)" : ""}` : "");
     setDescription(template?.description ?? "");
@@ -75,7 +89,20 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
     setQuestions(template?.questions.length ? structuredClone(template.questions) : [blankQuestion()]);
     setEditorOpen(true);
     setPreview(false);
-  }
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    openNewTemplate: () => openEditor(),
+  }), [openEditor]);
+
+  useEffect(() => {
+    function handleOpenNewTemplate() {
+      openEditor();
+    }
+
+    window.addEventListener("partner-form-library:new-template", handleOpenNewTemplate);
+    return () => window.removeEventListener("partner-form-library:new-template", handleOpenNewTemplate);
+  }, [openEditor]);
 
   function openSend(template: PartnerFormTemplate) {
     setSendTemplate(template);
@@ -145,17 +172,16 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
     });
   }
 
-  return (
-    <section className="mb-6 rounded-[10px] border border-[#293b49] bg-[#101a24] p-4 text-white">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><p className="text-xs font-semibold uppercase tracking-wider text-[#8fcfff]">Materiais · Formulários</p><h2 className="mt-1 text-xl font-bold">Modelos de formulários</h2></div>
-        <button className="flex items-center gap-2 rounded-[8px] bg-[#168ce4] px-4 py-2 text-sm font-semibold" onClick={() => openEditor()}><FilePlus2 className="size-4" />Criar modelo</button>
-      </div>
-      {unavailable ? <p className="mt-4 rounded border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-100" role="status">Os modelos estão temporariamente indisponíveis. Tente recarregar a página.</p> : null}
+  const templateCards = (
+    <>
+      {unavailable ? <p className={cn("rounded border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-100", mode === "cards" && "col-span-full")} role="status">Os modelos estão temporariamente indisponíveis. Tente recarregar a página.</p> : null}
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {templates.map((template) => (
-          <article className="rounded-[8px] border border-[#303746] p-4" key={template.id}>
+          <article className={cn(
+            "rounded-[8px] border border-[#303746] bg-[#101a24]/78 p-4 text-white",
+            mode === "cards" && "min-h-[282px] sm:min-h-[354px]",
+          )} key={template.id}>
+            <p className="mb-2 text-[10px] font-semibold text-[#b481ff] sm:text-[11px]">Formulário</p>
             <div className="flex justify-between gap-2"><h3 className="font-semibold">{template.title}</h3><span className="text-xs text-[#8fcfff]">{template.status} · v{template.version}</span></div>
             <p className="mt-2 line-clamp-2 text-xs text-[#8b92a3]">{template.description || "Sem descrição"}</p>
             <p className="mt-2 text-xs text-[#8b92a3]">{template.questionCount} perguntas · {template.sendCount} envios · {template.responseCount} respostas</p>
@@ -168,11 +194,23 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
             </div>
           </article>
         ))}
-        {templates.length === 0 ? <p className="text-sm text-[#9eabb8]">Nenhum modelo criado.</p> : null}
-      </div>
+        {templates.length === 0 ? <p className={cn("text-sm text-[#9eabb8]", mode === "cards" && "col-span-full")}>Nenhum modelo criado.</p> : null}
+    </>
+  );
+
+  return (
+    <section className={cn(mode === "section" && "mb-6 rounded-[10px] border border-[#293b49] bg-[#101a24] p-4 text-white", mode === "cards" && "contents")}>
+      {mode === "section" ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><p className="text-xs font-semibold uppercase tracking-wider text-[#8fcfff]">Materiais · Formulários</p><h2 className="mt-1 text-xl font-bold">Modelos de formulários</h2></div>
+          <button className="flex items-center gap-2 rounded-[8px] bg-[#168ce4] px-4 py-2 text-sm font-semibold" onClick={() => openEditor()}><FilePlus2 className="size-4" />Criar modelo</button>
+        </div>
+      ) : null}
+
+      {mode === "section" ? <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{templateCards}</div> : templateCards}
 
       {editorOpen ? (
-        <div className="mt-5 grid gap-4 border-t border-[#303746] pt-5 xl:grid-cols-2">
+        <div className={cn("mt-5 grid gap-4 border-t border-[#303746] pt-5 xl:grid-cols-2", mode === "cards" && "col-span-full rounded-[8px] border border-[#293b49] bg-[#101a24]/78 p-4 text-white")}>
           <div className={cn("grid gap-3", preview && "hidden xl:grid")}>
             <input aria-label="Título do modelo" className={inputClass} placeholder="Título" value={title} onChange={(event) => setTitle(event.target.value)} />
             <textarea aria-label="Descrição do modelo" className={cn(inputClass, "min-h-20 py-2")} placeholder="Descrição" value={description} onChange={(event) => setDescription(event.target.value)} />
@@ -198,7 +236,7 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
       ) : null}
 
       {sendTemplate ? (
-        <div className="mt-5 grid gap-3 border-t border-[#303746] pt-5">
+        <div className={cn("mt-5 grid gap-3 border-t border-[#303746] pt-5", mode === "cards" && "col-span-full rounded-[8px] border border-[#293b49] bg-[#101a24]/78 p-4 text-white")}>
           <h3 className="font-bold">Enviar “{sendTemplate.title}”</h3>
           <input className={inputClass} placeholder="Buscar Clientes" value={search} onChange={(event) => setSearch(event.target.value)} />
           <button className="w-fit text-xs text-[#8fcfff]" onClick={() => setSelected(filteredClients.map((client) => client.id))}>Selecionar todos os filtrados ({filteredClients.length})</button>
@@ -211,4 +249,4 @@ export function PartnerFormLibrary({ clients, templates, unavailable = false }: 
       ) : null}
     </section>
   );
-}
+});
