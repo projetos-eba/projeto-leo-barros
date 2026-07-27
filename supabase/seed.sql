@@ -550,9 +550,6 @@ begin
   delete from public.partner_form_templates
   where partner_id = target_partner_id;
 
-  delete from public.partner_client_notes
-  where partner_id = target_partner_id;
-
   delete from public.partner_client_receivables
   where partner_id = target_partner_id;
 
@@ -880,69 +877,6 @@ begin
     ('a1000000-0000-4000-8000-000000000923', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'a1000000-0000-4000-8000-000000000911', 3, 36000, current_date + 20, 'pending', null, null),
     ('a1000000-0000-4000-8000-000000000924', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000912', 1, 29000, current_date - 5, 'pending', null, null),
     ('a1000000-0000-4000-8000-000000000925', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'a1000000-0000-4000-8000-000000000912', 2, 29000, current_date + 25, 'pending', null, null);
-
-  insert into public.partner_client_notes (
-    id,
-    partner_id,
-    patient_id,
-    note_type,
-    title,
-    body,
-    created_at
-  )
-  values
-    ('a1000000-0000-4000-8000-000000000931', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'anamnesis', 'Consulta inicial', 'Cliente relata boa adesao nos dias uteis e maior dificuldade aos fins de semana.', now() - interval '10 days'),
-    ('a1000000-0000-4000-8000-000000000932', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'prescription', 'Ajuste nutricional', 'Manter distribuicao de proteinas e revisar carboidratos no jantar.', now() - interval '4 days');
-
-  insert into public.partner_form_templates (
-    id,
-    partner_id,
-    title,
-    description,
-    questions,
-    status
-  )
-  values (
-    'a1000000-0000-4000-8000-000000000941',
-    target_partner_id,
-    'Check-in semanal',
-    'Responda antes da proxima consulta.',
-    '[{"id":"energia","label":"Como esteve sua energia nesta semana?","type":"long_text"},{"id":"dificuldade","label":"Qual foi a maior dificuldade?","type":"long_text"},{"id":"aderencia","label":"O que funcionou melhor no plano?","type":"long_text"}]'::jsonb,
-    'active'
-  );
-
-  insert into public.partner_form_assignments (
-    id,
-    partner_id,
-    template_id,
-    title_snapshot,
-    description_snapshot,
-    questions_snapshot,
-    status,
-    sent_at
-  )
-  values (
-    'a1000000-0000-4000-8000-000000000942',
-    target_partner_id,
-    'a1000000-0000-4000-8000-000000000941',
-    'Check-in semanal',
-    'Responda antes da proxima consulta.',
-    '[{"id":"energia","label":"Como esteve sua energia nesta semana?","type":"long_text"},{"id":"dificuldade","label":"Qual foi a maior dificuldade?","type":"long_text"},{"id":"aderencia","label":"O que funcionou melhor no plano?","type":"long_text"}]'::jsonb,
-    'sent',
-    now() - interval '2 days'
-  );
-
-  insert into public.partner_form_assignment_clients (
-    id,
-    assignment_id,
-    partner_id,
-    patient_id,
-    status,
-    created_at
-  )
-  values
-    ('a1000000-0000-4000-8000-000000000943', 'a1000000-0000-4000-8000-000000000942', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 'sent', now() - interval '2 days'),
-    ('a1000000-0000-4000-8000-000000000944', 'a1000000-0000-4000-8000-000000000942', target_partner_id, 'a1000000-0000-4000-8000-000000000302', 'sent', now() - interval '2 days');
 
   insert into public.partner_client_goals (
     id,

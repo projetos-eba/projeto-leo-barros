@@ -6,7 +6,7 @@ import { AccessBlocked } from "@/components/auth/access-blocked";
 import { PartnerShellRouter } from "@/components/shells/partner-shell-router";
 import { requireShellRole, getCurrentProfile } from "@/lib/auth/next-guards";
 import { partnerHasActivePlan } from "@/lib/auth/partner-plan-access";
-import { isBillingManagementPath, isPartnerSettingsPath } from "@/lib/billing/entitlement";
+import { isPartnerRouteAvailableWithoutActivePlan } from "@/lib/billing/entitlement";
 import { createClient } from "@/lib/supabase/server";
 
 type ParceirosLayoutProps = {
@@ -32,22 +32,18 @@ export default async function ParceirosLayout({ children }: ParceirosLayoutProps
   }
 
   const { profile } = await getCurrentProfile();
-  let isBillingPath = false;
-  let isSettingsPath = false;
   let hasActivePlan = false;
 
   if (profile?.role === "parceiro") {
     const headerList = await headers();
     const pathname = headerList.get("x-current-pathname") ?? "";
-    isBillingPath = isBillingManagementPath(pathname);
-    isSettingsPath = isPartnerSettingsPath(pathname);
     const supabase = await createClient();
     hasActivePlan = await partnerHasActivePlan({
       profileId: profile.id,
       supabase,
     });
 
-    if (!hasActivePlan && !isBillingPath) {
+    if (!hasActivePlan && !isPartnerRouteAvailableWithoutActivePlan(pathname)) {
       redirect("/planos");
     }
   }
