@@ -7,10 +7,6 @@ import { getCurrentProfile } from "@/lib/auth/next-guards";
 import {
   normalizeProtocolVideoUrl,
   parseProtocolTags,
-  type PartnerProtocolExerciseEquipment,
-  type PartnerProtocolExerciseLevel,
-  type PartnerProtocolExerciseMuscleGroup,
-  type PartnerProtocolExerciseObjective,
   type PartnerProtocolFoodCategory,
   type PartnerProtocolFoodSource,
 } from "@/lib/partners/protocols-metrics";
@@ -225,7 +221,7 @@ export async function updatePartnerProtocolFood(input: z.input<typeof updateFood
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_protocol_foods")
     .update({
       carbs_g: parsed.data.carbs,
@@ -246,9 +242,12 @@ export async function updatePartnerProtocolFood(input: z.input<typeof updateFood
       tags: parseProtocolTags(parsed.data.tags),
     })
     .eq("id", parsed.data.foodId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível atualizar o alimento.", ok: false };
+  if (!row) return { error: "Alimento não encontrado.", ok: false };
 
   await recordProtocolEvent(context, { eventType: "updated", foodId: parsed.data.foodId, itemType: "food" });
   revalidateProtocols();
@@ -344,7 +343,7 @@ export async function updatePartnerProtocolExercise(input: z.input<typeof update
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_protocol_exercises")
     .update({
       cadence: nullable(parsed.data.cadence),
@@ -365,9 +364,12 @@ export async function updatePartnerProtocolExercise(input: z.input<typeof update
       video_url: videoUrl,
     })
     .eq("id", parsed.data.exerciseId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível atualizar o exercício.", ok: false };
+  if (!row) return { error: "Exercício não encontrado.", ok: false };
 
   await recordProtocolEvent(context, { eventType: "updated", exerciseId: parsed.data.exerciseId, itemType: "exercise" });
   revalidateProtocols();
@@ -382,13 +384,16 @@ export async function setPartnerProtocolArchived(input: z.input<typeof archiveSc
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
   const table = parsed.data.itemType === "food" ? "partner_protocol_foods" : "partner_protocol_exercises";
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from(table)
     .update({ status: parsed.data.value ? "archived" : "active" })
     .eq("id", parsed.data.id)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível alterar o status.", ok: false };
+  if (!row) return { error: "Item não encontrado.", ok: false };
 
   await recordProtocolEvent(context, {
     eventType: parsed.data.value ? "archived" : "restored",
@@ -414,54 +419,24 @@ export async function createPartnerProtocolUseDraft(input: z.input<typeof useDra
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { data, error } = await context.supabase
-    .from("partner_protocol_use_drafts")
-    .insert({
-      exercise_id: parsed.data.itemType === "exercise" ? parsed.data.exerciseId : null,
-      food_id: parsed.data.itemType === "food" ? parsed.data.foodId : null,
-      item_type: parsed.data.itemType,
-      notes: nullable(parsed.data.notes),
-      partner_id: context.partnerId,
-      patient_id: parsed.data.patientId,
-      plan_context: parsed.data.planContext,
-    })
-    .select("id")
-    .single();
-
-  if (error) return { error: "Não foi possível registrar o uso em plano.", ok: false };
-
-  const table = parsed.data.itemType === "food" ? "partner_protocol_foods" : "partner_protocol_exercises";
   const id = parsed.data.itemType === "food" ? parsed.data.foodId : parsed.data.exerciseId;
   if (!id) return { error: "Item inválido.", ok: false };
-  const { data: currentRows } = await context.supabase
-    .from(table)
-    .select("usage_count")
-    .eq("id", id)
-    .eq("partner_id", context.partnerId)
-    .limit(1);
-  const current = Array.isArray(currentRows) && currentRows[0]?.usage_count ? Number(currentRows[0].usage_count) : 0;
-  await context.supabase
-    .from(table)
-    .update({ usage_count: current + 1 })
-    .eq("id", id)
-    .eq("partner_id", context.partnerId);
+  const { data: draftId, error } = await context.supabase.rpc("create_partner_protocol_use_draft", {
+    p_item_id: id,
+    p_item_type: parsed.data.itemType,
+    p_notes: nullable(parsed.data.notes),
+    p_patient_id: parsed.data.patientId,
+    p_plan_context: parsed.data.planContext,
+  });
+  if (error || !draftId) return { error: "Não foi possível registrar o uso em plano.", ok: false };
 
   await recordProtocolEvent(context, {
-    details: { draftId: data.id, planContext: parsed.data.planContext },
+    details: { draftId, planContext: parsed.data.planContext },
     eventType: "used",
     exerciseId: parsed.data.exerciseId,
     foodId: parsed.data.foodId,
     itemType: parsed.data.itemType,
   });
   revalidateProtocols();
-  return { id: data.id, message: "Uso registrado como rascunho.", ok: true };
+  return { id: draftId, message: "Uso registrado como rascunho.", ok: true };
 }
-
-export const protocolActionOptions = {
-  equipments: ["barra", "halteres", "maquina", "polia", "peso_corporal", "elastico", "kettlebell", "outros"] satisfies PartnerProtocolExerciseEquipment[],
-  foodCategories: ["cereal", "carne", "fruta", "gordura", "laticinio", "leguminosa", "suplemento", "verdura", "outros"] satisfies PartnerProtocolFoodCategory[],
-  foodSources: ["taco", "tbca", "custom", "imported"] satisfies PartnerProtocolFoodSource[],
-  levels: ["iniciante", "intermediario", "avancado"] satisfies PartnerProtocolExerciseLevel[],
-  muscleGroups: ["peito", "costas", "pernas", "ombros", "biceps", "triceps", "core", "gluteos", "cardio_condicionamento", "mobilidade", "outros"] satisfies PartnerProtocolExerciseMuscleGroup[],
-  objectives: ["forca", "hipertrofia", "resistencia", "mobilidade", "reabilitacao", "condicionamento"] satisfies PartnerProtocolExerciseObjective[],
-};

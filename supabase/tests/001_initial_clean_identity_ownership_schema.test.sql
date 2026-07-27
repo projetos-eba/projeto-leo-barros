@@ -52,11 +52,12 @@ select tables_are(
     'partner_client_exam_events',
     'partner_client_exam_results',
     'partner_client_goals',
-    'partner_client_notes',
+    'partner_client_anamnesis_entries',
     'partner_client_observations',
     'partner_client_plan_contracts',
     'partner_client_plan_modules',
     'partner_client_plan_subscriptions',
+    'partner_client_prescription_notes',
     'partner_client_photo_comparison_notes',
     'partner_client_photo_events',
     'partner_client_photo_items',
@@ -74,6 +75,8 @@ select tables_are(
     'partner_financial_events',
     'partner_form_assignment_clients',
     'partner_form_assignments',
+    'partner_form_questions',
+    'partner_form_response_answers',
     'partner_form_responses',
     'partner_form_templates',
     'partner_material_events',
@@ -113,6 +116,12 @@ select has_column('public', 'admins', 'profile_id', 'admins.profile_id existe');
 select has_column('public', 'patients', 'profile_id', 'patients.profile_id existe');
 select hasnt_column('public', 'patients', 'user_id', 'patients.user_id não existe');
 select has_column('public', 'partners', 'professional_type', 'partners.professional_type existe');
+select has_column('public', 'partner_client_prescription_notes', 'summary', 'prescrições possuem resumo tipado');
+select has_column('public', 'partner_form_questions', 'template_id', 'perguntas pertencem a um modelo');
+select has_column('public', 'partner_form_response_answers', 'response_id', 'respostas possuem vínculo com envio');
+select is((select relrowsecurity from pg_class where oid = 'public.partner_client_anamnesis_entries'::regclass), true, 'anamnese usa RLS');
+select is((select relrowsecurity from pg_class where oid = 'public.partner_client_prescription_notes'::regclass), true, 'prescrições usam RLS');
+select is((select relrowsecurity from pg_class where oid = 'public.partner_form_questions'::regclass), true, 'perguntas de formulário usam RLS');
 select has_column('public', 'partner_clients', 'service_scope', 'partner_clients.service_scope existe');
 select hasnt_column('public', 'partner_clients', 'is_primary', 'partner_clients.is_primary não existe');
 

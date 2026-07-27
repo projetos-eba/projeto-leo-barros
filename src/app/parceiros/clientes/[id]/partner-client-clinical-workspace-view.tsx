@@ -217,7 +217,9 @@ function AnamnesisTab({ data, patientId }: { data: PartnerClientClinicalWorkspac
           <h2 className="text-[18px] font-bold text-white">Histórico</h2>
         </div>
         <div className="mt-4 grid gap-3">
-          {data.history.length === 0 ? (
+          {data.state === "unavailable" ? (
+            <EmptyState>A anamnese está temporariamente indisponível. Os demais módulos continuam disponíveis.</EmptyState>
+          ) : data.history.length === 0 ? (
             <EmptyState>Nenhuma anamnese salva para este Cliente.</EmptyState>
           ) : data.history.map((entry) => (
             <button
@@ -325,7 +327,9 @@ function PrescriptionsTab({ data, patientId }: { data: PartnerClientClinicalWork
           <h2 className="text-[18px] font-bold text-white">Histórico de prescrições</h2>
         </div>
         <div className="mt-4 grid gap-3">
-          {data.history.length === 0 ? (
+          {data.state === "unavailable" ? (
+            <EmptyState>As prescrições estão temporariamente indisponíveis. Tente novamente em alguns instantes.</EmptyState>
+          ) : data.history.length === 0 ? (
             <EmptyState>Nenhuma prescrição salva para este Cliente.</EmptyState>
           ) : data.history.map((entry) => (
             <article className="rounded-[8px] border border-[#303746] bg-[#0b1823] p-4" key={entry.id}>
@@ -494,7 +498,9 @@ function FormsTab({ data, patientId }: { data: PartnerClientClinicalWorkspaceDat
           <h2 className="text-[18px] font-bold text-white">Respostas deste Cliente</h2>
         </div>
         <div className="mt-4 grid gap-3">
-          {assignments.length === 0 ? (
+          {data.state === "unavailable" ? (
+            <EmptyState>Os formulários estão temporariamente indisponíveis. Tente novamente em alguns instantes.</EmptyState>
+          ) : assignments.length === 0 ? (
             <EmptyState>Nenhum formulário enviado para este Cliente.</EmptyState>
           ) : assignments.map((assignment) => (
             <article className="rounded-[8px] border border-[#303746] bg-[#0b1823] p-4" key={assignment.assignmentClientId}>

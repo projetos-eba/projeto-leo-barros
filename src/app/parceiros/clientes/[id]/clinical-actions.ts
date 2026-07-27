@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getCurrentProfile } from "@/lib/auth/next-guards";
-import type { LooseDb, LooseQueryResult } from "@/lib/supabase/loose-db";
 import { createClient } from "@/lib/supabase/server";
 
 export type ClinicalActionResult = {
@@ -42,6 +41,7 @@ const prescriptionSchema = z.object({
   instructions: z.string().trim().max(1000).optional(),
   patientId: patientIdSchema,
   prescriptionType: z.enum(["general", "nutrition", "training", "supplement", "exam", "behavior"]),
+  summary: z.string().trim().max(300).optional(),
   status: z.enum(["draft", "published"]),
   title: z.string().trim().min(3).max(120),
 });
@@ -85,16 +85,6 @@ const simpleFormSchema = z.object({
   title: z.string().trim().min(2).max(140),
 });
 
-function asRows<T>(result: LooseQueryResult): T[] {
-  if (result.error) return [];
-  return Array.isArray(result.data) ? result.data as T[] : [];
-}
-
-function asSingle<T>(result: LooseQueryResult): T | null {
-  if (result.error || !result.data) return null;
-  return result.data as T;
-}
-
 function normalizeNullable(value: string | null | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
@@ -102,39 +92,23 @@ function normalizeNullable(value: string | null | undefined) {
 
 async function getPartnerContext() {
   const supabase = await createClient();
-  const db = supabase as unknown as LooseDb;
   const { profile } = await getCurrentProfile();
 
   if (!profile) {
-    return { db, error: "Sessão do parceiro indisponível.", partner: null, profileId: null };
+    return { error: "Sessão do parceiro indisponível.", partner: null, profileId: null, supabase };
   }
 
-  const partner = asSingle<PartnerRow>(
-    await db
-      .from("partners")
-      .select("id, profile_id, professional_name")
-      .eq("profile_id", profile.id)
-      .maybeSingle(),
-  );
+  const { data: partner, error: partnerError } = await supabase
+    .from("partners")
+    .select("id, profile_id, professional_name")
+    .eq("profile_id", profile.id)
+    .maybeSingle();
 
-  if (!partner) {
-    return { db, error: "Cadastro do parceiro indisponível.", partner: null, profileId: profile.id };
+  if (partnerError || !partner) {
+    return { error: "Cadastro do parceiro indisponível.", partner: null, profileId: profile.id, supabase };
   }
 
-  return { db, error: null, partner, profileId: profile.id };
-}
-
-async function nextVersion(db: LooseDb, table: string, partnerId: string, patientId: string) {
-  const rows = asRows<VersionRow>(
-    await db
-      .from(table)
-      .select("version_number")
-      .eq("partner_id", partnerId)
-      .eq("patient_id", patientId)
-      .order("version_number", { ascending: false })
-      .limit(1),
-  );
-  return (rows[0]?.version_number ?? 0) + 1;
+  return { error: null, partner, profileId: profile.id, supabase };
 }
 
 function revalidateClient(patientId: string) {
@@ -150,35 +124,16 @@ export async function saveClientAnamnesisEntry(
   const context = await getPartnerContext();
   if (!context.partner) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  await context.db
-    .from("partner_client_anamnesis_entries")
-    .update({ is_current: false })
-    .eq("partner_id", context.partner.id)
-    .eq("patient_id", parsed.data.patientId)
-    .eq("is_current", true);
-
-  const version = await nextVersion(context.db, "partner_client_anamnesis_entries", context.partner.id, parsed.data.patientId);
-  const result = await context.db
-    .from("partner_client_anamnesis_entries")
-    .insert({
-      content: parsed.data.content,
-      created_by_profile_id: context.profileId,
-      is_current: true,
-      partner_id: context.partner.id,
-      patient_id: parsed.data.patientId,
-      sections: {},
-      summary: normalizeNullable(parsed.data.summary),
-      title: parsed.data.title,
-      version_number: version,
-    })
-    .select("id")
-    .single();
-  const row = asSingle<IdRow>(result);
-
-  if (!row) return { error: "Não foi possível salvar a anamnese.", ok: false };
+  const { data: entryId, error } = await context.supabase.rpc("save_partner_client_anamnesis_entry", {
+    p_content: parsed.data.content,
+    p_patient_id: parsed.data.patientId,
+    p_summary: parsed.data.summary ?? "",
+    p_title: parsed.data.title,
+  });
+  if (error || !entryId) return { error: "Não foi possível salvar a anamnese.", ok: false };
 
   revalidateClient(parsed.data.patientId);
-  return { id: row.id, message: "Anamnese salva.", ok: true };
+  return { id: entryId, message: "Anamnese salva.", ok: true };
 }
 
 export async function saveClientPrescriptionNote(
@@ -190,31 +145,19 @@ export async function saveClientPrescriptionNote(
   const context = await getPartnerContext();
   if (!context.partner) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const version = await nextVersion(context.db, "partner_client_prescription_notes", context.partner.id, parsed.data.patientId);
-  const status = parsed.data.status;
-  const result = await context.db
-    .from("partner_client_prescription_notes")
-    .insert({
-      archived_at: null,
-      content: parsed.data.content,
-      created_by_profile_id: context.profileId,
-      instructions: normalizeNullable(parsed.data.instructions),
-      partner_id: context.partner.id,
-      patient_id: parsed.data.patientId,
-      prescription_type: parsed.data.prescriptionType,
-      published_at: status === "published" ? new Date().toISOString() : null,
-      status,
-      title: parsed.data.title,
-      version_number: version,
-    })
-    .select("id")
-    .single();
-  const row = asSingle<IdRow>(result);
-
-  if (!row) return { error: "Não foi possível salvar a prescrição.", ok: false };
+  const { data: noteId, error } = await context.supabase.rpc("save_partner_client_prescription_note", {
+    p_content: parsed.data.content,
+    p_instructions: parsed.data.instructions ?? "",
+    p_patient_id: parsed.data.patientId,
+    p_prescription_type: parsed.data.prescriptionType,
+    p_status: parsed.data.status,
+    p_summary: normalizeNullable(parsed.data.summary) ?? parsed.data.content.split(/\n+/)[0]?.slice(0, 300) ?? "",
+    p_title: parsed.data.title,
+  });
+  if (error || !noteId) return { error: "Não foi possível salvar a prescrição.", ok: false };
 
   revalidateClient(parsed.data.patientId);
-  return { id: row.id, message: "Prescrição salva.", ok: true };
+  return { id: noteId, message: "Prescrição salva.", ok: true };
 }
 
 export async function setClientPrescriptionStatus(
@@ -227,7 +170,7 @@ export async function setClientPrescriptionStatus(
   if (!context.partner) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
   const status = parsed.data.status;
-  const result = await context.db
+  const { data: row, error } = await context.supabase
     .from("partner_client_prescription_notes")
     .update({
       archived_at: status === "archived" ? new Date().toISOString() : null,
@@ -240,7 +183,7 @@ export async function setClientPrescriptionStatus(
     .select("id")
     .maybeSingle();
 
-  if (!asSingle<IdRow>(result)) return { error: "Não foi possível atualizar a prescrição.", ok: false };
+  if (error || !row) return { error: "Não foi possível atualizar a prescrição.", ok: false };
 
   revalidateClient(parsed.data.patientId);
   return { message: "Prescrição atualizada.", ok: true };
@@ -255,7 +198,7 @@ export async function createAndSendClientForm(
   const context = await getPartnerContext();
   if (!context.partner) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const templateResult = await context.db
+  const templateResult = await context.supabase
     .from("partner_form_templates")
     .insert({
       created_by_profile_id: context.profileId,
@@ -266,8 +209,8 @@ export async function createAndSendClientForm(
     })
     .select("id")
     .single();
-  const template = asSingle<IdRow>(templateResult);
-  if (!template) return { error: "Não foi possível criar o formulário.", ok: false };
+  const template = templateResult.data;
+  if (templateResult.error || !template) return { error: "Não foi possível criar o formulário.", ok: false };
 
   const questionRows = parsed.data.questions.map((question, index) => ({
     help_text: normalizeNullable(question.helpText),
@@ -281,10 +224,10 @@ export async function createAndSendClientForm(
     sort_order: index,
     template_id: template.id,
   }));
-  const questionResult = await context.db.from("partner_form_questions").insert(questionRows);
+  const questionResult = await context.supabase.from("partner_form_questions").insert(questionRows);
   if (questionResult.error) return { error: "Não foi possível salvar as perguntas.", ok: false };
 
-  const assignmentResult = await context.db
+  const assignmentResult = await context.supabase
     .from("partner_form_assignments")
     .insert({
       created_by_profile_id: context.profileId,
@@ -297,11 +240,11 @@ export async function createAndSendClientForm(
     })
     .select("id")
     .single();
-  const assignment = asSingle<IdRow>(assignmentResult);
-  if (!assignment) return { error: "Não foi possível enviar o formulário.", ok: false };
+  const assignment = assignmentResult.data;
+  if (assignmentResult.error || !assignment) return { error: "Não foi possível enviar o formulário.", ok: false };
 
   const uniquePatientIds = Array.from(new Set(parsed.data.patientIds));
-  const assignedResult = await context.db.from("partner_form_assignment_clients").insert(
+  const assignedResult = await context.supabase.from("partner_form_assignment_clients").insert(
     uniquePatientIds.map((patientId) => ({
       assignment_id: assignment.id,
       partner_id: context.partner?.id,
