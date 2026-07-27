@@ -84,7 +84,7 @@ describe("materials metrics", () => {
 
   it("calcula métricas e agrega destinatários ativos", () => {
     const data = buildPartnerMaterialsData(raw);
-    expect(data.metrics).toEqual({ favorites: 1, forms: 1, shared: 1, total: 2 });
+    expect(data.metrics).toEqual({ archived: 0, favorites: 1, shared: 1, total: 2 });
     expect(data.materials[0].shareCount).toBe(1);
     expect(data.materials[0].sizeLabel).toBe("2,3 MB");
     expect(data.materials[1].embedUrl).toBe("https://www.youtube.com/embed/abc123");

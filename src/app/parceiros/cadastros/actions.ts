@@ -424,9 +424,9 @@ export async function createPartnerProtocolUseDraft(input: z.input<typeof useDra
   const { data: draftId, error } = await context.supabase.rpc("create_partner_protocol_use_draft", {
     p_item_id: id,
     p_item_type: parsed.data.itemType,
-    p_notes: nullable(parsed.data.notes),
-    p_patient_id: parsed.data.patientId,
-    p_plan_context: parsed.data.planContext,
+    p_notes: nullable(parsed.data.notes) ?? undefined,
+    p_patient_id: parsed.data.patientId!,
+    p_plan_context: parsed.data.planContext!,
   });
   if (error || !draftId) return { error: "Não foi possível registrar o uso em plano.", ok: false };
 

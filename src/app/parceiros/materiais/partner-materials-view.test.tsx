@@ -84,7 +84,7 @@ const data: PartnerMaterialsData = {
       updatedAt: "2026-06-30T11:00:00.000Z",
     },
   ],
-  metrics: { favorites: 1, forms: 0, shared: 0, total: 2 },
+  metrics: { archived: 0, favorites: 1, shared: 0, total: 2 },
   partner: { id: "partner-1", professionalName: "Antonio Ferrari", professionalType: "nutricionista" },
 };
 

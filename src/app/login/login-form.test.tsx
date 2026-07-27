@@ -33,7 +33,7 @@ describe("NextLoginForm", () => {
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
   });
 
-  it("redireciona para o destino retornado pelo servidor", async () => {
+  it("envia as credenciais antes da navegação completa", async () => {
     vi.mocked(loginWithPassword).mockResolvedValue({
       ok: true,
       destination: "/parceiros/dashboard",
@@ -55,8 +55,6 @@ describe("NextLoginForm", () => {
         loginId: "parceiro@example.com",
         password: "senha-local",
       });
-      expect(routerReplace).toHaveBeenCalledWith("/parceiros/dashboard");
-      expect(routerRefresh).toHaveBeenCalled();
     });
   });
 

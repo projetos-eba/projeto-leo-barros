@@ -2,6 +2,7 @@ export type AssessmentFormula = "mifflin" | "harris_benedict" | "cunningham" | "
 export type AssessmentActivityLevel = "sedentary" | "light" | "moderate" | "active" | "athlete";
 export type AssessmentMethod = "pollock_7" | "pollock_3" | "bioimpedance" | "manual";
 export type AssessmentGender = "female" | "male" | "non_binary" | "other" | "not_informed" | null;
+export type AssessmentBiologicalSex = "female" | "male" | "not_informed";
 
 export type PartnerClientAssessmentRawData = {
   assessments: PartnerClientAssessmentRawAssessment[];
@@ -17,6 +18,7 @@ export type PartnerClientAssessmentRawData = {
     displayName: string;
     email: string;
     gender: AssessmentGender;
+    biologicalSex: AssessmentBiologicalSex;
     objective: string | null;
     patientId: string;
     serviceScopes: string[];
@@ -73,7 +75,7 @@ export type CalorieCalculationInput = {
   age: number;
   bodyFatPercentage: number | null;
   formula: AssessmentFormula;
-  gender: AssessmentGender;
+  biologicalSex: AssessmentBiologicalSex;
   heightCm: number;
   targetDays: number;
   targetWeightKg: number | null;
@@ -116,9 +118,12 @@ export type PartnerClientAssessmentsData = {
   };
   client: {
     age: number | null;
+    birthDate: string | null;
     gender: AssessmentGender;
+    biologicalSex: AssessmentBiologicalSex;
     id: string;
     name: string;
+    objective: string | null;
   };
   circumferences: {
     availableMetrics: Array<{
@@ -172,6 +177,7 @@ export type PartnerClientAssessmentsData = {
     weight: AssessmentKpi;
   };
   latestAssessment: PartnerClientAssessment | null;
+  formulaEligibility: Record<AssessmentFormula, { status: "available" | "invalid_inputs" | "missing_inputs"; reason: string | null }>;
 };
 
 export type PartnerClientAssessment = Omit<PartnerClientAssessmentRawAssessment, "calculations" | "circumferences"> & {
@@ -355,8 +361,29 @@ function bmiClassification(bmi: number) {
   return "Obesidade III";
 }
 
-function normalizeGender(gender: AssessmentGender) {
-  return gender === "female" || gender === "male" ? gender : "male";
+export function getFormulaEligibility(input: Omit<CalorieCalculationInput, "formula">): PartnerClientAssessmentsData["formulaEligibility"] {
+  const invalidCommon = !Number.isFinite(input.age) || input.age <= 0
+    || !Number.isFinite(input.heightCm) || input.heightCm < 80
+    || !Number.isFinite(input.weightKg) || input.weightKg < 20
+    || !Number.isFinite(input.targetDays) || input.targetDays < 7;
+  if (invalidCommon) {
+    return Object.fromEntries((Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => [
+      formula,
+      { status: "invalid_inputs", reason: "Revise idade, peso, altura e prazo da avaliação." },
+    ])) as PartnerClientAssessmentsData["formulaEligibility"];
+  }
+  const hasBodyComposition = input.bodyFatPercentage !== null;
+  const validBodyComposition = !hasBodyComposition || (Number.isFinite(input.bodyFatPercentage) && input.bodyFatPercentage! >= 1 && input.bodyFatPercentage! <= 80);
+  return {
+    mifflin: input.biologicalSex === "not_informed" ? { status: "missing_inputs", reason: "Informe o sexo biológico para esta fórmula." } : { status: "available", reason: null },
+    harris_benedict: input.biologicalSex === "not_informed" ? { status: "missing_inputs", reason: "Informe o sexo biológico para esta fórmula." } : { status: "available", reason: null },
+    cunningham: !validBodyComposition
+      ? { status: "invalid_inputs", reason: "Revise o percentual de gordura da avaliação." }
+      : hasBodyComposition
+        ? { status: "available", reason: null }
+        : { status: "missing_inputs", reason: "Informe a composição corporal para esta fórmula." },
+    tinsley: { status: "available", reason: null },
+  };
 }
 
 export function calculateBmi(weightKg: number, heightCm: number) {
@@ -374,22 +401,25 @@ export function calculateFatMass(weightKg: number, bodyFatPercentage: number | n
 }
 
 export function calculateBmr(input: CalorieCalculationInput) {
-  const gender = normalizeGender(input.gender);
-  const leanMassKg = calculateLeanMass(input.weightKg, input.bodyFatPercentage) ?? input.weightKg * 0.78;
+  const sex = input.biologicalSex;
+  const leanMassKg = calculateLeanMass(input.weightKg, input.bodyFatPercentage);
 
   if (input.formula === "mifflin") {
-    const offset = gender === "female" ? -161 : 5;
+    if (sex === "not_informed") throw new Error("biological_sex_required");
+    const offset = sex === "female" ? -161 : 5;
     return roundInt(10 * input.weightKg + 6.25 * input.heightCm - 5 * input.age + offset);
   }
 
   if (input.formula === "harris_benedict") {
-    if (gender === "female") {
+    if (sex === "not_informed") throw new Error("biological_sex_required");
+    if (sex === "female") {
       return roundInt(447.593 + 9.247 * input.weightKg + 3.098 * input.heightCm - 4.33 * input.age);
     }
     return roundInt(88.362 + 13.397 * input.weightKg + 4.799 * input.heightCm - 5.677 * input.age);
   }
 
   if (input.formula === "cunningham") {
+    if (leanMassKg === null) throw new Error("body_composition_required");
     return roundInt(500 + 22 * leanMassKg);
   }
 
@@ -496,15 +526,16 @@ export function buildPartnerClientAssessments(
         age,
         bodyFatPercentage: latest.bodyFatPercentage,
         formula: "mifflin",
-        gender: raw.identity.gender,
+        biologicalSex: raw.identity.biologicalSex,
         heightCm: latest.heightCm,
         targetDays,
         targetWeightKg: targetWeight,
         weightKg: latest.weightKg,
       }
     : null;
+  const formulaEligibility = calorieInput ? getFormulaEligibility(calorieInput) : Object.fromEntries((Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => [formula, { status: "missing_inputs", reason: "Registre uma avaliação e a data de nascimento." }])) as PartnerClientAssessmentsData["formulaEligibility"];
   const comparison = calorieInput
-    ? (Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => calculateCalories({ ...calorieInput, formula }))
+    ? (Object.keys(formulaLabels) as AssessmentFormula[]).filter((formula) => formulaEligibility[formula].status === "available").map((formula) => calculateCalories({ ...calorieInput, formula }))
     : [];
   const selectedFormula =
     raw.calculations.find((calculation) => calculation.status === "applied")?.formula ??
@@ -582,9 +613,12 @@ export function buildPartnerClientAssessments(
     },
     client: {
       age,
+      birthDate: raw.identity.birthDate,
       gender: raw.identity.gender,
+      biologicalSex: raw.identity.biologicalSex,
       id: raw.identity.patientId,
       name: raw.identity.displayName,
+      objective: raw.identity.objective,
     },
     circumferences: {
       availableMetrics: availableMetricKeys.map((key) => ({ key, label: circumferenceLabels[key] ?? key })),
@@ -652,5 +686,6 @@ export function buildPartnerClientAssessments(
       },
     },
     latestAssessment: latest,
+    formulaEligibility,
   };
 }
