@@ -8,6 +8,7 @@ import {
   BookOpen,
   Check,
   ChevronDown,
+  FilePlus2,
   FileImage,
   FileSpreadsheet,
   FileText,
@@ -28,6 +29,7 @@ import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -52,6 +54,7 @@ import {
 
 type PartnerMaterialsViewProps = {
   data: PartnerMaterialsData;
+  formsActiveCount?: number;
   formsSection?: ReactNode;
 };
 
@@ -67,6 +70,7 @@ const categories: Array<"all" | PartnerMaterialCategory> = [
   "treino",
   "medico",
   "educativo",
+  "formularios",
   "outros",
 ];
 
@@ -253,7 +257,7 @@ function MaterialCard({
   );
 }
 
-export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsViewProps) {
+export function PartnerMaterialsView({ data, formsActiveCount = 0, formsSection }: PartnerMaterialsViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
@@ -264,6 +268,7 @@ export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsVie
   const [sort, setSort] = useState<SortMode>("recent");
   const [view, setView] = useState<ViewMode>("grid");
   const [newOpen, setNewOpen] = useState(false);
+  const [newMenuOpen, setNewMenuOpen] = useState(false);
   const [newKind, setNewKind] = useState<NewMaterialKind>("file");
   const [file, setFile] = useState<File | null>(null);
   const [shareMaterial, setShareMaterial] = useState<PartnerMaterial | null>(null);
@@ -290,6 +295,13 @@ export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsVie
     const query = shareSearch.trim().toLocaleLowerCase("pt-BR");
     return data.clients.filter((client) => !query || `${client.displayName} ${client.email}`.toLocaleLowerCase("pt-BR").includes(query));
   }, [data.clients, shareSearch]);
+
+  const showForms = Boolean(formsSection) && (category === "all" || category === "formularios");
+
+  function openNewFormTemplate() {
+    setNewMenuOpen(false);
+    window.dispatchEvent(new Event("partner-form-library:new-template"));
+  }
 
   function runAction(action: () => Promise<{ error?: string; message?: string; ok: boolean }>) {
     startTransition(async () => {
@@ -414,16 +426,26 @@ export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsVie
             <h1 className="text-[24px] font-bold leading-tight sm:text-[30px]">Materiais</h1>
             <p className="mt-1 text-[12px] text-[#8c9aa6] sm:mt-2 sm:text-[13px]">Organize conteúdos de apoio e compartilhe com seus Clientes.</p>
           </div>
-          <button className="flex h-9 items-center gap-1.5 rounded-[8px] bg-[#168ce4] px-3 text-[12px] font-semibold text-white hover:bg-[#269cf0] sm:h-11 sm:gap-2 sm:px-5 sm:text-[13px]" onClick={() => setNewOpen(true)} type="button">
-            <Plus className="size-4" /> Novo material
-          </button>
+          <Popover open={newMenuOpen} onOpenChange={setNewMenuOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex h-9 items-center gap-1.5 rounded-[8px] bg-[#168ce4] px-3 text-[12px] font-semibold text-white hover:bg-[#269cf0] sm:h-11 sm:gap-2 sm:px-5 sm:text-[13px]" type="button">
+                <Plus className="size-4" /> Novo material
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 border-[#2c4353] bg-[#101d27] p-1 text-white">
+              <button className="flex w-full items-center gap-2 rounded-[7px] px-3 py-2.5 text-left text-[13px] hover:bg-[#192c39]" onClick={() => { setNewMenuOpen(false); setNewOpen(true); }} type="button">
+                <FileText className="size-4 text-[#5eb5ff]" /> Conteúdo
+              </button>
+              <button className="flex w-full items-center gap-2 rounded-[7px] px-3 py-2.5 text-left text-[13px] hover:bg-[#192c39]" onClick={openNewFormTemplate} type="button">
+                <FilePlus2 className="size-4 text-[#b481ff]" /> Formulário
+              </button>
+            </PopoverContent>
+          </Popover>
         </header>
-
-        <div className="mt-6">{formsSection}</div>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-3 xl:grid-cols-4">
           <MetricCard icon={FileText} label="Materiais ativos" tone="bg-[#123d60] text-[#5eb5ff]" value={data.metrics.total} />
-          <MetricCard icon={Send} label="Compartilhamentos ativos" tone="bg-[#123d2d] text-[#54d18a]" value={data.metrics.shared} />
+          <MetricCard icon={FilePlus2} label="Formulários ativos" tone="bg-[#123d2d] text-[#54d18a]" value={formsActiveCount} />
           <MetricCard icon={Archive} label="Materiais arquivados" tone="bg-[#302052] text-[#ae88ff]" value={data.metrics.archived} />
           <MetricCard icon={Star} label="Favoritos" tone="bg-[#443818] text-[#f5c542]" value={data.metrics.favorites} />
         </div>
@@ -459,8 +481,9 @@ export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsVie
           </div>
         </Panel>
 
-        {visibleMaterials.length ? (
+        {visibleMaterials.length || showForms ? (
           <div className={cn("mt-3 gap-2 sm:mt-4 sm:gap-3", view === "grid" ? "grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" : "flex flex-col")}>
+            {showForms ? formsSection : null}
             {visibleMaterials.map((material) => (
               <MaterialCard key={material.id} layout={view} material={material} onArchive={handleArchive} onEdit={setEditMaterial} onFavorite={handleFavorite} onShare={openShare} />
             ))}

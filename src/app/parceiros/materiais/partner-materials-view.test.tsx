@@ -108,6 +108,7 @@ describe("PartnerMaterialsView", () => {
     expect(screen.getByRole("heading", { name: "Materiais" })).toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.queryByText("Cardio")).not.toBeInTheDocument();
+    expect(screen.getByText("Formulários ativos")).toBeInTheDocument();
     expect(screen.getByText("Plano Alimentar Low Carb")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Treino" }));
@@ -121,6 +122,7 @@ describe("PartnerMaterialsView", () => {
   it("cria vídeo por link e favorita um material", async () => {
     render(<PartnerMaterialsView data={data} />);
     fireEvent.click(screen.getByRole("button", { name: "Novo material" }));
+    fireEvent.click(screen.getByRole("button", { name: "Conteúdo" }));
     fireEvent.click(screen.getByRole("button", { name: "Vídeo por link" }));
     fireEvent.change(screen.getByPlaceholderText("Ex.: Guia alimentar inicial"), { target: { value: "Aula de mobilidade" } });
     fireEvent.change(screen.getByPlaceholderText("https://youtube.com/watch?v=..."), { target: { value: "https://youtu.be/abc123" } });
