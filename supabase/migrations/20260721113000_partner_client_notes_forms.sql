@@ -1,3 +1,17 @@
+-- Superseded by 20260721100000_partner_client_notes_forms.sql.
+--
+-- This migration was originally committed after the newer, normalized clinical
+-- schema despite its later timestamp. Keeping the old DDL here caused clean
+-- resets to recreate the form tables with an incompatible shape. Environments
+-- that already applied this version are reconciled by
+-- 20260726130000_reconcile_partner_clinical_workspace.sql.
+do $$
+begin
+  raise notice 'Legacy partner clinical schema is reconciled by a later migration.';
+end
+$$;
+
+/*
 create table public.partner_client_notes (
   id uuid primary key default gen_random_uuid(),
   partner_id uuid not null references public.partners(id) on delete restrict,
@@ -179,6 +193,7 @@ using (patient_id = public.current_active_patient_id());
 create policy partner_form_responses_patient_insert
 on public.partner_form_responses for insert to authenticated
 with check (patient_id = public.current_active_patient_id());
+*/
 
 create policy partner_form_responses_patient_update
 on public.partner_form_responses for update to authenticated

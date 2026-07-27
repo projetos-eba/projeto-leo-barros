@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { LoginView, type LoginCredentials } from "@/components/auth/login-view";
@@ -33,7 +32,6 @@ export function NextLoginForm({
   supportText = "Clientes acessam somente contas ja vinculadas por um parceiro",
   title = "Login do Cliente",
 }: NextLoginFormProps) {
-  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialErrorMessage,
   );
@@ -56,8 +54,11 @@ export function NextLoginForm({
         return;
       }
 
-      router.replace(result.destination);
-      router.refresh();
+      // A full navigation happens only after the Server Action response has
+      // applied Supabase's session cookies. Client-side RSC navigation here
+      // can otherwise race the Set-Cookie response and render a protected
+      // partner page with the previous anonymous request cookies.
+      window.location.assign(result.destination);
     });
   }
 
@@ -82,4 +83,3 @@ export function NextLoginForm({
     />
   );
 }
-

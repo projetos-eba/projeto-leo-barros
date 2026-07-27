@@ -194,7 +194,7 @@ export async function updatePartnerMaterial(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_materials")
     .update({
       category: parsed.data.category,
@@ -203,9 +203,12 @@ export async function updatePartnerMaterial(
       title: parsed.data.title,
     })
     .eq("id", parsed.data.materialId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível atualizar o material.", ok: false };
+  if (!row) return { error: "Material não encontrado.", ok: false };
 
   await recordEvent(context, parsed.data.materialId, "updated");
   revalidateMaterials(parsed.data.materialId);
@@ -221,13 +224,16 @@ export async function setPartnerMaterialFavorite(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_materials")
     .update({ is_favorite: parsed.data.value })
     .eq("id", parsed.data.materialId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível atualizar o favorito.", ok: false };
+  if (!row) return { error: "Material não encontrado.", ok: false };
 
   await recordEvent(context, parsed.data.materialId, parsed.data.value ? "favorited" : "unfavorited");
   revalidateMaterials(parsed.data.materialId);
@@ -243,13 +249,16 @@ export async function setPartnerMaterialArchived(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_materials")
     .update({ status: parsed.data.value ? "archived" : "active" })
     .eq("id", parsed.data.materialId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível alterar o status.", ok: false };
+  if (!row) return { error: "Material não encontrado.", ok: false };
 
   await recordEvent(context, parsed.data.materialId, parsed.data.value ? "archived" : "restored");
   revalidateMaterials(parsed.data.materialId);
@@ -276,7 +285,7 @@ export async function sharePartnerMaterial(
     status: "linked" as const,
   }));
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_material_shares")
     .upsert(rows, { onConflict: "material_id,patient_id" });
 
@@ -307,9 +316,12 @@ export async function revokePartnerMaterialShare(
     .update({ revoked_at: new Date().toISOString(), status: "revoked" })
     .eq("material_id", parsed.data.materialId)
     .eq("patient_id", parsed.data.patientId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
   if (error) return { error: "Não foi possível revogar o compartilhamento.", ok: false };
+  if (!row) return { error: "Compartilhamento não encontrado.", ok: false };
 
   await recordEvent(context, parsed.data.materialId, "revoked", parsed.data.patientId);
   revalidateMaterials(parsed.data.materialId);

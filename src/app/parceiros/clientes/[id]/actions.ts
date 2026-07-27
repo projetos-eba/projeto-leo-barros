@@ -2209,11 +2209,11 @@ export async function addClientDietMealItem(
       .eq("plan_context", "dieta");
   }
 
-  await context.supabase
-    .from("partner_protocol_foods")
-    .update({ usage_count: Number((food as { usage_count?: number }).usage_count ?? 0) + 1 })
-    .eq("id", food.id)
-    .eq("partner_id", context.partnerId);
+  const { data: usageCount, error: usageError } = await context.supabase.rpc("increment_partner_protocol_usage", {
+    p_item_id: food.id,
+    p_item_type: "food",
+  });
+  if (usageError || usageCount === null) return { error: "Alimento adicionado, mas não foi possível confirmar o uso na base.", ok: false };
 
   const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
   await recordDietEvent(context, {

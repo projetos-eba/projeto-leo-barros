@@ -7,6 +7,7 @@ import { getCurrentProfile } from "@/lib/auth/next-guards";
 import { createClient } from "@/lib/supabase/server";
 
 export type PartnerAgendaActionResult = {
+  code?: "success" | "validation_error" | "not_found" | "forbidden" | "unavailable" | "unexpected_error";
   error?: string;
   message?: string;
   ok: boolean;
@@ -109,14 +110,14 @@ export async function createPartnerAgendaAppointment(
   input: z.input<typeof appointmentSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = appointmentSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise os dados do compromisso.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Revise os dados do compromisso.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
   const { endsAt, startsAt } = buildPeriod(parsed.data.startsAt, parsed.data.durationMinutes);
   if (startsAt.getTime() <= Date.now()) {
-    return { error: "Escolha uma data futura para o compromisso.", ok: false };
+    return { code: "validation_error", error: "Escolha uma data futura para o compromisso.", ok: false };
   }
 
   const { error } = await context.supabase.from("partner_client_appointments").insert({
@@ -133,23 +134,23 @@ export async function createPartnerAgendaAppointment(
     title: parsed.data.title,
   });
 
-  if (error) return { error: "Não foi possível criar o compromisso.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível criar o compromisso.", ok: false };
 
   revalidateAgenda(parsed.data.patientId);
-  return { message: "Compromisso salvo.", ok: true };
+  return { code: "success", message: "Compromisso salvo.", ok: true };
 }
 
 export async function updatePartnerAgendaAppointment(
   input: z.input<typeof updateAppointmentSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = updateAppointmentSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise os dados do compromisso.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Revise os dados do compromisso.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
   const { endsAt, startsAt } = buildPeriod(parsed.data.startsAt, parsed.data.durationMinutes);
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_client_appointments")
     .update({
       appointment_type: parsed.data.appointmentType,
@@ -164,51 +165,57 @@ export async function updatePartnerAgendaAppointment(
       title: parsed.data.title,
     })
     .eq("id", parsed.data.appointmentId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) return { error: "Não foi possível atualizar o compromisso.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível atualizar o compromisso.", ok: false };
+  if (!row) return { code: "not_found", error: "Compromisso não encontrado.", ok: false };
 
   revalidateAgenda(parsed.data.patientId);
-  return { message: "Compromisso atualizado.", ok: true };
+  return { code: "success", message: "Compromisso atualizado.", ok: true };
 }
 
 export async function setPartnerAgendaAppointmentStatus(
   input: z.input<typeof appointmentStatusUpdateSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = appointmentStatusUpdateSchema.safeParse(input);
-  if (!parsed.success) return { error: "Compromisso inválido.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Compromisso inválido.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_client_appointments")
     .update({ status: parsed.data.status })
     .eq("id", parsed.data.appointmentId)
     .eq("partner_id", context.partnerId)
-    .eq("patient_id", parsed.data.patientId);
+    .eq("patient_id", parsed.data.patientId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) return { error: "Não foi possível atualizar o status.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível atualizar o status.", ok: false };
+  if (!row) return { code: "not_found", error: "Compromisso não encontrado.", ok: false };
 
   revalidateAgenda(parsed.data.patientId);
-  return { message: "Status atualizado.", ok: true };
+  return { code: "success", message: "Status atualizado.", ok: true };
 }
 
 export async function reschedulePartnerAgendaAppointment(
   input: z.input<typeof rescheduleAppointmentSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = rescheduleAppointmentSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise a nova data do compromisso.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Revise a nova data do compromisso.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
   const { endsAt, startsAt } = buildPeriod(parsed.data.startsAt, parsed.data.durationMinutes);
   if (startsAt.getTime() <= Date.now()) {
-    return { error: "Escolha uma data futura para remarcar.", ok: false };
+    return { code: "validation_error", error: "Escolha uma data futura para remarcar.", ok: false };
   }
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_client_appointments")
     .update({
       ends_at: endsAt.toISOString(),
@@ -217,26 +224,29 @@ export async function reschedulePartnerAgendaAppointment(
     })
     .eq("id", parsed.data.appointmentId)
     .eq("partner_id", context.partnerId)
-    .eq("patient_id", parsed.data.patientId);
+    .eq("patient_id", parsed.data.patientId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) return { error: "Não foi possível remarcar.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível remarcar.", ok: false };
+  if (!row) return { code: "not_found", error: "Compromisso não encontrado.", ok: false };
 
   revalidateAgenda(parsed.data.patientId);
-  return { message: "Compromisso remarcado.", ok: true };
+  return { code: "success", message: "Compromisso remarcado.", ok: true };
 }
 
 export async function createPartnerCalendarBlock(
   input: z.input<typeof blockSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = blockSchema.safeParse(input);
-  if (!parsed.success) return { error: "Revise os dados do bloqueio.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Revise os dados do bloqueio.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
   const { endsAt, startsAt } = buildPeriod(parsed.data.startsAt, parsed.data.durationMinutes);
   if (startsAt.getTime() <= Date.now()) {
-    return { error: "Escolha uma data futura para o bloqueio.", ok: false };
+    return { code: "validation_error", error: "Escolha uma data futura para o bloqueio.", ok: false };
   }
 
   const { error } = await context.supabase.from("partner_calendar_blocks").insert({
@@ -248,29 +258,32 @@ export async function createPartnerCalendarBlock(
     title: parsed.data.title,
   });
 
-  if (error) return { error: "Não foi possível bloquear o horário.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível bloquear o horário.", ok: false };
 
   revalidateAgenda();
-  return { message: "Horário bloqueado.", ok: true };
+  return { code: "success", message: "Horário bloqueado.", ok: true };
 }
 
 export async function setPartnerCalendarBlockCanceled(
   input: z.input<typeof blockStatusSchema>,
 ): Promise<PartnerAgendaActionResult> {
   const parsed = blockStatusSchema.safeParse(input);
-  if (!parsed.success) return { error: "Bloqueio inválido.", ok: false };
+  if (!parsed.success) return { code: "validation_error", error: "Bloqueio inválido.", ok: false };
 
   const context = await getPartnerContext();
-  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  if (!context.partnerId) return { code: "forbidden", error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
+  const { data: row, error } = await context.supabase
     .from("partner_calendar_blocks")
     .update({ status: parsed.data.canceled ? "canceled" : "active" })
     .eq("id", parsed.data.blockId)
-    .eq("partner_id", context.partnerId);
+    .eq("partner_id", context.partnerId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) return { error: "Não foi possível atualizar o bloqueio.", ok: false };
+  if (error) return { code: "unavailable", error: "Não foi possível atualizar o bloqueio.", ok: false };
+  if (!row) return { code: "not_found", error: "Bloqueio não encontrado.", ok: false };
 
   revalidateAgenda();
-  return { message: parsed.data.canceled ? "Bloqueio cancelado." : "Bloqueio reaberto.", ok: true };
+  return { code: "success", message: parsed.data.canceled ? "Bloqueio cancelado." : "Bloqueio reaberto.", ok: true };
 }
