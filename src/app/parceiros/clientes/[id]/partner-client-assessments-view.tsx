@@ -70,6 +70,7 @@ import { cn } from "@/lib/utils";
 
 import {
   applyClientCalorieCalculation,
+  completePartnerClientProfile,
   saveClientAssessment,
   saveClientCalorieCalculation,
 } from "./actions";
@@ -131,13 +132,14 @@ const formulaNotes: Record<AssessmentFormula, string> = {
   tinsley: "Alternativa por peso corporal para rotina esportiva.",
 };
 
-function Panel({ children, className }: { children: ReactNode; className?: string }) {
+function Panel({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   return (
     <section
       className={cn(
         "min-w-0 rounded-[14px] border border-[rgba(65,80,92,0.71)] bg-[linear-gradient(153deg,rgba(42,63,79,0.35)_8%,rgba(96,144,181,0)_79%)] shadow-[0_2px_4px_rgba(0,0,0,0.07)]",
         className,
       )}
+      id={id}
     >
       {children}
     </section>
@@ -775,6 +777,11 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   const [circumferenceMode, setCircumferenceMode] = useState<"general" | "region" | "radar">("general");
   const [pendingAction, setPendingAction] = useState<"save" | "apply" | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [profileDraft, setProfileDraft] = useState({
+    biologicalSex: assessments.client.biologicalSex,
+    birthDate: assessments.client.birthDate ?? "",
+    objective: assessments.client.objective ?? "",
+  });
   const [calorieInputs, setCalorieInputs] = useState(() => {
     const latest = assessments.latestAssessment;
     const saved = (assessments.calorie.latestApplied ?? assessments.calculations[0])?.inputs ?? {};
@@ -796,12 +803,14 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
     const heightCm = calorieInputs.heightCm;
     const latestAssessment = assessments.latestAssessment;
     const weightKg = calorieInputs.weightKg;
-    return (Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => calculateCalories({
+    return (Object.keys(formulaLabels) as AssessmentFormula[])
+      .filter((formula) => assessments.formulaEligibility[formula].status === "available")
+      .map((formula) => calculateCalories({
       activityLevel: calorieInputs.activityLevel,
       age,
       bodyFatPercentage: latestAssessment.bodyFatPercentage,
       formula,
-      gender: assessments.client.gender,
+      biologicalSex: assessments.client.biologicalSex,
       heightCm,
       targetDays: latestAssessment.targetDays,
       targetWeightKg: calorieInputs.targetWeightKg,
@@ -809,6 +818,12 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
     }));
   }, [assessments, calorieInputs]);
   const selectedCalculation = calorieComparison.find((item) => item.formula === selectedFormula) ?? null;
+  useEffect(() => {
+    if (assessments.formulaEligibility[selectedFormula].status === "available") return;
+    const available = (Object.keys(formulaLabels) as AssessmentFormula[])
+      .find((formula) => assessments.formulaEligibility[formula].status === "available");
+    if (available) setSelectedFormula(available);
+  }, [assessments.formulaEligibility, selectedFormula]);
   const calorieProjection = useMemo(() => {
     if (!selectedCalculation || !assessments.latestAssessment || !assessments.client.age || calorieInputs.heightCm === null || calorieInputs.weightKg === null) return [];
     const age = assessments.client.age;
@@ -820,7 +835,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
       age,
       bodyFatPercentage: latestAssessment.bodyFatPercentage,
       formula: selectedFormula,
-      gender: assessments.client.gender,
+      biologicalSex: assessments.client.biologicalSex,
       heightCm,
       targetDays: latestAssessment.targetDays,
       targetWeightKg: calorieInputs.targetWeightKg,
@@ -843,6 +858,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
         inputs: {
           activityLevel: calorieInputs.activityLevel,
           bodyFatPercentage: assessments.latestAssessment.bodyFatPercentage,
+          biologicalSex: assessments.client.biologicalSex,
           heightCm: calorieInputs.heightCm,
           targetDays: selectedCalculation.targetDays,
           targetWeightKg: selectedCalculation.targetWeightKg,
@@ -883,6 +899,27 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
         <PartnerClientProfileHeader activeTab="avaliacoes" overview={overview} />
 
+        <Panel className="mt-4 p-4" id="assessment-readiness">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <SectionTitle>Prontidão da avaliação</SectionTitle>
+              <p className="mt-1 text-[12px] text-[#8b92a3]">Complete apenas os dados exigidos pelas fórmulas que pretende usar.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px]">
+              <span className="rounded-full border border-[#303746] px-3 py-1">Nascimento: {assessments.client.birthDate ? "informado" : "ausente"}</span>
+              <span className="rounded-full border border-[#303746] px-3 py-1">Sexo biológico: {assessments.client.biologicalSex === "not_informed" ? "ausente" : "informado"}</span>
+              <span className="rounded-full border border-[#303746] px-3 py-1">Peso/altura: {assessments.latestAssessment ? "informados" : "ausentes"}</span>
+              <span className="rounded-full border border-[#303746] px-3 py-1">Composição: {assessments.latestAssessment?.bodyFatPercentage !== null && assessments.latestAssessment ? "informada" : "ausente"}</span>
+            </div>
+          </div>
+          <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={(event) => { event.preventDefault(); void completePartnerClientProfile({ ...profileDraft, patientId: assessments.client.id }).then((result) => { setActionMessage(result.message ?? result.error ?? null); if (result.ok) router.refresh(); }); }}>
+            <input aria-label="Data de nascimento" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" required type="date" value={profileDraft.birthDate} onChange={(event) => setProfileDraft((value) => ({ ...value, birthDate: event.target.value }))} />
+            <select aria-label="Sexo biológico" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" value={profileDraft.biologicalSex} onChange={(event) => setProfileDraft((value) => ({ ...value, biologicalSex: event.target.value as typeof value.biologicalSex }))}><option value="not_informed">Sexo não informado</option><option value="female">Feminino</option><option value="male">Masculino</option></select>
+            <input aria-label="Objetivo principal" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" placeholder="Objetivo principal" required value={profileDraft.objective} onChange={(event) => setProfileDraft((value) => ({ ...value, objective: event.target.value }))} />
+            <button className="h-10 rounded-[8px] bg-[#3b97e3] px-4 text-[13px] font-semibold" type="submit">Completar cadastro</button>
+          </form>
+        </Panel>
+
         <section className="mt-4 grid grid-cols-2 gap-3 sm:mt-8 xl:grid-cols-3 2xl:grid-cols-6">
           <KpiCard delta={assessments.kpis.weight.delta} helper={assessments.kpis.weight.helper} icon={<Weight className="size-4" />} inverseDelta label="Peso atual" suffix=" kg" value={assessments.kpis.weight.value} />
           <KpiCard delta={assessments.kpis.bodyFat.delta} helper={assessments.kpis.bodyFat.helper} icon={<Percent className="size-4" />} inverseDelta label="% Gordura" suffix="%" value={assessments.kpis.bodyFat.value} />
@@ -901,7 +938,10 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             <label className="grid max-w-full gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
               Fórmula selecionada
               <select className="h-10 max-w-full rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[13px] normal-case tracking-normal text-white outline-none focus:border-[#3b97e3]" value={selectedFormula} onChange={(event) => setSelectedFormula(event.target.value as AssessmentFormula)}>
-                {Object.entries(formulaLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                {Object.entries(formulaLabels).map(([key, label]) => {
+                  const eligibility = assessments.formulaEligibility[key as AssessmentFormula];
+                  return <option disabled={eligibility.status !== "available"} key={key} value={key}>{label}{eligibility.status === "available" ? "" : " — indisponível"}</option>;
+                })}
               </select>
             </label>
           </div>
@@ -913,11 +953,12 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
                 <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]"><SlidersHorizontal className="size-3.5 shrink-0" /> <span className="truncate">{assessmentMethodLabels[assessments.latestAssessment?.assessmentMethod ?? "pollock_7"]}</span></span>
               </div>
               <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              {calorieComparison.length > 0 ? calorieComparison.map((calculation) => (
-                <FormulaCard active={selectedFormula === calculation.formula} calculation={calculation} key={calculation.formula} onSelect={() => setSelectedFormula(calculation.formula)} />
-              )) : (
-                <div className="rounded-[12px] border border-[#303746] bg-[#111821] p-4 text-[13px] text-[#8b92a3]">Cadastre uma avaliação para habilitar cálculos.</div>
-              )}
+              {(Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => {
+                const calculation = calorieComparison.find((item) => item.formula === formula);
+                if (calculation) return <FormulaCard active={selectedFormula === calculation.formula} calculation={calculation} key={formula} onSelect={() => setSelectedFormula(calculation.formula)} />;
+                const eligibility = assessments.formulaEligibility[formula];
+                return <div className="rounded-[12px] border border-[#303746] bg-[#111821] p-4" key={formula}><p className="font-semibold text-white">{formulaLabels[formula]}</p><p className="mt-2 text-[11px] font-semibold uppercase text-amber-300">{eligibility.status === "invalid_inputs" ? "Dados inválidos" : "Dados ausentes"}</p><p className="mt-1 text-[12px] leading-5 text-[#8b92a3]">{eligibility.reason}</p><a className="mt-3 inline-block text-xs font-semibold text-[#8fcfff]" href="#assessment-readiness">Completar cadastro</a></div>;
+              })}
               </div>
             </div>
 
@@ -925,7 +966,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
               <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-3 sm:p-4">
                 <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Dados do Cliente</h3>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-4">
-                  <MiniInfo label="Gênero" value={overview.client.genderLabel} />
+                  <MiniInfo label="Sexo biológico" value={assessments.client.biologicalSex === "female" ? "Feminino" : assessments.client.biologicalSex === "male" ? "Masculino" : "Não informado"} />
                   <MiniInfo label="Idade" value={overview.client.ageLabel} />
                   <label className="grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
                     Altura (cm)

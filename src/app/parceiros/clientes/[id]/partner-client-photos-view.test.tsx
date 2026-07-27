@@ -45,7 +45,7 @@ const overview: PartnerClientOverviewData = {
     avatarUrl: null,
     birthDateLabel: "02/07/1997",
     email: "ana@example.invalid",
-    genderLabel: "Feminino",
+    biologicalSexLabel: "Feminino",
     id: "a1000000-0000-4000-8000-000000000301",
     initial: "A",
     name: "Ana Ribeiro",

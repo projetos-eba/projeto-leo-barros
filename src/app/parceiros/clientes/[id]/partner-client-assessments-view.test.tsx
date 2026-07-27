@@ -7,6 +7,7 @@ import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-m
 
 import {
   applyClientCalorieCalculation,
+  completePartnerClientProfile,
   saveClientAssessment,
   saveClientCalorieCalculation,
 } from "./actions";
@@ -34,6 +35,7 @@ vi.mock("recharts", () => ({
 
 vi.mock("./actions", () => ({
   applyClientCalorieCalculation: vi.fn(),
+  completePartnerClientProfile: vi.fn(),
   saveClientAssessment: vi.fn(),
   saveClientCalorieCalculation: vi.fn(),
 }));
@@ -49,7 +51,7 @@ const overview: PartnerClientOverviewData = {
     avatarUrl: null,
     birthDateLabel: "30/06/1997",
     email: "ana@example.invalid",
-    genderLabel: "Feminino",
+    biologicalSexLabel: "Feminino",
     id: "a1000000-0000-4000-8000-000000000301",
     initial: "A",
     name: "Ana Ribeiro",
@@ -143,9 +145,18 @@ const assessments: PartnerClientAssessmentsData = {
   },
   client: {
     age: 29,
+    biologicalSex: "female",
+    birthDate: "1997-06-30",
     gender: "female",
     id: "a1000000-0000-4000-8000-000000000301",
     name: "Ana Ribeiro",
+    objective: "Hipertrofia",
+  },
+  formulaEligibility: {
+    cunningham: { reason: null, status: "available" },
+    harris_benedict: { reason: null, status: "available" },
+    mifflin: { reason: null, status: "available" },
+    tinsley: { reason: null, status: "available" },
   },
   circumferences: {
     availableMetrics: [
@@ -224,6 +235,7 @@ describe("PartnerClientAssessmentsView", () => {
     vi.mocked(saveClientAssessment).mockResolvedValue({ ok: true });
     vi.mocked(saveClientCalorieCalculation).mockResolvedValue({ id: "calc-new", ok: true });
     vi.mocked(applyClientCalorieCalculation).mockResolvedValue({ ok: true });
+    vi.mocked(completePartnerClientProfile).mockResolvedValue({ ok: true });
     refresh.mockReset();
   });
 
