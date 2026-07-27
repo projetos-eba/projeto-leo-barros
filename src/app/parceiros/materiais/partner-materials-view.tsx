@@ -52,6 +52,7 @@ import {
 
 type PartnerMaterialsViewProps = {
   data: PartnerMaterialsData;
+  formsSection?: ReactNode;
 };
 
 type ViewMode = "grid" | "list";
@@ -66,7 +67,6 @@ const categories: Array<"all" | PartnerMaterialCategory> = [
   "treino",
   "medico",
   "educativo",
-  "formularios",
   "outros",
 ];
 
@@ -253,7 +253,7 @@ function MaterialCard({
   );
 }
 
-export function PartnerMaterialsView({ data }: PartnerMaterialsViewProps) {
+export function PartnerMaterialsView({ data, formsSection }: PartnerMaterialsViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
@@ -419,10 +419,12 @@ export function PartnerMaterialsView({ data }: PartnerMaterialsViewProps) {
           </button>
         </header>
 
+        <div className="mt-6">{formsSection}</div>
+
         <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-3 xl:grid-cols-4">
           <MetricCard icon={FileText} label="Materiais ativos" tone="bg-[#123d60] text-[#5eb5ff]" value={data.metrics.total} />
           <MetricCard icon={Send} label="Compartilhamentos ativos" tone="bg-[#123d2d] text-[#54d18a]" value={data.metrics.shared} />
-          <MetricCard icon={FileSpreadsheet} label="Formulários" tone="bg-[#302052] text-[#ae88ff]" value={data.metrics.forms} />
+          <MetricCard icon={Archive} label="Materiais arquivados" tone="bg-[#302052] text-[#ae88ff]" value={data.metrics.archived} />
           <MetricCard icon={Star} label="Favoritos" tone="bg-[#443818] text-[#f5c542]" value={data.metrics.favorites} />
         </div>
 

@@ -35,9 +35,11 @@ export type PartnerClientFormAssignment = {
   assignmentClientId: string;
   assignmentId: string;
   createdAt: string;
+  dueAt: string | null;
   message: string | null;
   questions: PartnerClientFormQuestion[];
-  responseAnswers: Array<{ label: string; value: string }>;
+  responseAnswers: Array<{ label: string; questionId: string; value: string }>;
+  sentAt: string | null;
   status: string;
   submittedAt: string | null;
   title: string;
@@ -55,6 +57,7 @@ export type PartnerClientClinicalWorkspaceData = {
     assignments: PartnerClientFormAssignment[];
     clients: PartnerClientFormClient[];
     state: ModuleState;
+    templates: Array<{ description: string | null; id: string; title: string }>;
   };
   prescriptions: {
     history: PartnerClientClinicalEntry[];
@@ -66,6 +69,26 @@ type QueryResult<T> = PromiseLike<{ data: T[] | null; error: { message: string }
 
 function optionsFromJson(value: unknown) {
   return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
+}
+
+function questionsFromSnapshot(value: unknown): PartnerClientFormQuestion[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const questions = (value as { questions?: unknown }).questions;
+  if (!Array.isArray(questions)) return [];
+  return questions.flatMap((question, index) => {
+    if (!question || typeof question !== "object" || Array.isArray(question)) return [];
+    const item = question as Record<string, unknown>;
+    if (typeof item.id !== "string" || typeof item.prompt !== "string" || typeof item.type !== "string") return [];
+    return [{
+      helpText: typeof item.helpText === "string" ? item.helpText : null,
+      id: item.id,
+      options: optionsFromJson(item.options),
+      prompt: item.prompt,
+      required: item.required !== false,
+      sortOrder: index,
+      type: item.type,
+    }];
+  });
 }
 
 function answerValue(value: unknown) {
@@ -109,9 +132,9 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
   const [anamnesisResult, prescriptionsResult, templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult] = await Promise.all([
     secondaryRows(supabase.from("partner_client_anamnesis_entries").select("id, title, summary, content, version_number, is_current, created_at").eq("partner_id", partner.id).eq("patient_id", patientId).order("version_number", { ascending: false })),
     secondaryRows(supabase.from("partner_client_prescription_notes").select("id, title, summary, prescription_type, status, content, version_number, created_at").eq("partner_id", partner.id).eq("patient_id", patientId).order("created_at", { ascending: false })),
-    secondaryRows(supabase.from("partner_form_templates").select("id, title").eq("partner_id", partner.id).order("created_at", { ascending: false })),
-    secondaryRows(supabase.from("partner_form_questions").select("id, template_id, sort_order, question_type, prompt, help_text, required, options").eq("partner_id", partner.id).order("sort_order", { ascending: true })),
-    secondaryRows(supabase.from("partner_form_assignments").select("id, template_id, title, message, created_at").eq("partner_id", partner.id).order("created_at", { ascending: false })),
+    secondaryRows(supabase.from("partner_form_templates").select("id, title, description, status").eq("partner_id", partner.id).order("created_at", { ascending: false })),
+    secondaryRows(supabase.from("partner_form_questions").select("id, template_id, template_version_id, sort_order, question_type, prompt, help_text, required, options").eq("partner_id", partner.id).order("sort_order", { ascending: true })),
+    secondaryRows(supabase.from("partner_form_assignments").select("id, template_id, template_version_id, template_snapshot, title, message, sent_at, due_at, created_at").eq("partner_id", partner.id).order("created_at", { ascending: false })),
     secondaryRows(supabase.from("partner_form_assignment_clients").select("id, assignment_id, patient_id, status, submitted_at, created_at").eq("partner_id", partner.id).eq("patient_id", patientId).order("created_at", { ascending: false })),
     secondaryRows(supabase.from("partner_form_responses").select("id, assignment_client_id, status").eq("partner_id", partner.id).eq("patient_id", patientId)),
     secondaryRows(supabase.from("partner_form_response_answers").select("response_id, question_id, value_json").eq("partner_id", partner.id).eq("patient_id", patientId)),
@@ -121,10 +144,13 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
   const prescriptions = prescriptionsResult.rows.map((row) => ({ content: row.content, createdAt: row.created_at, id: row.id, status: row.status, summary: row.summary, title: row.title, type: row.prescription_type, version: row.version_number }));
   const templateTitleById = new Map(templatesResult.rows.map((template) => [template.id, template.title]));
   const questionsByTemplate = new Map<string, PartnerClientFormQuestion[]>();
+  const questionsByVersion = new Map<string, PartnerClientFormQuestion[]>();
   questionsResult.rows.forEach((question) => {
-    const list = questionsByTemplate.get(question.template_id) ?? [];
-    list.push({ helpText: question.help_text, id: question.id, options: optionsFromJson(question.options), prompt: question.prompt, required: question.required, sortOrder: question.sort_order, type: question.question_type });
-    questionsByTemplate.set(question.template_id, list);
+    const normalized = { helpText: question.help_text, id: question.id, options: optionsFromJson(question.options), prompt: question.prompt, required: question.required, sortOrder: question.sort_order, type: question.question_type };
+    questionsByTemplate.set(question.template_id, [...(questionsByTemplate.get(question.template_id) ?? []), normalized]);
+    if (question.template_version_id) {
+      questionsByVersion.set(question.template_version_id, [...(questionsByVersion.get(question.template_version_id) ?? []), normalized]);
+    }
   });
   const responseByAssignmentClient = new Map(responsesResult.rows.map((response) => [response.assignment_client_id, response]));
   const answersByResponse = new Map<string, typeof answersResult.rows>();
@@ -133,15 +159,20 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
   const assignments = assignmentClientsResult.rows.flatMap((assigned) => {
     const assignment = assignmentsResult.rows.find((item) => item.id === assigned.assignment_id);
     if (!assignment) return [];
-    const questions = questionsByTemplate.get(assignment.template_id) ?? [];
+    const questions = questionsFromSnapshot(assignment.template_snapshot);
+    const immutableQuestions = questions.length > 0
+      ? questions
+      : (assignment.template_version_id ? questionsByVersion.get(assignment.template_version_id) : null) ?? questionsByTemplate.get(assignment.template_id) ?? [];
     const response = responseByAssignmentClient.get(assigned.id);
     return [{
       assignmentClientId: assigned.id,
       assignmentId: assignment.id,
       createdAt: assigned.created_at,
+      dueAt: assignment.due_at,
       message: assignment.message,
-      questions,
-      responseAnswers: (response ? answersByResponse.get(response.id) ?? [] : []).map((answer) => ({ label: questions.find((question) => question.id === answer.question_id)?.prompt ?? "Resposta", value: answerValue(answer.value_json) })),
+      questions: immutableQuestions,
+      responseAnswers: (response ? answersByResponse.get(response.id) ?? [] : []).map((answer) => ({ label: immutableQuestions.find((question) => question.id === answer.question_id)?.prompt ?? "Resposta", questionId: answer.question_id, value: answerValue(answer.value_json) })),
+      sentAt: assignment.sent_at,
       status: assigned.status,
       submittedAt: assigned.submitted_at,
       title: assignment.title || templateTitleById.get(assignment.template_id) || "Formulário",
@@ -150,7 +181,7 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
 
   return {
     anamnesis: { current: anamnesis.find((entry) => entry.isCurrent) ?? anamnesis[0] ?? null, history: anamnesis, state: anamnesisResult.state },
-    forms: { assignments, clients, state: [templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult].some((result) => result.state === "unavailable") ? "unavailable" : "available" },
+    forms: { assignments, clients, state: [templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult].some((result) => result.state === "unavailable") ? "unavailable" : "available", templates: templatesResult.rows.filter((template) => template.status === "active").map((template) => ({ description: template.description, id: template.id, title: template.title })) },
     prescriptions: { history: prescriptions, state: prescriptionsResult.state },
   };
 }
