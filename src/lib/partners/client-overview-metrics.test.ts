@@ -57,6 +57,7 @@ const raw: PartnerClientOverviewRawData = {
   },
   identity: {
     avatarUrl: "/avatars/ana-ribeiro-seed.png",
+    biologicalSex: "female",
     birthDate: "1991-05-12",
     displayName: "Ana Ribeiro",
     email: "ana@example.invalid",
@@ -134,7 +135,7 @@ describe("buildPartnerClientOverview", () => {
 
     expect(overview.client).toMatchObject({
       ageLabel: "35 anos",
-      genderLabel: "Feminino",
+      biologicalSexLabel: "Feminino",
       name: "Ana Ribeiro",
       serviceScopes: ["dieta", "treino"],
       statusLabel: "Ativo",

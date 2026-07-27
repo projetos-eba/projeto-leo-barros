@@ -3938,9 +3938,12 @@ export type Database = {
           id: string
           message: string | null
           partner_id: string
+          request_key: string | null
           sent_at: string | null
           status: string
           template_id: string
+          template_snapshot: Json
+          template_version_id: string
           title: string
           updated_at: string
         }
@@ -3951,9 +3954,12 @@ export type Database = {
           id?: string
           message?: string | null
           partner_id: string
+          request_key?: string | null
           sent_at?: string | null
           status?: string
           template_id: string
+          template_snapshot: Json
+          template_version_id: string
           title: string
           updated_at?: string
         }
@@ -3964,9 +3970,12 @@ export type Database = {
           id?: string
           message?: string | null
           partner_id?: string
+          request_key?: string | null
           sent_at?: string | null
           status?: string
           template_id?: string
+          template_snapshot?: Json
+          template_version_id?: string
           title?: string
           updated_at?: string
         }
@@ -3992,6 +4001,13 @@ export type Database = {
             referencedRelation: "partner_form_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "partner_form_assignments_template_version_id_fkey"
+            columns: ["template_version_id"]
+            isOneToOne: false
+            referencedRelation: "partner_form_template_versions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_form_questions: {
@@ -4006,8 +4022,10 @@ export type Database = {
           required: boolean
           scale_max: number | null
           scale_min: number | null
+          settings: Json
           sort_order: number
           template_id: string
+          template_version_id: string | null
           updated_at: string
         }
         Insert: {
@@ -4021,8 +4039,10 @@ export type Database = {
           required?: boolean
           scale_max?: number | null
           scale_min?: number | null
+          settings?: Json
           sort_order: number
           template_id: string
+          template_version_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -4036,8 +4056,10 @@ export type Database = {
           required?: boolean
           scale_max?: number | null
           scale_min?: number | null
+          settings?: Json
           sort_order?: number
           template_id?: string
+          template_version_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -4053,6 +4075,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "partner_form_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_form_questions_template_version_id_fkey"
+            columns: ["template_version_id"]
+            isOneToOne: false
+            referencedRelation: "partner_form_template_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -4187,10 +4216,78 @@ export type Database = {
           },
         ]
       }
+      partner_form_template_versions: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          default_message: string | null
+          description: string | null
+          id: string
+          partner_id: string
+          published_at: string | null
+          questions_snapshot: Json
+          status: string
+          template_id: string
+          title: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          default_message?: string | null
+          description?: string | null
+          id?: string
+          partner_id: string
+          published_at?: string | null
+          questions_snapshot: Json
+          status: string
+          template_id: string
+          title: string
+          version_number: number
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          default_message?: string | null
+          description?: string | null
+          id?: string
+          partner_id?: string
+          published_at?: string | null
+          questions_snapshot?: Json
+          status?: string
+          template_id?: string
+          title?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_form_template_versions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_form_template_versions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_form_template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "partner_form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_form_templates: {
         Row: {
           created_at: string
           created_by_profile_id: string | null
+          default_message: string | null
           description: string | null
           id: string
           partner_id: string
@@ -4201,6 +4298,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by_profile_id?: string | null
+          default_message?: string | null
           description?: string | null
           id?: string
           partner_id: string
@@ -4211,6 +4309,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by_profile_id?: string | null
+          default_message?: string | null
           description?: string | null
           id?: string
           partner_id?: string
@@ -5431,6 +5530,7 @@ export type Database = {
       patients: {
         Row: {
           avatar_url: string | null
+          biological_sex: string
           birth_date: string | null
           cpf: string | null
           created_at: string
@@ -5443,6 +5543,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          biological_sex?: string
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
@@ -5455,6 +5556,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          biological_sex?: string
           birth_date?: string | null
           cpf?: string | null
           created_at?: string
@@ -6068,6 +6170,15 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: Json
       }
+      complete_partner_client_profile: {
+        Args: {
+          p_biological_sex: string
+          p_birth_date: string
+          p_objective: string
+          p_patient_id: string
+        }
+        Returns: boolean
+      }
       create_partner_protocol_use_draft: {
         Args: {
           p_item_id: string
@@ -6156,6 +6267,10 @@ export type Database = {
         Args: { p_patient_id: string }
         Returns: Json
       }
+      partner_client_assessments_legacy_20260727: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_client_cardio: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_diet: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_exams: { Args: { p_patient_id: string }; Returns: Json }
@@ -6194,30 +6309,56 @@ export type Database = {
         }
         Returns: string
       }
-      provision_client_for_partner_records: {
-        Args: {
-          p_auth_user_id: string
-          p_birth_date: string
-          p_caller_profile_id: string
-          p_cpf: string
-          p_display_name: string
-          p_email: string
-          p_idempotency_key: string
-          p_invite_status: string
-          p_objective: string
-          p_phone: string
-          p_request_hash: string
-          p_service_scopes: string[]
-        }
-        Returns: {
-          patient_id: string
-          profile_id: string
-          relationship_ids: string[]
-          result_invite_status: string
-          result_service_scopes: string[]
-          result_status: string
-        }[]
-      }
+      provision_client_for_partner_records:
+        | {
+            Args: {
+              p_auth_user_id: string
+              p_biological_sex: string
+              p_birth_date: string
+              p_caller_profile_id: string
+              p_cpf: string
+              p_display_name: string
+              p_email: string
+              p_idempotency_key: string
+              p_invite_status: string
+              p_objective: string
+              p_phone: string
+              p_request_hash: string
+              p_service_scopes: string[]
+            }
+            Returns: {
+              patient_id: string
+              profile_id: string
+              relationship_ids: string[]
+              result_invite_status: string
+              result_service_scopes: string[]
+              result_status: string
+            }[]
+          }
+        | {
+            Args: {
+              p_auth_user_id: string
+              p_birth_date: string
+              p_caller_profile_id: string
+              p_cpf: string
+              p_display_name: string
+              p_email: string
+              p_idempotency_key: string
+              p_invite_status: string
+              p_objective: string
+              p_phone: string
+              p_request_hash: string
+              p_service_scopes: string[]
+            }
+            Returns: {
+              patient_id: string
+              profile_id: string
+              relationship_ids: string[]
+              result_invite_status: string
+              result_service_scopes: string[]
+              result_status: string
+            }[]
+          }
       provision_partner_records: {
         Args: {
           p_auth_user_id: string
@@ -6258,6 +6399,27 @@ export type Database = {
           p_status: string
           p_summary: string
           p_title: string
+        }
+        Returns: string
+      }
+      save_partner_form_template: {
+        Args: {
+          p_default_message: string
+          p_description: string
+          p_questions: Json
+          p_status: string
+          p_template_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      send_partner_form_template: {
+        Args: {
+          p_due_at: string
+          p_message: string
+          p_patient_ids: string[]
+          p_request_key: string
+          p_template_id: string
         }
         Returns: string
       }

@@ -9,6 +9,7 @@ import {
   calculateCalories,
   calculateFatMass,
   calculateLeanMass,
+  getFormulaEligibility,
   type PartnerClientAssessmentRawData,
 } from "./client-assessments-metrics";
 
@@ -87,6 +88,7 @@ const raw: PartnerClientAssessmentRawData = {
     targetWeightKg: 80,
   },
   identity: {
+    biologicalSex: "female",
     birthDate: "1997-06-30",
     displayName: "Ana Ribeiro",
     email: "ana@example.invalid",
@@ -110,7 +112,7 @@ describe("client assessments metrics", () => {
       activityLevel: "moderate" as const,
       age: 29,
       bodyFatPercentage: 14.7,
-      gender: "female" as const,
+      biologicalSex: "female" as const,
       heightCm: 174,
       targetDays: 90,
       targetWeightKg: 80,
@@ -128,13 +130,33 @@ describe("client assessments metrics", () => {
     expect(calculation.projectedWeightDeltaKg).toBe(1.6);
   });
 
+  it("não usa fallback masculino quando sexo biológico não foi informado", () => {
+    const input = {
+      activityLevel: "moderate" as const,
+      age: 29,
+      biologicalSex: "not_informed" as const,
+      bodyFatPercentage: null,
+      heightCm: 174,
+      targetDays: 90,
+      targetWeightKg: 80,
+      weightKg: 78.4,
+    };
+
+    const eligibility = getFormulaEligibility(input);
+    expect(eligibility.mifflin).toMatchObject({ status: "missing_inputs" });
+    expect(eligibility.harris_benedict).toMatchObject({ status: "missing_inputs" });
+    expect(eligibility.cunningham).toMatchObject({ status: "missing_inputs" });
+    expect(eligibility.tinsley).toMatchObject({ status: "available" });
+    expect(() => calculateBmr({ ...input, formula: "mifflin" })).toThrow("biological_sex_required");
+  });
+
   it("gera projecao de calorias e peso ao longo do prazo", () => {
     const input = {
       activityLevel: "moderate" as const,
       age: 29,
       bodyFatPercentage: 14.7,
       formula: "mifflin" as const,
-      gender: "female" as const,
+      biologicalSex: "female" as const,
       heightCm: 174,
       targetDays: 90,
       targetWeightKg: 80,
