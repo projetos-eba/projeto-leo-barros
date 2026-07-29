@@ -28,11 +28,13 @@
 ## UX
 
 - KPIs: peso, gordura corporal, massa muscular, massa magra, IMC e última avaliação.
-- Metodologias no topo: Mifflin-St Jeor, Harris-Benedict, Cunningham e Tinsley, com método físico `Pollock 7`, `Pollock 3`, `Bioimpedância` ou `Manual técnico`.
-- Cálculo calórico: dados do Cliente ao lado da projeção, eixo Y dinâmico e card azul de calorias para objetivo.
-- Avaliação física: dobras cutâneas e circunferências reais salvas em tabelas normalizadas, com histórico lateral.
-- Análise gráfica: composição corporal, distribuição de dobras e painel de circunferências com modos `Dinâmico/Stack`, `Geral/Por região/Radar`.
-- Drawer/modal: nova avaliação com dados corporais, metodologia, dobras, circunferências, meta, prazo, atividade e observações.
+- Metodologias no topo: Mifflin-St Jeor, Harris-Benedict, Cunningham e Tinsley, com método físico `3 dobras Guedes`, `3 dobras Jackson & Pollock`, `4 dobras Durnin & Womersley`, `4 dobras Faulkner`, `7 dobras Jackson, Pollock & Ward`, `Bioimpedância` ou `Manual técnico`.
+- Bio do Cliente: edição de nascimento, sexo biológico e objetivo a partir do header do perfil individual.
+- Cálculo calórico: dados do Cliente ao lado da projeção de meta por peso ao longo do tempo, eixo Y dinâmico e card azul de calorias para objetivo.
+- Avaliação física: resultado calculado da última avaliação, faixas de IMC/% gordura/FFMI, dobras cutâneas e circunferências reais salvas em tabelas normalizadas.
+- Histórico de avaliações: tabela técnica com data, protocolo, peso, IMC, FFMI, percentual de gordura, massa magra e massa gorda, com ações para visualizar e editar uma avaliação específica.
+- Análise gráfica: composição corporal, distribuição de dobras e painel de circunferências com seleção de variáveis e modos `Dinâmico/Stack`, `Geral/Por região/Radar`.
+- Drawer/modal: nova avaliação e edição de avaliação existente com dados corporais, metodologia, dobras, circunferências, meta, prazo, atividade e observações.
 
 ## Segurança
 
