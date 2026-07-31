@@ -61,6 +61,7 @@ export type PartnerProtocolFoodRecord = {
   serving_unit: string;
   sodium_mg: number;
   source: string;
+  system_food_id?: string | null;
   status: string;
   suggested_uses: string[];
   tags: string[];
@@ -83,12 +84,60 @@ export type PartnerProtocolExerciseRecord = {
   objective: string;
   rest_seconds: number;
   status: string;
+  system_exercise_id?: string | null;
   tags: string[];
   thumbnail_url: string | null;
   updated_at: string;
   usage_count: number;
   variations: string[];
   video_url: string | null;
+};
+
+export type SystemFoodRecord = {
+  carbohydrate_g_per_g: number | null;
+  carbohydrate_g_100g: number | null;
+  category_taco: string;
+  description: string;
+  energy_kcal_per_g: number | null;
+  energy_kcal_100g: number | null;
+  fat_g_per_g: number | null;
+  fiber_g_per_g: number | null;
+  fiber_g_100g: number | null;
+  food_number: number;
+  id: string;
+  lipids_g_100g: number | null;
+  partner_category: string;
+  predominant_macro: string;
+  protein_g_per_g: number | null;
+  protein_g_100g: number | null;
+  source_checksum: string;
+  source_name: string;
+  source_version: string;
+};
+
+export type SystemExerciseRecord = {
+  description: string | null;
+  difficulty_level: string | null;
+  equipment: string | null;
+  gif_storage_path: string | null;
+  id: string;
+  instructions: string | null;
+  media_checksum?: string | null;
+  media_frame_count?: number | null;
+  media_height?: number | null;
+  media_is_animated?: boolean | null;
+  media_version?: string | null;
+  media_width?: number | null;
+  name: string;
+  poster_storage_path: string | null;
+  preview_storage_path?: string | null;
+  primary_muscle_group: string | null;
+  secondary_muscle_groups: string[];
+  slug: string;
+  source_checksum: string | null;
+  source_gif_storage_path?: string | null;
+  source_name: string;
+  source_version: string;
 };
 
 export type PartnerProtocolClient = {
@@ -116,6 +165,7 @@ export type PartnerProtocolFood = {
   sodium: number;
   source: PartnerProtocolFoodSource;
   sourceLabel: string;
+  systemFoodId: string | null;
   status: PartnerProtocolStatus;
   suggestedUses: string[];
   tags: string[];
@@ -141,12 +191,63 @@ export type PartnerProtocolExercise = {
   objectiveLabel: string;
   restSeconds: number;
   status: PartnerProtocolStatus;
+  systemExerciseId: string | null;
   tags: string[];
   thumbnailUrl: string | null;
   updatedAt: string;
   usageCount: number;
   variations: string[];
   videoUrl: string | null;
+};
+
+export type SystemFood = {
+  alreadyImported: boolean;
+  carbsPerG: number | null;
+  carbsPer100g: number | null;
+  categoryTaco: string;
+  energyKcalPerG: number | null;
+  energyKcalPer100g: number | null;
+  fatPerG: number | null;
+  fatPer100g: number | null;
+  fiberPerG: number | null;
+  fiberPer100g: number | null;
+  foodNumber: number;
+  id: string;
+  name: string;
+  partnerCategory: PartnerProtocolFoodCategory;
+  predominantMacro: string;
+  proteinPerG: number | null;
+  proteinPer100g: number | null;
+  sourceChecksum: string;
+  sourceName: string;
+  sourceVersion: string;
+};
+
+export type SystemExercise = {
+  alreadyImported: boolean;
+  description: string | null;
+  equipment: PartnerProtocolExerciseEquipment;
+  equipmentLabel: string;
+  gifUrl: string | null;
+  id: string;
+  instructions: string | null;
+  level: PartnerProtocolExerciseLevel;
+  levelLabel: string;
+  mediaFrameCount: number | null;
+  mediaHeight: number | null;
+  mediaIsAnimated: boolean;
+  mediaWidth: number | null;
+  muscleGroup: PartnerProtocolExerciseMuscleGroup;
+  muscleGroupLabel: string;
+  name: string;
+  posterUrl: string | null;
+  previewUrl: string | null;
+  secondaryMuscleGroups: PartnerProtocolExerciseMuscleGroup[];
+  slug: string;
+  sourceChecksum: string | null;
+  sourceGifUrl: string | null;
+  sourceName: string;
+  sourceVersion: string;
 };
 
 export type PartnerProtocolsData = {
@@ -160,6 +261,8 @@ export type PartnerProtocolsData = {
     exerciseWithoutVideo: number;
     foodWithoutCategory: number;
     importedFoods: number;
+    systemExercises: number;
+    systemFoods: number;
   };
   partner: {
     id: string;
@@ -168,6 +271,10 @@ export type PartnerProtocolsData = {
   } | null;
   topExercises: PartnerProtocolExercise[];
   topFoods: PartnerProtocolFood[];
+  systemExercises: SystemExercise[];
+  systemFoodCategories: string[];
+  systemFoodMacros: string[];
+  systemFoods: SystemFood[];
 };
 
 export type PartnerProtocolsRawData = {
@@ -175,6 +282,8 @@ export type PartnerProtocolsRawData = {
   exercises: PartnerProtocolExerciseRecord[];
   foods: PartnerProtocolFoodRecord[];
   partner: PartnerProtocolsData["partner"];
+  systemExercises?: SystemExerciseRecord[];
+  systemFoods?: SystemFoodRecord[];
 };
 
 export const foodCategoryLabels: Record<PartnerProtocolFoodCategory, string> = {
@@ -255,6 +364,28 @@ const objectives = Object.keys(objectiveLabels) as PartnerProtocolExerciseObject
 function normalizeNumber(value: number | string | null | undefined) {
   const parsed = typeof value === "number" ? value : Number(String(value ?? "").replace(",", "."));
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeNullableNumber(value: number | string | null | undefined) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(String(value).replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function publicSystemExerciseMediaUrl(path: string | null | undefined) {
+  if (!path) return null;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/g, "");
+  const publicPath = `/storage/v1/object/public/system-exercise-media/${path}`;
+  return supabaseUrl ? `${supabaseUrl}${publicPath}` : publicPath;
+}
+
+function resolveSupabasePublicUrl(value: string | null | undefined) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!trimmed.startsWith("/storage/v1/object/public/")) return trimmed;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/g, "");
+  return supabaseUrl ? `${supabaseUrl}${trimmed}` : trimmed;
 }
 
 function asStatus(value: string): PartnerProtocolStatus {
@@ -356,6 +487,7 @@ export function buildPartnerProtocolsData(raw: PartnerProtocolsRawData): Partner
       sodium: normalizeNumber(row.sodium_mg),
       source,
       sourceLabel: foodSourceLabels[source],
+      systemFoodId: row.system_food_id ?? null,
       status: asStatus(row.status),
       suggestedUses: row.suggested_uses,
       tags: row.tags,
@@ -397,12 +529,85 @@ export function buildPartnerProtocolsData(raw: PartnerProtocolsRawData): Partner
       objectiveLabel: objectiveLabels[objective],
       restSeconds: row.rest_seconds,
       status: asStatus(row.status),
+      systemExerciseId: row.system_exercise_id ?? null,
       tags: row.tags,
-      thumbnailUrl: row.thumbnail_url,
+      thumbnailUrl: resolveSupabasePublicUrl(row.thumbnail_url),
       updatedAt: row.updated_at,
       usageCount: row.usage_count,
       variations: row.variations,
-      videoUrl: row.video_url,
+      videoUrl: resolveSupabasePublicUrl(row.video_url),
+    };
+  });
+
+  const importedFoodIds = new Set(foods.map((food) => food.systemFoodId).filter(Boolean));
+  const importedExerciseIds = new Set(exercises.map((exercise) => exercise.systemExerciseId).filter(Boolean));
+  const systemFoods = (raw.systemFoods ?? []).map((row): SystemFood => {
+    const partnerCategory = foodCategories.includes(row.partner_category as PartnerProtocolFoodCategory)
+      ? row.partner_category as PartnerProtocolFoodCategory
+      : "outros";
+
+    return {
+      alreadyImported: importedFoodIds.has(row.id),
+      carbsPerG: normalizeNullableNumber(row.carbohydrate_g_per_g),
+      carbsPer100g: normalizeNullableNumber(row.carbohydrate_g_100g),
+      categoryTaco: row.category_taco,
+      energyKcalPerG: normalizeNullableNumber(row.energy_kcal_per_g),
+      energyKcalPer100g: normalizeNullableNumber(row.energy_kcal_100g),
+      fatPerG: normalizeNullableNumber(row.fat_g_per_g),
+      fatPer100g: normalizeNullableNumber(row.lipids_g_100g),
+      fiberPerG: normalizeNullableNumber(row.fiber_g_per_g),
+      fiberPer100g: normalizeNullableNumber(row.fiber_g_100g),
+      foodNumber: normalizeNumber(row.food_number),
+      id: row.id,
+      name: row.description,
+      partnerCategory,
+      predominantMacro: row.predominant_macro,
+      proteinPerG: normalizeNullableNumber(row.protein_g_per_g),
+      proteinPer100g: normalizeNullableNumber(row.protein_g_100g),
+      sourceChecksum: row.source_checksum,
+      sourceName: row.source_name,
+      sourceVersion: row.source_version,
+    };
+  });
+
+  const systemExercises = (raw.systemExercises ?? []).map((row): SystemExercise => {
+    const muscleGroup = muscleGroups.includes(row.primary_muscle_group as PartnerProtocolExerciseMuscleGroup)
+      ? row.primary_muscle_group as PartnerProtocolExerciseMuscleGroup
+      : "outros";
+    const equipment = equipments.includes(row.equipment as PartnerProtocolExerciseEquipment)
+      ? row.equipment as PartnerProtocolExerciseEquipment
+      : "outros";
+    const level = levels.includes(row.difficulty_level as PartnerProtocolExerciseLevel)
+      ? row.difficulty_level as PartnerProtocolExerciseLevel
+      : "intermediario";
+    const previewPath = row.preview_storage_path ?? row.gif_storage_path;
+
+    return {
+      alreadyImported: importedExerciseIds.has(row.id),
+      description: row.description,
+      equipment,
+      equipmentLabel: row.equipment ? equipmentLabels[equipment] : "Não informado",
+      gifUrl: publicSystemExerciseMediaUrl(previewPath),
+      id: row.id,
+      instructions: row.instructions,
+      level,
+      levelLabel: row.difficulty_level ? levelLabels[level] : "Não informado",
+      mediaFrameCount: normalizeNullableNumber(row.media_frame_count),
+      mediaHeight: normalizeNullableNumber(row.media_height),
+      mediaIsAnimated: Boolean(row.media_is_animated),
+      mediaWidth: normalizeNullableNumber(row.media_width),
+      muscleGroup,
+      muscleGroupLabel: row.primary_muscle_group ? muscleGroupLabels[muscleGroup] : "Não informado",
+      name: row.name,
+      posterUrl: publicSystemExerciseMediaUrl(row.poster_storage_path),
+      previewUrl: publicSystemExerciseMediaUrl(row.preview_storage_path),
+      secondaryMuscleGroups: (row.secondary_muscle_groups ?? [])
+        .filter((group): group is PartnerProtocolExerciseMuscleGroup => muscleGroups.includes(group as PartnerProtocolExerciseMuscleGroup)),
+      slug: row.slug,
+      sourceChecksum: row.media_checksum ?? row.source_checksum,
+      sourceGifUrl: publicSystemExerciseMediaUrl(row.source_gif_storage_path),
+      sourceName: row.source_name,
+      sourceVersion: row.media_version ?? row.source_version,
     };
   });
 
@@ -417,8 +622,14 @@ export function buildPartnerProtocolsData(raw: PartnerProtocolsRawData): Partner
       exerciseWithoutVideo: exercises.filter((exercise) => exercise.status === "active" && !exercise.videoUrl).length,
       foodWithoutCategory: foods.filter((food) => food.status === "active" && food.category === "outros").length,
       importedFoods: foods.filter((food) => food.source === "imported" || food.source === "taco" || food.source === "tbca").length,
+      systemExercises: systemExercises.length,
+      systemFoods: systemFoods.length,
     },
     partner: raw.partner,
+    systemExercises,
+    systemFoodCategories: Array.from(new Set(systemFoods.map((food) => food.categoryTaco))).sort((left, right) => left.localeCompare(right, "pt-BR")),
+    systemFoodMacros: Array.from(new Set(systemFoods.map((food) => food.predominantMacro))).sort((left, right) => left.localeCompare(right, "pt-BR")),
+    systemFoods,
     topExercises: [...exercises].sort((a, b) => b.usageCount - a.usageCount).slice(0, 4),
     topFoods: [...foods].sort((a, b) => b.usageCount - a.usageCount).slice(0, 4),
   };

@@ -17,6 +17,8 @@ select tables_are(
     'billing_prices',
     'billing_products',
     'billing_sync_outbox',
+    'catalog_import_batches',
+    'catalog_import_items',
     'client_diet_daily_logs',
     'client_diet_events',
     'client_diet_meal_logs',
@@ -106,6 +108,9 @@ select tables_are(
     'profiles',
     'stripe_webhook_events',
     'provisioning_operations',
+    'system_exercise_media',
+    'system_exercises',
+    'system_foods',
     'support_tickets'
   ],
   'public contém a fundação limpa, o ledger de provisionamento e o domínio operacional aprovado'

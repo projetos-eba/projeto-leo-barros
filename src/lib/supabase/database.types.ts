@@ -515,6 +515,153 @@ export type Database = {
           },
         ]
       }
+      catalog_import_batches: {
+        Row: {
+          already_imported_count: number
+          catalog_type: string
+          created_at: string
+          failed_count: number
+          filters: Json
+          id: string
+          imported_count: number
+          partner_id: string
+          reactivated_count: number
+          requested_count: number
+          selection_mode: string
+          source_checksum: string | null
+          source_name: string
+          source_version: string | null
+          status: string
+        }
+        Insert: {
+          already_imported_count?: number
+          catalog_type: string
+          created_at?: string
+          failed_count?: number
+          filters?: Json
+          id?: string
+          imported_count?: number
+          partner_id: string
+          reactivated_count?: number
+          requested_count?: number
+          selection_mode: string
+          source_checksum?: string | null
+          source_name: string
+          source_version?: string | null
+          status?: string
+        }
+        Update: {
+          already_imported_count?: number
+          catalog_type?: string
+          created_at?: string
+          failed_count?: number
+          filters?: Json
+          id?: string
+          imported_count?: number
+          partner_id?: string
+          reactivated_count?: number
+          requested_count?: number
+          selection_mode?: string
+          source_checksum?: string | null
+          source_name?: string
+          source_version?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_import_batches_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_import_items: {
+        Row: {
+          batch_id: string
+          catalog_type: string
+          created_at: string
+          detail: string | null
+          id: string
+          partner_exercise_id: string | null
+          partner_food_id: string | null
+          partner_id: string
+          status: string
+          system_exercise_id: string | null
+          system_food_id: string | null
+        }
+        Insert: {
+          batch_id: string
+          catalog_type: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          partner_exercise_id?: string | null
+          partner_food_id?: string | null
+          partner_id: string
+          status: string
+          system_exercise_id?: string | null
+          system_food_id?: string | null
+        }
+        Update: {
+          batch_id?: string
+          catalog_type?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          partner_exercise_id?: string | null
+          partner_food_id?: string | null
+          partner_id?: string
+          status?: string
+          system_exercise_id?: string | null
+          system_food_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_import_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_import_items_partner_exercise_fkey"
+            columns: ["partner_exercise_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_exercises"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "catalog_import_items_partner_food_fkey"
+            columns: ["partner_food_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_protocol_foods"
+            referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "catalog_import_items_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_import_items_system_exercise_id_fkey"
+            columns: ["system_exercise_id"]
+            isOneToOne: false
+            referencedRelation: "system_exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_import_items_system_food_id_fkey"
+            columns: ["system_food_id"]
+            isOneToOne: false
+            referencedRelation: "system_foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_diet_daily_logs: {
         Row: {
           created_at: string
@@ -4567,15 +4714,21 @@ export type Database = {
           default_sets: number
           equipment: string
           id: string
+          imported_at: string | null
           instructions: string | null
           level: string
+          local_alias: string | null
           muscle_group: string
           name: string
           objective: string
           partner_id: string
           rest_seconds: number
           secondary_muscle_groups: string[]
+          source_checksum_snapshot: string | null
+          source_snapshot: Json | null
+          source_version_snapshot: string | null
           status: string
+          system_exercise_id: string | null
           tags: string[]
           thumbnail_url: string | null
           updated_at: string
@@ -4590,15 +4743,21 @@ export type Database = {
           default_sets?: number
           equipment?: string
           id?: string
+          imported_at?: string | null
           instructions?: string | null
           level?: string
+          local_alias?: string | null
           muscle_group: string
           name: string
           objective?: string
           partner_id: string
           rest_seconds?: number
           secondary_muscle_groups?: string[]
+          source_checksum_snapshot?: string | null
+          source_snapshot?: Json | null
+          source_version_snapshot?: string | null
           status?: string
+          system_exercise_id?: string | null
           tags?: string[]
           thumbnail_url?: string | null
           updated_at?: string
@@ -4613,15 +4772,21 @@ export type Database = {
           default_sets?: number
           equipment?: string
           id?: string
+          imported_at?: string | null
           instructions?: string | null
           level?: string
+          local_alias?: string | null
           muscle_group?: string
           name?: string
           objective?: string
           partner_id?: string
           rest_seconds?: number
           secondary_muscle_groups?: string[]
+          source_checksum_snapshot?: string | null
+          source_snapshot?: Json | null
+          source_version_snapshot?: string | null
           status?: string
+          system_exercise_id?: string | null
           tags?: string[]
           thumbnail_url?: string | null
           updated_at?: string
@@ -4637,6 +4802,13 @@ export type Database = {
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "partner_protocol_exercises_system_exercise_id_fkey"
+            columns: ["system_exercise_id"]
+            isOneToOne: false
+            referencedRelation: "system_exercises"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_protocol_foods: {
@@ -4648,7 +4820,9 @@ export type Database = {
           fiber_g: number
           household_measure: string | null
           id: string
+          imported_at: string | null
           kcal: number
+          local_alias: string | null
           name: string
           notes: string | null
           partner_id: string
@@ -4657,8 +4831,12 @@ export type Database = {
           serving_unit: string
           sodium_mg: number
           source: string
+          source_checksum_snapshot: string | null
+          source_snapshot: Json | null
+          source_version_snapshot: string | null
           status: string
           suggested_uses: string[]
+          system_food_id: string | null
           tags: string[]
           updated_at: string
           usage_count: number
@@ -4671,7 +4849,9 @@ export type Database = {
           fiber_g?: number
           household_measure?: string | null
           id?: string
+          imported_at?: string | null
           kcal?: number
+          local_alias?: string | null
           name: string
           notes?: string | null
           partner_id: string
@@ -4680,8 +4860,12 @@ export type Database = {
           serving_unit?: string
           sodium_mg?: number
           source?: string
+          source_checksum_snapshot?: string | null
+          source_snapshot?: Json | null
+          source_version_snapshot?: string | null
           status?: string
           suggested_uses?: string[]
+          system_food_id?: string | null
           tags?: string[]
           updated_at?: string
           usage_count?: number
@@ -4694,7 +4878,9 @@ export type Database = {
           fiber_g?: number
           household_measure?: string | null
           id?: string
+          imported_at?: string | null
           kcal?: number
+          local_alias?: string | null
           name?: string
           notes?: string | null
           partner_id?: string
@@ -4703,8 +4889,12 @@ export type Database = {
           serving_unit?: string
           sodium_mg?: number
           source?: string
+          source_checksum_snapshot?: string | null
+          source_snapshot?: Json | null
+          source_version_snapshot?: string | null
           status?: string
           suggested_uses?: string[]
+          system_food_id?: string | null
           tags?: string[]
           updated_at?: string
           usage_count?: number
@@ -4715,6 +4905,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_protocol_foods_system_food_id_fkey"
+            columns: ["system_food_id"]
+            isOneToOne: false
+            referencedRelation: "system_foods"
             referencedColumns: ["id"]
           },
         ]
@@ -6007,6 +6204,327 @@ export type Database = {
           },
         ]
       }
+      system_exercise_media: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          exercise_code: string
+          frame_count: number
+          id: string
+          is_animated: boolean
+          media_version: string
+          metadata: Json
+          original_height: number
+          original_size_bytes: number
+          original_width: number
+          poster_mime_type: string
+          poster_size_bytes: number
+          poster_storage_path: string
+          preview_mime_type: string | null
+          preview_size_bytes: number | null
+          preview_storage_path: string | null
+          published_at: string | null
+          source_checksum: string
+          source_file_name: string
+          source_key: string
+          source_mime_type: string
+          source_relative_path: string
+          source_storage_path: string
+          status: string
+          system_exercise_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          exercise_code: string
+          frame_count: number
+          id?: string
+          is_animated: boolean
+          media_version: string
+          metadata?: Json
+          original_height: number
+          original_size_bytes: number
+          original_width: number
+          poster_mime_type?: string
+          poster_size_bytes: number
+          poster_storage_path: string
+          preview_mime_type?: string | null
+          preview_size_bytes?: number | null
+          preview_storage_path?: string | null
+          published_at?: string | null
+          source_checksum: string
+          source_file_name: string
+          source_key: string
+          source_mime_type?: string
+          source_relative_path: string
+          source_storage_path: string
+          status?: string
+          system_exercise_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          exercise_code?: string
+          frame_count?: number
+          id?: string
+          is_animated?: boolean
+          media_version?: string
+          metadata?: Json
+          original_height?: number
+          original_size_bytes?: number
+          original_width?: number
+          poster_mime_type?: string
+          poster_size_bytes?: number
+          poster_storage_path?: string
+          preview_mime_type?: string | null
+          preview_size_bytes?: number | null
+          preview_storage_path?: string | null
+          published_at?: string | null
+          source_checksum?: string
+          source_file_name?: string
+          source_key?: string
+          source_mime_type?: string
+          source_relative_path?: string
+          source_storage_path?: string
+          status?: string
+          system_exercise_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_exercise_media_source_key_fkey"
+            columns: ["source_key"]
+            isOneToOne: false
+            referencedRelation: "system_exercises"
+            referencedColumns: ["source_key"]
+          },
+          {
+            foreignKeyName: "system_exercise_media_system_exercise_id_fkey"
+            columns: ["system_exercise_id"]
+            isOneToOne: false
+            referencedRelation: "system_exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_exercises: {
+        Row: {
+          category: string | null
+          contraindications: string | null
+          created_at: string
+          description: string | null
+          difficulty_level: string | null
+          equipment: string | null
+          gif_storage_path: string | null
+          id: string
+          instructions: string | null
+          laterality: string | null
+          media_checksum: string | null
+          media_duration_seconds: number | null
+          media_frame_count: number | null
+          media_height: number | null
+          media_is_animated: boolean | null
+          media_published_at: string | null
+          media_status: string
+          media_version: string | null
+          media_width: number | null
+          metadata: Json
+          movement_pattern: string | null
+          name: string
+          poster_mime_type: string | null
+          poster_size_bytes: number | null
+          poster_storage_path: string | null
+          preview_mime_type: string | null
+          preview_size_bytes: number | null
+          preview_storage_path: string | null
+          primary_muscle_group: string | null
+          publication_status: string
+          safety_notes: string | null
+          secondary_muscle_groups: string[]
+          slug: string
+          source_checksum: string | null
+          source_gif_storage_path: string | null
+          source_key: string
+          source_mime_type: string | null
+          source_name: string
+          source_size_bytes: number | null
+          source_version: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          contraindications?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          equipment?: string | null
+          gif_storage_path?: string | null
+          id?: string
+          instructions?: string | null
+          laterality?: string | null
+          media_checksum?: string | null
+          media_duration_seconds?: number | null
+          media_frame_count?: number | null
+          media_height?: number | null
+          media_is_animated?: boolean | null
+          media_published_at?: string | null
+          media_status?: string
+          media_version?: string | null
+          media_width?: number | null
+          metadata?: Json
+          movement_pattern?: string | null
+          name: string
+          poster_mime_type?: string | null
+          poster_size_bytes?: number | null
+          poster_storage_path?: string | null
+          preview_mime_type?: string | null
+          preview_size_bytes?: number | null
+          preview_storage_path?: string | null
+          primary_muscle_group?: string | null
+          publication_status?: string
+          safety_notes?: string | null
+          secondary_muscle_groups?: string[]
+          slug: string
+          source_checksum?: string | null
+          source_gif_storage_path?: string | null
+          source_key: string
+          source_mime_type?: string | null
+          source_name: string
+          source_size_bytes?: number | null
+          source_version: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          contraindications?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          equipment?: string | null
+          gif_storage_path?: string | null
+          id?: string
+          instructions?: string | null
+          laterality?: string | null
+          media_checksum?: string | null
+          media_duration_seconds?: number | null
+          media_frame_count?: number | null
+          media_height?: number | null
+          media_is_animated?: boolean | null
+          media_published_at?: string | null
+          media_status?: string
+          media_version?: string | null
+          media_width?: number | null
+          metadata?: Json
+          movement_pattern?: string | null
+          name?: string
+          poster_mime_type?: string | null
+          poster_size_bytes?: number | null
+          poster_storage_path?: string | null
+          preview_mime_type?: string | null
+          preview_size_bytes?: number | null
+          preview_storage_path?: string | null
+          primary_muscle_group?: string | null
+          publication_status?: string
+          safety_notes?: string | null
+          secondary_muscle_groups?: string[]
+          slug?: string
+          source_checksum?: string | null
+          source_gif_storage_path?: string | null
+          source_key?: string
+          source_mime_type?: string | null
+          source_name?: string
+          source_size_bytes?: number | null
+          source_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_foods: {
+        Row: {
+          carbohydrate_g_100g: number | null
+          carbohydrate_g_per_g: number | null
+          category_taco: string
+          created_at: string
+          description: string
+          energy_kcal_100g: number | null
+          energy_kcal_per_g: number | null
+          fat_g_per_g: number | null
+          fiber_g_100g: number | null
+          fiber_g_per_g: number | null
+          food_number: number
+          id: string
+          lipids_g_100g: number | null
+          metadata: Json
+          partner_category: string
+          predominant_macro: string
+          protein_g_100g: number | null
+          protein_g_per_g: number | null
+          publication_status: string
+          source_checksum: string
+          source_key: string
+          source_name: string
+          source_row_hash: string
+          source_version: string
+          updated_at: string
+        }
+        Insert: {
+          carbohydrate_g_100g?: number | null
+          carbohydrate_g_per_g?: number | null
+          category_taco: string
+          created_at?: string
+          description: string
+          energy_kcal_100g?: number | null
+          energy_kcal_per_g?: number | null
+          fat_g_per_g?: number | null
+          fiber_g_100g?: number | null
+          fiber_g_per_g?: number | null
+          food_number: number
+          id?: string
+          lipids_g_100g?: number | null
+          metadata?: Json
+          partner_category?: string
+          predominant_macro: string
+          protein_g_100g?: number | null
+          protein_g_per_g?: number | null
+          publication_status?: string
+          source_checksum: string
+          source_key: string
+          source_name: string
+          source_row_hash: string
+          source_version: string
+          updated_at?: string
+        }
+        Update: {
+          carbohydrate_g_100g?: number | null
+          carbohydrate_g_per_g?: number | null
+          category_taco?: string
+          created_at?: string
+          description?: string
+          energy_kcal_100g?: number | null
+          energy_kcal_per_g?: number | null
+          fat_g_per_g?: number | null
+          fiber_g_100g?: number | null
+          fiber_g_per_g?: number | null
+          food_number?: number
+          id?: string
+          lipids_g_100g?: number | null
+          metadata?: Json
+          partner_category?: string
+          predominant_macro?: string
+          protein_g_100g?: number | null
+          protein_g_per_g?: number | null
+          publication_status?: string
+          source_checksum?: string
+          source_key?: string
+          source_name?: string
+          source_row_hash?: string
+          source_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -6275,6 +6793,10 @@ export type Database = {
       partner_client_diet: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_exams: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_overview_legacy_20260727: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_client_photos: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_real_adherence: {
         Args: {
@@ -6308,6 +6830,26 @@ export type Database = {
           p_source_program_id: string
         }
         Returns: string
+      }
+      partner_import_system_exercises: {
+        Args: {
+          p_equipment?: string
+          p_exercise_ids?: string[]
+          p_import_all?: boolean
+          p_muscle_group?: string
+          p_query?: string
+        }
+        Returns: Json
+      }
+      partner_import_system_foods: {
+        Args: {
+          p_category_taco?: string
+          p_food_ids?: string[]
+          p_import_all?: boolean
+          p_macro?: string
+          p_query?: string
+        }
+        Returns: Json
       }
       provision_client_for_partner_records:
         | {

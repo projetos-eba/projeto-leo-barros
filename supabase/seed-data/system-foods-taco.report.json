@@ -1,0 +1,76 @@
+{
+  "duplicates": 0,
+  "emptyCounts": {
+    "numero_alimento": 0,
+    "descricao": 0,
+    "categoria_TACO": 0,
+    "macronutriente_predominante": 0,
+    "energia_kcal_100g": 6,
+    "carboidrato_g_100g": 15,
+    "proteina_g_100g": 15,
+    "lipideos_g_100g": 7,
+    "fibra_g_100g": 235,
+    "carboidrato_g_por_g": 15,
+    "proteina_g_por_g": 15,
+    "gordura_g_por_g": 7,
+    "fibra_g_por_g": 235,
+    "energia_kcal_por_g": 6,
+    "fonte": 0
+  },
+  "negativeValues": [
+    {
+      "description": "Carne, bovina, capa de contra-filé, sem gordura, grelhada",
+      "field": "carbohydrate_g_100g",
+      "row": 9,
+      "value": -0.01
+    },
+    {
+      "description": "Carne, bovina, capa de contra-filé, sem gordura, grelhada",
+      "field": "carbohydrate_g_per_g",
+      "row": 9,
+      "value": -0.0001
+    },
+    {
+      "description": "Tucunaré, filé, congelado, cru",
+      "field": "carbohydrate_g_100g",
+      "row": 123,
+      "value": -0.05
+    },
+    {
+      "description": "Tucunaré, filé, congelado, cru",
+      "field": "carbohydrate_g_per_g",
+      "row": 123,
+      "value": -0.0005
+    },
+    {
+      "description": "Frango, fígado, cru",
+      "field": "carbohydrate_g_100g",
+      "row": 126,
+      "value": -0.02
+    },
+    {
+      "description": "Frango, fígado, cru",
+      "field": "carbohydrate_g_per_g",
+      "row": 126,
+      "value": -0.0002
+    },
+    {
+      "description": "Corimba, cru",
+      "field": "carbohydrate_g_100g",
+      "row": 130,
+      "value": -0.03
+    },
+    {
+      "description": "Corimba, cru",
+      "field": "carbohydrate_g_per_g",
+      "row": 130,
+      "value": -0.0003
+    }
+  ],
+  "rejectedRows": 0,
+  "rowCount": 597,
+  "sheet": "TACO",
+  "sourceChecksum": "f1289702f58a1566a4ddd0e5d93932749eead2f02ee7e0b5ca7732e2438121e2",
+  "sourceFile": "tabelas_nutricionais.xlsx",
+  "sourceVersion": "TACO 4a ed. (2011)"
+}
