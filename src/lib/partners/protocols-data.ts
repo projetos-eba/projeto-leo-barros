@@ -7,6 +7,8 @@ import {
   type PartnerProtocolExerciseRecord,
   type PartnerProtocolFoodRecord,
   type PartnerProtocolsData,
+  type SystemExerciseRecord,
+  type SystemFoodRecord,
 } from "./protocols-metrics";
 
 type QueryResult<T> = {
@@ -78,7 +80,7 @@ export async function fetchPartnerProtocolsData(): Promise<PartnerProtocolsData>
     });
   }
 
-  const [clientRows, foods, exercises] = await Promise.all([
+  const [clientRows, foods, exercises, systemFoods, systemExercises] = await Promise.all([
     expectData(
       asQuery<PartnerClientListRow>(supabase.rpc("partner_clients_list")),
       "Clientes disponíveis",
@@ -87,7 +89,7 @@ export async function fetchPartnerProtocolsData(): Promise<PartnerProtocolsData>
       asQuery<PartnerProtocolFoodRecord>(
         supabase
           .from("partner_protocol_foods")
-          .select("id, name, category, source, serving_size, serving_unit, household_measure, kcal, carbs_g, protein_g, fat_g, fiber_g, sodium_mg, notes, tags, suggested_uses, usage_count, status, created_at, updated_at")
+          .select("id, name, category, source, serving_size, serving_unit, household_measure, kcal, carbs_g, protein_g, fat_g, fiber_g, sodium_mg, notes, tags, suggested_uses, usage_count, system_food_id, status, created_at, updated_at")
           .eq("partner_id", partner.id)
           .order("updated_at", { ascending: false }),
       ),
@@ -97,11 +99,31 @@ export async function fetchPartnerProtocolsData(): Promise<PartnerProtocolsData>
       asQuery<PartnerProtocolExerciseRecord>(
         supabase
           .from("partner_protocol_exercises")
-          .select("id, name, muscle_group, secondary_muscle_groups, equipment, level, objective, default_sets, default_reps, rest_seconds, cadence, video_url, thumbnail_url, instructions, tags, variations, usage_count, status, created_at, updated_at")
+          .select("id, name, muscle_group, secondary_muscle_groups, equipment, level, objective, default_sets, default_reps, rest_seconds, cadence, video_url, thumbnail_url, instructions, tags, variations, usage_count, system_exercise_id, status, created_at, updated_at")
           .eq("partner_id", partner.id)
           .order("updated_at", { ascending: false }),
       ),
       "biblioteca de exercícios",
+    ),
+    expectData(
+      asQuery<SystemFoodRecord>(
+        supabase
+          .from("system_foods")
+          .select("id, food_number, description, category_taco, partner_category, predominant_macro, energy_kcal_100g, carbohydrate_g_100g, protein_g_100g, lipids_g_100g, fiber_g_100g, carbohydrate_g_per_g, protein_g_per_g, fat_g_per_g, fiber_g_per_g, energy_kcal_per_g, source_name, source_version, source_checksum")
+          .eq("publication_status", "published")
+          .order("description", { ascending: true }),
+      ),
+      "biblioteca TACO",
+    ),
+    expectData(
+      asQuery<SystemExerciseRecord>(
+        supabase
+          .from("system_exercises")
+          .select("id, source_key, name, slug, description, instructions, primary_muscle_group, secondary_muscle_groups, equipment, difficulty_level, gif_storage_path, source_gif_storage_path, poster_storage_path, preview_storage_path, media_width, media_height, media_frame_count, media_is_animated, source_name, source_version, source_checksum, media_checksum, media_version")
+          .eq("publication_status", "published")
+          .order("name", { ascending: true }),
+      ),
+      "biblioteca oficial de exercícios",
     ),
   ]);
 
@@ -123,5 +145,7 @@ export async function fetchPartnerProtocolsData(): Promise<PartnerProtocolsData>
       professionalName: partner.professional_name,
       professionalType: partner.professional_type,
     },
+    systemExercises,
+    systemFoods,
   });
 }

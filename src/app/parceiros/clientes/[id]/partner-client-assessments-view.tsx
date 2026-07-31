@@ -7,22 +7,18 @@ import {
   ClipboardPlus,
   Download,
   Dumbbell,
+  Eye,
   Flame,
   Layers3,
   Loader2,
-  Lock,
   Percent,
-  Plus,
+  Pencil,
   Ruler,
   Save,
   SlidersHorizontal,
   Target,
-  TrendingDown,
-  TrendingUp,
-  Utensils,
   Weight,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -49,6 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import type {
   AssessmentActivityLevel,
+  AssessmentBiologicalSex,
   AssessmentFormula,
   AssessmentMethod,
   CalorieCalculation,
@@ -56,11 +53,14 @@ import type {
 } from "@/lib/partners/client-assessments-metrics";
 import {
   assessmentMethodLabels,
+  assessmentMethodUsesSkinfoldFormula,
+  assessmentProtocolSkinfolds,
   activityLevels,
   buildChartDomain,
   buildCalorieProjection,
   buildDynamicNumberDomain,
   calculateCalories,
+  calculatePhysicalAssessment,
   circumferenceLabels,
   formulaLabels,
   skinfoldLabels,
@@ -107,6 +107,7 @@ const circumferenceKeys = [
 ] as const;
 
 const skinfoldKeys = [
+  "biceps",
   "pectoral",
   "abdominal",
   "triceps",
@@ -122,6 +123,7 @@ const compositionMetrics = [
   { key: "weightKg", label: "Peso corporal", suffix: " kg" },
   { key: "fatMassKg", label: "Massa gorda", suffix: " kg" },
   { key: "leanMassKg", label: "Massa magra", suffix: " kg" },
+  { key: "ffmi", label: "FFMI", suffix: "" },
   { key: "muscleMassKg", label: "Massa muscular", suffix: " kg" },
 ];
 
@@ -168,15 +170,81 @@ function deltaLabel(value: number | null, suffix: string, inverse = false) {
   return `${good ? "↗" : "↘"} ${sign}${value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}${suffix}`;
 }
 
-function HeaderModule({ scope }: { scope: string }) {
-  const Icon = scope === "dieta" ? Utensils : scope === "treino" ? Dumbbell : Target;
-  const label = scope === "dieta" ? "Dieta" : scope === "treino" ? "Treino" : "Saúde";
+function classifyBodyFat(value: number | null, biologicalSex: AssessmentBiologicalSex) {
+  if (value === null) return { label: "Sem dados", tone: "text-[#8b92a3]" };
+  if (biologicalSex === "female") {
+    if (value < 14) return { label: "Essencial", tone: "text-[#8fcfff]" };
+    if (value < 21) return { label: "Atlético", tone: "text-[#58a067]" };
+    if (value < 25) return { label: "Fitness", tone: "text-[#9bd36f]" };
+    if (value < 32) return { label: "Aceitável", tone: "text-[#f0c76a]" };
+    if (value < 39) return { label: "Elevado", tone: "text-[#f48c58]" };
+    return { label: "Muito elevado", tone: "text-[#ff7b8e]" };
+  }
+  if (value < 6) return { label: "Essencial", tone: "text-[#8fcfff]" };
+  if (value < 14) return { label: "Atlético", tone: "text-[#58a067]" };
+  if (value < 18) return { label: "Fitness", tone: "text-[#9bd36f]" };
+  if (value < 25) return { label: "Aceitável", tone: "text-[#f0c76a]" };
+  if (value < 30) return { label: "Elevado", tone: "text-[#f48c58]" };
+  return { label: "Muito elevado", tone: "text-[#ff7b8e]" };
+}
+
+function classifyFfmi(value: number | null, biologicalSex: AssessmentBiologicalSex) {
+  if (value === null) return { label: "Sem dados", tone: "text-[#8b92a3]" };
+  if (biologicalSex === "female") {
+    if (value < 15) return { label: "Baixo", tone: "text-[#8fcfff]" };
+    if (value < 17) return { label: "Média", tone: "text-[#58a067]" };
+    if (value < 19) return { label: "Bom", tone: "text-[#9bd36f]" };
+    if (value < 21) return { label: "Muito alto", tone: "text-[#f0c76a]" };
+    return { label: "Elevado", tone: "text-[#ff7b8e]" };
+  }
+  if (value < 18) return { label: "Baixo", tone: "text-[#8fcfff]" };
+  if (value < 20) return { label: "Média", tone: "text-[#58a067]" };
+  if (value < 22) return { label: "Bom", tone: "text-[#9bd36f]" };
+  if (value < 25) return { label: "Muito alto", tone: "text-[#f0c76a]" };
+  return { label: "Elevado", tone: "text-[#ff7b8e]" };
+}
+
+function spectrumPosition(value: number | null, min: number, max: number) {
+  if (value === null) return 0;
+  return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+}
+
+function ResultSpectrum({
+  label,
+  max,
+  min,
+  suffix = "",
+  tone,
+  value,
+}: {
+  label: string;
+  max: number;
+  min: number;
+  suffix?: string;
+  tone: string;
+  value: number | null;
+}) {
+  const position = spectrumPosition(value, min, max);
 
   return (
-    <span className="inline-flex h-[42px] items-center gap-2 rounded-[10px] border border-[#2f82bf]/45 bg-[rgba(10,44,72,0.35)] px-3 text-[12px] font-semibold text-[#c5e7ff]">
-      <Icon className="size-3.5" />
-      {label}
-    </span>
+    <div className="rounded-[12px] border border-[#303746] bg-[#081522]/70 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">{label}</p>
+        <p className={cn("text-[12px] font-bold", tone)}>{value === null ? "Sem dados" : formatNumber(value, suffix)}</p>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#111821]">
+        <div className="flex h-full">
+          <span className="h-full flex-1 bg-[#2f82bf]" />
+          <span className="h-full flex-1 bg-[#58a067]" />
+          <span className="h-full flex-1 bg-[#f0c76a]" />
+          <span className="h-full flex-1 bg-[#f48c58]" />
+          <span className="h-full flex-1 bg-[#ff7b8e]" />
+        </div>
+      </div>
+      <div className="relative h-4">
+        {value !== null ? <span className="absolute top-[-5px] h-4 w-1 rounded-full bg-white shadow-[0_0_0_2px_rgba(11,23,32,0.8)]" style={{ left: `${position}%` }} /> : null}
+      </div>
+    </div>
   );
 }
 
@@ -236,6 +304,15 @@ function MiniInfo({ label, value }: { label: string; value: string }) {
     <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-3">
       <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.05em] text-[#8b92a3]">{label}</p>
       <p className="mt-1 min-w-0 break-words text-[14px] font-semibold leading-5 text-white">{value}</p>
+    </div>
+  );
+}
+
+function ClientDataInfo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex min-h-[64px] min-w-0 flex-col justify-center rounded-[10px] border border-[#303746] bg-[#081522] px-3 py-2">
+      <p className="min-w-0 truncate text-[10px] font-semibold uppercase leading-4 tracking-[0.05em] text-[#8b92a3]">{label}</p>
+      <p className="mt-1 min-w-0 truncate text-[14px] font-semibold leading-5 text-white">{value}</p>
     </div>
   );
 }
@@ -316,24 +393,31 @@ function CompactCalorieTooltip({
 }) {
   if (!active || !payload?.length) return null;
 
-  const goal = payload.find((item) => item.dataKey === "goalKcal")?.value;
-  const maintenance = payload.find((item) => item.dataKey === "maintenanceKcal")?.value;
+  const estimated = payload.find((item) => item.dataKey === "weightKg")?.value;
+  const target = payload.find((item) => item.dataKey === "targetWeightKg")?.value;
 
   return (
     <div className="w-[154px] rounded-[8px] border border-[#2f82bf] bg-[#071827] px-3 py-2 text-[#f4f8fb] shadow-[0_10px_24px_rgba(0,0,0,0.25)] sm:w-[180px]">
       <p className="text-[14px] font-semibold leading-5 sm:text-[15px]">Dia {label}</p>
       <div className="mt-2 grid gap-1 text-[12px] leading-4 sm:text-[13px]">
-        <p className="truncate text-[#3b97e3]">Meta: {typeof goal === "number" ? goal.toLocaleString("pt-BR") : goal} kcal</p>
-        <p className="truncate text-[#9aa5b6]">Manter: {typeof maintenance === "number" ? maintenance.toLocaleString("pt-BR") : maintenance} kcal</p>
+        <p className="truncate text-[#3b97e3]">Estimado: {typeof estimated === "number" ? estimated.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : estimated} kg</p>
+        <p className="truncate text-[#9aa5b6]">Meta: {typeof target === "number" ? target.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : target} kg</p>
       </div>
     </div>
   );
 }
 
-function CalorieProjectionChart({ data }: { data: PartnerClientAssessmentsData["calorie"]["projection"] }) {
+function CalorieProjectionChart({
+  data,
+  targetWeightKg,
+}: {
+  data: PartnerClientAssessmentsData["calorie"]["projection"];
+  targetWeightKg: number | null;
+}) {
   const { ref, width } = useMeasuredWidth();
+  const chartData = data.map((item) => ({ ...item, targetWeightKg }));
   const domain = buildDynamicNumberDomain(
-    data.flatMap((item) => [item.goalKcal, item.maintenanceKcal]),
+    chartData.flatMap((item) => [item.weightKg, item.targetWeightKg]),
     0.16,
   );
   const compact = width > 0 && width < 430;
@@ -343,11 +427,11 @@ function CalorieProjectionChart({ data }: { data: PartnerClientAssessmentsData["
 
   return (
     <div className="h-[218px] min-w-0 overflow-hidden sm:h-[230px]" data-testid="client-assessments-calorie-chart" ref={ref}>
-      {width > 0 && data.length > 0 ? (
-        <LineChart data={data} height={chartHeight} margin={{ bottom: 2, left: compact ? -16 : -10, right: compact ? 10 : 6, top: 10 }} width={width}>
+      {width > 0 && chartData.length > 0 ? (
+        <LineChart data={chartData} height={chartHeight} margin={{ bottom: 2, left: compact ? -16 : -10, right: compact ? 10 : 6, top: 10 }} width={width}>
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.75} vertical={false} />
           <XAxis axisLine={false} dataKey="day" tick={{ fill: "#9aa5b6", fontSize: compact ? 10 : 11 }} tickFormatter={(value) => `${value}d`} tickLine={false} ticks={xTicks} />
-          <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: compact ? 10 : 11 }} tickLine={false} width={compact ? 46 : 52} />
+          <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: compact ? 10 : 11 }} tickFormatter={(value) => `${value}kg`} tickLine={false} width={compact ? 46 : 52} />
           <Tooltip
             allowEscapeViewBox={{ x: false, y: false }}
             content={<CompactCalorieTooltip />}
@@ -355,11 +439,11 @@ function CalorieProjectionChart({ data }: { data: PartnerClientAssessmentsData["
             position={tooltipPosition}
             wrapperStyle={{ maxWidth: compact ? 160 : 190, zIndex: 20 }}
           />
-          <Line dataKey="maintenanceKcal" dot={{ fill: "#5a6477", r: 3 }} name="Manter peso" stroke="#7b8794" strokeDasharray="6 6" strokeWidth={2.2} type="monotone" />
-          <Line dataKey="goalKcal" dot={{ fill: "#3b97e3", r: 3 }} name="Chegar à meta" stroke="#3b97e3" strokeWidth={2.8} type="monotone" />
+          <Line dataKey="targetWeightKg" dot={false} name="Meta" stroke="#7b8794" strokeDasharray="6 6" strokeWidth={2.2} type="monotone" />
+          <Line dataKey="weightKg" dot={{ fill: "#3b97e3", r: 3 }} name="Estimado" stroke="#3b97e3" strokeWidth={2.8} type="monotone" />
         </LineChart>
       ) : (
-        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Sem dados para projetar calorias.</div>
+        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Sem dados para projetar a meta.</div>
       )}
     </div>
   );
@@ -369,14 +453,16 @@ function CircumferenceChart({
   data,
   metrics,
   mode = "general",
+  selectedMetrics,
 }: {
   data: PartnerClientAssessmentsData["charts"]["circumferenceSeries"];
   metrics: PartnerClientAssessmentsData["circumferences"]["availableMetrics"];
   mode?: "general" | "region" | "radar";
+  selectedMetrics: string[];
 }) {
   const { ref, width } = useMeasuredWidth();
   const colors = ["#3b97e3", "#58a067", "#f0c76a", "#ff7b8e", "#9b7cff"];
-  const visibleMetrics = metrics.slice(0, mode === "region" ? 8 : 5);
+  const visibleMetrics = metrics.filter((metric) => selectedMetrics.includes(metric.key));
   const domain = buildChartDomain(data, visibleMetrics.map((metric) => metric.key), 0.14);
   const latest = data.at(-1);
   const radarData = visibleMetrics.map((metric) => ({
@@ -386,7 +472,7 @@ function CircumferenceChart({
 
   return (
     <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-circumference-chart" ref={ref}>
-      {width > 0 && data.length > 0 && metrics.length > 0 ? (
+      {width > 0 && data.length > 0 && visibleMetrics.length > 0 ? (
         mode === "radar" ? (
           <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={Math.min(82, Math.max(54, width / 5))} width={width}>
             <PolarGrid stroke="#31536b" />
@@ -418,7 +504,7 @@ function CircumferenceChart({
         </LineChart>
         )
       ) : (
-        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Sem circunferências registradas.</div>
+        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Selecione ao menos uma métrica.</div>
       )}
     </div>
   );
@@ -453,21 +539,71 @@ function ModeToggle<TMode extends string>({
   );
 }
 
+function MetricSelector({
+  groups,
+  onToggle,
+  onToggleAll,
+  selected,
+}: {
+  groups: Array<{ label: string; metrics: Array<{ key: string; label: string }> }>;
+  onToggle: (key: string) => void;
+  onToggleAll: () => void;
+  selected: string[];
+}) {
+  const allMetrics = groups.flatMap((group) => group.metrics);
+  const allSelected = allMetrics.length > 0 && allMetrics.every((metric) => selected.includes(metric.key));
+
+  return (
+    <aside className="grid content-start gap-4 border-b border-[#303746] bg-[#081522]/55 p-3 sm:p-4 lg:border-b-0 lg:border-r">
+      <button className="inline-flex h-9 items-center justify-center gap-2 rounded-[9px] bg-[#3b97e3] px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-white" type="button" onClick={onToggleAll}>
+        <Check className="size-3.5" />
+        {allSelected ? "Desmarcar todos" : "Marcar todos"}
+      </button>
+      {groups.map((group) => (
+        <div className="grid gap-2" key={group.label}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b92a3]">{group.label}</p>
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+            {group.metrics.map((metric) => {
+              const active = selected.includes(metric.key);
+              return (
+                <button
+                  className={cn(
+                    "inline-flex h-9 min-w-0 items-center gap-2 rounded-[9px] border px-2 text-left text-[11px] font-semibold transition",
+                    active ? "border-[#3b97e3] bg-[#102f4a] text-[#8fcfff]" : "border-[#303746] bg-[#111821] text-[#8b92a3]",
+                  )}
+                  key={metric.key}
+                  type="button"
+                  onClick={() => onToggle(metric.key)}
+                >
+                  <span className={cn("flex size-3.5 shrink-0 items-center justify-center rounded-[4px]", active ? "bg-[#3b97e3] text-white" : "bg-[#25313f]")}>{active ? <Check className="size-2.5" /> : null}</span>
+                  <span className="truncate">{metric.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </aside>
+  );
+}
+
 function CompositionChart({
   data,
   mode,
+  selectedMetrics,
 }: {
   data: PartnerClientAssessmentsData["charts"]["compositionSeries"];
   mode: "dynamic" | "stack";
+  selectedMetrics: string[];
 }) {
   const { ref, width } = useMeasuredWidth();
   const colors = ["#3b97e3", "#a277ff", "#ff7b8e", "#58a067", "#f0c76a"];
-  const visible = mode === "dynamic" ? compositionMetrics.filter((metric) => metric.key !== "muscleMassKg") : compositionMetrics;
+  const visible = compositionMetrics.filter((metric) => selectedMetrics.includes(metric.key));
   const domain = buildChartDomain(data, visible.map((metric) => metric.key), 0.14);
 
   return (
     <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-composition-chart" ref={ref}>
-      {width > 0 && data.length > 0 ? (
+      {width > 0 && data.length > 0 && visible.length > 0 ? (
         <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: 6, top: 12 }} width={width}>
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.7} vertical={false} />
           <XAxis axisLine={false} dataKey="date" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} />
@@ -494,7 +630,7 @@ function CompositionChart({
           ))}
         </LineChart>
       ) : (
-        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Sem composição registrada.</div>
+        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Selecione ao menos uma métrica.</div>
       )}
     </div>
   );
@@ -504,14 +640,16 @@ function SkinfoldChart({
   data,
   metrics,
   mode,
+  selectedMetrics,
 }: {
   data: PartnerClientAssessmentsData["charts"]["skinfoldSeries"];
   metrics: PartnerClientAssessmentsData["skinfolds"]["availableMetrics"];
   mode: "general" | "region" | "radar";
+  selectedMetrics: string[];
 }) {
   const { ref, width } = useMeasuredWidth();
   const colors = ["#3b97e3", "#ff7b8e", "#a277ff", "#58a067", "#f0c76a", "#62d0ff", "#d678ff", "#f48c58"];
-  const visibleMetrics = metrics.slice(0, mode === "region" ? 8 : 5);
+  const visibleMetrics = metrics.filter((metric) => selectedMetrics.includes(metric.key));
   const domain = buildChartDomain(data, visibleMetrics.map((metric) => metric.key), 0.16);
   const latest = data.at(-1);
   const radarData = visibleMetrics.map((metric) => ({
@@ -521,7 +659,7 @@ function SkinfoldChart({
 
   return (
     <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-skinfold-chart" ref={ref}>
-      {width > 0 && data.length > 0 && metrics.length > 0 ? (
+      {width > 0 && data.length > 0 && visibleMetrics.length > 0 ? (
         mode === "radar" ? (
           <RadarChart cx="50%" cy="50%" data={radarData} height={260} outerRadius={Math.min(82, Math.max(54, width / 5))} width={width}>
             <PolarGrid stroke="#31536b" />
@@ -553,7 +691,7 @@ function SkinfoldChart({
           </LineChart>
         )
       ) : (
-        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Sem dobras cutâneas registradas.</div>
+        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Selecione ao menos uma métrica.</div>
       )}
     </div>
   );
@@ -584,47 +722,93 @@ function exportCsv(
 }
 
 function AssessmentDialog({
+  assessment,
   data,
+  mode,
   onOpenChange,
   open,
 }: {
+  assessment: PartnerClientAssessmentsData["records"][number] | null;
   data: PartnerClientAssessmentsData;
+  mode: "create" | "edit";
   onOpenChange: (open: boolean) => void;
   open: boolean;
 }) {
   const router = useRouter();
-  const latest = data.latestAssessment;
+  const base = mode === "edit" && assessment ? assessment : data.latestAssessment;
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [form, setForm] = useState({
-    activityLevel: latest?.activityLevel ?? "moderate",
-    assessmentMethod: latest?.assessmentMethod ?? "pollock_7",
-    assessedAt: new Date().toISOString().slice(0, 10),
-    bodyFatPercentage: latest?.bodyFatPercentage?.toString() ?? "",
-    heightCm: latest?.heightCm?.toString() ?? "175",
-    muscleMassKg: latest?.muscleMassKg?.toString() ?? "",
-    notes: "",
-    targetDays: latest?.targetDays?.toString() ?? "90",
-    targetWeightKg: latest?.targetWeightKg?.toString() ?? "",
-    title: "Avaliação corporal",
-    weightKg: latest?.weightKg?.toString() ?? "",
+    activityLevel: base?.activityLevel ?? "moderate",
+    assessmentMethod: base?.assessmentMethod ?? "jackson_pollock_7",
+    assessedAt: mode === "edit" && base ? base.assessedAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+    bodyFatPercentage: base?.bodyFatPercentage?.toString() ?? "",
+    heightCm: base?.heightCm?.toString() ?? "175",
+    muscleMassKg: base?.muscleMassKg?.toString() ?? "",
+    notes: mode === "edit" ? base?.notes ?? "" : "",
+    targetDays: base?.targetDays?.toString() ?? "90",
+    targetWeightKg: base?.targetWeightKg?.toString() ?? "",
+    title: mode === "edit" ? base?.title ?? "Avaliação corporal" : "Avaliação corporal",
+    weightKg: base?.weightKg?.toString() ?? "",
   });
   const [circumferences, setCircumferences] = useState<Record<string, string>>(() =>
     Object.fromEntries(circumferenceKeys.map((key) => [
       key,
-      latest?.circumferences.find((item) => item.metricKey === key)?.valueCm.toString() ?? "",
+      base?.circumferences.find((item) => item.metricKey === key)?.valueCm.toString() ?? "",
     ])),
   );
   const [skinfolds, setSkinfolds] = useState<Record<string, string>>(() =>
     Object.fromEntries(skinfoldKeys.map((key) => [
       key,
-      latest?.skinfolds.find((item) => item.metricKey === key)?.valueMm.toString() ?? "",
+      base?.skinfolds.find((item) => item.metricKey === key)?.valueMm.toString() ?? "",
     ])),
   );
+
+  useEffect(() => {
+    if (!open) return;
+    const nextBase = mode === "edit" && assessment ? assessment : data.latestAssessment;
+    setError(null);
+    setForm({
+      activityLevel: nextBase?.activityLevel ?? "moderate",
+      assessmentMethod: nextBase?.assessmentMethod ?? "jackson_pollock_7",
+      assessedAt: mode === "edit" && nextBase ? nextBase.assessedAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      bodyFatPercentage: nextBase?.bodyFatPercentage?.toString() ?? "",
+      heightCm: nextBase?.heightCm?.toString() ?? "175",
+      muscleMassKg: nextBase?.muscleMassKg?.toString() ?? "",
+      notes: mode === "edit" ? nextBase?.notes ?? "" : "",
+      targetDays: nextBase?.targetDays?.toString() ?? "90",
+      targetWeightKg: nextBase?.targetWeightKg?.toString() ?? "",
+      title: mode === "edit" ? nextBase?.title ?? "Avaliação corporal" : "Avaliação corporal",
+      weightKg: nextBase?.weightKg?.toString() ?? "",
+    });
+    setCircumferences(Object.fromEntries(circumferenceKeys.map((key) => [
+      key,
+      nextBase?.circumferences.find((item) => item.metricKey === key)?.valueCm.toString() ?? "",
+    ])));
+    setSkinfolds(Object.fromEntries(skinfoldKeys.map((key) => [
+      key,
+      nextBase?.skinfolds.find((item) => item.metricKey === key)?.valueMm.toString() ?? "",
+    ])));
+  }, [assessment, data.latestAssessment, mode, open]);
 
   function setField(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
+
+  const selectedMethod = form.assessmentMethod as AssessmentMethod;
+  const activeSkinfolds = assessmentProtocolSkinfolds[selectedMethod];
+  const usesSkinfoldFormula = assessmentMethodUsesSkinfoldFormula(selectedMethod);
+  const physicalPreview = useMemo(() => calculatePhysicalAssessment({
+    age: data.client.age,
+    assessmentMethod: selectedMethod,
+    biologicalSex: data.client.biologicalSex as AssessmentBiologicalSex,
+    bodyFatPercentage: form.bodyFatPercentage ? Number(form.bodyFatPercentage) : null,
+    heightCm: Number(form.heightCm),
+    skinfolds: Object.entries(skinfolds)
+      .filter(([, value]) => value.trim() !== "")
+      .map(([metricKey, value]) => ({ metricKey, valueMm: Number(value) })),
+    weightKg: Number(form.weightKg),
+  }), [data.client.age, data.client.biologicalSex, form.bodyFatPercentage, form.heightCm, form.weightKg, selectedMethod, skinfolds]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -636,7 +820,8 @@ function AssessmentDialog({
         activityLevel: form.activityLevel as AssessmentActivityLevel,
         assessmentMethod: form.assessmentMethod as AssessmentMethod,
         assessedAt: new Date(`${form.assessedAt}T12:00:00`).toISOString(),
-        bodyFatPercentage: form.bodyFatPercentage ? Number(form.bodyFatPercentage) : null,
+        assessmentId: mode === "edit" && assessment ? assessment.id : undefined,
+        bodyFatPercentage: usesSkinfoldFormula ? physicalPreview.bodyFatPercentage : form.bodyFatPercentage ? Number(form.bodyFatPercentage) : null,
         circumferences: Object.entries(circumferences)
           .filter(([, value]) => value.trim() !== "")
           .map(([metricKey, value]) => ({ metricKey: metricKey as (typeof circumferenceKeys)[number], valueCm: Number(value) })),
@@ -669,9 +854,9 @@ function AssessmentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[760px] sm:rounded-[14px]">
         <DialogHeader className="border-b border-[#303746] px-4 py-4 text-left sm:px-6 sm:py-5">
-          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">Nova avaliação</DialogTitle>
+          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">{mode === "edit" ? "Editar avaliação" : "Nova avaliação"}</DialogTitle>
           <DialogDescription className="text-[#8b92a3]">
-            Registre dados corporais, metodologia, dobras cutâneas, circunferências e parâmetros para cálculo calórico.
+            {mode === "edit" ? "Revise dados corporais, metodologia, dobras cutâneas, circunferências e parâmetros da avaliação." : "Registre dados corporais, metodologia, dobras cutâneas, circunferências e parâmetros para cálculo calórico."}
           </DialogDescription>
         </DialogHeader>
         <form className="grid gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5" onSubmit={handleSubmit}>
@@ -680,7 +865,9 @@ function AssessmentDialog({
             <Label text="Data"><Input required type="date" value={form.assessedAt} onChange={(value) => setField("assessedAt", value)} /></Label>
             <Label text="Altura (cm)"><Input required inputMode="decimal" value={form.heightCm} onChange={(value) => setField("heightCm", value)} /></Label>
             <Label text="Peso (kg)"><Input required inputMode="decimal" value={form.weightKg} onChange={(value) => setField("weightKg", value)} /></Label>
-            <Label text="% gordura"><Input inputMode="decimal" value={form.bodyFatPercentage} onChange={(value) => setField("bodyFatPercentage", value)} /></Label>
+            <Label text={usesSkinfoldFormula ? "% gordura calculada" : "% gordura"}>
+              <Input inputMode="decimal" readOnly={usesSkinfoldFormula} value={usesSkinfoldFormula ? physicalPreview.bodyFatPercentage?.toString() ?? "" : form.bodyFatPercentage} onChange={(value) => setField("bodyFatPercentage", value)} />
+            </Label>
             <Label text="Massa muscular (kg)"><Input inputMode="decimal" value={form.muscleMassKg} onChange={(value) => setField("muscleMassKg", value)} /></Label>
             <Label text="Peso meta (kg)"><Input inputMode="decimal" value={form.targetWeightKg} onChange={(value) => setField("targetWeightKg", value)} /></Label>
             <Label text="Prazo (dias)"><Input required inputMode="numeric" value={form.targetDays} onChange={(value) => setField("targetDays", value)} /></Label>
@@ -700,13 +887,25 @@ function AssessmentDialog({
 
           <div>
             <h3 className="text-[15px] font-bold text-white">Dobras cutâneas</h3>
+            {usesSkinfoldFormula ? <p className="mt-1 text-[12px] text-[#8b92a3]">Preencha as dobras exigidas pelo protocolo selecionado.</p> : null}
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {skinfoldKeys.map((key) => (
-                <Label key={key} text={String(skinfoldLabels[key] ?? key) + " (mm)"}>
-                  <Input inputMode="decimal" value={skinfolds[key]} onChange={(value) => setSkinfolds((current) => ({ ...current, [key]: value }))} />
+              {skinfoldKeys.map((key) => {
+                const active = !usesSkinfoldFormula || activeSkinfolds.includes(key);
+                return (
+                <Label className={cn(!active && "opacity-35")} key={key} text={String(skinfoldLabels[key] ?? key) + " (mm)"}>
+                  <Input disabled={!active} inputMode="decimal" value={skinfolds[key]} onChange={(value) => setSkinfolds((current) => ({ ...current, [key]: value }))} />
                 </Label>
-              ))}
+                );
+              })}
             </div>
+          </div>
+
+          <div className="grid gap-3 rounded-[12px] border border-[#303746] bg-[#111821]/70 p-3 sm:grid-cols-4">
+            <MiniInfo label="Gordura" value={formatNumber(physicalPreview.bodyFatPercentage, "%")} />
+            <MiniInfo label="Massa gorda" value={formatNumber(physicalPreview.fatMassKg, " kg")} />
+            <MiniInfo label="Massa magra" value={formatNumber(physicalPreview.leanMassKg, " kg")} />
+            <MiniInfo label="FFMI" value={formatNumber(physicalPreview.ffmi)} />
+            {physicalPreview.reason ? <p className="text-[12px] text-amber-200 sm:col-span-4">{physicalPreview.reason}</p> : null}
           </div>
 
           <div>
@@ -730,7 +929,7 @@ function AssessmentDialog({
             <button className="h-10 rounded-[10px] border border-[#303746] px-5 text-[14px] font-semibold text-white" type="button" onClick={() => onOpenChange(false)}>Cancelar</button>
             <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[14px] font-semibold text-white disabled:opacity-60" disabled={pending} type="submit">
               {pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-              Salvar avaliação
+              {mode === "edit" ? "Atualizar avaliação" : "Salvar avaliação"}
             </button>
           </div>
         </form>
@@ -739,19 +938,23 @@ function AssessmentDialog({
   );
 }
 
-function Label({ children, text }: { children: ReactNode; text: string }) {
-  return <label className="grid gap-1.5 text-[12px] font-semibold leading-4 text-[#d7dae0] sm:gap-2 sm:text-[13px]">{text}{children}</label>;
+function Label({ children, className, text }: { children: ReactNode; className?: string; text: string }) {
+  return <label className={cn("grid gap-1.5 text-[12px] font-semibold leading-4 text-[#d7dae0] sm:gap-2 sm:text-[13px]", className)}>{text}{children}</label>;
 }
 
 function Input({
   inputMode,
+  disabled,
   onChange,
+  readOnly,
   required,
   type = "text",
   value,
 }: {
   inputMode?: "decimal" | "numeric";
+  disabled?: boolean;
   onChange: (value: string) => void;
+  readOnly?: boolean;
   required?: boolean;
   type?: string;
   value: string;
@@ -759,7 +962,9 @@ function Input({
   return (
     <input
       className="h-10 min-w-0 rounded-[10px] border border-[#303746] bg-[#161a22] px-2 text-[13px] outline-none focus:border-[#3b97e3] sm:px-3 sm:text-[14px]"
+      disabled={disabled}
       inputMode={inputMode}
+      readOnly={readOnly}
       required={required}
       type={type}
       value={value}
@@ -768,14 +973,150 @@ function Input({
   );
 }
 
+function ProfileBioDialog({
+  draft,
+  onDraftChange,
+  onOpenChange,
+  onSubmit,
+  open,
+  pending,
+}: {
+  draft: { biologicalSex: AssessmentBiologicalSex; birthDate: string; objective: string };
+  onDraftChange: (draft: { biologicalSex: AssessmentBiologicalSex; birthDate: string; objective: string }) => void;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: () => void;
+  open: boolean;
+  pending: boolean;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[560px] sm:rounded-[14px]">
+        <DialogHeader className="border-b border-[#303746] px-4 py-4 text-left sm:px-6 sm:py-5">
+          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">Editar bio</DialogTitle>
+          <DialogDescription className="text-[#8b92a3]">Atualize os dados usados nas fórmulas de avaliação.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 px-4 py-4 sm:px-6 sm:py-5">
+          <Label text="Data de nascimento">
+            <Input required type="date" value={draft.birthDate} onChange={(value) => onDraftChange({ ...draft, birthDate: value })} />
+          </Label>
+          <label className="grid gap-1.5 text-[12px] font-semibold leading-4 text-[#d7dae0] sm:gap-2 sm:text-[13px]">
+            Sexo biológico
+            <select className="h-10 w-full rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none focus:border-[#3b97e3]" value={draft.biologicalSex} onChange={(event) => onDraftChange({ ...draft, biologicalSex: event.target.value as AssessmentBiologicalSex })}>
+              <option value="not_informed">Sexo não informado</option>
+              <option value="female">Feminino</option>
+              <option value="male">Masculino</option>
+            </select>
+          </label>
+          <Label text="Objetivo principal">
+            <Input required value={draft.objective} onChange={(value) => onDraftChange({ ...draft, objective: value })} />
+          </Label>
+          <div className="flex justify-end gap-2 border-t border-[#303746] pt-4">
+            <button className="h-10 rounded-[10px] border border-[#303746] px-5 text-[14px] font-semibold text-white" type="button" onClick={() => onOpenChange(false)}>Cancelar</button>
+            <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[14px] font-semibold text-white disabled:opacity-60" disabled={pending} type="button" onClick={onSubmit}>
+              {pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              Salvar bio
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AssessmentDetailsDialog({
+  assessment,
+  biologicalSex,
+  onEdit,
+  onOpenChange,
+  open,
+}: {
+  assessment: PartnerClientAssessmentsData["records"][number] | null;
+  biologicalSex: AssessmentBiologicalSex;
+  onEdit: () => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+}) {
+  const bodyFatClassification = classifyBodyFat(assessment?.bodyFatPercentage ?? null, biologicalSex);
+  const ffmiClassification = classifyFfmi(assessment?.ffmi ?? null, biologicalSex);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[92vh] overflow-y-auto border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[720px] sm:rounded-[14px]">
+        <DialogHeader className="border-b border-[#303746] px-4 py-4 text-left sm:px-6 sm:py-5">
+          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">{assessment?.title ?? "Detalhes da avaliação"}</DialogTitle>
+          <DialogDescription className="text-[#8b92a3]">
+            {assessment ? `${new Date(assessment.assessedAt).toLocaleDateString("pt-BR")} · ${assessmentMethodLabels[assessment.assessmentMethod]}` : "Selecione uma avaliação para visualizar."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {assessment ? (
+          <div className="grid gap-4 px-4 py-4 sm:px-6 sm:py-5">
+            <div className="grid gap-3 sm:grid-cols-4">
+              <MiniInfo label="Peso" value={formatNumber(assessment.weightKg, " kg")} />
+              <MiniInfo label="% gordura" value={`${formatNumber(assessment.bodyFatPercentage, "%")} · ${bodyFatClassification.label}`} />
+              <MiniInfo label="Massa magra" value={formatNumber(assessment.leanMassKg, " kg")} />
+              <MiniInfo label="FFMI" value={`${formatNumber(assessment.ffmi)} · ${ffmiClassification.label}`} />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <ResultSpectrum label={`IMC · ${assessment.bmiClassification}`} max={45} min={12} tone="text-[#8fcfff]" value={assessment.bmi} />
+              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={biologicalSex === "female" ? 50 : 40} min={biologicalSex === "female" ? 5 : 0} suffix="%" tone={bodyFatClassification.tone} value={assessment.bodyFatPercentage} />
+              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={biologicalSex === "female" ? 27 : 30} min={biologicalSex === "female" ? 12 : 15} tone={ffmiClassification.tone} value={assessment.ffmi} />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Dobras cutâneas</h3>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {assessment.skinfolds.map((item) => (
+                    <MiniInfo key={item.metricKey} label={item.label} value={formatNumber(item.valueMm, " mm")} />
+                  ))}
+                  {assessment.skinfolds.length === 0 ? <p className="text-[13px] text-[#8b92a3]">Nenhuma dobra cutânea registrada.</p> : null}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Circunferências</h3>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {assessment.circumferences.map((item) => (
+                    <MiniInfo key={item.metricKey} label={item.label} value={formatNumber(item.valueCm, " cm")} />
+                  ))}
+                  {assessment.circumferences.length === 0 ? <p className="text-[13px] text-[#8b92a3]">Nenhuma circunferência registrada.</p> : null}
+                </div>
+              </div>
+            </div>
+
+            {assessment.notes ? <p className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-3 text-[13px] leading-5 text-[#d7dae0]">{assessment.notes}</p> : null}
+
+            <div className="flex justify-end border-t border-[#303746] pt-4">
+              <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[14px] font-semibold text-white" type="button" onClick={onEdit}>
+                <Pencil className="size-4" />
+                Editar avaliação
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function PartnerClientAssessmentsView({ assessments, overview }: PartnerClientAssessmentsViewProps) {
   const router = useRouter();
-  const [assessmentOpen, setAssessmentOpen] = useState(false);
+  const [assessmentFlow, setAssessmentFlow] = useState<{
+    assessmentId: string | null;
+    mode: "create" | "details" | "edit";
+    open: boolean;
+  }>({ assessmentId: null, mode: "create", open: false });
   const [selectedFormula, setSelectedFormula] = useState<AssessmentFormula>(assessments.calorie.selected?.formula ?? "mifflin");
   const [compositionMode, setCompositionMode] = useState<"dynamic" | "stack">("dynamic");
   const [skinfoldMode, setSkinfoldMode] = useState<"general" | "region" | "radar">("general");
   const [circumferenceMode, setCircumferenceMode] = useState<"general" | "region" | "radar">("general");
+  const [selectedCompositionMetrics, setSelectedCompositionMetrics] = useState(() => compositionMetrics.map((metric) => metric.key));
+  const [selectedSkinfoldMetrics, setSelectedSkinfoldMetrics] = useState(() => assessments.skinfolds.availableMetrics.map((metric) => metric.key));
+  const [selectedCircumferenceMetrics, setSelectedCircumferenceMetrics] = useState(() => assessments.circumferences.availableMetrics.slice(0, 8).map((metric) => metric.key));
   const [pendingAction, setPendingAction] = useState<"save" | "apply" | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profilePending, setProfilePending] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [profileDraft, setProfileDraft] = useState({
     biologicalSex: assessments.client.biologicalSex,
@@ -842,6 +1183,31 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
       weightKg,
     }, selectedCalculation);
   }, [assessments, calorieInputs, selectedCalculation, selectedFormula]);
+  const latestAssessment = assessments.latestAssessment;
+  const selectedAssessment = assessmentFlow.assessmentId
+    ? assessments.records.find((item) => item.id === assessmentFlow.assessmentId) ?? null
+    : null;
+  const bodyFatClassification = classifyBodyFat(latestAssessment?.bodyFatPercentage ?? null, assessments.client.biologicalSex);
+  const ffmiClassification = classifyFfmi(latestAssessment?.ffmi ?? null, assessments.client.biologicalSex);
+
+  async function saveProfileDraft() {
+    setProfilePending(true);
+    setActionMessage(null);
+    try {
+      const result = await completePartnerClientProfile({ ...profileDraft, patientId: assessments.client.id });
+      setActionMessage(result.message ?? result.error ?? null);
+      if (result.ok) {
+        setProfileOpen(false);
+        router.refresh();
+      }
+    } finally {
+      setProfilePending(false);
+    }
+  }
+
+  function toggleMetric(current: string[], key: string) {
+    return current.includes(key) ? current.filter((item) => item !== key) : [...current, key];
+  }
 
   async function saveCalculation(apply: boolean) {
     if (!selectedCalculation || !assessments.latestAssessment) return;
@@ -897,28 +1263,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-6 lg:px-6">
       <div className="relative mx-auto min-w-0 max-w-[1197px]">
-        <PartnerClientProfileHeader activeTab="avaliacoes" overview={overview} />
-
-        <Panel className="mt-4 p-4" id="assessment-readiness">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <SectionTitle>Prontidão da avaliação</SectionTitle>
-              <p className="mt-1 text-[12px] text-[#8b92a3]">Complete apenas os dados exigidos pelas fórmulas que pretende usar.</p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-[11px]">
-              <span className="rounded-full border border-[#303746] px-3 py-1">Nascimento: {assessments.client.birthDate ? "informado" : "ausente"}</span>
-              <span className="rounded-full border border-[#303746] px-3 py-1">Sexo biológico: {assessments.client.biologicalSex === "not_informed" ? "ausente" : "informado"}</span>
-              <span className="rounded-full border border-[#303746] px-3 py-1">Peso/altura: {assessments.latestAssessment ? "informados" : "ausentes"}</span>
-              <span className="rounded-full border border-[#303746] px-3 py-1">Composição: {assessments.latestAssessment?.bodyFatPercentage !== null && assessments.latestAssessment ? "informada" : "ausente"}</span>
-            </div>
-          </div>
-          <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={(event) => { event.preventDefault(); void completePartnerClientProfile({ ...profileDraft, patientId: assessments.client.id }).then((result) => { setActionMessage(result.message ?? result.error ?? null); if (result.ok) router.refresh(); }); }}>
-            <input aria-label="Data de nascimento" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" required type="date" value={profileDraft.birthDate} onChange={(event) => setProfileDraft((value) => ({ ...value, birthDate: event.target.value }))} />
-            <select aria-label="Sexo biológico" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" value={profileDraft.biologicalSex} onChange={(event) => setProfileDraft((value) => ({ ...value, biologicalSex: event.target.value as typeof value.biologicalSex }))}><option value="not_informed">Sexo não informado</option><option value="female">Feminino</option><option value="male">Masculino</option></select>
-            <input aria-label="Objetivo principal" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px]" placeholder="Objetivo principal" required value={profileDraft.objective} onChange={(event) => setProfileDraft((value) => ({ ...value, objective: event.target.value }))} />
-            <button className="h-10 rounded-[8px] bg-[#3b97e3] px-4 text-[13px] font-semibold" type="submit">Completar cadastro</button>
-          </form>
-        </Panel>
+        <PartnerClientProfileHeader activeTab="avaliacoes" overview={overview} onEditProfile={() => setProfileOpen(true)} />
 
         <section className="mt-4 grid grid-cols-2 gap-3 sm:mt-8 xl:grid-cols-3 2xl:grid-cols-6">
           <KpiCard delta={assessments.kpis.weight.delta} helper={assessments.kpis.weight.helper} icon={<Weight className="size-4" />} inverseDelta label="Peso atual" suffix=" kg" value={assessments.kpis.weight.value} />
@@ -950,14 +1295,14 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             <div className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Metodologias</h3>
-                <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]"><SlidersHorizontal className="size-3.5 shrink-0" /> <span className="truncate">{assessmentMethodLabels[assessments.latestAssessment?.assessmentMethod ?? "pollock_7"]}</span></span>
+                <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]"><SlidersHorizontal className="size-3.5 shrink-0" /> <span className="truncate">{assessmentMethodLabels[assessments.latestAssessment?.assessmentMethod ?? "jackson_pollock_7"]}</span></span>
               </div>
               <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               {(Object.keys(formulaLabels) as AssessmentFormula[]).map((formula) => {
                 const calculation = calorieComparison.find((item) => item.formula === formula);
                 if (calculation) return <FormulaCard active={selectedFormula === calculation.formula} calculation={calculation} key={formula} onSelect={() => setSelectedFormula(calculation.formula)} />;
                 const eligibility = assessments.formulaEligibility[formula];
-                return <div className="rounded-[12px] border border-[#303746] bg-[#111821] p-4" key={formula}><p className="font-semibold text-white">{formulaLabels[formula]}</p><p className="mt-2 text-[11px] font-semibold uppercase text-amber-300">{eligibility.status === "invalid_inputs" ? "Dados inválidos" : "Dados ausentes"}</p><p className="mt-1 text-[12px] leading-5 text-[#8b92a3]">{eligibility.reason}</p><a className="mt-3 inline-block text-xs font-semibold text-[#8fcfff]" href="#assessment-readiness">Completar cadastro</a></div>;
+                return <div className="rounded-[12px] border border-[#303746] bg-[#111821] p-4" key={formula}><p className="font-semibold text-white">{formulaLabels[formula]}</p><p className="mt-2 text-[11px] font-semibold uppercase text-amber-300">{eligibility.status === "invalid_inputs" ? "Dados inválidos" : "Dados ausentes"}</p><p className="mt-1 text-[12px] leading-5 text-[#8b92a3]">{eligibility.reason}</p><button className="mt-3 text-xs font-semibold text-[#8fcfff]" type="button" onClick={() => setProfileOpen(true)}>Editar bio</button></div>;
               })}
               </div>
             </div>
@@ -966,30 +1311,30 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
               <div className="rounded-[12px] border border-[#303746] bg-[#111821]/80 p-3 sm:p-4">
                 <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Dados do Cliente</h3>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-4">
-                  <MiniInfo label="Sexo biológico" value={assessments.client.biologicalSex === "female" ? "Feminino" : assessments.client.biologicalSex === "male" ? "Masculino" : "Não informado"} />
-                  <MiniInfo label="Idade" value={overview.client.ageLabel} />
-                  <label className="grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
-                    Altura (cm)
-                    <input aria-label="Altura (cm)" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px] font-semibold text-white outline-none focus:border-[#3b97e3]" min="100" step="0.1" type="number" value={calorieInputs.heightCm ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, heightCm: event.target.value === "" ? null : Number(event.target.value) }))} />
+                  <ClientDataInfo label="Sexo biológico" value={assessments.client.biologicalSex === "female" ? "Feminino" : assessments.client.biologicalSex === "male" ? "Masculino" : "Não informado"} />
+                  <ClientDataInfo label="Idade" value={overview.client.ageLabel} />
+                  <label className="flex min-h-[64px] min-w-0 flex-col justify-center rounded-[10px] border border-[#303746] bg-[#081522] px-3 py-2 text-[#8b92a3] focus-within:border-[#3b97e3]">
+                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase leading-4 tracking-[0.05em]">Altura (cm)</span>
+                    <input aria-label="Altura (cm)" className="mt-1 h-5 w-full min-w-0 bg-transparent p-0 text-[14px] font-semibold leading-5 text-white outline-none" min="100" step="0.1" type="number" value={calorieInputs.heightCm ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, heightCm: event.target.value === "" ? null : Number(event.target.value) }))} />
                   </label>
-                  <label className="grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
-                    Peso atual (kg)
-                    <input aria-label="Peso atual (kg)" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px] font-semibold text-white outline-none focus:border-[#3b97e3]" min="20" step="0.1" type="number" value={calorieInputs.weightKg ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, weightKg: event.target.value === "" ? null : Number(event.target.value) }))} />
+                  <label className="flex min-h-[64px] min-w-0 flex-col justify-center rounded-[10px] border border-[#303746] bg-[#081522] px-3 py-2 text-[#8b92a3] focus-within:border-[#3b97e3]">
+                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase leading-4 tracking-[0.05em]">Peso atual (kg)</span>
+                    <input aria-label="Peso atual (kg)" className="mt-1 h-5 w-full min-w-0 bg-transparent p-0 text-[14px] font-semibold leading-5 text-white outline-none" min="20" step="0.1" type="number" value={calorieInputs.weightKg ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, weightKg: event.target.value === "" ? null : Number(event.target.value) }))} />
                   </label>
-                  <label className="grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
-                    Peso meta (kg)
-                    <input aria-label="Peso meta (kg)" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px] font-semibold text-white outline-none focus:border-[#3b97e3]" min="20" step="0.1" type="number" value={calorieInputs.targetWeightKg ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, targetWeightKg: event.target.value === "" ? null : Number(event.target.value) }))} />
+                  <label className="flex min-h-[64px] min-w-0 flex-col justify-center rounded-[10px] border border-[#303746] bg-[#081522] px-3 py-2 text-[#8b92a3] focus-within:border-[#3b97e3]">
+                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase leading-4 tracking-[0.05em]">Peso meta (kg)</span>
+                    <input aria-label="Peso meta (kg)" className="mt-1 h-5 w-full min-w-0 bg-transparent p-0 text-[14px] font-semibold leading-5 text-white outline-none" min="20" step="0.1" type="number" value={calorieInputs.targetWeightKg ?? ""} onChange={(event) => setCalorieInputs((current) => ({ ...current, targetWeightKg: event.target.value === "" ? null : Number(event.target.value) }))} />
                   </label>
-                  <MiniInfo label="Prazo" value={`${assessments.latestAssessment?.targetDays ?? 90} dias`} />
+                  <ClientDataInfo label="Prazo" value={`${assessments.latestAssessment?.targetDays ?? 90} dias`} />
+                  <label className="col-span-2 flex min-h-[64px] min-w-0 flex-col justify-center rounded-[10px] border border-[#303746] bg-[#081522] px-3 py-2 text-[#8b92a3] focus-within:border-[#3b97e3]">
+                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase leading-4 tracking-[0.05em]">Fator de atividade</span>
+                    <select aria-label="Fator de atividade" className="mt-1 h-6 w-full min-w-0 bg-transparent p-0 text-[14px] font-semibold normal-case leading-5 text-white outline-none" value={calorieInputs.activityLevel} onChange={(event) => setCalorieInputs((current) => ({ ...current, activityLevel: event.target.value as AssessmentActivityLevel }))}>
+                      {Object.entries(activityLevels).sort((left, right) => left[1].factor - right[1].factor).map(([key, value]) => <option key={key} value={key}>{value.shortLabel} ({value.factor})</option>)}
+                    </select>
+                  </label>
                 </div>
-                <label className="mt-3 grid gap-1 text-[11px] font-semibold uppercase text-[#8b92a3]">
-                  Fator de atividade
-                  <select aria-label="Fator de atividade" className="h-10 rounded-[8px] border border-[#303746] bg-[#081522] px-3 text-[13px] normal-case text-white outline-none focus:border-[#3b97e3]" value={calorieInputs.activityLevel} onChange={(event) => setCalorieInputs((current) => ({ ...current, activityLevel: event.target.value as AssessmentActivityLevel }))}>
-                    {Object.entries(activityLevels).sort((left, right) => left[1].factor - right[1].factor).map(([key, value]) => <option key={key} value={key}>{value.shortLabel} ({value.factor})</option>)}
-                  </select>
-                </label>
-                <div className="mt-3 rounded-[8px] bg-[#081522] p-3 text-[11px] leading-4 text-[#8fcfff]">
-                  Fator aplicado: {selectedCalculation?.activityFactor ?? "-"} - {selectedCalculation?.activityLabel ?? "Sem dados"}
+                <div className="mt-3 rounded-[10px] bg-[#081522] px-3 py-3 text-[11px] leading-4 text-[#8fcfff]">
+                  Fator aplicado: {selectedCalculation?.activityFactor ?? "-"} · {selectedCalculation?.activityLabel ?? "Sem dados"}
                 </div>
               </div>
 
@@ -1008,13 +1353,13 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
                 </div>
                 <div className="rounded-[12px] border border-[#303746] bg-[#081522]/70 p-3 sm:p-4">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                  <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Projeção calórica ao longo do tempo</h3>
+                  <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Projeção de meta ao longo do tempo</h3>
                   <div className="flex gap-4 text-[12px] text-[#9aa5b6]">
-                    <span className="inline-flex items-center gap-2"><span className="h-px w-4 bg-[#7b8794]" /> Manter peso</span>
-                    <span className="inline-flex items-center gap-2"><span className="h-px w-4 bg-[#3b97e3]" /> Chegar à meta</span>
+                    <span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#3b97e3]" /> Estimado</span>
+                    <span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#7b8794]" /> Meta</span>
                   </div>
                 </div>
-                  <CalorieProjectionChart data={calorieProjection} />
+                  <CalorieProjectionChart data={calorieProjection} targetWeightKg={selectedCalculation?.targetWeightKg ?? null} />
                 </div>
               </div>
 
@@ -1056,12 +1401,27 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <SectionTitle>Avaliação Física</SectionTitle>
-                <p className="mt-1 text-[12px] leading-5 text-[#8b92a3] sm:text-[13px]">Dobras cutâneas, circunferências e método técnico da última avaliação.</p>
+                <p className="mt-1 text-[12px] leading-5 text-[#8b92a3] sm:text-[13px]">Resultado calculado, protocolo, dobras cutâneas e circunferências da última avaliação.</p>
               </div>
-              <button className="inline-flex h-9 items-center gap-2 rounded-[9px] bg-[#3b97e3] px-3 text-[13px] font-semibold text-white sm:h-10 sm:rounded-[10px] sm:px-4 sm:text-[14px]" type="button" onClick={() => setAssessmentOpen(true)}>
+              <button className="inline-flex h-9 items-center gap-2 rounded-[9px] bg-[#3b97e3] px-3 text-[13px] font-semibold text-white sm:h-10 sm:rounded-[10px] sm:px-4 sm:text-[14px]" type="button" onClick={() => setAssessmentFlow({ assessmentId: null, mode: "create", open: true })}>
                 <ClipboardPlus className="size-4" /> Registrar dados
               </button>
             </div>
+
+            <div className="mt-4 grid gap-3 lg:grid-cols-5">
+              <MiniInfo label="Protocolo" value={latestAssessment ? assessmentMethodLabels[latestAssessment.assessmentMethod] : "Sem avaliação"} />
+              <MiniInfo label="Gordura corporal" value={latestAssessment ? `${formatNumber(latestAssessment.bodyFatPercentage, "%")} · ${bodyFatClassification.label}` : "Sem dados"} />
+              <MiniInfo label="Massa magra" value={formatNumber(latestAssessment?.leanMassKg ?? null, " kg")} />
+              <MiniInfo label="Massa gorda" value={formatNumber(latestAssessment?.fatMassKg ?? null, " kg")} />
+              <MiniInfo label="Soma de dobras" value={formatNumber(latestAssessment?.sumSkinfoldsMm ?? null, " mm")} />
+            </div>
+
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <ResultSpectrum label={`IMC · ${latestAssessment?.bmiClassification ?? "Sem dados"}`} max={45} min={12} suffix="" tone="text-[#8fcfff]" value={latestAssessment?.bmi ?? null} />
+              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={assessments.client.biologicalSex === "female" ? 50 : 40} min={assessments.client.biologicalSex === "female" ? 5 : 0} suffix="%" tone={bodyFatClassification.tone} value={latestAssessment?.bodyFatPercentage ?? null} />
+              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={assessments.client.biologicalSex === "female" ? 27 : 30} min={assessments.client.biologicalSex === "female" ? 12 : 15} tone={ffmiClassification.tone} value={latestAssessment?.ffmi ?? null} />
+            </div>
+
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-[#8fcfff]"><Layers3 className="size-4" /><h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#9aa5b6]">Dobras cutâneas (mm)</h3></div>
@@ -1096,26 +1456,73 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
           </Panel>
 
           <Panel className="overflow-hidden p-0">
-            <div className="border-b border-[#303746] px-5 py-4">
-              <SectionTitle>Histórico de Avaliações</SectionTitle>
-            </div>
-            <div className="max-h-[520px] overflow-y-auto px-5 py-4">
-              <div className="relative grid gap-4 before:absolute before:left-[7px] before:top-2 before:h-[calc(100%-16px)] before:w-px before:bg-[#303746]">
-                {assessments.history.map((item, index) => (
-                  <article className="relative grid gap-1 pl-8" key={item.id}>
-                    <span className={cn("absolute left-0 top-1 size-3.5 rounded-full border-2", index === 0 ? "border-[#3b97e3] bg-[#3b97e3]" : "border-[#708597] bg-[#0b1720]")} />
-                    <div className="rounded-[10px] border border-[#303746] bg-[#111821]/70 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-[13px] font-bold text-white">{item.dateLabel}</h3>
-                        <button className="text-[11px] font-semibold text-[#8fcfff]" type="button" onClick={() => setAssessmentOpen(true)}>Ver detalhes</button>
-                      </div>
-                      <p className="mt-1 text-[11px] text-[#8b92a3]">Peso {formatNumber(item.weightKg, " kg")} • Gordura {formatNumber(item.bodyFatPercentage, "%")}</p>
-                      <p className="mt-1 line-clamp-2 text-[11px] text-[#5a6477]">{item.notes ?? item.title}</p>
-                    </div>
-                  </article>
-                ))}
-                {assessments.history.length === 0 ? <p className="text-[13px] text-[#8b92a3]">Nenhuma avaliação cadastrada.</p> : null}
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] px-5 py-4">
+              <div>
+                <SectionTitle>Histórico de Avaliações</SectionTitle>
+                <p className="mt-1 text-[12px] text-[#8b92a3]">Comparativo técnico das avaliações registradas.</p>
               </div>
+              <span className="rounded-full border border-[#303746] px-3 py-1 text-[11px] font-semibold text-[#8b92a3]">{assessments.history.length} registros</span>
+            </div>
+            <div className="max-h-[520px] overflow-auto">
+              {assessments.history.length > 0 ? (
+                <table className="min-w-[760px] w-full text-left">
+                  <thead className="sticky top-0 z-10 bg-[#0e1923]">
+                    <tr className="border-b border-[#303746] text-[10px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">
+                      <th className="px-4 py-3">Data</th>
+                      <th className="px-4 py-3">Protocolo</th>
+                      <th className="px-4 py-3">Peso</th>
+                      <th className="px-4 py-3">IMC</th>
+                      <th className="px-4 py-3">FFMI</th>
+                      <th className="px-4 py-3">% Gordura</th>
+                      <th className="px-4 py-3">M. magra</th>
+                      <th className="px-4 py-3">M. gorda</th>
+                      <th className="px-4 py-3 text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#25313f]">
+                    {assessments.history.map((item) => (
+                      <tr className="bg-[#0b1720]/30 text-[12px] text-[#d7dae0] transition hover:bg-[#111821]" key={item.id}>
+                        <td className="px-4 py-3">
+                          <p className="font-bold text-white">{item.dateLabel}</p>
+                          <p className="mt-1 line-clamp-1 text-[11px] text-[#5a6477]">{item.title}</p>
+                        </td>
+                        <td className="px-4 py-3 max-w-[180px] truncate text-[#8fcfff]">{assessmentMethodLabels[item.assessmentMethod]}</td>
+                        <td className="px-4 py-3 font-semibold">{formatNumber(item.weightKg, " kg")}</td>
+                        <td className="px-4 py-3">
+                          <p className="font-semibold">{formatNumber(item.bmi)}</p>
+                          <p className="text-[10px] text-[#8b92a3]">{item.bmiClassification}</p>
+                        </td>
+                        <td className="px-4 py-3 font-semibold">{formatNumber(item.ffmi)}</td>
+                        <td className="px-4 py-3 font-bold text-[#ff9aaa]">{formatNumber(item.bodyFatPercentage, "%")}</td>
+                        <td className="px-4 py-3 font-semibold text-[#8bd89d]">{formatNumber(item.leanMassKg, " kg")}</td>
+                        <td className="px-4 py-3 font-semibold text-[#f0c76a]">{formatNumber(item.fatMassKg, " kg")}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              aria-label={`Visualizar avaliação ${item.dateLabel}`}
+                              className="inline-flex size-8 items-center justify-center rounded-[8px] border border-[#303746] text-[#8fcfff] transition hover:border-[#3b97e3]"
+                              type="button"
+                              onClick={() => setAssessmentFlow({ assessmentId: item.id, mode: "details", open: true })}
+                            >
+                              <Eye className="size-4" />
+                            </button>
+                            <button
+                              aria-label={`Editar avaliação ${item.dateLabel}`}
+                              className="inline-flex size-8 items-center justify-center rounded-[8px] border border-[#303746] text-[#f0c76a] transition hover:border-[#f0c76a]"
+                              type="button"
+                              onClick={() => setAssessmentFlow({ assessmentId: item.id, mode: "edit", open: true })}
+                            >
+                              <Pencil className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="px-5 py-4 text-[13px] text-[#8b92a3]">Nenhuma avaliação cadastrada.</p>
+              )}
             </div>
           </Panel>
         </section>
@@ -1129,44 +1536,98 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
             <span className="rounded-[10px] border border-[#303746] px-3 py-2 text-[12px] text-[#8b92a3]">{assessments.history.at(-1)?.dateLabel ?? "Sem histórico"} - {assessments.history[0]?.dateLabel ?? "Sem histórico"}</span>
           </div>
           <div className="grid gap-4 xl:grid-cols-2">
-            <Panel className="p-5">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <Panel className="overflow-hidden p-0">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] p-5">
                 <div>
                   <h3 className="text-[15px] font-bold text-white">Painel Dinâmico de Composição Corporal</h3>
-                  <p className="mt-1 text-[12px] text-[#8b92a3]">Peso, gordura e massa magra com eixo ajustado aos dados.</p>
+                  <p className="mt-1 text-[12px] text-[#8b92a3]">Análise integrada de peso, gordura e massa magra.</p>
                 </div>
                 <ModeToggle modes={[{ label: "Dinâmico", value: "dynamic" }, { label: "Stack", value: "stack" }]} value={compositionMode} onChange={(value) => setCompositionMode(value as "dynamic" | "stack")} />
               </div>
-              <CompositionChart data={assessments.charts.compositionSeries} mode={compositionMode} />
+              <div className="grid lg:grid-cols-[260px_minmax(0,1fr)]">
+                <MetricSelector
+                  groups={[{ label: "Variáveis", metrics: compositionMetrics.map((metric) => ({ key: metric.key, label: metric.label })) }]}
+                  selected={selectedCompositionMetrics}
+                  onToggle={(key) => setSelectedCompositionMetrics((current) => toggleMetric(current, key))}
+                  onToggleAll={() => setSelectedCompositionMetrics((current) => current.length === compositionMetrics.length ? [] : compositionMetrics.map((metric) => metric.key))}
+                />
+                <div className="p-4">
+                  <CompositionChart data={assessments.charts.compositionSeries} mode={compositionMode} selectedMetrics={selectedCompositionMetrics} />
+                </div>
+              </div>
             </Panel>
 
-            <Panel className="p-5">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <Panel className="overflow-hidden p-0">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] p-5">
                 <div>
                   <h3 className="text-[15px] font-bold text-white">Distribuição de Dobras Cutâneas</h3>
                   <p className="mt-1 text-[12px] text-[#8b92a3]">Evolução detalhada por ponto de medição.</p>
                 </div>
                 <ModeToggle modes={[{ label: "Geral", value: "general" }, { label: "Por região", value: "region" }, { label: "Radar", value: "radar" }]} value={skinfoldMode} onChange={(value) => setSkinfoldMode(value as "general" | "region" | "radar")} />
               </div>
-              <SkinfoldChart data={assessments.charts.skinfoldSeries} metrics={assessments.skinfolds.availableMetrics} mode={skinfoldMode} />
+              <div className="grid lg:grid-cols-[260px_minmax(0,1fr)]">
+                <MetricSelector
+                  groups={["Tronco", "Membros superiores", "Membros inferiores", "Outros"].map((region) => ({
+                    label: region,
+                    metrics: assessments.skinfolds.availableMetrics.filter((metric) => metric.region === region).map((metric) => ({ key: metric.key, label: metric.label })),
+                  })).filter((group) => group.metrics.length > 0)}
+                  selected={selectedSkinfoldMetrics}
+                  onToggle={(key) => setSelectedSkinfoldMetrics((current) => toggleMetric(current, key))}
+                  onToggleAll={() => setSelectedSkinfoldMetrics((current) => current.length === assessments.skinfolds.availableMetrics.length ? [] : assessments.skinfolds.availableMetrics.map((metric) => metric.key))}
+                />
+                <div className="p-4">
+                  <SkinfoldChart data={assessments.charts.skinfoldSeries} metrics={assessments.skinfolds.availableMetrics} mode={skinfoldMode} selectedMetrics={selectedSkinfoldMetrics} />
+                </div>
+              </div>
             </Panel>
 
-            <Panel className="p-5 xl:col-span-2">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <Panel className="overflow-hidden p-0 xl:col-span-2">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#303746] p-5">
                 <div>
                   <h3 className="text-[15px] font-bold text-white">Painel de Circunferências</h3>
                   <p className="mt-1 text-[12px] text-[#8b92a3]">Medidas corporais com visualização geral, por região ou radar.</p>
                 </div>
                 <ModeToggle modes={[{ label: "Geral", value: "general" }, { label: "Por região", value: "region" }, { label: "Radar", value: "radar" }]} value={circumferenceMode} onChange={(value) => setCircumferenceMode(value as "general" | "region" | "radar")} />
               </div>
-              <CircumferenceChart data={assessments.charts.circumferenceSeries} metrics={assessments.circumferences.availableMetrics} mode={circumferenceMode} />
+              <div className="grid lg:grid-cols-[260px_minmax(0,1fr)]">
+                <MetricSelector
+                  groups={[{ label: "Medidas", metrics: assessments.circumferences.availableMetrics.map((metric) => ({ key: metric.key, label: metric.label })) }]}
+                  selected={selectedCircumferenceMetrics}
+                  onToggle={(key) => setSelectedCircumferenceMetrics((current) => toggleMetric(current, key))}
+                  onToggleAll={() => setSelectedCircumferenceMetrics((current) => current.length === assessments.circumferences.availableMetrics.length ? [] : assessments.circumferences.availableMetrics.map((metric) => metric.key))}
+                />
+                <div className="p-4">
+                  <CircumferenceChart data={assessments.charts.circumferenceSeries} metrics={assessments.circumferences.availableMetrics} mode={circumferenceMode} selectedMetrics={selectedCircumferenceMetrics} />
+                </div>
+              </div>
             </Panel>
           </div>
         </section>
 
       </div>
 
-      <AssessmentDialog data={assessments} open={assessmentOpen} onOpenChange={setAssessmentOpen} />
+      <ProfileBioDialog
+        draft={profileDraft}
+        open={profileOpen}
+        pending={profilePending}
+        onDraftChange={setProfileDraft}
+        onOpenChange={setProfileOpen}
+        onSubmit={() => void saveProfileDraft()}
+      />
+      <AssessmentDetailsDialog
+        assessment={selectedAssessment}
+        biologicalSex={assessments.client.biologicalSex}
+        open={assessmentFlow.open && assessmentFlow.mode === "details"}
+        onEdit={() => setAssessmentFlow((current) => ({ ...current, mode: "edit", open: true }))}
+        onOpenChange={(open) => setAssessmentFlow((current) => ({ ...current, open }))}
+      />
+      <AssessmentDialog
+        assessment={assessmentFlow.mode === "edit" ? selectedAssessment : null}
+        data={assessments}
+        mode={assessmentFlow.mode === "edit" ? "edit" : "create"}
+        open={assessmentFlow.open && assessmentFlow.mode !== "details"}
+        onOpenChange={(open) => setAssessmentFlow((current) => ({ ...current, open }))}
+      />
     </div>
   );
 }

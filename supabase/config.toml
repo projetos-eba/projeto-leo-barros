@@ -1,5 +1,9 @@
 project_id = "ltporrxlugkspjfbqvga"
 
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql", "./seed-data/system-foods-taco.sql"]
+
 [functions.provision-partner]
 verify_jwt = true
 

@@ -131,8 +131,8 @@ const assessments: PartnerClientAssessmentsData = {
   },
   charts: {
     compositionSeries: [
-      { bodyFatPercentage: 18, date: "01/04/2026", fatMassKg: 13.7, leanMassKg: 62.3, muscleMassKg: 60, weightKg: 76 },
-      { bodyFatPercentage: 14.7, date: "01/06/2026", fatMassKg: 11.5, leanMassKg: 66.9, muscleMassKg: 62.1, weightKg: 78.4 },
+      { bodyFatPercentage: 18, date: "01/04/2026", fatMassKg: 13.7, ffmi: 20.6, leanMassKg: 62.3, muscleMassKg: 60, sumSkinfoldsMm: 32, weightKg: 76 },
+      { bodyFatPercentage: 14.7, date: "01/06/2026", fatMassKg: 11.5, ffmi: 22.1, leanMassKg: 66.9, muscleMassKg: 62.1, sumSkinfoldsMm: 26.6, weightKg: 78.4 },
     ],
     circumferenceSeries: [
       { chest: 92, date: "01/04/2026", waist: 78 },
@@ -181,12 +181,19 @@ const assessments: PartnerClientAssessmentsData = {
   generatedAt: "2026-07-01T12:00:00.000Z",
   history: [
     {
+      assessmentMethod: "jackson_pollock_7",
       assessedAt: "2026-06-01T12:00:00.000Z",
+      bmi: 25.9,
+      bmiClassification: "Sobrepeso",
       bodyFatPercentage: 14.7,
       dateLabel: "01/06/2026",
+      fatMassKg: 11.5,
+      ffmi: 22.1,
       heightCm: 174,
       id: "assessment-1",
+      leanMassKg: 66.9,
       notes: "Evolução consistente.",
+      sumSkinfoldsMm: 26.6,
       targetDays: 90,
       targetWeightKg: 80,
       title: "Avaliação corporal completa",
@@ -196,6 +203,7 @@ const assessments: PartnerClientAssessmentsData = {
   kpis: {
     bmi: { classification: "Sobrepeso", delta: 0.2, helper: "Sobrepeso", label: "IMC", value: 25.9 },
     bodyFat: { delta: -1.1, helper: "Meta 12-15%", label: "% Gordura", value: 14.7 },
+    ffmi: { delta: 1.5, helper: "Massa livre de gordura/altura", label: "FFMI", value: 22.1 },
     lastAssessment: { dateLabel: "01/06/2026", daysAgoLabel: "há 30 dias", value: "01/06/2026" },
     leanMass: { delta: 1.6, helper: "Peso sem massa gorda", label: "Massa magra", value: 66.9 },
     muscleMass: { delta: 0.5, helper: "Informada na avaliação", label: "Massa muscular", value: 62.1 },
@@ -203,7 +211,7 @@ const assessments: PartnerClientAssessmentsData = {
   },
   latestAssessment: {
     activityLevel: "moderate",
-    assessmentMethod: "pollock_7",
+    assessmentMethod: "jackson_pollock_7",
     assessedAt: "2026-06-01T12:00:00.000Z",
     bmi: 25.9,
     bmiClassification: "Sobrepeso",
@@ -214,6 +222,7 @@ const assessments: PartnerClientAssessmentsData = {
       { id: "c2", label: "Cintura", metricKey: "waist", valueCm: 73 },
     ],
     fatMassKg: 11.5,
+    ffmi: 22.1,
     heightCm: 174,
     id: "assessment-1",
     leanMassKg: 66.9,
@@ -223,11 +232,43 @@ const assessments: PartnerClientAssessmentsData = {
       { id: "s1", label: "Abdominal", metricKey: "abdominal", region: "Tronco", valueMm: 14.7 },
       { id: "s2", label: "Tricipital", metricKey: "triceps", region: "Membros superiores", valueMm: 11.9 },
     ],
+    sumSkinfoldsMm: 26.6,
     targetDays: 90,
     targetWeightKg: 80,
     title: "Avaliação corporal completa",
     weightKg: 78.4,
   },
+  records: [
+    {
+      activityLevel: "moderate",
+      assessmentMethod: "jackson_pollock_7",
+      assessedAt: "2026-06-01T12:00:00.000Z",
+      bmi: 25.9,
+      bmiClassification: "Sobrepeso",
+      bodyFatPercentage: 14.7,
+      calculations: [],
+      circumferences: [
+        { id: "c1", label: "Tórax", metricKey: "chest", valueCm: 94 },
+        { id: "c2", label: "Cintura", metricKey: "waist", valueCm: 73 },
+      ],
+      fatMassKg: 11.5,
+      ffmi: 22.1,
+      heightCm: 174,
+      id: "assessment-1",
+      leanMassKg: 66.9,
+      muscleMassKg: 62.1,
+      notes: "Evolução consistente.",
+      skinfolds: [
+        { id: "s1", label: "Abdominal", metricKey: "abdominal", region: "Tronco", valueMm: 14.7 },
+        { id: "s2", label: "Tricipital", metricKey: "triceps", region: "Membros superiores", valueMm: 11.9 },
+      ],
+      sumSkinfoldsMm: 26.6,
+      targetDays: 90,
+      targetWeightKg: 80,
+      title: "Avaliação corporal completa",
+      weightKg: 78.4,
+    },
+  ],
 };
 
 describe("PartnerClientAssessmentsView", () => {
@@ -253,8 +294,26 @@ describe("PartnerClientAssessmentsView", () => {
     expect(screen.getByText("Avaliação Física")).toBeInTheDocument();
     expect(screen.getByText("Análise Gráfica da Avaliação")).toBeInTheDocument();
     expect(screen.getByText("Histórico de Avaliações")).toBeInTheDocument();
+    expect(screen.getAllByText("7 dobras Jackson, Pollock & Ward").length).toBeGreaterThan(0);
+    expect(screen.getByRole("columnheader", { name: "FFMI" })).toBeInTheDocument();
+    expect(screen.queryByText("Prontidão da avaliação")).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
+  });
+
+  it("edita a bio do Cliente pelo cabeçalho", async () => {
+    render(<PartnerClientAssessmentsView assessments={assessments} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar bio" }));
+    fireEvent.change(screen.getByLabelText("Objetivo principal"), { target: { value: "Recomposição corporal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar bio" }));
+
+    await waitFor(() => expect(completePartnerClientProfile).toHaveBeenCalledWith({
+      biologicalSex: "female",
+      birthDate: "1997-06-30",
+      objective: "Recomposição corporal",
+      patientId: overview.client.id,
+    }));
   });
 
   it("salva e aplica cálculo calórico", async () => {
@@ -300,15 +359,36 @@ describe("PartnerClientAssessmentsView", () => {
     render(<PartnerClientAssessmentsView assessments={assessments} overview={overview} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Registrar dados" }));
+    fireEvent.change(screen.getByLabelText("Método de avaliação física"), { target: { value: "guedes_3" } });
     fireEvent.change(screen.getByLabelText("Peso (kg)"), { target: { value: "79" } });
+    fireEvent.change(screen.getByLabelText("Suprailíaca (mm)"), { target: { value: "13" } });
     fireEvent.change(screen.getByLabelText("Abdominal (mm)"), { target: { value: "14" } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar avaliação" }));
 
     await waitFor(() => expect(saveClientAssessment).toHaveBeenCalledWith(expect.objectContaining({
       patientId: overview.client.id,
-      assessmentMethod: "pollock_7",
+      assessmentMethod: "guedes_3",
+      bodyFatPercentage: expect.any(Number),
       skinfolds: expect.arrayContaining([expect.objectContaining({ metricKey: "abdominal", valueMm: 14 })]),
       weightKg: 79,
+    })));
+  }, 40000);
+
+  it("visualiza e edita uma avaliação do histórico", async () => {
+    render(<PartnerClientAssessmentsView assessments={assessments} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Visualizar avaliação 01/06/2026" }));
+    expect(screen.getByRole("heading", { name: "Avaliação corporal completa" })).toBeInTheDocument();
+    expect(screen.getByText("Evolução consistente.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar avaliação" }));
+    fireEvent.change(screen.getByLabelText("Peso (kg)"), { target: { value: "80" } });
+    fireEvent.click(screen.getByRole("button", { name: "Atualizar avaliação" }));
+
+    await waitFor(() => expect(saveClientAssessment).toHaveBeenCalledWith(expect.objectContaining({
+      assessmentId: "assessment-1",
+      patientId: overview.client.id,
+      weightKg: 80,
     })));
   });
 });

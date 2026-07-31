@@ -1,0 +1,3113 @@
+{
+  "classifications": {
+    "ambiguous": [],
+    "duplicate": [],
+    "failed": [],
+    "invalid": [],
+    "matched": [],
+    "new": [
+      {
+        "exercise_code": "EX-ABDOMINAL-BICICLETA",
+        "name": "Abdominal bicicleta",
+        "source_relative_path": "Abdominal bicicleta.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL",
+        "name": "Abdominal com elevação de quadril",
+        "source_relative_path": "Abdominal com elevação de quadril.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-CRUNCH",
+        "name": "Abdominal crunch",
+        "source_relative_path": "Abdominal crunch.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-DECLINADO-SIT-UP",
+        "name": "Abdominal declinado (sit-up)",
+        "source_relative_path": "Abdominal declinado (sit-up).gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-DECLINADO-COM-PESO",
+        "name": "Abdominal declinado com peso",
+        "source_relative_path": "Abdominal declinado com peso.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-DECLINADO",
+        "name": "Abdominal declinado",
+        "source_relative_path": "Abdominal declinado.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-INVERTIDO",
+        "name": "Abdominal invertido",
+        "source_relative_path": "Abdominal invertido.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-NA-MAQUINA-AB-COASTER",
+        "name": "Abdominal na máquina ab coaster",
+        "source_relative_path": "Abdominal na máquina ab coaster.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-NA-MAQUINA",
+        "name": "Abdominal na máquina",
+        "source_relative_path": "Abdominal na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-NA-POLIA",
+        "name": "Abdominal na polia",
+        "source_relative_path": "Abdominal na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-SIT-UP",
+        "name": "Abdominal sit-up",
+        "source_relative_path": "Abdominal sit-up.gif"
+      },
+      {
+        "exercise_code": "EX-ABDOMINAL-V-V-UP",
+        "name": "Abdominal V (v-up)",
+        "source_relative_path": "Abdominal V (v-up).gif"
+      },
+      {
+        "exercise_code": "EX-ABDUCAO-DE-QUADRIL-DEITADO",
+        "name": "Abdução de quadril deitado",
+        "source_relative_path": "Abdução de quadril deitado.gif"
+      },
+      {
+        "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA",
+        "name": "Abdução de quadril na máquina",
+        "source_relative_path": "Abdução de quadril na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-POLIA",
+        "name": "Abdução de quadril na polia",
+        "source_relative_path": "Abdução de quadril na polia.gif"
+      },
+      {
+        "exercise_code": "EX-AFUNDO-LUNGE",
+        "name": "Afundo (lunge)",
+        "source_relative_path": "Afundo (lunge).gif"
+      },
+      {
+        "exercise_code": "EX-AFUNDO-COM-HALTERES",
+        "name": "Afundo com halteres",
+        "source_relative_path": "Afundo com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL",
+        "name": "Afundo com rotação e kettlebell",
+        "source_relative_path": "Afundo com rotação e kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-AFUNDO-PARADO-COM-BARRA",
+        "name": "Afundo parado com barra",
+        "source_relative_path": "Afundo parado com barra.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-AFUNDO-COM-HALTERES",
+        "name": "Agachamento afundo com halteres",
+        "source_relative_path": "Agachamento afundo com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-AFUNDO-NO-SMITH",
+        "name": "Agachamento afundo no Smith",
+        "source_relative_path": "Agachamento afundo no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-BARRA",
+        "name": "Agachamento búlgaro com barra",
+        "source_relative_path": "Agachamento búlgaro com barra.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-HALTERES",
+        "name": "Agachamento búlgaro com halteres",
+        "source_relative_path": "Agachamento búlgaro com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-COM-HALTERES",
+        "name": "Agachamento com halteres",
+        "source_relative_path": "Agachamento com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS",
+        "name": "Agachamento com pausa (barra nas costas)",
+        "source_relative_path": "Agachamento com pausa (barra nas costas).gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-COM-SALTO",
+        "name": "Agachamento com salto",
+        "source_relative_path": "Agachamento com salto.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-EM-V-INVERTIDO",
+        "name": "Agachamento em V invertido",
+        "source_relative_path": "Agachamento em V invertido.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-FRONTAL",
+        "name": "Agachamento frontal",
+        "source_relative_path": "Agachamento frontal.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL",
+        "name": "Agachamento goblet com kettlebell",
+        "source_relative_path": "Agachamento goblet com kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-HACK-NA-MAQUINA",
+        "name": "Agachamento hack na máquina",
+        "source_relative_path": "Agachamento hack na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-NO-APARELHO-EM-V",
+        "name": "Agachamento no aparelho em V",
+        "source_relative_path": "Agachamento no aparelho em V.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-NO-SMITH",
+        "name": "Agachamento no Smith",
+        "source_relative_path": "Agachamento no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-OVERHEAD-COM-BARRA",
+        "name": "Agachamento overhead com barra",
+        "source_relative_path": "Agachamento overhead com barra.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-PISTOL-UNILATERAL",
+        "name": "Agachamento pistol (unilateral)",
+        "source_relative_path": "Agachamento pistol (unilateral).gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-PISTOL-NA-CAIXA",
+        "name": "Agachamento pistol na caixa",
+        "source_relative_path": "Agachamento pistol na caixa.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-SUMO-COM-HALTERES",
+        "name": "Agachamento sumô com halteres",
+        "source_relative_path": "Agachamento sumô com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-SUMO-COM-KETTLEBELL",
+        "name": "Agachamento sumô com kettlebell",
+        "source_relative_path": "Agachamento sumô com kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-AGACHAMENTO-SUMO-LIVRE",
+        "name": "Agachamento sumô livre",
+        "source_relative_path": "Agachamento sumô livre.gif"
+      },
+      {
+        "exercise_code": "EX-ARRANCO-SNATCH",
+        "name": "Arranco (snatch)",
+        "source_relative_path": "Arranco (snatch).gif"
+      },
+      {
+        "exercise_code": "EX-ARRANCO-COM-HALTER",
+        "name": "Arranco com halter",
+        "source_relative_path": "Arranco com halter.gif"
+      },
+      {
+        "exercise_code": "EX-ARRANCO-COM-KETTLEBELL",
+        "name": "Arranco com kettlebell",
+        "source_relative_path": "Arranco com kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-ARRANCO-SUSPENSO-HANG-SNATCH",
+        "name": "Arranco suspenso (hang snatch)",
+        "source_relative_path": "Arranco suspenso (hang snatch).gif"
+      },
+      {
+        "exercise_code": "EX-ARREMESSO-JERK",
+        "name": "Arremesso (jerk)",
+        "source_relative_path": "Arremesso (jerk).gif"
+      },
+      {
+        "exercise_code": "EX-BALANCO-COM-KETTLEBELL-SWING",
+        "name": "Balanço com kettlebell (swing)",
+        "source_relative_path": "Balanço com kettlebell (swing).gif"
+      },
+      {
+        "exercise_code": "EX-BALANCO-UNILATERAL-COM-KETTLEBELL",
+        "name": "Balanço unilateral com kettlebell",
+        "source_relative_path": "Balanço unilateral com kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-BARRA-FIXA-PULL-UP",
+        "name": "Barra fixa (pull-up)",
+        "source_relative_path": "Barra fixa (pull-up).gif"
+      },
+      {
+        "exercise_code": "EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA",
+        "name": "Barra fixa assistida na máquina",
+        "source_relative_path": "Barra fixa assistida na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-BARRA-FIXA-SUPINADA",
+        "name": "Barra fixa supinada",
+        "source_relative_path": "Barra fixa supinada.gif"
+      },
+      {
+        "exercise_code": "EX-BOM-DIA-GOOD-MORNING",
+        "name": "Bom dia (good morning)",
+        "source_relative_path": "Bom dia (good morning).gif"
+      },
+      {
+        "exercise_code": "EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA",
+        "name": "Cadeira adutora (adução de coxa)",
+        "source_relative_path": "Cadeira adutora (adução de coxa).gif"
+      },
+      {
+        "exercise_code": "EX-CANIVETE-PILATES-JACKKNIFE",
+        "name": "Canivete (pilates jackknife)",
+        "source_relative_path": "Canivete (pilates jackknife).gif"
+      },
+      {
+        "exercise_code": "EX-COICE-DE-GLUTEO-NA-MAQUINA",
+        "name": "Coice de glúteo na máquina",
+        "source_relative_path": "Coice de glúteo na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-COICE-DE-GLUTEO-NA-POLIA",
+        "name": "Coice de glúteo na polia",
+        "source_relative_path": "Coice de glúteo na polia.gif"
+      },
+      {
+        "exercise_code": "EX-COICE-DE-GLUTEO",
+        "name": "Coice de glúteo",
+        "source_relative_path": "Coice de glúteo.gif"
+      },
+      {
+        "exercise_code": "EX-CONCHA-DEITADO-DE-LADO-CLAM",
+        "name": "Concha deitado de lado (clam)",
+        "source_relative_path": "Concha deitado de lado (clam).gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-COM-HALTERES",
+        "name": "Crucifixo com halteres",
+        "source_relative_path": "Crucifixo com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-DECLINADO-COM-HALTERES",
+        "name": "Crucifixo declinado com halteres",
+        "source_relative_path": "Crucifixo declinado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-EM-PE-NA-POLIA",
+        "name": "Crucifixo em pé na polia",
+        "source_relative_path": "Crucifixo em pé na polia.gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-INCLINADO-NA-POLIA",
+        "name": "Crucifixo inclinado na polia",
+        "source_relative_path": "Crucifixo inclinado na polia.gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK",
+        "name": "Crucifixo invertido na máquina (peck deck)",
+        "source_relative_path": "Crucifixo invertido na máquina (peck deck).gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-POLIA",
+        "name": "Crucifixo invertido na polia",
+        "source_relative_path": "Crucifixo invertido na polia.gif"
+      },
+      {
+        "exercise_code": "EX-CRUCIFIXO-NA-POLIA-BAIXA",
+        "name": "Crucifixo na polia baixa",
+        "source_relative_path": "Crucifixo na polia baixa.gif"
+      },
+      {
+        "exercise_code": "EX-DEAD-BUG-INSETO-MORTO",
+        "name": "Dead bug (inseto morto)",
+        "source_relative_path": "Dead bug (inseto morto).gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES",
+        "name": "Desenvolvimento Arnold com halteres",
+        "source_relative_path": "Desenvolvimento Arnold com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-COM-ANILHA",
+        "name": "Desenvolvimento com anilha",
+        "source_relative_path": "Desenvolvimento com anilha.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-COM-HALTERES",
+        "name": "Desenvolvimento com halteres",
+        "source_relative_path": "Desenvolvimento com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL",
+        "name": "Desenvolvimento landmine unilateral",
+        "source_relative_path": "Desenvolvimento landmine unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE",
+        "name": "Desenvolvimento landmine",
+        "source_relative_path": "Desenvolvimento landmine.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-MILITAR",
+        "name": "Desenvolvimento militar",
+        "source_relative_path": "Desenvolvimento militar.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-NA-MAQUINA",
+        "name": "Desenvolvimento na máquina",
+        "source_relative_path": "Desenvolvimento na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA",
+        "name": "Desenvolvimento por trás da nuca",
+        "source_relative_path": "Desenvolvimento por trás da nuca.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-BARRA",
+        "name": "Desenvolvimento sentado com barra",
+        "source_relative_path": "Desenvolvimento sentado com barra.gif"
+      },
+      {
+        "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES",
+        "name": "Desenvolvimento sentado com halteres",
+        "source_relative_path": "Desenvolvimento sentado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR",
+        "name": "Elevação de glúteo e posterior (GHR)",
+        "source_relative_path": "Elevação de glúteo e posterior (GHR).gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO",
+        "name": "Elevação de joelhos na cadeira do capitão",
+        "source_relative_path": "Elevação de joelhos na cadeira do capitão.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-JOELHOS-SENTADO",
+        "name": "Elevação de joelhos sentado",
+        "source_relative_path": "Elevação de joelhos sentado.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-EM-PE",
+        "name": "Elevação de panturrilha em pé",
+        "source_relative_path": "Elevação de panturrilha em pé.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-SENTADO",
+        "name": "Elevação de panturrilha sentado",
+        "source_relative_path": "Elevação de panturrilha sentado.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-PERNAS-NA-BARRA",
+        "name": "Elevação de pernas na barra",
+        "source_relative_path": "Elevação de pernas na barra.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-PERNAS",
+        "name": "Elevação de pernas",
+        "source_relative_path": "Elevação de pernas.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-QUADRIL-HIP-THRUST",
+        "name": "Elevação de quadril (hip thrust)",
+        "source_relative_path": "Elevação de quadril (hip thrust).gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST",
+        "name": "Elevação de quadril com barra (hip thrust)",
+        "source_relative_path": "Elevação de quadril com barra (hip thrust).gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA",
+        "name": "Elevação de quadril na máquina",
+        "source_relative_path": "Elevação de quadril na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-EM-Y-COM-HALTERES",
+        "name": "Elevação em Y com halteres",
+        "source_relative_path": "Elevação em Y com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-FRONTAL-COM-BARRA-W",
+        "name": "Elevação frontal com barra W",
+        "source_relative_path": "Elevação frontal com barra W.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-FRONTAL-COM-HALTERES",
+        "name": "Elevação frontal com halteres",
+        "source_relative_path": "Elevação frontal com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-FRONTAL-NA-POLIA",
+        "name": "Elevação frontal na polia",
+        "source_relative_path": "Elevação frontal na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-COM-HALTERES",
+        "name": "Elevação lateral com halteres",
+        "source_relative_path": "Elevação lateral com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES",
+        "name": "Elevação lateral curvado com halteres",
+        "source_relative_path": "Elevação lateral curvado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-NA-MAQUINA",
+        "name": "Elevação lateral na máquina",
+        "source_relative_path": "Elevação lateral na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-NA-POLIA",
+        "name": "Elevação lateral na polia",
+        "source_relative_path": "Elevação lateral na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES",
+        "name": "Elevação lateral posterior sentado com halteres",
+        "source_relative_path": "Elevação lateral posterior sentado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA",
+        "name": "Elevação lateral unilateral na polia",
+        "source_relative_path": "Elevação lateral unilateral na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ELIPTICO-MAQUINA",
+        "name": "Elíptico (máquina)",
+        "source_relative_path": "Elíptico (máquina).gif"
+      },
+      {
+        "exercise_code": "EX-ENCOLHIMENTO-COM-BARRA",
+        "name": "Encolhimento com barra",
+        "source_relative_path": "Encolhimento com barra.gif"
+      },
+      {
+        "exercise_code": "EX-ENCOLHIMENTO-COM-HALTERES",
+        "name": "Encolhimento com halteres",
+        "source_relative_path": "Encolhimento com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ENCOLHIMENTO-NA-MAQUINA",
+        "name": "Encolhimento na máquina",
+        "source_relative_path": "Encolhimento na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ENCOLHIMENTO-NA-POLIA",
+        "name": "Encolhimento na polia",
+        "source_relative_path": "Encolhimento na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ENCOLHIMENTO-NO-SMITH",
+        "name": "Encolhimento no Smith",
+        "source_relative_path": "Encolhimento no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-ESCALADOR-MOUNTAIN-CLIMBER",
+        "name": "Escalador (mountain climber)",
+        "source_relative_path": "Escalador (mountain climber).gif"
+      },
+      {
+        "exercise_code": "EX-ESTEIRA",
+        "name": "Esteira",
+        "source_relative_path": "Esteira.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA",
+        "name": "Extensão de perna (cadeira extensora)",
+        "source_relative_path": "Extensão de perna (cadeira extensora).gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-PERNA-UNILATERAL",
+        "name": "Extensão de perna unilateral",
+        "source_relative_path": "Extensão de perna unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA",
+        "name": "Extensão de tríceps acima da cabeça na polia",
+        "source_relative_path": "Extensão de tríceps acima da cabeça na polia.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-COM-HALTERES",
+        "name": "Extensão de tríceps com halteres",
+        "source_relative_path": "Extensão de tríceps com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA",
+        "name": "Extensão de tríceps deitado na polia",
+        "source_relative_path": "Extensão de tríceps deitado na polia.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA",
+        "name": "Extensão de tríceps na máquina",
+        "source_relative_path": "Extensão de tríceps na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-POLIA",
+        "name": "Extensão de tríceps na polia",
+        "source_relative_path": "Extensão de tríceps na polia.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES",
+        "name": "Extensão de tríceps sentado com halteres",
+        "source_relative_path": "Extensão de tríceps sentado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-EXTENSAO-LOMBAR",
+        "name": "Extensão lombar",
+        "source_relative_path": "Extensão lombar.gif"
+      },
+      {
+        "exercise_code": "EX-FACE-PULL-PUXADA-FACIAL",
+        "name": "Face pull (puxada facial)",
+        "source_relative_path": "Face pull (puxada facial).gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-ARCHER-ARQUEIRO",
+        "name": "Flexão archer (arqueiro)",
+        "source_relative_path": "Flexão archer (arqueiro).gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-COM-PEGADA-FECHADA",
+        "name": "Flexão com pegada fechada",
+        "source_relative_path": "Flexão com pegada fechada.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-BRACO",
+        "name": "Flexão de braço",
+        "source_relative_path": "Flexão de braço.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-PERNA-MESA-FLEXORA",
+        "name": "Flexão de perna (mesa flexora)",
+        "source_relative_path": "Flexão de perna (mesa flexora).gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-PERNA-COM-HALTER",
+        "name": "Flexão de perna com halter",
+        "source_relative_path": "Flexão de perna com halter.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA",
+        "name": "Flexão de perna sentado (cadeira flexora)",
+        "source_relative_path": "Flexão de perna sentado (cadeira flexora).gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO",
+        "name": "Flexão de perna unilateral sentado",
+        "source_relative_path": "Flexão de perna unilateral sentado.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL",
+        "name": "Flexão de perna unilateral",
+        "source_relative_path": "Flexão de perna unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-LATERAL-A-45-GRAUS",
+        "name": "Flexão lateral a 45 graus",
+        "source_relative_path": "Flexão lateral a 45 graus.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-LATERAL-NA-POLIA",
+        "name": "Flexão lateral na polia",
+        "source_relative_path": "Flexão lateral na polia.gif"
+      },
+      {
+        "exercise_code": "EX-FLEXAO-PIKE",
+        "name": "Flexão pike",
+        "source_relative_path": "Flexão pike.gif"
+      },
+      {
+        "exercise_code": "EX-HIPEREXTENSAO-LOMBAR",
+        "name": "Hiperextensão lombar",
+        "source_relative_path": "Hiperextensão lombar.gif"
+      },
+      {
+        "exercise_code": "EX-LEG-PRESS-HORIZONTAL-UNILATERAL",
+        "name": "Leg press horizontal unilateral",
+        "source_relative_path": "Leg press horizontal unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-LEG-PRESS-HORIZONTAL",
+        "name": "Leg press horizontal",
+        "source_relative_path": "Leg press horizontal.gif"
+      },
+      {
+        "exercise_code": "EX-LEG-PRESS-UNILATERAL",
+        "name": "Leg press unilateral",
+        "source_relative_path": "Leg press unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-LEG-PRESS",
+        "name": "Leg press",
+        "source_relative_path": "Leg press.gif"
+      },
+      {
+        "exercise_code": "EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR",
+        "name": "Levantamento terra com trap bar",
+        "source_relative_path": "Levantamento terra com trap bar.gif"
+      },
+      {
+        "exercise_code": "EX-LEVANTAMENTO-TERRA-NO-SMITH",
+        "name": "Levantamento terra no Smith",
+        "source_relative_path": "Levantamento terra no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES",
+        "name": "Levantamento terra romeno com halteres",
+        "source_relative_path": "Levantamento terra romeno com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA",
+        "name": "Levantamento terra sumô com pausa",
+        "source_relative_path": "Levantamento terra sumô com pausa.gif"
+      },
+      {
+        "exercise_code": "EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES",
+        "name": "Levantamento terra unilateral com halteres",
+        "source_relative_path": "Levantamento terra unilateral com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE",
+        "name": "Máquina de glúteo (monster glute)",
+        "source_relative_path": "Máquina de glúteo (monster glute).gif"
+      },
+      {
+        "exercise_code": "EX-MERGULHO-NAS-PARALELAS",
+        "name": "Mergulho nas paralelas",
+        "source_relative_path": "Mergulho nas paralelas.gif"
+      },
+      {
+        "exercise_code": "EX-MERGULHO-NO-BANCO",
+        "name": "Mergulho no banco",
+        "source_relative_path": "Mergulho no banco.gif"
+      },
+      {
+        "exercise_code": "EX-MERGULHO-SENTADO-NA-MAQUINA",
+        "name": "Mergulho sentado na máquina",
+        "source_relative_path": "Mergulho sentado na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-MUSCLE-UP-NA-BARRA",
+        "name": "Muscle-up na barra",
+        "source_relative_path": "Muscle-up na barra.gif"
+      },
+      {
+        "exercise_code": "EX-NADADOR-SWIMMING",
+        "name": "Nadador (swimming)",
+        "source_relative_path": "Nadador (swimming).gif"
+      },
+      {
+        "exercise_code": "EX-PARALELAS-ASSISTIDAS-NA-MAQUINA",
+        "name": "Paralelas assistidas na máquina",
+        "source_relative_path": "Paralelas assistidas na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-PES-NA-BARRA-TOES-TO-BAR",
+        "name": "Pés na barra (toes to bar)",
+        "source_relative_path": "Pés na barra (toes to bar).gif"
+      },
+      {
+        "exercise_code": "EX-POLICHINELO",
+        "name": "Polichinelo",
+        "source_relative_path": "Polichinelo.gif"
+      },
+      {
+        "exercise_code": "EX-PONTE-DE-GLUTEO-UNILATERAL",
+        "name": "Ponte de glúteo unilateral",
+        "source_relative_path": "Ponte de glúteo unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-PONTE-DE-GLUTEO",
+        "name": "Ponte de glúteo",
+        "source_relative_path": "Ponte de glúteo.gif"
+      },
+      {
+        "exercise_code": "EX-PRANCHA-LATERAL",
+        "name": "Prancha lateral",
+        "source_relative_path": "Prancha lateral.gif"
+      },
+      {
+        "exercise_code": "EX-PRANCHA-RKC",
+        "name": "Prancha RKC",
+        "source_relative_path": "Prancha RKC.gif"
+      },
+      {
+        "exercise_code": "EX-PULAR-CORDA",
+        "name": "Pular corda",
+        "source_relative_path": "Pular corda.gif"
+      },
+      {
+        "exercise_code": "EX-PULL-THROUGH-NA-POLIA",
+        "name": "Pull-through na polia",
+        "source_relative_path": "Pull-through na polia.gif"
+      },
+      {
+        "exercise_code": "EX-PULLOVER-COM-BARRA",
+        "name": "Pullover com barra",
+        "source_relative_path": "Pullover com barra.gif"
+      },
+      {
+        "exercise_code": "EX-PULLOVER-COM-HALTER",
+        "name": "Pullover com halter",
+        "source_relative_path": "Pullover com halter.gif"
+      },
+      {
+        "exercise_code": "EX-PUSH-PRESS",
+        "name": "Push press",
+        "source_relative_path": "Push press.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-ABERTA-UNILATERAL",
+        "name": "Puxada aberta unilateral",
+        "source_relative_path": "Puxada aberta unilateral.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-ABERTA",
+        "name": "Puxada aberta",
+        "source_relative_path": "Puxada aberta.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-ALTA-DO-ARRANCO",
+        "name": "Puxada alta do arranco",
+        "source_relative_path": "Puxada alta do arranco.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-ALTA-DO-TERRA-SUMO",
+        "name": "Puxada alta do terra sumô",
+        "source_relative_path": "Puxada alta do terra sumô.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL",
+        "name": "Puxada alta sumô com kettlebell",
+        "source_relative_path": "Puxada alta sumô com kettlebell.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA",
+        "name": "Puxada com braços estendidos na polia",
+        "source_relative_path": "Puxada com braços estendidos na polia.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-COM-PEGADA-MAG",
+        "name": "Puxada com pegada MAG",
+        "source_relative_path": "Puxada com pegada MAG.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-COM-PEGADA-NEUTRA",
+        "name": "Puxada com pegada neutra",
+        "source_relative_path": "Puxada com pegada neutra.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-FRONTAL-PULLDOWN",
+        "name": "Puxada frontal (pulldown)",
+        "source_relative_path": "Puxada frontal (pulldown).gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-POR-TRAS-DA-NUCA",
+        "name": "Puxada por trás da nuca",
+        "source_relative_path": "Puxada por trás da nuca.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-SUPINADA",
+        "name": "Puxada supinada",
+        "source_relative_path": "Puxada supinada.gif"
+      },
+      {
+        "exercise_code": "EX-PUXADA-UNILATERAL-NA-POLIA",
+        "name": "Puxada unilateral na polia",
+        "source_relative_path": "Puxada unilateral na polia.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-COM-BARRA-W",
+        "name": "Remada alta com barra W",
+        "source_relative_path": "Remada alta com barra W.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-COM-BARRA",
+        "name": "Remada alta com barra",
+        "source_relative_path": "Remada alta com barra.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-COM-HALTERES",
+        "name": "Remada alta com halteres",
+        "source_relative_path": "Remada alta com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-NA-MAQUINA",
+        "name": "Remada alta na máquina",
+        "source_relative_path": "Remada alta na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA",
+        "name": "Remada alta pegada supinada na máquina",
+        "source_relative_path": "Remada alta pegada supinada na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA",
+        "name": "Remada alta unilateral na máquina",
+        "source_relative_path": "Remada alta unilateral na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-BAIXA-NA-MAQUINA",
+        "name": "Remada baixa na máquina",
+        "source_relative_path": "Remada baixa na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-BAIXA-SENTADO-NA-POLIA",
+        "name": "Remada baixa sentado na polia",
+        "source_relative_path": "Remada baixa sentado na polia.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA",
+        "name": "Remada baixa sentado no chão na polia",
+        "source_relative_path": "Remada baixa sentado no chão na polia.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA",
+        "name": "Remada baixa unilateral na máquina",
+        "source_relative_path": "Remada baixa unilateral na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-CAVALINHO-NA-MAQUINA",
+        "name": "Remada cavalinho na máquina",
+        "source_relative_path": "Remada cavalinho na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-COM-BARRA-PEGADA-SUPINADA",
+        "name": "Remada com barra pegada supinada",
+        "source_relative_path": "Remada com barra pegada supinada.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-COM-HALTERES",
+        "name": "Remada com halteres",
+        "source_relative_path": "Remada com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-DEITADO-COM-BARRA",
+        "name": "Remada deitado com barra",
+        "source_relative_path": "Remada deitado com barra.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-INCLINADA-COM-BARRA",
+        "name": "Remada inclinada com barra",
+        "source_relative_path": "Remada inclinada com barra.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-INCLINADA-COM-HALTERES",
+        "name": "Remada inclinada com halteres",
+        "source_relative_path": "Remada inclinada com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-INVERTIDA",
+        "name": "Remada invertida",
+        "source_relative_path": "Remada invertida.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-NO-SMITH",
+        "name": "Remada no Smith",
+        "source_relative_path": "Remada no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-PENDLAY",
+        "name": "Remada Pendlay",
+        "source_relative_path": "Remada Pendlay.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-SENTADO-NA-MAQUINA",
+        "name": "Remada sentado na máquina",
+        "source_relative_path": "Remada sentado na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-SENTADO-UNILATERAL-NA-POLIA",
+        "name": "Remada sentado unilateral na polia",
+        "source_relative_path": "Remada sentado unilateral na polia.gif"
+      },
+      {
+        "exercise_code": "EX-REMADA-UNILATERAL-COM-HALTER-SERROTE",
+        "name": "Remada unilateral com halter (serrote)",
+        "source_relative_path": "Remada unilateral com halter (serrote).gif"
+      },
+      {
+        "exercise_code": "EX-REMO-MAQUINA",
+        "name": "Remo (máquina)",
+        "source_relative_path": "Remo (máquina).gif"
+      },
+      {
+        "exercise_code": "EX-ROLO-ABDOMINAL-ROLL-OUT",
+        "name": "Rolo abdominal (roll-out)",
+        "source_relative_path": "Rolo abdominal (roll-out).gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-BICEPS-NA-MAQUINA",
+        "name": "Rosca de bíceps na máquina",
+        "source_relative_path": "Rosca de bíceps na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA-W",
+        "name": "Rosca de punho com barra W",
+        "source_relative_path": "Rosca de punho com barra W.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA",
+        "name": "Rosca de punho com barra",
+        "source_relative_path": "Rosca de punho com barra.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-PUNHO-COM-HALTERES",
+        "name": "Rosca de punho com halteres",
+        "source_relative_path": "Rosca de punho com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA",
+        "name": "Rosca de punho inversa com barra",
+        "source_relative_path": "Rosca de punho inversa com barra.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES",
+        "name": "Rosca de punho inversa com halteres",
+        "source_relative_path": "Rosca de punho inversa com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DIRETA-COM-BARRA-W",
+        "name": "Rosca direta com barra W",
+        "source_relative_path": "Rosca direta com barra W.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DIRETA-COM-HALTERES",
+        "name": "Rosca direta com halteres",
+        "source_relative_path": "Rosca direta com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-DIRETA-NA-POLIA",
+        "name": "Rosca direta na polia",
+        "source_relative_path": "Rosca direta na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-INCLINADA-COM-HALTERES",
+        "name": "Rosca inclinada com halteres",
+        "source_relative_path": "Rosca inclinada com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-INVERSA-COM-BARRA",
+        "name": "Rosca inversa com barra",
+        "source_relative_path": "Rosca inversa com barra.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-MARTELO-COM-HALTERES",
+        "name": "Rosca martelo com halteres",
+        "source_relative_path": "Rosca martelo com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-MARTELO-NA-POLIA",
+        "name": "Rosca martelo na polia",
+        "source_relative_path": "Rosca martelo na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA-W",
+        "name": "Rosca scott com barra W",
+        "source_relative_path": "Rosca scott com barra W.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA",
+        "name": "Rosca scott com barra",
+        "source_relative_path": "Rosca scott com barra.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-SCOTT-COM-HALTERES",
+        "name": "Rosca scott com halteres",
+        "source_relative_path": "Rosca scott com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-ROSCA-SCOTT-NA-MAQUINA",
+        "name": "Rosca scott na máquina",
+        "source_relative_path": "Rosca scott na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-ROTACAO-DE-TRONCO-NA-POLIA",
+        "name": "Rotação de tronco na polia",
+        "source_relative_path": "Rotação de tronco na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ROTACAO-EXTERNA-NA-POLIA",
+        "name": "Rotação externa na polia",
+        "source_relative_path": "Rotação externa na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ROTACAO-INTERNA-NA-POLIA",
+        "name": "Rotação interna na polia",
+        "source_relative_path": "Rotação interna na polia.gif"
+      },
+      {
+        "exercise_code": "EX-ROTACAO-RUSSA-RUSSIAN-TWIST",
+        "name": "Rotação russa (russian twist)",
+        "source_relative_path": "Rotação russa (russian twist).gif"
+      },
+      {
+        "exercise_code": "EX-SIMULADOR-DE-ESCADA-STEPMILL",
+        "name": "Simulador de escada (stepmill)",
+        "source_relative_path": "Simulador de escada (stepmill).gif"
+      },
+      {
+        "exercise_code": "EX-SKI-ERG-ERGOMETRO-DE-ESQUI",
+        "name": "Ski erg (ergômetro de esqui)",
+        "source_relative_path": "Ski erg (ergômetro de esqui).gif"
+      },
+      {
+        "exercise_code": "EX-SNATCH-BALANCE",
+        "name": "Snatch balance",
+        "source_relative_path": "Snatch balance.gif"
+      },
+      {
+        "exercise_code": "EX-STIFF-TERRA-PERNAS-RIGIDAS",
+        "name": "Stiff (terra pernas rígidas)",
+        "source_relative_path": "Stiff (terra pernas rígidas).gif"
+      },
+      {
+        "exercise_code": "EX-STIFF-COM-HALTERES",
+        "name": "Stiff com halteres",
+        "source_relative_path": "Stiff com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-STIFF-UNILATERAL-COM-BARRA",
+        "name": "Stiff unilateral com barra",
+        "source_relative_path": "Stiff unilateral com barra.gif"
+      },
+      {
+        "exercise_code": "EX-SUBIDA-NO-BANCO-STEP-UP",
+        "name": "Subida no banco (step-up)",
+        "source_relative_path": "Subida no banco (step-up).gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-COM-PEGADA-FECHADA",
+        "name": "Supino com pegada fechada",
+        "source_relative_path": "Supino com pegada fechada.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-DECLINADO-NA-MAQUINA",
+        "name": "Supino declinado na máquina",
+        "source_relative_path": "Supino declinado na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-COM-BARRA",
+        "name": "Supino inclinado com barra",
+        "source_relative_path": "Supino inclinado com barra.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-COM-HALTERES",
+        "name": "Supino inclinado com halteres",
+        "source_relative_path": "Supino inclinado com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES",
+        "name": "Supino inclinado com rotação e halteres",
+        "source_relative_path": "Supino inclinado com rotação e halteres.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS",
+        "name": "Supino inclinado na máquina (chest press)",
+        "source_relative_path": "Supino inclinado na máquina (chest press).gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA",
+        "name": "Supino inclinado na máquina",
+        "source_relative_path": "Supino inclinado na máquina.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-INCLINADO-NO-SMITH",
+        "name": "Supino inclinado no Smith",
+        "source_relative_path": "Supino inclinado no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-NA-MAQUINA-CHEST-PRESS",
+        "name": "Supino na máquina (chest press)",
+        "source_relative_path": "Supino na máquina (chest press).gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-NA-MAQUINA-HAMMER",
+        "name": "Supino na máquina hammer",
+        "source_relative_path": "Supino na máquina hammer.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-NO-SMITH",
+        "name": "Supino no Smith",
+        "source_relative_path": "Supino no Smith.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-RETO-COM-HALTERES",
+        "name": "Supino reto com halteres",
+        "source_relative_path": "Supino reto com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-SUPINO-RETO",
+        "name": "Supino reto",
+        "source_relative_path": "Supino reto.gif"
+      },
+      {
+        "exercise_code": "EX-THRUSTER-2",
+        "name": "Thruster (2)",
+        "source_relative_path": "Thruster (2).gif"
+      },
+      {
+        "exercise_code": "EX-THRUSTER-COM-HALTERES",
+        "name": "Thruster com halteres",
+        "source_relative_path": "Thruster com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-TOQUE-NO-OMBRO-PRANCHA",
+        "name": "Toque no ombro (prancha)",
+        "source_relative_path": "Toque no ombro (prancha).gif"
+      },
+      {
+        "exercise_code": "EX-TRICEPS-COICE-COM-HALTERES",
+        "name": "Tríceps coice com halteres",
+        "source_relative_path": "Tríceps coice com halteres.gif"
+      },
+      {
+        "exercise_code": "EX-TRICEPS-PUSHDOWN-NA-POLIA",
+        "name": "Tríceps pushdown na polia",
+        "source_relative_path": "Tríceps pushdown na polia.gif"
+      },
+      {
+        "exercise_code": "EX-TRICEPS-TESTA-DEITADO",
+        "name": "Tríceps testa deitado",
+        "source_relative_path": "Tríceps testa deitado.gif"
+      },
+      {
+        "exercise_code": "EX-TRICEPS-TESTA",
+        "name": "Tríceps testa",
+        "source_relative_path": "Tríceps testa.gif"
+      },
+      {
+        "exercise_code": "EX-TURKISH-GET-UP",
+        "name": "Turkish get-up",
+        "source_relative_path": "Turkish get-up.gif"
+      },
+      {
+        "exercise_code": "EX-VOADOR-PECK-DECK",
+        "name": "Voador (peck deck)",
+        "source_relative_path": "Voador (peck deck).gif"
+      }
+    ],
+    "unchanged": [],
+    "updated": []
+  },
+  "generatedAt": "2026-07-31T04:17:51.827Z",
+  "invalid": [],
+  "items": [
+    {
+      "exercise_code": "EX-ABDOMINAL-BICICLETA",
+      "name": "Abdominal bicicleta",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-BICICLETA/c3bddd30/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-BICICLETA/c3bddd30/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-BICICLETA/c3bddd30/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL",
+      "name": "Abdominal com elevação de quadril",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL/1e56e7ab/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL/1e56e7ab/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL/1e56e7ab/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-CRUNCH",
+      "name": "Abdominal crunch",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-CRUNCH/114859eb/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-CRUNCH/114859eb/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-CRUNCH/114859eb/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-DECLINADO",
+      "name": "Abdominal declinado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-DECLINADO/c97d33e4/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-DECLINADO/c97d33e4/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-DECLINADO/c97d33e4/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-DECLINADO-SIT-UP",
+      "name": "Abdominal declinado (sit-up)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-DECLINADO-SIT-UP/10763aec/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-DECLINADO-SIT-UP/10763aec/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-DECLINADO-SIT-UP/10763aec/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-DECLINADO-COM-PESO",
+      "name": "Abdominal declinado com peso",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-DECLINADO-COM-PESO/9b2a9168/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-DECLINADO-COM-PESO/9b2a9168/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-DECLINADO-COM-PESO/9b2a9168/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-INVERTIDO",
+      "name": "Abdominal invertido",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-INVERTIDO/93040e90/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-INVERTIDO/93040e90/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-INVERTIDO/93040e90/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-NA-MAQUINA",
+      "name": "Abdominal na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-NA-MAQUINA/8bbed769/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-NA-MAQUINA/8bbed769/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-NA-MAQUINA/8bbed769/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-NA-MAQUINA-AB-COASTER",
+      "name": "Abdominal na máquina ab coaster",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-NA-MAQUINA-AB-COASTER/49b2e3d2/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-NA-MAQUINA-AB-COASTER/49b2e3d2/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-NA-MAQUINA-AB-COASTER/49b2e3d2/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-NA-POLIA",
+      "name": "Abdominal na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-NA-POLIA/51660485/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-NA-POLIA/51660485/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-NA-POLIA/51660485/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-SIT-UP",
+      "name": "Abdominal sit-up",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-SIT-UP/08dd2c35/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-SIT-UP/08dd2c35/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-SIT-UP/08dd2c35/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDOMINAL-V-V-UP",
+      "name": "Abdominal V (v-up)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDOMINAL-V-V-UP/485505e1/poster.webp",
+      "preview": "exercise-library/EX-ABDOMINAL-V-V-UP/485505e1/preview.webp",
+      "source": "exercise-library/EX-ABDOMINAL-V-V-UP/485505e1/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDUCAO-DE-QUADRIL-DEITADO",
+      "name": "Abdução de quadril deitado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDUCAO-DE-QUADRIL-DEITADO/e910388b/poster.webp",
+      "preview": "exercise-library/EX-ABDUCAO-DE-QUADRIL-DEITADO/e910388b/preview.webp",
+      "source": "exercise-library/EX-ABDUCAO-DE-QUADRIL-DEITADO/e910388b/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA",
+      "name": "Abdução de quadril na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA/838008c3/poster.webp",
+      "preview": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA/838008c3/preview.webp",
+      "source": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA/838008c3/source.gif"
+    },
+    {
+      "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-POLIA",
+      "name": "Abdução de quadril na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-POLIA/84efd5c0/poster.webp",
+      "preview": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-POLIA/84efd5c0/preview.webp",
+      "source": "exercise-library/EX-ABDUCAO-DE-QUADRIL-NA-POLIA/84efd5c0/source.gif"
+    },
+    {
+      "exercise_code": "EX-AFUNDO-LUNGE",
+      "name": "Afundo (lunge)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AFUNDO-LUNGE/41b9dc35/poster.webp",
+      "preview": "exercise-library/EX-AFUNDO-LUNGE/41b9dc35/preview.webp",
+      "source": "exercise-library/EX-AFUNDO-LUNGE/41b9dc35/source.gif"
+    },
+    {
+      "exercise_code": "EX-AFUNDO-COM-HALTERES",
+      "name": "Afundo com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AFUNDO-COM-HALTERES/493d67c3/poster.webp",
+      "preview": "exercise-library/EX-AFUNDO-COM-HALTERES/493d67c3/preview.webp",
+      "source": "exercise-library/EX-AFUNDO-COM-HALTERES/493d67c3/source.gif"
+    },
+    {
+      "exercise_code": "EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL",
+      "name": "Afundo com rotação e kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL/30157107/poster.webp",
+      "preview": "exercise-library/EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL/30157107/preview.webp",
+      "source": "exercise-library/EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL/30157107/source.gif"
+    },
+    {
+      "exercise_code": "EX-AFUNDO-PARADO-COM-BARRA",
+      "name": "Afundo parado com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AFUNDO-PARADO-COM-BARRA/f6052287/poster.webp",
+      "preview": "exercise-library/EX-AFUNDO-PARADO-COM-BARRA/f6052287/preview.webp",
+      "source": "exercise-library/EX-AFUNDO-PARADO-COM-BARRA/f6052287/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-AFUNDO-COM-HALTERES",
+      "name": "Agachamento afundo com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-AFUNDO-COM-HALTERES/0d30327f/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-AFUNDO-COM-HALTERES/0d30327f/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-AFUNDO-COM-HALTERES/0d30327f/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-AFUNDO-NO-SMITH",
+      "name": "Agachamento afundo no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-AFUNDO-NO-SMITH/3448595e/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-AFUNDO-NO-SMITH/3448595e/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-AFUNDO-NO-SMITH/3448595e/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-BARRA",
+      "name": "Agachamento búlgaro com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-BARRA/74a98e37/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-BARRA/74a98e37/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-BARRA/74a98e37/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-HALTERES",
+      "name": "Agachamento búlgaro com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-HALTERES/311c1de6/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-HALTERES/311c1de6/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-BULGARO-COM-HALTERES/311c1de6/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-COM-HALTERES",
+      "name": "Agachamento com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-COM-HALTERES/c7a5421c/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-COM-HALTERES/c7a5421c/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-COM-HALTERES/c7a5421c/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS",
+      "name": "Agachamento com pausa (barra nas costas)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS/1a871666/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS/1a871666/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS/1a871666/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-COM-SALTO",
+      "name": "Agachamento com salto",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-COM-SALTO/ba7079c5/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-COM-SALTO/ba7079c5/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-COM-SALTO/ba7079c5/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-EM-V-INVERTIDO",
+      "name": "Agachamento em V invertido",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-EM-V-INVERTIDO/02e13544/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-EM-V-INVERTIDO/02e13544/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-EM-V-INVERTIDO/02e13544/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-FRONTAL",
+      "name": "Agachamento frontal",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-FRONTAL/6046d880/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-FRONTAL/6046d880/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-FRONTAL/6046d880/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL",
+      "name": "Agachamento goblet com kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL/d582ab04/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL/d582ab04/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL/d582ab04/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-HACK-NA-MAQUINA",
+      "name": "Agachamento hack na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-HACK-NA-MAQUINA/f33a2710/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-HACK-NA-MAQUINA/f33a2710/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-HACK-NA-MAQUINA/f33a2710/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-NO-APARELHO-EM-V",
+      "name": "Agachamento no aparelho em V",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-NO-APARELHO-EM-V/88338d09/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-NO-APARELHO-EM-V/88338d09/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-NO-APARELHO-EM-V/88338d09/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-NO-SMITH",
+      "name": "Agachamento no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-NO-SMITH/907c1c12/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-NO-SMITH/907c1c12/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-NO-SMITH/907c1c12/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-OVERHEAD-COM-BARRA",
+      "name": "Agachamento overhead com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-OVERHEAD-COM-BARRA/5487fc26/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-OVERHEAD-COM-BARRA/5487fc26/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-OVERHEAD-COM-BARRA/5487fc26/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-PISTOL-UNILATERAL",
+      "name": "Agachamento pistol (unilateral)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-PISTOL-UNILATERAL/e267ae9e/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-PISTOL-UNILATERAL/e267ae9e/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-PISTOL-UNILATERAL/e267ae9e/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-PISTOL-NA-CAIXA",
+      "name": "Agachamento pistol na caixa",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-PISTOL-NA-CAIXA/b1024557/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-PISTOL-NA-CAIXA/b1024557/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-PISTOL-NA-CAIXA/b1024557/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-SUMO-COM-HALTERES",
+      "name": "Agachamento sumô com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-SUMO-COM-HALTERES/d1825928/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-SUMO-COM-HALTERES/d1825928/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-SUMO-COM-HALTERES/d1825928/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-SUMO-COM-KETTLEBELL",
+      "name": "Agachamento sumô com kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-SUMO-COM-KETTLEBELL/1134cf88/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-SUMO-COM-KETTLEBELL/1134cf88/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-SUMO-COM-KETTLEBELL/1134cf88/source.gif"
+    },
+    {
+      "exercise_code": "EX-AGACHAMENTO-SUMO-LIVRE",
+      "name": "Agachamento sumô livre",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-AGACHAMENTO-SUMO-LIVRE/81069d80/poster.webp",
+      "preview": "exercise-library/EX-AGACHAMENTO-SUMO-LIVRE/81069d80/preview.webp",
+      "source": "exercise-library/EX-AGACHAMENTO-SUMO-LIVRE/81069d80/source.gif"
+    },
+    {
+      "exercise_code": "EX-ARRANCO-SNATCH",
+      "name": "Arranco (snatch)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ARRANCO-SNATCH/10bb604c/poster.webp",
+      "preview": "exercise-library/EX-ARRANCO-SNATCH/10bb604c/preview.webp",
+      "source": "exercise-library/EX-ARRANCO-SNATCH/10bb604c/source.gif"
+    },
+    {
+      "exercise_code": "EX-ARRANCO-COM-HALTER",
+      "name": "Arranco com halter",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ARRANCO-COM-HALTER/aa489af0/poster.webp",
+      "preview": "exercise-library/EX-ARRANCO-COM-HALTER/aa489af0/preview.webp",
+      "source": "exercise-library/EX-ARRANCO-COM-HALTER/aa489af0/source.gif"
+    },
+    {
+      "exercise_code": "EX-ARRANCO-COM-KETTLEBELL",
+      "name": "Arranco com kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ARRANCO-COM-KETTLEBELL/0afbc579/poster.webp",
+      "preview": "exercise-library/EX-ARRANCO-COM-KETTLEBELL/0afbc579/preview.webp",
+      "source": "exercise-library/EX-ARRANCO-COM-KETTLEBELL/0afbc579/source.gif"
+    },
+    {
+      "exercise_code": "EX-ARRANCO-SUSPENSO-HANG-SNATCH",
+      "name": "Arranco suspenso (hang snatch)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ARRANCO-SUSPENSO-HANG-SNATCH/49a9f71e/poster.webp",
+      "preview": "exercise-library/EX-ARRANCO-SUSPENSO-HANG-SNATCH/49a9f71e/preview.webp",
+      "source": "exercise-library/EX-ARRANCO-SUSPENSO-HANG-SNATCH/49a9f71e/source.gif"
+    },
+    {
+      "exercise_code": "EX-ARREMESSO-JERK",
+      "name": "Arremesso (jerk)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ARREMESSO-JERK/b3181829/poster.webp",
+      "preview": "exercise-library/EX-ARREMESSO-JERK/b3181829/preview.webp",
+      "source": "exercise-library/EX-ARREMESSO-JERK/b3181829/source.gif"
+    },
+    {
+      "exercise_code": "EX-BALANCO-COM-KETTLEBELL-SWING",
+      "name": "Balanço com kettlebell (swing)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BALANCO-COM-KETTLEBELL-SWING/56e25f9d/poster.webp",
+      "preview": "exercise-library/EX-BALANCO-COM-KETTLEBELL-SWING/56e25f9d/preview.webp",
+      "source": "exercise-library/EX-BALANCO-COM-KETTLEBELL-SWING/56e25f9d/source.gif"
+    },
+    {
+      "exercise_code": "EX-BALANCO-UNILATERAL-COM-KETTLEBELL",
+      "name": "Balanço unilateral com kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BALANCO-UNILATERAL-COM-KETTLEBELL/e03feb45/poster.webp",
+      "preview": "exercise-library/EX-BALANCO-UNILATERAL-COM-KETTLEBELL/e03feb45/preview.webp",
+      "source": "exercise-library/EX-BALANCO-UNILATERAL-COM-KETTLEBELL/e03feb45/source.gif"
+    },
+    {
+      "exercise_code": "EX-BARRA-FIXA-PULL-UP",
+      "name": "Barra fixa (pull-up)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BARRA-FIXA-PULL-UP/45d98d62/poster.webp",
+      "preview": "exercise-library/EX-BARRA-FIXA-PULL-UP/45d98d62/preview.webp",
+      "source": "exercise-library/EX-BARRA-FIXA-PULL-UP/45d98d62/source.gif"
+    },
+    {
+      "exercise_code": "EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA",
+      "name": "Barra fixa assistida na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA/1e69859c/poster.webp",
+      "preview": "exercise-library/EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA/1e69859c/preview.webp",
+      "source": "exercise-library/EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA/1e69859c/source.gif"
+    },
+    {
+      "exercise_code": "EX-BARRA-FIXA-SUPINADA",
+      "name": "Barra fixa supinada",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BARRA-FIXA-SUPINADA/d928c543/poster.webp",
+      "preview": "exercise-library/EX-BARRA-FIXA-SUPINADA/d928c543/preview.webp",
+      "source": "exercise-library/EX-BARRA-FIXA-SUPINADA/d928c543/source.gif"
+    },
+    {
+      "exercise_code": "EX-BOM-DIA-GOOD-MORNING",
+      "name": "Bom dia (good morning)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-BOM-DIA-GOOD-MORNING/105c8994/poster.webp",
+      "preview": "exercise-library/EX-BOM-DIA-GOOD-MORNING/105c8994/preview.webp",
+      "source": "exercise-library/EX-BOM-DIA-GOOD-MORNING/105c8994/source.gif"
+    },
+    {
+      "exercise_code": "EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA",
+      "name": "Cadeira adutora (adução de coxa)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA/9b25c9dc/poster.webp",
+      "preview": "exercise-library/EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA/9b25c9dc/preview.webp",
+      "source": "exercise-library/EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA/9b25c9dc/source.gif"
+    },
+    {
+      "exercise_code": "EX-CANIVETE-PILATES-JACKKNIFE",
+      "name": "Canivete (pilates jackknife)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CANIVETE-PILATES-JACKKNIFE/0c2c7a1e/poster.webp",
+      "preview": "exercise-library/EX-CANIVETE-PILATES-JACKKNIFE/0c2c7a1e/preview.webp",
+      "source": "exercise-library/EX-CANIVETE-PILATES-JACKKNIFE/0c2c7a1e/source.gif"
+    },
+    {
+      "exercise_code": "EX-COICE-DE-GLUTEO",
+      "name": "Coice de glúteo",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-COICE-DE-GLUTEO/5e3ee21d/poster.webp",
+      "preview": "exercise-library/EX-COICE-DE-GLUTEO/5e3ee21d/preview.webp",
+      "source": "exercise-library/EX-COICE-DE-GLUTEO/5e3ee21d/source.gif"
+    },
+    {
+      "exercise_code": "EX-COICE-DE-GLUTEO-NA-MAQUINA",
+      "name": "Coice de glúteo na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-COICE-DE-GLUTEO-NA-MAQUINA/f5200fcb/poster.webp",
+      "preview": "exercise-library/EX-COICE-DE-GLUTEO-NA-MAQUINA/f5200fcb/preview.webp",
+      "source": "exercise-library/EX-COICE-DE-GLUTEO-NA-MAQUINA/f5200fcb/source.gif"
+    },
+    {
+      "exercise_code": "EX-COICE-DE-GLUTEO-NA-POLIA",
+      "name": "Coice de glúteo na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-COICE-DE-GLUTEO-NA-POLIA/95904163/poster.webp",
+      "preview": "exercise-library/EX-COICE-DE-GLUTEO-NA-POLIA/95904163/preview.webp",
+      "source": "exercise-library/EX-COICE-DE-GLUTEO-NA-POLIA/95904163/source.gif"
+    },
+    {
+      "exercise_code": "EX-CONCHA-DEITADO-DE-LADO-CLAM",
+      "name": "Concha deitado de lado (clam)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CONCHA-DEITADO-DE-LADO-CLAM/67e49795/poster.webp",
+      "preview": "exercise-library/EX-CONCHA-DEITADO-DE-LADO-CLAM/67e49795/preview.webp",
+      "source": "exercise-library/EX-CONCHA-DEITADO-DE-LADO-CLAM/67e49795/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-COM-HALTERES",
+      "name": "Crucifixo com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-COM-HALTERES/a72e4c58/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-COM-HALTERES/a72e4c58/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-COM-HALTERES/a72e4c58/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-DECLINADO-COM-HALTERES",
+      "name": "Crucifixo declinado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-DECLINADO-COM-HALTERES/8a5f00ce/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-DECLINADO-COM-HALTERES/8a5f00ce/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-DECLINADO-COM-HALTERES/8a5f00ce/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-EM-PE-NA-POLIA",
+      "name": "Crucifixo em pé na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-EM-PE-NA-POLIA/9fcbae20/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-EM-PE-NA-POLIA/9fcbae20/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-EM-PE-NA-POLIA/9fcbae20/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-INCLINADO-NA-POLIA",
+      "name": "Crucifixo inclinado na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-INCLINADO-NA-POLIA/9d2b3601/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-INCLINADO-NA-POLIA/9d2b3601/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-INCLINADO-NA-POLIA/9d2b3601/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK",
+      "name": "Crucifixo invertido na máquina (peck deck)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK/156456b7/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK/156456b7/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK/156456b7/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-POLIA",
+      "name": "Crucifixo invertido na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-POLIA/0d3cce9a/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-POLIA/0d3cce9a/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-INVERTIDO-NA-POLIA/0d3cce9a/source.gif"
+    },
+    {
+      "exercise_code": "EX-CRUCIFIXO-NA-POLIA-BAIXA",
+      "name": "Crucifixo na polia baixa",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-CRUCIFIXO-NA-POLIA-BAIXA/168f757d/poster.webp",
+      "preview": "exercise-library/EX-CRUCIFIXO-NA-POLIA-BAIXA/168f757d/preview.webp",
+      "source": "exercise-library/EX-CRUCIFIXO-NA-POLIA-BAIXA/168f757d/source.gif"
+    },
+    {
+      "exercise_code": "EX-DEAD-BUG-INSETO-MORTO",
+      "name": "Dead bug (inseto morto)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DEAD-BUG-INSETO-MORTO/6983cad2/poster.webp",
+      "preview": "exercise-library/EX-DEAD-BUG-INSETO-MORTO/6983cad2/preview.webp",
+      "source": "exercise-library/EX-DEAD-BUG-INSETO-MORTO/6983cad2/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES",
+      "name": "Desenvolvimento Arnold com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES/fbfbdb24/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES/fbfbdb24/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES/fbfbdb24/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-COM-ANILHA",
+      "name": "Desenvolvimento com anilha",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-COM-ANILHA/80a0af50/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-COM-ANILHA/80a0af50/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-COM-ANILHA/80a0af50/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-COM-HALTERES",
+      "name": "Desenvolvimento com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-COM-HALTERES/cafe0911/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-COM-HALTERES/cafe0911/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-COM-HALTERES/cafe0911/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE",
+      "name": "Desenvolvimento landmine",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE/ba37b9c3/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE/ba37b9c3/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE/ba37b9c3/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL",
+      "name": "Desenvolvimento landmine unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL/12dc12ef/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL/12dc12ef/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL/12dc12ef/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-MILITAR",
+      "name": "Desenvolvimento militar",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-MILITAR/4c90c6a1/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-MILITAR/4c90c6a1/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-MILITAR/4c90c6a1/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-NA-MAQUINA",
+      "name": "Desenvolvimento na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-NA-MAQUINA/56cd56aa/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-NA-MAQUINA/56cd56aa/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-NA-MAQUINA/56cd56aa/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA",
+      "name": "Desenvolvimento por trás da nuca",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA/1201b769/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA/1201b769/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA/1201b769/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-BARRA",
+      "name": "Desenvolvimento sentado com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-BARRA/dd63726c/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-BARRA/dd63726c/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-BARRA/dd63726c/source.gif"
+    },
+    {
+      "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES",
+      "name": "Desenvolvimento sentado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES/de49f7b0/poster.webp",
+      "preview": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES/de49f7b0/preview.webp",
+      "source": "exercise-library/EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES/de49f7b0/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR",
+      "name": "Elevação de glúteo e posterior (GHR)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR/c23ac468/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR/c23ac468/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR/c23ac468/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO",
+      "name": "Elevação de joelhos na cadeira do capitão",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO/4704d205/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO/4704d205/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO/4704d205/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-JOELHOS-SENTADO",
+      "name": "Elevação de joelhos sentado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-JOELHOS-SENTADO/4631ed68/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-JOELHOS-SENTADO/4631ed68/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-JOELHOS-SENTADO/4631ed68/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-EM-PE",
+      "name": "Elevação de panturrilha em pé",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-EM-PE/1882844f/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-EM-PE/1882844f/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-EM-PE/1882844f/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-SENTADO",
+      "name": "Elevação de panturrilha sentado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-SENTADO/afede411/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-SENTADO/afede411/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-PANTURRILHA-SENTADO/afede411/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-PERNAS",
+      "name": "Elevação de pernas",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-PERNAS/0f47139e/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-PERNAS/0f47139e/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-PERNAS/0f47139e/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-PERNAS-NA-BARRA",
+      "name": "Elevação de pernas na barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-PERNAS-NA-BARRA/e6d30efc/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-PERNAS-NA-BARRA/e6d30efc/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-PERNAS-NA-BARRA/e6d30efc/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-QUADRIL-HIP-THRUST",
+      "name": "Elevação de quadril (hip thrust)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-QUADRIL-HIP-THRUST/68a8dd59/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-QUADRIL-HIP-THRUST/68a8dd59/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-QUADRIL-HIP-THRUST/68a8dd59/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST",
+      "name": "Elevação de quadril com barra (hip thrust)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST/71ba623a/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST/71ba623a/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST/71ba623a/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA",
+      "name": "Elevação de quadril na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA/0c484bb9/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA/0c484bb9/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA/0c484bb9/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-EM-Y-COM-HALTERES",
+      "name": "Elevação em Y com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-EM-Y-COM-HALTERES/f262adbe/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-EM-Y-COM-HALTERES/f262adbe/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-EM-Y-COM-HALTERES/f262adbe/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-FRONTAL-COM-BARRA-W",
+      "name": "Elevação frontal com barra W",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-FRONTAL-COM-BARRA-W/b5131048/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-FRONTAL-COM-BARRA-W/b5131048/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-FRONTAL-COM-BARRA-W/b5131048/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-FRONTAL-COM-HALTERES",
+      "name": "Elevação frontal com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-FRONTAL-COM-HALTERES/61b00210/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-FRONTAL-COM-HALTERES/61b00210/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-FRONTAL-COM-HALTERES/61b00210/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-FRONTAL-NA-POLIA",
+      "name": "Elevação frontal na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-FRONTAL-NA-POLIA/e83b1327/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-FRONTAL-NA-POLIA/e83b1327/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-FRONTAL-NA-POLIA/e83b1327/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-COM-HALTERES",
+      "name": "Elevação lateral com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-COM-HALTERES/c031242f/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-COM-HALTERES/c031242f/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-COM-HALTERES/c031242f/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES",
+      "name": "Elevação lateral curvado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES/c2bc5822/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES/c2bc5822/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES/c2bc5822/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-NA-MAQUINA",
+      "name": "Elevação lateral na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-NA-MAQUINA/c0664ea3/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-NA-MAQUINA/c0664ea3/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-NA-MAQUINA/c0664ea3/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-NA-POLIA",
+      "name": "Elevação lateral na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-NA-POLIA/fd6c66bf/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-NA-POLIA/fd6c66bf/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-NA-POLIA/fd6c66bf/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES",
+      "name": "Elevação lateral posterior sentado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES/b92ef282/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES/b92ef282/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES/b92ef282/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA",
+      "name": "Elevação lateral unilateral na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA/dc1a5b5c/poster.webp",
+      "preview": "exercise-library/EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA/dc1a5b5c/preview.webp",
+      "source": "exercise-library/EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA/dc1a5b5c/source.gif"
+    },
+    {
+      "exercise_code": "EX-ELIPTICO-MAQUINA",
+      "name": "Elíptico (máquina)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ELIPTICO-MAQUINA/a39ccbda/poster.webp",
+      "preview": "exercise-library/EX-ELIPTICO-MAQUINA/a39ccbda/preview.webp",
+      "source": "exercise-library/EX-ELIPTICO-MAQUINA/a39ccbda/source.gif"
+    },
+    {
+      "exercise_code": "EX-ENCOLHIMENTO-COM-BARRA",
+      "name": "Encolhimento com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ENCOLHIMENTO-COM-BARRA/33897438/poster.webp",
+      "preview": "exercise-library/EX-ENCOLHIMENTO-COM-BARRA/33897438/preview.webp",
+      "source": "exercise-library/EX-ENCOLHIMENTO-COM-BARRA/33897438/source.gif"
+    },
+    {
+      "exercise_code": "EX-ENCOLHIMENTO-COM-HALTERES",
+      "name": "Encolhimento com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ENCOLHIMENTO-COM-HALTERES/ab11054f/poster.webp",
+      "preview": "exercise-library/EX-ENCOLHIMENTO-COM-HALTERES/ab11054f/preview.webp",
+      "source": "exercise-library/EX-ENCOLHIMENTO-COM-HALTERES/ab11054f/source.gif"
+    },
+    {
+      "exercise_code": "EX-ENCOLHIMENTO-NA-MAQUINA",
+      "name": "Encolhimento na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ENCOLHIMENTO-NA-MAQUINA/cf9172eb/poster.webp",
+      "preview": "exercise-library/EX-ENCOLHIMENTO-NA-MAQUINA/cf9172eb/preview.webp",
+      "source": "exercise-library/EX-ENCOLHIMENTO-NA-MAQUINA/cf9172eb/source.gif"
+    },
+    {
+      "exercise_code": "EX-ENCOLHIMENTO-NA-POLIA",
+      "name": "Encolhimento na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ENCOLHIMENTO-NA-POLIA/05b19fec/poster.webp",
+      "preview": "exercise-library/EX-ENCOLHIMENTO-NA-POLIA/05b19fec/preview.webp",
+      "source": "exercise-library/EX-ENCOLHIMENTO-NA-POLIA/05b19fec/source.gif"
+    },
+    {
+      "exercise_code": "EX-ENCOLHIMENTO-NO-SMITH",
+      "name": "Encolhimento no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ENCOLHIMENTO-NO-SMITH/2d5b0839/poster.webp",
+      "preview": "exercise-library/EX-ENCOLHIMENTO-NO-SMITH/2d5b0839/preview.webp",
+      "source": "exercise-library/EX-ENCOLHIMENTO-NO-SMITH/2d5b0839/source.gif"
+    },
+    {
+      "exercise_code": "EX-ESCALADOR-MOUNTAIN-CLIMBER",
+      "name": "Escalador (mountain climber)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ESCALADOR-MOUNTAIN-CLIMBER/cd5b9e36/poster.webp",
+      "preview": "exercise-library/EX-ESCALADOR-MOUNTAIN-CLIMBER/cd5b9e36/preview.webp",
+      "source": "exercise-library/EX-ESCALADOR-MOUNTAIN-CLIMBER/cd5b9e36/source.gif"
+    },
+    {
+      "exercise_code": "EX-ESTEIRA",
+      "name": "Esteira",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ESTEIRA/5d456309/poster.webp",
+      "preview": "exercise-library/EX-ESTEIRA/5d456309/preview.webp",
+      "source": "exercise-library/EX-ESTEIRA/5d456309/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA",
+      "name": "Extensão de perna (cadeira extensora)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA/baf58096/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA/baf58096/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA/baf58096/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-PERNA-UNILATERAL",
+      "name": "Extensão de perna unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-PERNA-UNILATERAL/8ef30934/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-PERNA-UNILATERAL/8ef30934/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-PERNA-UNILATERAL/8ef30934/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA",
+      "name": "Extensão de tríceps acima da cabeça na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA/84b29c70/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA/84b29c70/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA/84b29c70/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-COM-HALTERES",
+      "name": "Extensão de tríceps com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-COM-HALTERES/58c1f7c5/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-COM-HALTERES/58c1f7c5/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-COM-HALTERES/58c1f7c5/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA",
+      "name": "Extensão de tríceps deitado na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA/a26c2005/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA/a26c2005/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA/a26c2005/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA",
+      "name": "Extensão de tríceps na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA/e9df0c52/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA/e9df0c52/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA/e9df0c52/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-POLIA",
+      "name": "Extensão de tríceps na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-POLIA/d105e079/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-POLIA/d105e079/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-NA-POLIA/d105e079/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES",
+      "name": "Extensão de tríceps sentado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES/fb5f7ad2/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES/fb5f7ad2/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES/fb5f7ad2/source.gif"
+    },
+    {
+      "exercise_code": "EX-EXTENSAO-LOMBAR",
+      "name": "Extensão lombar",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-EXTENSAO-LOMBAR/92acfef0/poster.webp",
+      "preview": "exercise-library/EX-EXTENSAO-LOMBAR/92acfef0/preview.webp",
+      "source": "exercise-library/EX-EXTENSAO-LOMBAR/92acfef0/source.gif"
+    },
+    {
+      "exercise_code": "EX-FACE-PULL-PUXADA-FACIAL",
+      "name": "Face pull (puxada facial)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FACE-PULL-PUXADA-FACIAL/01ee0a29/poster.webp",
+      "preview": "exercise-library/EX-FACE-PULL-PUXADA-FACIAL/01ee0a29/preview.webp",
+      "source": "exercise-library/EX-FACE-PULL-PUXADA-FACIAL/01ee0a29/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-ARCHER-ARQUEIRO",
+      "name": "Flexão archer (arqueiro)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-ARCHER-ARQUEIRO/84fb314d/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-ARCHER-ARQUEIRO/84fb314d/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-ARCHER-ARQUEIRO/84fb314d/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-COM-PEGADA-FECHADA",
+      "name": "Flexão com pegada fechada",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-COM-PEGADA-FECHADA/a0180045/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-COM-PEGADA-FECHADA/a0180045/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-COM-PEGADA-FECHADA/a0180045/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-BRACO",
+      "name": "Flexão de braço",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-BRACO/d50f7698/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-BRACO/d50f7698/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-BRACO/d50f7698/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-PERNA-MESA-FLEXORA",
+      "name": "Flexão de perna (mesa flexora)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-PERNA-MESA-FLEXORA/ec0631f6/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-PERNA-MESA-FLEXORA/ec0631f6/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-PERNA-MESA-FLEXORA/ec0631f6/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-PERNA-COM-HALTER",
+      "name": "Flexão de perna com halter",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-PERNA-COM-HALTER/dc164749/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-PERNA-COM-HALTER/dc164749/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-PERNA-COM-HALTER/dc164749/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA",
+      "name": "Flexão de perna sentado (cadeira flexora)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA/82dada27/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA/82dada27/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA/82dada27/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL",
+      "name": "Flexão de perna unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL/791c6f2f/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL/791c6f2f/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL/791c6f2f/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO",
+      "name": "Flexão de perna unilateral sentado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO/6d7de2cc/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO/6d7de2cc/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO/6d7de2cc/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-LATERAL-A-45-GRAUS",
+      "name": "Flexão lateral a 45 graus",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-LATERAL-A-45-GRAUS/fd6b5c6e/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-LATERAL-A-45-GRAUS/fd6b5c6e/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-LATERAL-A-45-GRAUS/fd6b5c6e/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-LATERAL-NA-POLIA",
+      "name": "Flexão lateral na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-LATERAL-NA-POLIA/a95ad883/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-LATERAL-NA-POLIA/a95ad883/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-LATERAL-NA-POLIA/a95ad883/source.gif"
+    },
+    {
+      "exercise_code": "EX-FLEXAO-PIKE",
+      "name": "Flexão pike",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-FLEXAO-PIKE/c69171b8/poster.webp",
+      "preview": "exercise-library/EX-FLEXAO-PIKE/c69171b8/preview.webp",
+      "source": "exercise-library/EX-FLEXAO-PIKE/c69171b8/source.gif"
+    },
+    {
+      "exercise_code": "EX-HIPEREXTENSAO-LOMBAR",
+      "name": "Hiperextensão lombar",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-HIPEREXTENSAO-LOMBAR/9f1f92fa/poster.webp",
+      "preview": "exercise-library/EX-HIPEREXTENSAO-LOMBAR/9f1f92fa/preview.webp",
+      "source": "exercise-library/EX-HIPEREXTENSAO-LOMBAR/9f1f92fa/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEG-PRESS",
+      "name": "Leg press",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEG-PRESS/51977119/poster.webp",
+      "preview": "exercise-library/EX-LEG-PRESS/51977119/preview.webp",
+      "source": "exercise-library/EX-LEG-PRESS/51977119/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEG-PRESS-HORIZONTAL",
+      "name": "Leg press horizontal",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEG-PRESS-HORIZONTAL/0c7ddade/poster.webp",
+      "preview": "exercise-library/EX-LEG-PRESS-HORIZONTAL/0c7ddade/preview.webp",
+      "source": "exercise-library/EX-LEG-PRESS-HORIZONTAL/0c7ddade/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEG-PRESS-HORIZONTAL-UNILATERAL",
+      "name": "Leg press horizontal unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEG-PRESS-HORIZONTAL-UNILATERAL/679f7ec0/poster.webp",
+      "preview": "exercise-library/EX-LEG-PRESS-HORIZONTAL-UNILATERAL/679f7ec0/preview.webp",
+      "source": "exercise-library/EX-LEG-PRESS-HORIZONTAL-UNILATERAL/679f7ec0/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEG-PRESS-UNILATERAL",
+      "name": "Leg press unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEG-PRESS-UNILATERAL/1b60127f/poster.webp",
+      "preview": "exercise-library/EX-LEG-PRESS-UNILATERAL/1b60127f/preview.webp",
+      "source": "exercise-library/EX-LEG-PRESS-UNILATERAL/1b60127f/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR",
+      "name": "Levantamento terra com trap bar",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR/525e38ae/poster.webp",
+      "preview": "exercise-library/EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR/525e38ae/preview.webp",
+      "source": "exercise-library/EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR/525e38ae/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEVANTAMENTO-TERRA-NO-SMITH",
+      "name": "Levantamento terra no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEVANTAMENTO-TERRA-NO-SMITH/c93ac8c7/poster.webp",
+      "preview": "exercise-library/EX-LEVANTAMENTO-TERRA-NO-SMITH/c93ac8c7/preview.webp",
+      "source": "exercise-library/EX-LEVANTAMENTO-TERRA-NO-SMITH/c93ac8c7/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES",
+      "name": "Levantamento terra romeno com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES/621bab38/poster.webp",
+      "preview": "exercise-library/EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES/621bab38/preview.webp",
+      "source": "exercise-library/EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES/621bab38/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA",
+      "name": "Levantamento terra sumô com pausa",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA/ef1b6e69/poster.webp",
+      "preview": "exercise-library/EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA/ef1b6e69/preview.webp",
+      "source": "exercise-library/EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA/ef1b6e69/source.gif"
+    },
+    {
+      "exercise_code": "EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES",
+      "name": "Levantamento terra unilateral com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES/451b7f26/poster.webp",
+      "preview": "exercise-library/EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES/451b7f26/preview.webp",
+      "source": "exercise-library/EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES/451b7f26/source.gif"
+    },
+    {
+      "exercise_code": "EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE",
+      "name": "Máquina de glúteo (monster glute)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE/bcdc3f15/poster.webp",
+      "preview": "exercise-library/EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE/bcdc3f15/preview.webp",
+      "source": "exercise-library/EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE/bcdc3f15/source.gif"
+    },
+    {
+      "exercise_code": "EX-MERGULHO-NAS-PARALELAS",
+      "name": "Mergulho nas paralelas",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-MERGULHO-NAS-PARALELAS/a73ca962/poster.webp",
+      "preview": "exercise-library/EX-MERGULHO-NAS-PARALELAS/a73ca962/preview.webp",
+      "source": "exercise-library/EX-MERGULHO-NAS-PARALELAS/a73ca962/source.gif"
+    },
+    {
+      "exercise_code": "EX-MERGULHO-NO-BANCO",
+      "name": "Mergulho no banco",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-MERGULHO-NO-BANCO/2fce183f/poster.webp",
+      "preview": "exercise-library/EX-MERGULHO-NO-BANCO/2fce183f/preview.webp",
+      "source": "exercise-library/EX-MERGULHO-NO-BANCO/2fce183f/source.gif"
+    },
+    {
+      "exercise_code": "EX-MERGULHO-SENTADO-NA-MAQUINA",
+      "name": "Mergulho sentado na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-MERGULHO-SENTADO-NA-MAQUINA/8bec964f/poster.webp",
+      "preview": "exercise-library/EX-MERGULHO-SENTADO-NA-MAQUINA/8bec964f/preview.webp",
+      "source": "exercise-library/EX-MERGULHO-SENTADO-NA-MAQUINA/8bec964f/source.gif"
+    },
+    {
+      "exercise_code": "EX-MUSCLE-UP-NA-BARRA",
+      "name": "Muscle-up na barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-MUSCLE-UP-NA-BARRA/749a1b65/poster.webp",
+      "preview": "exercise-library/EX-MUSCLE-UP-NA-BARRA/749a1b65/preview.webp",
+      "source": "exercise-library/EX-MUSCLE-UP-NA-BARRA/749a1b65/source.gif"
+    },
+    {
+      "exercise_code": "EX-NADADOR-SWIMMING",
+      "name": "Nadador (swimming)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-NADADOR-SWIMMING/9f9dd594/poster.webp",
+      "preview": "exercise-library/EX-NADADOR-SWIMMING/9f9dd594/preview.webp",
+      "source": "exercise-library/EX-NADADOR-SWIMMING/9f9dd594/source.gif"
+    },
+    {
+      "exercise_code": "EX-PARALELAS-ASSISTIDAS-NA-MAQUINA",
+      "name": "Paralelas assistidas na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PARALELAS-ASSISTIDAS-NA-MAQUINA/b16bf5ee/poster.webp",
+      "preview": "exercise-library/EX-PARALELAS-ASSISTIDAS-NA-MAQUINA/b16bf5ee/preview.webp",
+      "source": "exercise-library/EX-PARALELAS-ASSISTIDAS-NA-MAQUINA/b16bf5ee/source.gif"
+    },
+    {
+      "exercise_code": "EX-PES-NA-BARRA-TOES-TO-BAR",
+      "name": "Pés na barra (toes to bar)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PES-NA-BARRA-TOES-TO-BAR/6ff36a53/poster.webp",
+      "preview": "exercise-library/EX-PES-NA-BARRA-TOES-TO-BAR/6ff36a53/preview.webp",
+      "source": "exercise-library/EX-PES-NA-BARRA-TOES-TO-BAR/6ff36a53/source.gif"
+    },
+    {
+      "exercise_code": "EX-POLICHINELO",
+      "name": "Polichinelo",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-POLICHINELO/792b7579/poster.webp",
+      "preview": "exercise-library/EX-POLICHINELO/792b7579/preview.webp",
+      "source": "exercise-library/EX-POLICHINELO/792b7579/source.gif"
+    },
+    {
+      "exercise_code": "EX-PONTE-DE-GLUTEO",
+      "name": "Ponte de glúteo",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PONTE-DE-GLUTEO/9bb808f5/poster.webp",
+      "preview": "exercise-library/EX-PONTE-DE-GLUTEO/9bb808f5/preview.webp",
+      "source": "exercise-library/EX-PONTE-DE-GLUTEO/9bb808f5/source.gif"
+    },
+    {
+      "exercise_code": "EX-PONTE-DE-GLUTEO-UNILATERAL",
+      "name": "Ponte de glúteo unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PONTE-DE-GLUTEO-UNILATERAL/cd50d089/poster.webp",
+      "preview": "exercise-library/EX-PONTE-DE-GLUTEO-UNILATERAL/cd50d089/preview.webp",
+      "source": "exercise-library/EX-PONTE-DE-GLUTEO-UNILATERAL/cd50d089/source.gif"
+    },
+    {
+      "exercise_code": "EX-PRANCHA-LATERAL",
+      "name": "Prancha lateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PRANCHA-LATERAL/16202528/poster.webp",
+      "preview": "exercise-library/EX-PRANCHA-LATERAL/16202528/preview.webp",
+      "source": "exercise-library/EX-PRANCHA-LATERAL/16202528/source.gif"
+    },
+    {
+      "exercise_code": "EX-PRANCHA-RKC",
+      "name": "Prancha RKC",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PRANCHA-RKC/b97f866b/poster.webp",
+      "preview": "exercise-library/EX-PRANCHA-RKC/b97f866b/preview.webp",
+      "source": "exercise-library/EX-PRANCHA-RKC/b97f866b/source.gif"
+    },
+    {
+      "exercise_code": "EX-PULAR-CORDA",
+      "name": "Pular corda",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PULAR-CORDA/b860b6ee/poster.webp",
+      "preview": "exercise-library/EX-PULAR-CORDA/b860b6ee/preview.webp",
+      "source": "exercise-library/EX-PULAR-CORDA/b860b6ee/source.gif"
+    },
+    {
+      "exercise_code": "EX-PULL-THROUGH-NA-POLIA",
+      "name": "Pull-through na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PULL-THROUGH-NA-POLIA/6c5edf51/poster.webp",
+      "preview": "exercise-library/EX-PULL-THROUGH-NA-POLIA/6c5edf51/preview.webp",
+      "source": "exercise-library/EX-PULL-THROUGH-NA-POLIA/6c5edf51/source.gif"
+    },
+    {
+      "exercise_code": "EX-PULLOVER-COM-BARRA",
+      "name": "Pullover com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PULLOVER-COM-BARRA/73901108/poster.webp",
+      "preview": "exercise-library/EX-PULLOVER-COM-BARRA/73901108/preview.webp",
+      "source": "exercise-library/EX-PULLOVER-COM-BARRA/73901108/source.gif"
+    },
+    {
+      "exercise_code": "EX-PULLOVER-COM-HALTER",
+      "name": "Pullover com halter",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PULLOVER-COM-HALTER/c37aa9cb/poster.webp",
+      "preview": "exercise-library/EX-PULLOVER-COM-HALTER/c37aa9cb/preview.webp",
+      "source": "exercise-library/EX-PULLOVER-COM-HALTER/c37aa9cb/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUSH-PRESS",
+      "name": "Push press",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUSH-PRESS/37ebc70c/poster.webp",
+      "preview": "exercise-library/EX-PUSH-PRESS/37ebc70c/preview.webp",
+      "source": "exercise-library/EX-PUSH-PRESS/37ebc70c/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-ABERTA",
+      "name": "Puxada aberta",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-ABERTA/019b02f4/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-ABERTA/019b02f4/preview.webp",
+      "source": "exercise-library/EX-PUXADA-ABERTA/019b02f4/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-ABERTA-UNILATERAL",
+      "name": "Puxada aberta unilateral",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-ABERTA-UNILATERAL/f489a308/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-ABERTA-UNILATERAL/f489a308/preview.webp",
+      "source": "exercise-library/EX-PUXADA-ABERTA-UNILATERAL/f489a308/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-ALTA-DO-ARRANCO",
+      "name": "Puxada alta do arranco",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-ALTA-DO-ARRANCO/2232aa88/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-ALTA-DO-ARRANCO/2232aa88/preview.webp",
+      "source": "exercise-library/EX-PUXADA-ALTA-DO-ARRANCO/2232aa88/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-ALTA-DO-TERRA-SUMO",
+      "name": "Puxada alta do terra sumô",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-ALTA-DO-TERRA-SUMO/34bb7ab4/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-ALTA-DO-TERRA-SUMO/34bb7ab4/preview.webp",
+      "source": "exercise-library/EX-PUXADA-ALTA-DO-TERRA-SUMO/34bb7ab4/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL",
+      "name": "Puxada alta sumô com kettlebell",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL/183a8c30/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL/183a8c30/preview.webp",
+      "source": "exercise-library/EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL/183a8c30/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA",
+      "name": "Puxada com braços estendidos na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA/f7be8797/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA/f7be8797/preview.webp",
+      "source": "exercise-library/EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA/f7be8797/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-COM-PEGADA-MAG",
+      "name": "Puxada com pegada MAG",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-COM-PEGADA-MAG/162a5ead/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-COM-PEGADA-MAG/162a5ead/preview.webp",
+      "source": "exercise-library/EX-PUXADA-COM-PEGADA-MAG/162a5ead/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-COM-PEGADA-NEUTRA",
+      "name": "Puxada com pegada neutra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-COM-PEGADA-NEUTRA/acb6f276/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-COM-PEGADA-NEUTRA/acb6f276/preview.webp",
+      "source": "exercise-library/EX-PUXADA-COM-PEGADA-NEUTRA/acb6f276/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-FRONTAL-PULLDOWN",
+      "name": "Puxada frontal (pulldown)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-FRONTAL-PULLDOWN/95938978/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-FRONTAL-PULLDOWN/95938978/preview.webp",
+      "source": "exercise-library/EX-PUXADA-FRONTAL-PULLDOWN/95938978/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-POR-TRAS-DA-NUCA",
+      "name": "Puxada por trás da nuca",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-POR-TRAS-DA-NUCA/5ca78e5a/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-POR-TRAS-DA-NUCA/5ca78e5a/preview.webp",
+      "source": "exercise-library/EX-PUXADA-POR-TRAS-DA-NUCA/5ca78e5a/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-SUPINADA",
+      "name": "Puxada supinada",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-SUPINADA/da4599ea/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-SUPINADA/da4599ea/preview.webp",
+      "source": "exercise-library/EX-PUXADA-SUPINADA/da4599ea/source.gif"
+    },
+    {
+      "exercise_code": "EX-PUXADA-UNILATERAL-NA-POLIA",
+      "name": "Puxada unilateral na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-PUXADA-UNILATERAL-NA-POLIA/cc504971/poster.webp",
+      "preview": "exercise-library/EX-PUXADA-UNILATERAL-NA-POLIA/cc504971/preview.webp",
+      "source": "exercise-library/EX-PUXADA-UNILATERAL-NA-POLIA/cc504971/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-COM-BARRA",
+      "name": "Remada alta com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-COM-BARRA/23da89ee/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-COM-BARRA/23da89ee/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-COM-BARRA/23da89ee/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-COM-BARRA-W",
+      "name": "Remada alta com barra W",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-COM-BARRA-W/a1ee1eee/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-COM-BARRA-W/a1ee1eee/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-COM-BARRA-W/a1ee1eee/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-COM-HALTERES",
+      "name": "Remada alta com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-COM-HALTERES/38c095a2/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-COM-HALTERES/38c095a2/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-COM-HALTERES/38c095a2/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-NA-MAQUINA",
+      "name": "Remada alta na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-NA-MAQUINA/690de78a/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-NA-MAQUINA/690de78a/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-NA-MAQUINA/690de78a/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA",
+      "name": "Remada alta pegada supinada na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA/e6c73ec8/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA/e6c73ec8/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA/e6c73ec8/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA",
+      "name": "Remada alta unilateral na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA/215313dd/poster.webp",
+      "preview": "exercise-library/EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA/215313dd/preview.webp",
+      "source": "exercise-library/EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA/215313dd/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-BAIXA-NA-MAQUINA",
+      "name": "Remada baixa na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-BAIXA-NA-MAQUINA/bc36244d/poster.webp",
+      "preview": "exercise-library/EX-REMADA-BAIXA-NA-MAQUINA/bc36244d/preview.webp",
+      "source": "exercise-library/EX-REMADA-BAIXA-NA-MAQUINA/bc36244d/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-BAIXA-SENTADO-NA-POLIA",
+      "name": "Remada baixa sentado na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-BAIXA-SENTADO-NA-POLIA/4545273f/poster.webp",
+      "preview": "exercise-library/EX-REMADA-BAIXA-SENTADO-NA-POLIA/4545273f/preview.webp",
+      "source": "exercise-library/EX-REMADA-BAIXA-SENTADO-NA-POLIA/4545273f/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA",
+      "name": "Remada baixa sentado no chão na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA/d0c2d971/poster.webp",
+      "preview": "exercise-library/EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA/d0c2d971/preview.webp",
+      "source": "exercise-library/EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA/d0c2d971/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA",
+      "name": "Remada baixa unilateral na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA/60f7bf94/poster.webp",
+      "preview": "exercise-library/EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA/60f7bf94/preview.webp",
+      "source": "exercise-library/EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA/60f7bf94/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-CAVALINHO-NA-MAQUINA",
+      "name": "Remada cavalinho na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-CAVALINHO-NA-MAQUINA/4c6dbf94/poster.webp",
+      "preview": "exercise-library/EX-REMADA-CAVALINHO-NA-MAQUINA/4c6dbf94/preview.webp",
+      "source": "exercise-library/EX-REMADA-CAVALINHO-NA-MAQUINA/4c6dbf94/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-COM-BARRA-PEGADA-SUPINADA",
+      "name": "Remada com barra pegada supinada",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-COM-BARRA-PEGADA-SUPINADA/e7340458/poster.webp",
+      "preview": "exercise-library/EX-REMADA-COM-BARRA-PEGADA-SUPINADA/e7340458/preview.webp",
+      "source": "exercise-library/EX-REMADA-COM-BARRA-PEGADA-SUPINADA/e7340458/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-COM-HALTERES",
+      "name": "Remada com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-COM-HALTERES/08926e82/poster.webp",
+      "preview": "exercise-library/EX-REMADA-COM-HALTERES/08926e82/preview.webp",
+      "source": "exercise-library/EX-REMADA-COM-HALTERES/08926e82/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-DEITADO-COM-BARRA",
+      "name": "Remada deitado com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-DEITADO-COM-BARRA/5f5f03a7/poster.webp",
+      "preview": "exercise-library/EX-REMADA-DEITADO-COM-BARRA/5f5f03a7/preview.webp",
+      "source": "exercise-library/EX-REMADA-DEITADO-COM-BARRA/5f5f03a7/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-INCLINADA-COM-BARRA",
+      "name": "Remada inclinada com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-INCLINADA-COM-BARRA/73f57bf8/poster.webp",
+      "preview": "exercise-library/EX-REMADA-INCLINADA-COM-BARRA/73f57bf8/preview.webp",
+      "source": "exercise-library/EX-REMADA-INCLINADA-COM-BARRA/73f57bf8/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-INCLINADA-COM-HALTERES",
+      "name": "Remada inclinada com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-INCLINADA-COM-HALTERES/f19fe949/poster.webp",
+      "preview": "exercise-library/EX-REMADA-INCLINADA-COM-HALTERES/f19fe949/preview.webp",
+      "source": "exercise-library/EX-REMADA-INCLINADA-COM-HALTERES/f19fe949/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-INVERTIDA",
+      "name": "Remada invertida",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-INVERTIDA/1a7faff5/poster.webp",
+      "preview": "exercise-library/EX-REMADA-INVERTIDA/1a7faff5/preview.webp",
+      "source": "exercise-library/EX-REMADA-INVERTIDA/1a7faff5/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-NO-SMITH",
+      "name": "Remada no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-NO-SMITH/b8180864/poster.webp",
+      "preview": "exercise-library/EX-REMADA-NO-SMITH/b8180864/preview.webp",
+      "source": "exercise-library/EX-REMADA-NO-SMITH/b8180864/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-PENDLAY",
+      "name": "Remada Pendlay",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-PENDLAY/a6700c25/poster.webp",
+      "preview": "exercise-library/EX-REMADA-PENDLAY/a6700c25/preview.webp",
+      "source": "exercise-library/EX-REMADA-PENDLAY/a6700c25/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-SENTADO-NA-MAQUINA",
+      "name": "Remada sentado na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-SENTADO-NA-MAQUINA/36a57811/poster.webp",
+      "preview": "exercise-library/EX-REMADA-SENTADO-NA-MAQUINA/36a57811/preview.webp",
+      "source": "exercise-library/EX-REMADA-SENTADO-NA-MAQUINA/36a57811/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-SENTADO-UNILATERAL-NA-POLIA",
+      "name": "Remada sentado unilateral na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-SENTADO-UNILATERAL-NA-POLIA/9fcfb645/poster.webp",
+      "preview": "exercise-library/EX-REMADA-SENTADO-UNILATERAL-NA-POLIA/9fcfb645/preview.webp",
+      "source": "exercise-library/EX-REMADA-SENTADO-UNILATERAL-NA-POLIA/9fcfb645/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMADA-UNILATERAL-COM-HALTER-SERROTE",
+      "name": "Remada unilateral com halter (serrote)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMADA-UNILATERAL-COM-HALTER-SERROTE/f0818ffd/poster.webp",
+      "preview": "exercise-library/EX-REMADA-UNILATERAL-COM-HALTER-SERROTE/f0818ffd/preview.webp",
+      "source": "exercise-library/EX-REMADA-UNILATERAL-COM-HALTER-SERROTE/f0818ffd/source.gif"
+    },
+    {
+      "exercise_code": "EX-REMO-MAQUINA",
+      "name": "Remo (máquina)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-REMO-MAQUINA/12743e82/poster.webp",
+      "preview": "exercise-library/EX-REMO-MAQUINA/12743e82/preview.webp",
+      "source": "exercise-library/EX-REMO-MAQUINA/12743e82/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROLO-ABDOMINAL-ROLL-OUT",
+      "name": "Rolo abdominal (roll-out)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROLO-ABDOMINAL-ROLL-OUT/97e0d058/poster.webp",
+      "preview": "exercise-library/EX-ROLO-ABDOMINAL-ROLL-OUT/97e0d058/preview.webp",
+      "source": "exercise-library/EX-ROLO-ABDOMINAL-ROLL-OUT/97e0d058/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-BICEPS-NA-MAQUINA",
+      "name": "Rosca de bíceps na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-BICEPS-NA-MAQUINA/9d8681e9/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-BICEPS-NA-MAQUINA/9d8681e9/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-BICEPS-NA-MAQUINA/9d8681e9/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA",
+      "name": "Rosca de punho com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA/0add63bd/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA/0add63bd/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA/0add63bd/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA-W",
+      "name": "Rosca de punho com barra W",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA-W/3de1c856/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA-W/3de1c856/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-PUNHO-COM-BARRA-W/3de1c856/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-PUNHO-COM-HALTERES",
+      "name": "Rosca de punho com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-PUNHO-COM-HALTERES/7ca4e306/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-PUNHO-COM-HALTERES/7ca4e306/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-PUNHO-COM-HALTERES/7ca4e306/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA",
+      "name": "Rosca de punho inversa com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA/d308701b/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA/d308701b/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA/d308701b/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES",
+      "name": "Rosca de punho inversa com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES/606092c6/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES/606092c6/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES/606092c6/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DIRETA-COM-BARRA-W",
+      "name": "Rosca direta com barra W",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DIRETA-COM-BARRA-W/4f753671/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DIRETA-COM-BARRA-W/4f753671/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DIRETA-COM-BARRA-W/4f753671/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DIRETA-COM-HALTERES",
+      "name": "Rosca direta com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DIRETA-COM-HALTERES/9928e76e/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DIRETA-COM-HALTERES/9928e76e/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DIRETA-COM-HALTERES/9928e76e/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-DIRETA-NA-POLIA",
+      "name": "Rosca direta na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-DIRETA-NA-POLIA/7aa1fa61/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-DIRETA-NA-POLIA/7aa1fa61/preview.webp",
+      "source": "exercise-library/EX-ROSCA-DIRETA-NA-POLIA/7aa1fa61/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-INCLINADA-COM-HALTERES",
+      "name": "Rosca inclinada com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-INCLINADA-COM-HALTERES/a19457cb/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-INCLINADA-COM-HALTERES/a19457cb/preview.webp",
+      "source": "exercise-library/EX-ROSCA-INCLINADA-COM-HALTERES/a19457cb/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-INVERSA-COM-BARRA",
+      "name": "Rosca inversa com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-INVERSA-COM-BARRA/0de9f1d0/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-INVERSA-COM-BARRA/0de9f1d0/preview.webp",
+      "source": "exercise-library/EX-ROSCA-INVERSA-COM-BARRA/0de9f1d0/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-MARTELO-COM-HALTERES",
+      "name": "Rosca martelo com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-MARTELO-COM-HALTERES/7f07f7a3/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-MARTELO-COM-HALTERES/7f07f7a3/preview.webp",
+      "source": "exercise-library/EX-ROSCA-MARTELO-COM-HALTERES/7f07f7a3/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-MARTELO-NA-POLIA",
+      "name": "Rosca martelo na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-MARTELO-NA-POLIA/ed37f965/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-MARTELO-NA-POLIA/ed37f965/preview.webp",
+      "source": "exercise-library/EX-ROSCA-MARTELO-NA-POLIA/ed37f965/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA",
+      "name": "Rosca scott com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA/8a9b650f/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA/8a9b650f/preview.webp",
+      "source": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA/8a9b650f/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA-W",
+      "name": "Rosca scott com barra W",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA-W/734e6e34/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA-W/734e6e34/preview.webp",
+      "source": "exercise-library/EX-ROSCA-SCOTT-COM-BARRA-W/734e6e34/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-SCOTT-COM-HALTERES",
+      "name": "Rosca scott com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-SCOTT-COM-HALTERES/51e8b85b/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-SCOTT-COM-HALTERES/51e8b85b/preview.webp",
+      "source": "exercise-library/EX-ROSCA-SCOTT-COM-HALTERES/51e8b85b/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROSCA-SCOTT-NA-MAQUINA",
+      "name": "Rosca scott na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROSCA-SCOTT-NA-MAQUINA/4e602bbd/poster.webp",
+      "preview": "exercise-library/EX-ROSCA-SCOTT-NA-MAQUINA/4e602bbd/preview.webp",
+      "source": "exercise-library/EX-ROSCA-SCOTT-NA-MAQUINA/4e602bbd/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROTACAO-DE-TRONCO-NA-POLIA",
+      "name": "Rotação de tronco na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROTACAO-DE-TRONCO-NA-POLIA/b6840972/poster.webp",
+      "preview": "exercise-library/EX-ROTACAO-DE-TRONCO-NA-POLIA/b6840972/preview.webp",
+      "source": "exercise-library/EX-ROTACAO-DE-TRONCO-NA-POLIA/b6840972/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROTACAO-EXTERNA-NA-POLIA",
+      "name": "Rotação externa na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROTACAO-EXTERNA-NA-POLIA/ce43693d/poster.webp",
+      "preview": "exercise-library/EX-ROTACAO-EXTERNA-NA-POLIA/ce43693d/preview.webp",
+      "source": "exercise-library/EX-ROTACAO-EXTERNA-NA-POLIA/ce43693d/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROTACAO-INTERNA-NA-POLIA",
+      "name": "Rotação interna na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROTACAO-INTERNA-NA-POLIA/3a02867b/poster.webp",
+      "preview": "exercise-library/EX-ROTACAO-INTERNA-NA-POLIA/3a02867b/preview.webp",
+      "source": "exercise-library/EX-ROTACAO-INTERNA-NA-POLIA/3a02867b/source.gif"
+    },
+    {
+      "exercise_code": "EX-ROTACAO-RUSSA-RUSSIAN-TWIST",
+      "name": "Rotação russa (russian twist)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-ROTACAO-RUSSA-RUSSIAN-TWIST/03ed54b8/poster.webp",
+      "preview": "exercise-library/EX-ROTACAO-RUSSA-RUSSIAN-TWIST/03ed54b8/preview.webp",
+      "source": "exercise-library/EX-ROTACAO-RUSSA-RUSSIAN-TWIST/03ed54b8/source.gif"
+    },
+    {
+      "exercise_code": "EX-SIMULADOR-DE-ESCADA-STEPMILL",
+      "name": "Simulador de escada (stepmill)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SIMULADOR-DE-ESCADA-STEPMILL/88953985/poster.webp",
+      "preview": "exercise-library/EX-SIMULADOR-DE-ESCADA-STEPMILL/88953985/preview.webp",
+      "source": "exercise-library/EX-SIMULADOR-DE-ESCADA-STEPMILL/88953985/source.gif"
+    },
+    {
+      "exercise_code": "EX-SKI-ERG-ERGOMETRO-DE-ESQUI",
+      "name": "Ski erg (ergômetro de esqui)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SKI-ERG-ERGOMETRO-DE-ESQUI/7518932f/poster.webp",
+      "preview": "exercise-library/EX-SKI-ERG-ERGOMETRO-DE-ESQUI/7518932f/preview.webp",
+      "source": "exercise-library/EX-SKI-ERG-ERGOMETRO-DE-ESQUI/7518932f/source.gif"
+    },
+    {
+      "exercise_code": "EX-SNATCH-BALANCE",
+      "name": "Snatch balance",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SNATCH-BALANCE/d8a5110e/poster.webp",
+      "preview": "exercise-library/EX-SNATCH-BALANCE/d8a5110e/preview.webp",
+      "source": "exercise-library/EX-SNATCH-BALANCE/d8a5110e/source.gif"
+    },
+    {
+      "exercise_code": "EX-STIFF-TERRA-PERNAS-RIGIDAS",
+      "name": "Stiff (terra pernas rígidas)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-STIFF-TERRA-PERNAS-RIGIDAS/94d55575/poster.webp",
+      "preview": "exercise-library/EX-STIFF-TERRA-PERNAS-RIGIDAS/94d55575/preview.webp",
+      "source": "exercise-library/EX-STIFF-TERRA-PERNAS-RIGIDAS/94d55575/source.gif"
+    },
+    {
+      "exercise_code": "EX-STIFF-COM-HALTERES",
+      "name": "Stiff com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-STIFF-COM-HALTERES/c881be9d/poster.webp",
+      "preview": "exercise-library/EX-STIFF-COM-HALTERES/c881be9d/preview.webp",
+      "source": "exercise-library/EX-STIFF-COM-HALTERES/c881be9d/source.gif"
+    },
+    {
+      "exercise_code": "EX-STIFF-UNILATERAL-COM-BARRA",
+      "name": "Stiff unilateral com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-STIFF-UNILATERAL-COM-BARRA/ea3fb6ee/poster.webp",
+      "preview": "exercise-library/EX-STIFF-UNILATERAL-COM-BARRA/ea3fb6ee/preview.webp",
+      "source": "exercise-library/EX-STIFF-UNILATERAL-COM-BARRA/ea3fb6ee/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUBIDA-NO-BANCO-STEP-UP",
+      "name": "Subida no banco (step-up)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUBIDA-NO-BANCO-STEP-UP/00a21340/poster.webp",
+      "preview": "exercise-library/EX-SUBIDA-NO-BANCO-STEP-UP/00a21340/preview.webp",
+      "source": "exercise-library/EX-SUBIDA-NO-BANCO-STEP-UP/00a21340/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-COM-PEGADA-FECHADA",
+      "name": "Supino com pegada fechada",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-COM-PEGADA-FECHADA/bb376cfe/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-COM-PEGADA-FECHADA/bb376cfe/preview.webp",
+      "source": "exercise-library/EX-SUPINO-COM-PEGADA-FECHADA/bb376cfe/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-DECLINADO-NA-MAQUINA",
+      "name": "Supino declinado na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-DECLINADO-NA-MAQUINA/59d167c7/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-DECLINADO-NA-MAQUINA/59d167c7/preview.webp",
+      "source": "exercise-library/EX-SUPINO-DECLINADO-NA-MAQUINA/59d167c7/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-COM-BARRA",
+      "name": "Supino inclinado com barra",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-COM-BARRA/1bb065b3/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-COM-BARRA/1bb065b3/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-COM-BARRA/1bb065b3/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-COM-HALTERES",
+      "name": "Supino inclinado com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-COM-HALTERES/96748e0d/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-COM-HALTERES/96748e0d/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-COM-HALTERES/96748e0d/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES",
+      "name": "Supino inclinado com rotação e halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES/6aec4f24/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES/6aec4f24/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES/6aec4f24/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA",
+      "name": "Supino inclinado na máquina",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA/24772787/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA/24772787/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA/24772787/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS",
+      "name": "Supino inclinado na máquina (chest press)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS/70509c90/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS/70509c90/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS/70509c90/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-INCLINADO-NO-SMITH",
+      "name": "Supino inclinado no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-INCLINADO-NO-SMITH/d91587d8/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-INCLINADO-NO-SMITH/d91587d8/preview.webp",
+      "source": "exercise-library/EX-SUPINO-INCLINADO-NO-SMITH/d91587d8/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-NA-MAQUINA-CHEST-PRESS",
+      "name": "Supino na máquina (chest press)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-NA-MAQUINA-CHEST-PRESS/d1fbbe6d/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-NA-MAQUINA-CHEST-PRESS/d1fbbe6d/preview.webp",
+      "source": "exercise-library/EX-SUPINO-NA-MAQUINA-CHEST-PRESS/d1fbbe6d/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-NA-MAQUINA-HAMMER",
+      "name": "Supino na máquina hammer",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-NA-MAQUINA-HAMMER/6f452a1b/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-NA-MAQUINA-HAMMER/6f452a1b/preview.webp",
+      "source": "exercise-library/EX-SUPINO-NA-MAQUINA-HAMMER/6f452a1b/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-NO-SMITH",
+      "name": "Supino no Smith",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-NO-SMITH/329f06a9/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-NO-SMITH/329f06a9/preview.webp",
+      "source": "exercise-library/EX-SUPINO-NO-SMITH/329f06a9/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-RETO",
+      "name": "Supino reto",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-RETO/8e0c693d/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-RETO/8e0c693d/preview.webp",
+      "source": "exercise-library/EX-SUPINO-RETO/8e0c693d/source.gif"
+    },
+    {
+      "exercise_code": "EX-SUPINO-RETO-COM-HALTERES",
+      "name": "Supino reto com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-SUPINO-RETO-COM-HALTERES/fa707276/poster.webp",
+      "preview": "exercise-library/EX-SUPINO-RETO-COM-HALTERES/fa707276/preview.webp",
+      "source": "exercise-library/EX-SUPINO-RETO-COM-HALTERES/fa707276/source.gif"
+    },
+    {
+      "exercise_code": "EX-THRUSTER-2",
+      "name": "Thruster (2)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-THRUSTER-2/33d97bbf/poster.webp",
+      "preview": "exercise-library/EX-THRUSTER-2/33d97bbf/preview.webp",
+      "source": "exercise-library/EX-THRUSTER-2/33d97bbf/source.gif"
+    },
+    {
+      "exercise_code": "EX-THRUSTER-COM-HALTERES",
+      "name": "Thruster com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-THRUSTER-COM-HALTERES/ac170e75/poster.webp",
+      "preview": "exercise-library/EX-THRUSTER-COM-HALTERES/ac170e75/preview.webp",
+      "source": "exercise-library/EX-THRUSTER-COM-HALTERES/ac170e75/source.gif"
+    },
+    {
+      "exercise_code": "EX-TOQUE-NO-OMBRO-PRANCHA",
+      "name": "Toque no ombro (prancha)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TOQUE-NO-OMBRO-PRANCHA/bb4ad791/poster.webp",
+      "preview": "exercise-library/EX-TOQUE-NO-OMBRO-PRANCHA/bb4ad791/preview.webp",
+      "source": "exercise-library/EX-TOQUE-NO-OMBRO-PRANCHA/bb4ad791/source.gif"
+    },
+    {
+      "exercise_code": "EX-TRICEPS-COICE-COM-HALTERES",
+      "name": "Tríceps coice com halteres",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TRICEPS-COICE-COM-HALTERES/216f77a9/poster.webp",
+      "preview": "exercise-library/EX-TRICEPS-COICE-COM-HALTERES/216f77a9/preview.webp",
+      "source": "exercise-library/EX-TRICEPS-COICE-COM-HALTERES/216f77a9/source.gif"
+    },
+    {
+      "exercise_code": "EX-TRICEPS-PUSHDOWN-NA-POLIA",
+      "name": "Tríceps pushdown na polia",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TRICEPS-PUSHDOWN-NA-POLIA/d73841be/poster.webp",
+      "preview": "exercise-library/EX-TRICEPS-PUSHDOWN-NA-POLIA/d73841be/preview.webp",
+      "source": "exercise-library/EX-TRICEPS-PUSHDOWN-NA-POLIA/d73841be/source.gif"
+    },
+    {
+      "exercise_code": "EX-TRICEPS-TESTA",
+      "name": "Tríceps testa",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TRICEPS-TESTA/06f9a77b/poster.webp",
+      "preview": "exercise-library/EX-TRICEPS-TESTA/06f9a77b/preview.webp",
+      "source": "exercise-library/EX-TRICEPS-TESTA/06f9a77b/source.gif"
+    },
+    {
+      "exercise_code": "EX-TRICEPS-TESTA-DEITADO",
+      "name": "Tríceps testa deitado",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TRICEPS-TESTA-DEITADO/1b067cad/poster.webp",
+      "preview": "exercise-library/EX-TRICEPS-TESTA-DEITADO/1b067cad/preview.webp",
+      "source": "exercise-library/EX-TRICEPS-TESTA-DEITADO/1b067cad/source.gif"
+    },
+    {
+      "exercise_code": "EX-TURKISH-GET-UP",
+      "name": "Turkish get-up",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-TURKISH-GET-UP/f17fe7e0/poster.webp",
+      "preview": "exercise-library/EX-TURKISH-GET-UP/f17fe7e0/preview.webp",
+      "source": "exercise-library/EX-TURKISH-GET-UP/f17fe7e0/source.gif"
+    },
+    {
+      "exercise_code": "EX-VOADOR-PECK-DECK",
+      "name": "Voador (peck deck)",
+      "result": "dry_run",
+      "poster": "exercise-library/EX-VOADOR-PECK-DECK/6dc89a0f/poster.webp",
+      "preview": "exercise-library/EX-VOADOR-PECK-DECK/6dc89a0f/preview.webp",
+      "source": "exercise-library/EX-VOADOR-PECK-DECK/6dc89a0f/source.gif"
+    }
+  ],
+  "mode": "dry-run",
+  "performance": {
+    "largestOriginal": {
+      "bytes": 16381835,
+      "name": "Rosca de bíceps na máquina"
+    },
+    "largestPreview": null,
+    "originalBytes": 1842614936,
+    "posterBytes": 0,
+    "previewBytes": 0,
+    "reductionPercent": null
+  },
+  "sourceDir": "/Users/antoniofelipe/Downloads/exercicios-gifs",
+  "sourceName": "Biblioteca oficial de exercícios",
+  "sourceVersion": "exercise-gifs-2026-07-31",
+  "summary": {
+    "ambiguous": 0,
+    "animated": 235,
+    "duplicate": 0,
+    "failed": 0,
+    "found": 236,
+    "invalid": 0,
+    "publishable": 236,
+    "skipped": 0,
+    "static": 1,
+    "uploaded": 0,
+    "valid": 236
+  }
+}

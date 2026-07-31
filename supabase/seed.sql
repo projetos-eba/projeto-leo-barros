@@ -931,10 +931,10 @@ begin
     notes
   )
   values
-    ('c1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '90 days') + interval '10 hours', 'Avaliação inicial', 174, 76.1, 17.1, 60.4, 'moderate', 'pollock_7', 80, 120, 'Início do acompanhamento integrado.'),
-    ('c1000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '60 days') + interval '10 hours', 'Reavaliação mensal', 174, 76.9, 16.2, 61.2, 'moderate', 'pollock_7', 80, 90, 'Boa resposta ao treino de força.'),
-    ('c1000000-0000-4000-8000-000000000103', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '30 days') + interval '10 hours', 'Reavaliação de composição', 174, 77.2, 15.8, 61.6, 'moderate', 'pollock_7', 80, 75, 'Ajustar carboidratos nos dias de treino.'),
-    ('c1000000-0000-4000-8000-000000000104', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '5 days') + interval '10 hours', 'Avaliação corporal completa', 174, 78.4, 14.7, 62.1, 'moderate', 'pollock_7', 80, 90, 'Evolução positiva de massa magra e redução de gordura.');
+    ('c1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '90 days') + interval '10 hours', 'Avaliação inicial', 174, 76.1, 17.1, 60.4, 'moderate', 'jackson_pollock_7', 80, 120, 'Início do acompanhamento integrado.'),
+    ('c1000000-0000-4000-8000-000000000102', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '60 days') + interval '10 hours', 'Reavaliação mensal', 174, 76.9, 16.2, 61.2, 'moderate', 'jackson_pollock_7', 80, 90, 'Boa resposta ao treino de força.'),
+    ('c1000000-0000-4000-8000-000000000103', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '30 days') + interval '10 hours', 'Reavaliação de composição', 174, 77.2, 15.8, 61.6, 'moderate', 'jackson_pollock_7', 80, 75, 'Ajustar carboidratos nos dias de treino.'),
+    ('c1000000-0000-4000-8000-000000000104', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('day', now() - interval '5 days') + interval '10 hours', 'Avaliação corporal completa', 174, 78.4, 14.7, 62.1, 'moderate', 'jackson_pollock_7', 80, 90, 'Evolução positiva de massa magra e redução de gordura.');
 
   insert into public.partner_client_assessment_circumferences (
     assessment_id,

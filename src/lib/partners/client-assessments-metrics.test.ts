@@ -8,8 +8,10 @@ import {
   calculateBmr,
   calculateCalories,
   calculateFatMass,
+  calculatePhysicalAssessment,
   calculateLeanMass,
   getFormulaEligibility,
+  normalizeAssessmentMethod,
   type PartnerClientAssessmentRawData,
 } from "./client-assessments-metrics";
 
@@ -20,7 +22,7 @@ const raw: PartnerClientAssessmentRawData = {
       assessedAt: "2026-04-01T12:00:00.000Z",
       bodyFatPercentage: 18,
       calculations: [],
-      assessmentMethod: "pollock_7",
+      assessmentMethod: "jackson_pollock_7",
       circumferences: [
         { id: "c1", metricKey: "waist", valueCm: 78 },
         { id: "c2", metricKey: "chest", valueCm: 92 },
@@ -43,7 +45,7 @@ const raw: PartnerClientAssessmentRawData = {
       assessedAt: "2026-06-01T12:00:00.000Z",
       bodyFatPercentage: 14.7,
       calculations: [],
-      assessmentMethod: "pollock_7",
+      assessmentMethod: "jackson_pollock_7",
       circumferences: [
         { id: "c3", metricKey: "waist", valueCm: 73 },
         { id: "c4", metricKey: "chest", valueCm: 94 },
@@ -128,6 +130,56 @@ describe("client assessments metrics", () => {
     expect(calculation.tdeeKcal).toBe(2427);
     expect(calculation.targetKcal).toBe(2564);
     expect(calculation.projectedWeightDeltaKg).toBe(1.6);
+  });
+
+  it("calcula composição física pelos protocolos de dobras da base inicial", () => {
+    const result = calculatePhysicalAssessment({
+      age: 29,
+      assessmentMethod: "guedes_3",
+      biologicalSex: "female",
+      bodyFatPercentage: null,
+      heightCm: 174,
+      skinfolds: [
+        { metricKey: "triceps", valueMm: 12 },
+        { metricKey: "suprailiac", valueMm: 14 },
+        { metricKey: "abdominal", valueMm: 16 },
+      ],
+      weightKg: 79,
+    });
+
+    expect(result).toMatchObject({
+      bodyFatPercentage: 20.6,
+      fatMassKg: 16.3,
+      ffmi: 20.7,
+      leanMassKg: 62.7,
+      status: "calculated",
+      sumSkinfoldsMm: 42,
+    });
+  });
+
+  it("exige apenas as dobras do protocolo selecionado", () => {
+    const result = calculatePhysicalAssessment({
+      age: 29,
+      assessmentMethod: "jackson_pollock_7",
+      biologicalSex: "female",
+      bodyFatPercentage: null,
+      heightCm: 174,
+      skinfolds: [{ metricKey: "abdominal", valueMm: 16 }],
+      weightKg: 79,
+    });
+
+    expect(result).toMatchObject({
+      bodyFatPercentage: null,
+      reason: "Preencha todas as dobras exigidas pelo protocolo.",
+      status: "missing_inputs",
+    });
+  });
+
+  it("normaliza métodos legados de avaliações já existentes", () => {
+    expect(normalizeAssessmentMethod("pollock_7")).toBe("jackson_pollock_7");
+    expect(normalizeAssessmentMethod("pollock_3")).toBe("jackson_pollock_3");
+    expect(normalizeAssessmentMethod("manual")).toBe("manual");
+    expect(normalizeAssessmentMethod(null)).toBe("jackson_pollock_7");
   });
 
   it("não usa fallback masculino quando sexo biológico não foi informado", () => {

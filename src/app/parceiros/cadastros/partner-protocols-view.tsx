@@ -3,6 +3,7 @@
 import {
   Archive,
   ArchiveRestore,
+  Check,
   ChevronDown,
   Database,
   Dumbbell,
@@ -11,7 +12,9 @@ import {
   FileUp,
   Grid2X2,
   LayoutList,
+  Loader2,
   Pencil,
+  Play,
   Plus,
   Save,
   Search,
@@ -20,7 +23,8 @@ import {
   Wheat,
 } from "lucide-react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -42,6 +46,8 @@ import {
   type PartnerProtocolFoodCategory,
   type PartnerProtocolFoodSource,
   type PartnerProtocolsData,
+  type SystemExercise,
+  type SystemFood,
 } from "@/lib/partners/protocols-metrics";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +56,8 @@ import {
   createPartnerProtocolFood,
   createPartnerProtocolUseDraft,
   importPartnerProtocolFoods,
+  importSystemExercisesToPartner,
+  importSystemFoodsToPartner,
   setPartnerProtocolArchived,
   updatePartnerProtocolExercise,
   updatePartnerProtocolFood,
@@ -61,7 +69,7 @@ type PartnerProtocolsViewProps = {
 
 type ActiveTab = "exercises" | "foods";
 type ViewMode = "cards" | "table";
-type DrawerMode = "exercise" | "food" | "import" | "use" | null;
+type DrawerMode = "exercise" | "food" | "import" | "systemExerciseImport" | "systemFoodImport" | "use" | null;
 
 type FoodForm = {
   carbs: number;
@@ -113,6 +121,20 @@ const objectives = Object.keys(objectiveLabels) as PartnerProtocolExerciseObject
 const suggestedUses = ["pre_treino", "pos_treino", "lanche", "refeicao_principal", "ceia", "outro"] as const;
 type SuggestedUse = (typeof suggestedUses)[number];
 const suggestedUseSet = new Set<string>(suggestedUses);
+
+function usePrefersReducedMotion() {
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(query.matches);
+    const listener = (event: MediaQueryListEvent) => setReducedMotion(event.matches);
+    query.addEventListener("change", listener);
+    return () => query.removeEventListener("change", listener);
+  }, []);
+
+  return reducedMotion;
+}
 
 const emptyFood: FoodForm = {
   carbs: 0,
@@ -255,6 +277,11 @@ function FoodMacroChips({ food }: { food: PartnerProtocolFood }) {
 }
 
 export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
+  const router = useRouter();
+  const systemFoods = useMemo(() => data.systemFoods ?? [], [data.systemFoods]);
+  const systemExercises = useMemo(() => data.systemExercises ?? [], [data.systemExercises]);
+  const systemFoodCategories = data.systemFoodCategories ?? [];
+  const systemFoodMacros = data.systemFoodMacros ?? [];
   const [activeTab, setActiveTab] = useState<ActiveTab>("foods");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [query, setQuery] = useState("");
@@ -270,7 +297,20 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   const [useClient, setUseClient] = useState("");
   const [useNotes, setUseNotes] = useState("");
   const [importText, setImportText] = useState("");
+  const [systemFoodQuery, setSystemFoodQuery] = useState("");
+  const [systemFoodCategory, setSystemFoodCategory] = useState("all");
+  const [systemFoodMacro, setSystemFoodMacro] = useState("all");
+  const [systemFoodPage, setSystemFoodPage] = useState(1);
+  const [selectedSystemFoodIds, setSelectedSystemFoodIds] = useState<string[]>([]);
+  const [systemExerciseQuery, setSystemExerciseQuery] = useState("");
+  const [systemExerciseGroup, setSystemExerciseGroup] = useState<"all" | PartnerProtocolExerciseMuscleGroup>("all");
+  const [systemExerciseEquipment, setSystemExerciseEquipment] = useState<"all" | PartnerProtocolExerciseEquipment>("all");
+  const [systemExercisePage, setSystemExercisePage] = useState(1);
+  const [selectedSystemExerciseIds, setSelectedSystemExerciseIds] = useState<string[]>([]);
+  const [previewSystemExerciseId, setPreviewSystemExerciseId] = useState<string | null>(null);
+  const [pinnedPreviewSystemExerciseId, setPinnedPreviewSystemExerciseId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const filteredFoods = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -295,6 +335,27 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   }, [data.exercises, exerciseEquipment, exerciseGroup, query, statusFilter]);
 
   const visibleCount = activeTab === "foods" ? filteredFoods.length : filteredExercises.length;
+  const pageSize = 50;
+  const filteredSystemFoods = useMemo(() => {
+    const term = systemFoodQuery.trim().toLowerCase();
+    return systemFoods.filter((food) => {
+      const matchesTerm = !term || [food.name, food.categoryTaco, food.predominantMacro].join(" ").toLowerCase().includes(term);
+      const matchesCategory = systemFoodCategory === "all" || food.categoryTaco === systemFoodCategory;
+      const matchesMacro = systemFoodMacro === "all" || food.predominantMacro === systemFoodMacro;
+      return matchesTerm && matchesCategory && matchesMacro;
+    });
+  }, [systemFoods, systemFoodCategory, systemFoodMacro, systemFoodQuery]);
+  const visibleSystemFoods = filteredSystemFoods.slice((systemFoodPage - 1) * pageSize, systemFoodPage * pageSize);
+  const filteredSystemExercises = useMemo(() => {
+    const term = systemExerciseQuery.trim().toLowerCase();
+    return systemExercises.filter((exercise) => {
+      const matchesTerm = !term || [exercise.name, exercise.muscleGroupLabel, exercise.equipmentLabel, exercise.description ?? ""].join(" ").toLowerCase().includes(term);
+      const matchesGroup = systemExerciseGroup === "all" || exercise.muscleGroup === systemExerciseGroup;
+      const matchesEquipment = systemExerciseEquipment === "all" || exercise.equipment === systemExerciseEquipment;
+      return matchesTerm && matchesGroup && matchesEquipment;
+    });
+  }, [systemExercises, systemExerciseEquipment, systemExerciseGroup, systemExerciseQuery]);
+  const visibleSystemExercises = filteredSystemExercises.slice((systemExercisePage - 1) * pageSize, systemExercisePage * pageSize);
 
   function openFood(food?: PartnerProtocolFood) {
     setFoodForm(food ? {
@@ -380,6 +441,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
       }
       toast.success(result.message ?? "Alimento salvo.");
       setDrawerMode(null);
+      router.refresh();
     });
   }
 
@@ -417,6 +479,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
       }
       toast.success(result.message ?? "Exercício salvo.");
       setDrawerMode(null);
+      router.refresh();
     });
   }
 
@@ -428,6 +491,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
         return;
       }
       toast.success(result.message ?? "Status atualizado.");
+      router.refresh();
     });
   }
 
@@ -468,6 +532,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
       toast.success(`${result.count ?? rows.length} alimentos importados.`);
       setImportText("");
       setDrawerMode(null);
+      router.refresh();
     });
   }
 
@@ -475,6 +540,84 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
     const file = event.target.files?.[0];
     if (!file) return;
     setImportText(await file.text());
+  }
+
+  function toggleSystemFood(id: string) {
+    setSelectedSystemFoodIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  }
+
+  function toggleVisibleSystemFoods() {
+    const visibleIds = visibleSystemFoods.filter((food) => !food.alreadyImported).map((food) => food.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedSystemFoodIds.includes(id));
+    setSelectedSystemFoodIds((current) => allSelected ? current.filter((id) => !visibleIds.includes(id)) : Array.from(new Set([...current, ...visibleIds])));
+  }
+
+  function selectFilteredSystemFoods() {
+    setSelectedSystemFoodIds(filteredSystemFoods.filter((food) => !food.alreadyImported).map((food) => food.id));
+  }
+
+  function toggleSystemExercise(id: string) {
+    setSelectedSystemExerciseIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  }
+
+  function toggleVisibleSystemExercises() {
+    const visibleIds = visibleSystemExercises.filter((exercise) => !exercise.alreadyImported).map((exercise) => exercise.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedSystemExerciseIds.includes(id));
+    setSelectedSystemExerciseIds((current) => allSelected ? current.filter((id) => !visibleIds.includes(id)) : Array.from(new Set([...current, ...visibleIds])));
+  }
+
+  function selectFilteredSystemExercises() {
+    setSelectedSystemExerciseIds(filteredSystemExercises.filter((exercise) => !exercise.alreadyImported).map((exercise) => exercise.id));
+  }
+
+  function handleSystemFoodImport(importAll = false) {
+    if (!importAll && selectedSystemFoodIds.length === 0) {
+      toast.error("Selecione ao menos um alimento.");
+      return;
+    }
+    if (importAll && filteredSystemFoods.length > 100 && !window.confirm(`Importar ${filteredSystemFoods.length} alimentos da biblioteca TACO?`)) return;
+    startTransition(async () => {
+      const result = await importSystemFoodsToPartner({
+        categoryTaco: systemFoodCategory === "all" ? null : systemFoodCategory,
+        foodIds: importAll ? null : selectedSystemFoodIds,
+        importAll,
+        macro: systemFoodMacro === "all" ? null : systemFoodMacro,
+        query: systemFoodQuery || null,
+      });
+      if (!result.ok) {
+        toast.error(result.error ?? "Não foi possível importar da biblioteca TACO.");
+        return;
+      }
+      toast.success(result.message ?? "Biblioteca TACO importada.");
+      setSelectedSystemFoodIds([]);
+      setDrawerMode(null);
+      router.refresh();
+    });
+  }
+
+  function handleSystemExerciseImport(importAll = false) {
+    if (!importAll && selectedSystemExerciseIds.length === 0) {
+      toast.error("Selecione ao menos um exercício.");
+      return;
+    }
+    if (importAll && filteredSystemExercises.length > 100 && !window.confirm(`Importar ${filteredSystemExercises.length} exercícios oficiais?`)) return;
+    startTransition(async () => {
+      const result = await importSystemExercisesToPartner({
+        equipment: systemExerciseEquipment === "all" ? null : systemExerciseEquipment,
+        exerciseIds: importAll ? null : selectedSystemExerciseIds,
+        importAll,
+        muscleGroup: systemExerciseGroup === "all" ? null : systemExerciseGroup,
+        query: systemExerciseQuery || null,
+      });
+      if (!result.ok) {
+        toast.error(result.error ?? "Não foi possível importar exercícios oficiais.");
+        return;
+      }
+      toast.success(result.message ?? "Biblioteca de exercícios importada.");
+      setSelectedSystemExerciseIds([]);
+      setDrawerMode(null);
+      router.refresh();
+    });
   }
 
   return (
@@ -494,8 +637,14 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
             <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] bg-[#188cef] px-3 text-[12px] font-semibold text-white shadow-[0_12px_30px_rgba(24,140,239,0.24)] hover:bg-[#2d9cff] sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => openExercise()} type="button">
               <Plus className="size-4" /> Novo exercício
             </button>
+            <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#2b3d4b] bg-[#111b27] px-3 text-[12px] font-semibold text-[#e7eef5] hover:border-[#2d9cff] sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => setDrawerMode("systemFoodImport")} type="button">
+              <UploadCloud className="size-4" /> Importar TACO
+            </button>
+            <button className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#2b3d4b] bg-[#111b27] px-3 text-[12px] font-semibold text-[#e7eef5] hover:border-[#2d9cff] sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => setDrawerMode("systemExerciseImport")} type="button">
+              <Play className="size-4" /> Exercícios oficiais
+            </button>
             <button className="col-span-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border border-[#2b3d4b] bg-[#111b27] px-3 text-[12px] font-semibold text-[#e7eef5] hover:border-[#2d9cff] sm:col-auto sm:h-12 sm:gap-2 sm:px-5 sm:text-[14px]" onClick={() => setDrawerMode("import")} type="button">
-              <UploadCloud className="size-4" /> Importar base
+              <FileUp className="size-4" /> CSV/TSV
             </button>
           </div>
         </header>
@@ -736,6 +885,129 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
         </SheetContent>
       </Sheet>
 
+      <Sheet open={drawerMode === "systemFoodImport"} onOpenChange={(open) => !open && setDrawerMode(null)}>
+        <SheetContent className="w-full overflow-y-auto border-[#293b49] bg-[#0c1823] text-[#edf4f8] sm:max-w-[860px]">
+          <SheetHeader>
+            <SheetTitle className="text-white">Importar da biblioteca TACO</SheetTitle>
+            <SheetDescription className="text-[#92a1ad]">Selecione alimentos da tabela TACO para adicionar à sua base de trabalho.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-5 grid gap-3">
+            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_190px_160px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#7f91a0]" />
+                <input aria-label="Buscar na biblioteca TACO" className={fieldClass("pl-10")} onChange={(event) => { setSystemFoodQuery(event.target.value); setSystemFoodPage(1); }} placeholder="Buscar alimento, categoria ou macro..." value={systemFoodQuery} />
+              </div>
+              <SelectShell>
+                <select aria-label="Categoria TACO" className={fieldClass("appearance-none pr-9")} onChange={(event) => { setSystemFoodCategory(event.target.value); setSystemFoodPage(1); }} value={systemFoodCategory}>
+                  <option value="all">Todas as categorias</option>
+                  {systemFoodCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+                </select>
+              </SelectShell>
+              <SelectShell>
+                <select aria-label="Macronutriente predominante" className={fieldClass("appearance-none pr-9")} onChange={(event) => { setSystemFoodMacro(event.target.value); setSystemFoodPage(1); }} value={systemFoodMacro}>
+                  <option value="all">Todos os macros</option>
+                  {systemFoodMacros.map((macro) => <option key={macro} value={macro}>{macro}</option>)}
+                </select>
+              </SelectShell>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#253847] bg-[#101a24] p-3 text-[12px] text-[#aebbc6]">
+              <span>{filteredSystemFoods.length} alimentos encontrados · {selectedSystemFoodIds.length} selecionados</span>
+              <div className="flex flex-wrap gap-2">
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={toggleVisibleSystemFoods}>Selecionar página</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={selectFilteredSystemFoods}>Selecionar resultados</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={() => setSelectedSystemFoodIds([])}>Limpar</button>
+              </div>
+            </div>
+            <div aria-live="polite" className="max-h-[460px] divide-y divide-[#223443] overflow-y-auto rounded-[8px] border border-[#253847]">
+              {visibleSystemFoods.map((food) => (
+                <SystemFoodRow food={food} key={food.id} selected={selectedSystemFoodIds.includes(food.id)} onToggle={() => toggleSystemFood(food.id)} />
+              ))}
+              {visibleSystemFoods.length === 0 ? <EmptyState label="Nenhum alimento da TACO encontrado." /> : null}
+            </div>
+            <Pager count={filteredSystemFoods.length} page={systemFoodPage} pageSize={pageSize} onPageChange={setSystemFoodPage} />
+            <div className="flex flex-col gap-2 border-t border-[#253847] pt-4 sm:flex-row sm:justify-end">
+              <button className="h-10 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5]" type="button" onClick={() => setDrawerMode(null)}>Cancelar</button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5] disabled:opacity-60" disabled={isPending || filteredSystemFoods.length === 0} type="button" onClick={() => handleSystemFoodImport(true)}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : <UploadCloud className="size-4" />}
+                Importar tudo filtrado
+              </button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-[#188cef] px-4 text-[13px] font-semibold text-white disabled:opacity-60" disabled={isPending || selectedSystemFoodIds.length === 0} type="button" onClick={() => handleSystemFoodImport(false)}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                Importar selecionados
+              </button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={drawerMode === "systemExerciseImport"} onOpenChange={(open) => !open && setDrawerMode(null)}>
+        <SheetContent className="w-full overflow-y-auto border-[#293b49] bg-[#0c1823] text-[#edf4f8] sm:max-w-[860px]">
+          <SheetHeader>
+            <SheetTitle className="text-white">Importar exercícios oficiais</SheetTitle>
+            <SheetDescription className="text-[#92a1ad]">Escolha exercícios publicados pela plataforma para adicionar à sua biblioteca.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-5 grid gap-3">
+            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_170px_150px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#7f91a0]" />
+                <input aria-label="Buscar exercícios oficiais" className={fieldClass("pl-10")} onChange={(event) => { setSystemExerciseQuery(event.target.value); setSystemExercisePage(1); }} placeholder="Buscar exercício, grupo ou equipamento..." value={systemExerciseQuery} />
+              </div>
+              <SelectShell>
+                <select aria-label="Grupo muscular oficial" className={fieldClass("appearance-none pr-9")} onChange={(event) => { setSystemExerciseGroup(event.target.value as typeof systemExerciseGroup); setSystemExercisePage(1); }} value={systemExerciseGroup}>
+                  <option value="all">Todos os grupos</option>
+                  {muscleGroups.map((group) => <option key={group} value={group}>{muscleGroupLabels[group]}</option>)}
+                </select>
+              </SelectShell>
+              <SelectShell>
+                <select aria-label="Equipamento oficial" className={fieldClass("appearance-none pr-9")} onChange={(event) => { setSystemExerciseEquipment(event.target.value as typeof systemExerciseEquipment); setSystemExercisePage(1); }} value={systemExerciseEquipment}>
+                  <option value="all">Equipamentos</option>
+                  {equipments.map((equipment) => <option key={equipment} value={equipment}>{equipmentLabels[equipment]}</option>)}
+                </select>
+              </SelectShell>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#253847] bg-[#101a24] p-3 text-[12px] text-[#aebbc6]">
+              <span>{filteredSystemExercises.length} exercícios encontrados · {selectedSystemExerciseIds.length} selecionados</span>
+              <div className="flex flex-wrap gap-2">
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={toggleVisibleSystemExercises}>Selecionar página</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={selectFilteredSystemExercises}>Selecionar resultados</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={() => setSelectedSystemExerciseIds([])}>Limpar</button>
+              </div>
+            </div>
+            <div aria-live="polite" className="max-h-[460px] divide-y divide-[#223443] overflow-y-auto rounded-[8px] border border-[#253847]">
+              {visibleSystemExercises.map((exercise) => (
+                <SystemExerciseRow
+                  activePreview={previewSystemExerciseId === exercise.id || pinnedPreviewSystemExerciseId === exercise.id}
+                  exercise={exercise}
+                  key={exercise.id}
+                  pinnedPreview={pinnedPreviewSystemExerciseId === exercise.id}
+                  reducedMotion={prefersReducedMotion}
+                  selected={selectedSystemExerciseIds.includes(exercise.id)}
+                  onPreviewChange={(active) => setPreviewSystemExerciseId(active ? exercise.id : null)}
+                  onPreviewToggle={() => {
+                    setPreviewSystemExerciseId(null);
+                    setPinnedPreviewSystemExerciseId((current) => current === exercise.id ? null : exercise.id);
+                  }}
+                  onToggle={() => toggleSystemExercise(exercise.id)}
+                />
+              ))}
+              {visibleSystemExercises.length === 0 ? <EmptyState label="Nenhum exercício oficial publicado." /> : null}
+            </div>
+            <Pager count={filteredSystemExercises.length} page={systemExercisePage} pageSize={pageSize} onPageChange={setSystemExercisePage} />
+            <div className="flex flex-col gap-2 border-t border-[#253847] pt-4 sm:flex-row sm:justify-end">
+              <button className="h-10 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5]" type="button" onClick={() => setDrawerMode(null)}>Cancelar</button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5] disabled:opacity-60" disabled={isPending || filteredSystemExercises.length === 0} type="button" onClick={() => handleSystemExerciseImport(true)}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : <UploadCloud className="size-4" />}
+                Importar tudo filtrado
+              </button>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-[#188cef] px-4 text-[13px] font-semibold text-white disabled:opacity-60" disabled={isPending || selectedSystemExerciseIds.length === 0} type="button" onClick={() => handleSystemExerciseImport(false)}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                Importar selecionados
+              </button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <Sheet open={drawerMode === "use"} onOpenChange={(open) => !open && setDrawerMode(null)}>
         <SheetContent className="w-full border-[#293b49] bg-[#0c1823] text-[#edf4f8] sm:max-w-[440px]">
           <SheetHeader>
@@ -759,6 +1031,143 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
           </form>
         </SheetContent>
       </Sheet>
+    </div>
+  );
+}
+
+function optionalNumber(value: number | null, suffix = "") {
+  return value === null ? "Não informado" : `${formatNumber(value)}${suffix}`;
+}
+
+function SystemFoodRow({ food, onToggle, selected }: { food: SystemFood; onToggle: () => void; selected: boolean }) {
+  return (
+    <label className={cn("grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 transition hover:bg-[#132434]", selected && "bg-[#0b2b45]/60")}>
+      <input aria-label={`Selecionar ${food.name}`} checked={selected} className="mt-1 size-4 accent-[#2d9cff]" disabled={food.alreadyImported} onChange={onToggle} type="checkbox" />
+      <span className="min-w-0">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="line-clamp-1 text-[13px] font-bold text-white">{food.name}</span>
+          {food.alreadyImported ? <Badge tone="green">Já importado</Badge> : null}
+          <Badge tone="blue">{food.predominantMacro}</Badge>
+        </span>
+        <span className="mt-1 block text-[11px] text-[#8fa0ad]">#{food.foodNumber} · {food.categoryTaco} · {food.sourceVersion}</span>
+        <span className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-semibold text-[#cbd6df]">
+          <span className="rounded-[6px] bg-[#0b2a45] px-2 py-1">Kcal {optionalNumber(food.energyKcalPer100g)}</span>
+          <span className="rounded-[6px] bg-[#302813] px-2 py-1">C {optionalNumber(food.carbsPer100g, "g")}</span>
+          <span className="rounded-[6px] bg-[#0e2c1e] px-2 py-1">P {optionalNumber(food.proteinPer100g, "g")}</span>
+          <span className="rounded-[6px] bg-[#32171b] px-2 py-1">G {optionalNumber(food.fatPer100g, "g")}</span>
+          <span className="rounded-[6px] bg-[#2a2350] px-2 py-1">Fibra {optionalNumber(food.fiberPer100g, "g")}</span>
+        </span>
+      </span>
+    </label>
+  );
+}
+
+function ExerciseMediaPreview({
+  active,
+  exercise,
+  onPreviewChange,
+  onPreviewToggle,
+  pinned,
+  reducedMotion,
+}: {
+  active: boolean;
+  exercise: SystemExercise;
+  onPreviewChange: (active: boolean) => void;
+  onPreviewToggle: () => void;
+  pinned: boolean;
+  reducedMotion: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const animatedUrl = exercise.previewUrl ?? exercise.sourceGifUrl;
+  const canAnimate = Boolean(animatedUrl) && !reducedMotion;
+  const src = !failed && active && canAnimate ? animatedUrl : exercise.posterUrl;
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  return (
+    <button
+      aria-label={canAnimate ? `Visualizar movimento de ${exercise.name}` : `Mídia de ${exercise.name}`}
+      aria-pressed={pinned}
+      className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[#314555] bg-[#101d27] focus:outline-none focus:ring-2 focus:ring-[#2d9cff]"
+      type="button"
+      onBlur={() => onPreviewChange(false)}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onPreviewToggle();
+      }}
+      onFocus={() => onPreviewChange(true)}
+      onMouseEnter={() => onPreviewChange(true)}
+      onMouseLeave={() => onPreviewChange(false)}
+    >
+      {src ? (
+        <img
+          alt=""
+          className="size-full object-cover"
+          data-testid={`exercise-media-${exercise.id}`}
+          height={56}
+          loading="lazy"
+          src={src}
+          width={56}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <Dumbbell className="size-6 text-[#56b5ff]" />
+      )}
+    </button>
+  );
+}
+
+function SystemExerciseRow({
+  activePreview,
+  exercise,
+  onPreviewChange,
+  onPreviewToggle,
+  pinnedPreview,
+  onToggle,
+  reducedMotion,
+  selected,
+}: {
+  activePreview: boolean;
+  exercise: SystemExercise;
+  onPreviewChange: (active: boolean) => void;
+  onPreviewToggle: () => void;
+  pinnedPreview: boolean;
+  onToggle: () => void;
+  reducedMotion: boolean;
+  selected: boolean;
+}) {
+  return (
+    <div className={cn("grid grid-cols-[auto_56px_minmax(0,1fr)] gap-3 px-3 py-3 transition hover:bg-[#132434]", selected && "bg-[#0b2b45]/60")}>
+      <input aria-label={`Selecionar ${exercise.name}`} checked={selected} className="mt-5 size-4 accent-[#2d9cff]" disabled={exercise.alreadyImported} onChange={onToggle} type="checkbox" />
+      <ExerciseMediaPreview active={activePreview} exercise={exercise} pinned={pinnedPreview} reducedMotion={reducedMotion} onPreviewChange={onPreviewChange} onPreviewToggle={onPreviewToggle} />
+      <span className="min-w-0">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="line-clamp-1 text-[13px] font-bold text-white">{exercise.name}</span>
+          {exercise.alreadyImported ? <Badge tone="green">Já importado</Badge> : null}
+          {exercise.previewUrl ? <Badge tone="purple">Preview</Badge> : null}
+        </span>
+        <span className="mt-1 block text-[11px] text-[#8fa0ad]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</span>
+        {exercise.mediaWidth && exercise.mediaHeight ? (
+          <span className="mt-1 block text-[10px] text-[#718394]">{exercise.mediaWidth}×{exercise.mediaHeight} · {exercise.mediaFrameCount ?? 1} frame(s)</span>
+        ) : null}
+        {exercise.description ? <span className="mt-1 line-clamp-2 block text-[12px] leading-5 text-[#cbd6df]">{exercise.description}</span> : null}
+      </span>
+    </div>
+  );
+}
+
+function Pager({ count, onPageChange, page, pageSize }: { count: number; onPageChange: (page: number) => void; page: number; pageSize: number }) {
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+  return (
+    <div className="flex items-center justify-between gap-3 text-[12px] text-[#8fa0ad]">
+      <span>Página {page} de {totalPages}</span>
+      <div className="flex gap-2">
+        <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5] disabled:opacity-50" disabled={page <= 1} type="button" onClick={() => onPageChange(Math.max(1, page - 1))}>Anterior</button>
+        <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5] disabled:opacity-50" disabled={page >= totalPages} type="button" onClick={() => onPageChange(Math.min(totalPages, page + 1))}>Próxima</button>
+      </div>
     </div>
   );
 }
