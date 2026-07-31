@@ -18,6 +18,7 @@ import {
   Plus,
   Save,
   Search,
+  Trash2,
   UploadCloud,
   Utensils,
   Wheat,
@@ -34,7 +35,6 @@ import {
   foodSourceLabels,
   levelLabels,
   muscleGroupLabels,
-  objectiveLabels,
   parseFoodImportTable,
   suggestedUseLabels,
   type PartnerProtocolExercise,
@@ -69,7 +69,7 @@ type PartnerProtocolsViewProps = {
 
 type ActiveTab = "exercises" | "foods";
 type ViewMode = "cards" | "table";
-type DrawerMode = "exercise" | "food" | "import" | "systemExerciseImport" | "systemFoodImport" | "use" | null;
+type DrawerMode = "exercise" | "exercisePreview" | "food" | "import" | "systemExerciseImport" | "systemFoodImport" | "use" | null;
 
 type FoodForm = {
   carbs: number;
@@ -117,7 +117,6 @@ const muscleGroups = Object.keys(muscleGroupLabels) as PartnerProtocolExerciseMu
 const secondaryMuscleGroups = ["peito", "costas", "pernas", "ombros", "biceps", "triceps", "core", "gluteos"] as const;
 const equipments = Object.keys(equipmentLabels) as PartnerProtocolExerciseEquipment[];
 const levels = Object.keys(levelLabels) as PartnerProtocolExerciseLevel[];
-const objectives = Object.keys(objectiveLabels) as PartnerProtocolExerciseObjective[];
 const suggestedUses = ["pre_treino", "pos_treino", "lanche", "refeicao_principal", "ceia", "outro"] as const;
 type SuggestedUse = (typeof suggestedUses)[number];
 const suggestedUseSet = new Set<string>(suggestedUses);
@@ -293,6 +292,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [foodForm, setFoodForm] = useState<FoodForm>(emptyFood);
   const [exerciseForm, setExerciseForm] = useState<ExerciseForm>(emptyExercise);
+  const [previewExercise, setPreviewExercise] = useState<PartnerProtocolExercise | null>(null);
   const [useTarget, setUseTarget] = useState<{ id: string; itemType: "exercise" | "food"; title: string } | null>(null);
   const [useClient, setUseClient] = useState("");
   const [useNotes, setUseNotes] = useState("");
@@ -326,7 +326,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   const filteredExercises = useMemo(() => {
     const term = query.trim().toLowerCase();
     return data.exercises.filter((exercise) => {
-      const matchesTerm = !term || [exercise.name, exercise.muscleGroupLabel, exercise.objectiveLabel, ...exercise.tags].join(" ").toLowerCase().includes(term);
+      const matchesTerm = !term || [exercise.name, exercise.muscleGroupLabel, exercise.equipmentLabel, ...exercise.tags].join(" ").toLowerCase().includes(term);
       const matchesGroup = exerciseGroup === "all" || exercise.muscleGroup === exerciseGroup;
       const matchesEquipment = exerciseEquipment === "all" || exercise.equipment === exerciseEquipment;
       const matchesStatus = statusFilter === "all" || exercise.status === statusFilter;
@@ -401,6 +401,11 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
       videoUrl: exercise.videoUrl ?? "",
     } : emptyExercise);
     setDrawerMode("exercise");
+  }
+
+  function openExercisePreview(exercise: PartnerProtocolExercise) {
+    setPreviewExercise(exercise);
+    setDrawerMode("exercisePreview");
   }
 
   function openUseDraft(item: PartnerProtocolExercise | PartnerProtocolFood, itemType: "exercise" | "food") {
@@ -484,6 +489,10 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   }
 
   function handleArchive(itemType: "exercise" | "food", id: string, archived: boolean) {
+    const actionLabel = archived ? "restaurar" : "excluir";
+    const itemLabel = itemType === "exercise" ? "este exercício" : "este alimento";
+    if (!window.confirm(`Deseja ${actionLabel} ${itemLabel}?`)) return;
+
     startTransition(async () => {
       const result = await setPartnerProtocolArchived({ id, itemType, value: !archived });
       if (!result.ok) {
@@ -724,7 +733,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
               {activeTab === "foods" ? (
                 <FoodList foods={filteredFoods} onArchive={handleArchive} onEdit={openFood} onUse={openUseDraft} viewMode={viewMode} />
               ) : (
-                <ExerciseList exercises={filteredExercises} onArchive={handleArchive} onEdit={openExercise} onUse={openUseDraft} viewMode={viewMode} />
+                <ExerciseList exercises={filteredExercises} onArchive={handleArchive} onEdit={openExercise} onPreview={openExercisePreview} viewMode={viewMode} />
               )}
               <div className="border-t border-[#223443] px-5 py-4 text-[12px] text-[#9aa8b4]">
                 Mostrando {visibleCount} {activeTab === "foods" ? "alimentos" : "exercícios"}
@@ -820,6 +829,35 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
         </SheetContent>
       </Sheet>
 
+      <Sheet open={drawerMode === "exercisePreview"} onOpenChange={(open) => {
+        if (!open) {
+          setPreviewExercise(null);
+          setDrawerMode(null);
+        }
+      }}>
+        <SheetContent className="w-full overflow-y-auto border-[#293b49] bg-[#0c1823] text-[#edf4f8] sm:max-w-[560px]">
+          <SheetHeader>
+            <SheetTitle className="text-white">Visualizar movimento</SheetTitle>
+            <SheetDescription className="text-[#92a1ad]">{previewExercise?.name ?? "Exercício"}</SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            {previewExercise?.videoUrl || previewExercise?.thumbnailUrl ? (
+              <div className="overflow-hidden rounded-[8px] border border-[#293b49] bg-[#07131d]">
+                <img
+                  alt={`Movimento de ${previewExercise.name}`}
+                  className="aspect-video w-full object-contain"
+                  src={previewExercise.videoUrl ?? previewExercise.thumbnailUrl ?? ""}
+                />
+              </div>
+            ) : (
+              <div className="flex min-h-[260px] items-center justify-center rounded-[8px] border border-[#293b49] bg-[#07131d] px-6 text-center text-[14px] text-[#92a1ad]">
+                Este exercício ainda não possui mídia vinculada.
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <Sheet open={drawerMode === "exercise"} onOpenChange={(open) => !open && setDrawerMode(null)}>
         <SheetContent className="w-full overflow-y-auto border-[#293b49] bg-[#0c1823] text-[#edf4f8] sm:max-w-[560px]">
           <SheetHeader>
@@ -837,9 +875,6 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
               </SelectField>
               <SelectField label="Nível" onChange={(value) => setExerciseForm((form) => ({ ...form, level: value as PartnerProtocolExerciseLevel }))} value={exerciseForm.level}>
                 {levels.map((level) => <option key={level} value={level}>{levelLabels[level]}</option>)}
-              </SelectField>
-              <SelectField label="Objetivo" onChange={(value) => setExerciseForm((form) => ({ ...form, objective: value as PartnerProtocolExerciseObjective }))} value={exerciseForm.objective}>
-                {objectives.map((objective) => <option key={objective} value={objective}>{objectiveLabels[objective]}</option>)}
               </SelectField>
             </div>
             <Input label="Grupos musculares secundários" onChange={(value) => setExerciseForm((form) => ({ ...form, secondaryMuscleGroups: value }))} placeholder="Tríceps, Ombros" value={exerciseForm.secondaryMuscleGroups} />
@@ -1213,13 +1248,13 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
             <FoodMacroChips food={food} />
           </div>
           <Badge className="hidden sm:inline-flex" tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
-          <IconAction className="hidden sm:flex" label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>
+          <IconAction className="hidden sm:flex" label={`Ver ${food.name}`} onClick={() => onEdit(food)}><Eye className="size-4" /></IconAction>
           <IconAction className="hidden sm:flex" label={`Editar ${food.name}`} onClick={() => onEdit(food)}><Pencil className="size-4" /></IconAction>
           <UseButton className="hidden sm:inline-flex" onClick={() => onUse(food, "food")} />
           <div className="col-span-2 grid grid-cols-[auto_1fr] gap-2 sm:hidden">
             <div className="flex items-center gap-1.5">
               <Badge tone={food.source === "custom" ? "green" : "blue"}>{food.sourceLabel}</Badge>
-              <IconAction label={`Ver ${food.name}`}><Eye className="size-4" /></IconAction>
+              <IconAction label={`Ver ${food.name}`} onClick={() => onEdit(food)}><Eye className="size-4" /></IconAction>
               <IconAction label={`Editar ${food.name}`} onClick={() => onEdit(food)}><Pencil className="size-4" /></IconAction>
               <IconAction label={food.status === "archived" ? "Restaurar item" : "Arquivar item"} onClick={() => onArchive("food", food.id, food.status === "archived")}>{food.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</IconAction>
             </div>
@@ -1231,11 +1266,11 @@ function FoodList({ foods, onArchive, onEdit, onUse, viewMode }: {
   );
 }
 
-function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
+function ExerciseList({ exercises, onArchive, onEdit, onPreview, viewMode }: {
   exercises: PartnerProtocolExercise[];
   onArchive: (itemType: "exercise" | "food", id: string, archived: boolean) => void;
   onEdit: (exercise: PartnerProtocolExercise) => void;
-  onUse: (item: PartnerProtocolExercise, itemType: "exercise") => void;
+  onPreview: (exercise: PartnerProtocolExercise) => void;
   viewMode: ViewMode;
 }) {
   if (exercises.length === 0) return <EmptyState label="Nenhum exercício encontrado." />;
@@ -1252,7 +1287,12 @@ function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
                 <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
               </div>
             </div>
-            <ItemActions archived={exercise.status === "archived"} onArchive={() => onArchive("exercise", exercise.id, exercise.status === "archived")} onEdit={() => onEdit(exercise)} onUse={() => onUse(exercise, "exercise")} sourceLabel={exercise.objectiveLabel} />
+            <ExerciseItemActions
+              archived={exercise.status === "archived"}
+              onArchive={() => onArchive("exercise", exercise.id, exercise.status === "archived")}
+              onEdit={() => onEdit(exercise)}
+              onPreview={() => onPreview(exercise)}
+            />
           </Panel>
         ))}
       </div>
@@ -1262,25 +1302,22 @@ function ExerciseList({ exercises, onArchive, onEdit, onUse, viewMode }: {
   return (
     <div className="divide-y divide-[#223443]">
       {exercises.map((exercise) => (
-        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-start gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_116px_48px_48px_150px] sm:items-center sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={exercise.id}>
+        <div className="grid min-h-[82px] grid-cols-[52px_minmax(0,1fr)] items-start gap-3 px-3 py-3 sm:min-h-[104px] sm:grid-cols-[82px_minmax(0,1fr)_48px_48px_48px] sm:items-center sm:gap-4 sm:px-5 sm:py-4 max-lg:sm:grid-cols-[82px_minmax(0,1fr)_auto]" key={exercise.id}>
           <ExerciseThumb exercise={exercise} />
           <div className="min-w-0">
             <p className="line-clamp-2 text-[13px] font-semibold leading-5 text-white sm:truncate sm:text-[16px]">{exercise.name}</p>
             <p className="mt-1 text-[11px] text-[#8fa0ad] sm:text-[12px]">{exercise.muscleGroupLabel} · {exercise.equipmentLabel} · {exercise.levelLabel}</p>
             <p className="mt-1 text-[11px] text-[#aebbc6] sm:mt-2 sm:text-[13px]">{exercise.defaultSets} séries · {exercise.defaultReps} reps · {exercise.restSeconds}s</p>
           </div>
-          <Badge className="hidden sm:inline-flex" tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
-          <IconAction className="hidden sm:flex" label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
+          <IconAction className="hidden sm:flex" label={`Ver ${exercise.name}`} onClick={() => onPreview(exercise)}><Eye className="size-4" /></IconAction>
           <IconAction className="hidden sm:flex" label={`Editar ${exercise.name}`} onClick={() => onEdit(exercise)}><Pencil className="size-4" /></IconAction>
-          <UseButton className="hidden sm:inline-flex" onClick={() => onUse(exercise, "exercise")} />
-          <div className="col-span-2 grid grid-cols-[auto_1fr] gap-2 sm:hidden">
+          <DeleteButton archived={exercise.status === "archived"} className="hidden sm:inline-flex" onClick={() => onArchive("exercise", exercise.id, exercise.status === "archived")} />
+          <div className="col-span-2 grid grid-cols-[auto_auto] justify-start gap-2 sm:hidden">
             <div className="flex items-center gap-1.5">
-              <Badge tone={exercise.objective === "forca" ? "green" : exercise.objective === "resistencia" ? "purple" : "yellow"}>{exercise.objectiveLabel}</Badge>
-              <IconAction label={`Ver ${exercise.name}`}><Eye className="size-4" /></IconAction>
+              <IconAction label={`Ver ${exercise.name}`} onClick={() => onPreview(exercise)}><Eye className="size-4" /></IconAction>
               <IconAction label={`Editar ${exercise.name}`} onClick={() => onEdit(exercise)}><Pencil className="size-4" /></IconAction>
-              <IconAction label={exercise.status === "archived" ? "Restaurar item" : "Arquivar item"} onClick={() => onArchive("exercise", exercise.id, exercise.status === "archived")}>{exercise.status === "archived" ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</IconAction>
             </div>
-            <UseButton className="w-full" onClick={() => onUse(exercise, "exercise")} />
+            <DeleteButton archived={exercise.status === "archived"} onClick={() => onArchive("exercise", exercise.id, exercise.status === "archived")} />
           </div>
         </div>
       ))}
@@ -1296,6 +1333,25 @@ function UseButton({ className, onClick }: { className?: string; onClick: () => 
   return (
     <button className={cn("inline-flex h-8 items-center justify-center rounded-[7px] border border-[#1d7ece] bg-[#0c2840] px-3 text-[12px] font-semibold text-[#c9e8ff] hover:bg-[#123f68] sm:h-10 sm:px-4 sm:text-[13px]", className)} onClick={onClick} type="button">
       Usar em plano
+    </button>
+  );
+}
+
+function DeleteButton({ archived, className, onClick }: { archived: boolean; className?: string; onClick: () => void }) {
+  return (
+    <button
+      aria-label={archived ? "Restaurar item" : "Excluir item"}
+      className={cn(
+        "inline-flex size-8 items-center justify-center rounded-[7px] border text-[12px] font-semibold sm:size-10 sm:text-[13px]",
+        archived
+          ? "border-[#1d7041] bg-[#102d21] text-[#bdf3cf] hover:bg-[#153b2a]"
+          : "border-[#7d2b35] bg-[#33151a] text-[#ffc8cf] hover:bg-[#451b22]",
+        className,
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {archived ? <ArchiveRestore className="size-4" /> : <Trash2 className="size-4" />}
     </button>
   );
 }
@@ -1316,6 +1372,18 @@ function ItemActions({ archived, onArchive, onEdit, onUse, sourceLabel }: { arch
         <IconAction label="Editar item" onClick={onEdit}><Pencil className="size-4" /></IconAction>
         <IconAction label={archived ? "Restaurar item" : "Arquivar item"} onClick={onArchive}>{archived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</IconAction>
         <UseButton onClick={onUse} />
+      </div>
+    </div>
+  );
+}
+
+function ExerciseItemActions({ archived, onArchive, onEdit, onPreview }: { archived: boolean; onArchive: () => void; onEdit: () => void; onPreview: () => void }) {
+  return (
+    <div className="mt-3 flex items-center justify-end gap-2 sm:mt-4">
+      <div className="flex gap-1">
+        <IconAction label="Visualizar movimento" onClick={onPreview}><Eye className="size-4" /></IconAction>
+        <IconAction label="Editar item" onClick={onEdit}><Pencil className="size-4" /></IconAction>
+        <IconAction label={archived ? "Restaurar item" : "Excluir item"} onClick={onArchive}>{archived ? <ArchiveRestore className="size-4" /> : <Trash2 className="size-4" />}</IconAction>
       </div>
     </div>
   );
