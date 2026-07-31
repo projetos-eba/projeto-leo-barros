@@ -9,6 +9,7 @@ import {
   importPartnerProtocolFoods,
   importSystemExercisesToPartner,
   importSystemFoodsToPartner,
+  setPartnerProtocolArchived,
 } from "./actions";
 import { PartnerProtocolsView } from "./partner-protocols-view";
 
@@ -56,11 +57,11 @@ const data: PartnerProtocolsData = {
       status: "active",
       systemExerciseId: null,
       tags: ["base"],
-      thumbnailUrl: null,
+      thumbnailUrl: "/storage/v1/object/public/system-exercise-media/exercise-library/EX-AGACHAMENTO-LIVRE/12345678/poster.webp",
       updatedAt: "2026-07-01T10:00:00.000Z",
       usageCount: 42,
       variations: [],
-      videoUrl: null,
+      videoUrl: "/storage/v1/object/public/system-exercise-media/exercise-library/EX-AGACHAMENTO-LIVRE/12345678/preview.webp",
     },
   ],
   foods: [
@@ -199,6 +200,7 @@ describe("PartnerProtocolsView", () => {
     vi.mocked(importPartnerProtocolFoods).mockResolvedValue({ count: 1, ok: true, message: "Tabela importada." });
     vi.mocked(importSystemExercisesToPartner).mockResolvedValue({ imported: 1, ok: true, message: "Biblioteca de exercícios importada." });
     vi.mocked(importSystemFoodsToPartner).mockResolvedValue({ imported: 1, ok: true, message: "Biblioteca TACO importada." });
+    vi.mocked(setPartnerProtocolArchived).mockResolvedValue({ ok: true, message: "Item arquivado." });
     refreshMock.mockClear();
   });
 
@@ -219,6 +221,28 @@ describe("PartnerProtocolsView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Biblioteca de Exercícios · 1" }));
     expect(screen.getByText("Agachamento livre")).toBeInTheDocument();
+  });
+
+  it("visualiza movimento e exclui exercício com confirmação sem ação de plano", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<PartnerProtocolsView data={data} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Biblioteca de Exercícios · 1" }));
+    expect(screen.queryByRole("button", { name: "Usar em plano" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Ver Agachamento livre" })[0]);
+    expect(screen.getByRole("heading", { name: "Visualizar movimento" })).toBeInTheDocument();
+    expect(screen.getByAltText("Movimento de Agachamento livre")).toHaveAttribute("src", expect.stringContaining("preview.webp"));
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Excluir item" })[0]);
+
+    await waitFor(() => expect(setPartnerProtocolArchived).toHaveBeenCalledWith({
+      id: "exercise-1",
+      itemType: "exercise",
+      value: true,
+    }));
+    expect(confirm).toHaveBeenCalledWith("Deseja excluir este exercício?");
   });
 
   it("cria alimento e importa tabela de alimentos", async () => {
