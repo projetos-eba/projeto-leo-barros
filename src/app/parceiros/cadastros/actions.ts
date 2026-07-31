@@ -14,11 +14,16 @@ import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
 export type PartnerProtocolsActionResult = {
+  alreadyImported?: number;
   count?: number;
   error?: string;
+  failed?: number;
   id?: string;
+  imported?: number;
   message?: string;
   ok: boolean;
+  reactivated?: number;
+  requested?: number;
 };
 
 const uuidSchema = z.string().uuid();
@@ -66,6 +71,22 @@ const importFoodRowSchema = z.object({
 
 const importFoodsSchema = z.object({
   rows: z.array(importFoodRowSchema).min(1).max(300),
+});
+
+const importSystemFoodsSchema = z.object({
+  categoryTaco: z.string().trim().max(80).nullable().optional(),
+  foodIds: z.array(uuidSchema).max(600).nullable().optional(),
+  importAll: z.boolean().default(false),
+  macro: z.string().trim().max(40).nullable().optional(),
+  query: z.string().trim().max(120).nullable().optional(),
+});
+
+const importSystemExercisesSchema = z.object({
+  equipment: z.string().trim().max(40).nullable().optional(),
+  exerciseIds: z.array(uuidSchema).max(300).nullable().optional(),
+  importAll: z.boolean().default(false),
+  muscleGroup: z.string().trim().max(40).nullable().optional(),
+  query: z.string().trim().max(120).nullable().optional(),
 });
 
 const exerciseSchema = z.object({
@@ -130,6 +151,10 @@ function nullable(value: string | null) {
   return trimmed ? trimmed : null;
 }
 
+function optionalRpcText(value: string | null | undefined) {
+  return nullable(value ?? null) ?? undefined;
+}
+
 function revalidateProtocols() {
   revalidatePath("/parceiros/cadastros");
 }
@@ -174,6 +199,27 @@ function normalizeFoodSource(value: string): PartnerProtocolFoodSource {
 function normalizeExerciseVideo(value: string | null) {
   if (!value) return null;
   return normalizeProtocolVideoUrl(value);
+}
+
+function catalogImportResult(value: unknown, fallbackMessage: string): PartnerProtocolsActionResult {
+  const payload = typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
+  const imported = typeof payload.imported === "number" ? payload.imported : 0;
+  const alreadyImported = typeof payload.alreadyImported === "number" ? payload.alreadyImported : 0;
+  const reactivated = typeof payload.reactivated === "number" ? payload.reactivated : 0;
+  const failed = typeof payload.failed === "number" ? payload.failed : 0;
+  const requested = typeof payload.requested === "number" ? payload.requested : imported + alreadyImported + reactivated + failed;
+
+  return {
+    alreadyImported,
+    count: imported + reactivated,
+    failed,
+    id: typeof payload.batchId === "string" ? payload.batchId : undefined,
+    imported,
+    message: `${fallbackMessage}: ${imported} novos, ${reactivated} reativados, ${alreadyImported} já importados.`,
+    ok: failed === 0,
+    reactivated,
+    requested,
+  };
 }
 
 export async function createPartnerProtocolFood(input: z.input<typeof foodSchema>): Promise<PartnerProtocolsActionResult> {
@@ -290,6 +336,56 @@ export async function importPartnerProtocolFoods(input: z.input<typeof importFoo
 
   revalidateProtocols();
   return { count: data?.length ?? rows.length, message: "Tabela importada.", ok: true };
+}
+
+export async function importSystemFoodsToPartner(input: z.input<typeof importSystemFoodsSchema>): Promise<PartnerProtocolsActionResult> {
+  const parsed = importSystemFoodsSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a seleção da biblioteca TACO.", ok: false };
+
+  if (!parsed.data.importAll && (!parsed.data.foodIds || parsed.data.foodIds.length === 0)) {
+    return { error: "Selecione ao menos um alimento.", ok: false };
+  }
+
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase.rpc("partner_import_system_foods", {
+    p_category_taco: optionalRpcText(parsed.data.categoryTaco),
+    p_food_ids: parsed.data.foodIds ?? undefined,
+    p_import_all: parsed.data.importAll,
+    p_macro: optionalRpcText(parsed.data.macro),
+    p_query: optionalRpcText(parsed.data.query),
+  });
+
+  if (error) return { error: "Não foi possível importar da biblioteca TACO.", ok: false };
+
+  revalidateProtocols();
+  return catalogImportResult(data, "Biblioteca TACO importada");
+}
+
+export async function importSystemExercisesToPartner(input: z.input<typeof importSystemExercisesSchema>): Promise<PartnerProtocolsActionResult> {
+  const parsed = importSystemExercisesSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a seleção de exercícios.", ok: false };
+
+  if (!parsed.data.importAll && (!parsed.data.exerciseIds || parsed.data.exerciseIds.length === 0)) {
+    return { error: "Selecione ao menos um exercício.", ok: false };
+  }
+
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase.rpc("partner_import_system_exercises", {
+    p_equipment: optionalRpcText(parsed.data.equipment),
+    p_exercise_ids: parsed.data.exerciseIds ?? undefined,
+    p_import_all: parsed.data.importAll,
+    p_muscle_group: optionalRpcText(parsed.data.muscleGroup),
+    p_query: optionalRpcText(parsed.data.query),
+  });
+
+  if (error) return { error: "Não foi possível importar exercícios oficiais.", ok: false };
+
+  revalidateProtocols();
+  return catalogImportResult(data, "Biblioteca de exercícios importada");
 }
 
 export async function createPartnerProtocolExercise(input: z.input<typeof exerciseSchema>): Promise<PartnerProtocolsActionResult> {

@@ -12,6 +12,10 @@ import {
   type CardioZoneKey,
 } from "@/lib/partners/client-cardio-metrics";
 import {
+  assessmentMethodUsesSkinfoldFormula,
+  assessmentProtocolSkinfolds,
+  calculateAgeFromBirthDate,
+  calculatePhysicalAssessment,
   getFormulaEligibility,
   type AssessmentActivityLevel,
   type AssessmentBiologicalSex,
@@ -73,6 +77,7 @@ const circumferenceKeys = [
 ] as const;
 
 const skinfoldKeys = [
+  "biceps",
   "pectoral",
   "abdominal",
   "triceps",
@@ -85,7 +90,15 @@ const skinfoldKeys = [
 
 const activityLevelSchema = z.enum(["sedentary", "light", "moderate", "active", "athlete"]);
 const formulaSchema = z.enum(["mifflin", "harris_benedict", "cunningham", "tinsley"]);
-const assessmentMethodSchema = z.enum(["pollock_7", "pollock_3", "bioimpedance", "manual"]);
+const assessmentMethodSchema = z.enum([
+  "guedes_3",
+  "jackson_pollock_3",
+  "durnin_womersley_4",
+  "faulkner_4",
+  "jackson_pollock_7",
+  "bioimpedance",
+  "manual",
+]);
 
 const assessmentSchema = z.object({
   activityLevel: activityLevelSchema,
@@ -479,11 +492,49 @@ export async function saveClientAssessment(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
+  const { data: patient, error: patientError } = await context.supabase
+    .from("patients")
+    .select("birth_date, biological_sex")
+    .eq("id", parsed.data.patientId)
+    .maybeSingle();
+  if (patientError || !patient) return { error: "Não foi possível validar os dados do Cliente.", ok: false };
+
+  const physicalResult = calculatePhysicalAssessment({
+    age: calculateAgeFromBirthDate(patient.birth_date ?? null, new Date(parsed.data.assessedAt)),
+    assessmentMethod: parsed.data.assessmentMethod,
+    biologicalSex: (patient.biological_sex ?? "not_informed") as AssessmentBiologicalSex,
+    bodyFatPercentage: parsed.data.bodyFatPercentage,
+    heightCm: parsed.data.heightCm,
+    skinfolds: parsed.data.skinfolds,
+    weightKg: parsed.data.weightKg,
+  });
+  if (physicalResult.status === "missing_inputs" || physicalResult.status === "invalid_inputs") {
+    return { error: physicalResult.reason ?? "Revise os dados da avaliação.", ok: false };
+  }
+
+  let previousAssessedAt: string | null = null;
+  if (parsed.data.assessmentId) {
+    const { data: existingAssessment, error: existingAssessmentError } = await context.supabase
+      .from("partner_client_assessments")
+      .select("assessed_at")
+      .eq("id", parsed.data.assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .maybeSingle();
+    if (existingAssessmentError || !existingAssessment) return { error: "Não foi possível localizar a avaliação.", ok: false };
+    previousAssessedAt = existingAssessment.assessed_at;
+  }
+
+  const requiredSkinfolds = assessmentProtocolSkinfolds[parsed.data.assessmentMethod];
+  const savedSkinfolds = assessmentMethodUsesSkinfoldFormula(parsed.data.assessmentMethod)
+    ? parsed.data.skinfolds.filter((skinfold) => requiredSkinfolds.includes(skinfold.metricKey))
+    : parsed.data.skinfolds;
+
   const assessmentPayload = {
     activity_level: parsed.data.activityLevel,
     assessment_method: parsed.data.assessmentMethod,
     assessed_at: parsed.data.assessedAt,
-    body_fat_percentage: parsed.data.bodyFatPercentage,
+    body_fat_percentage: physicalResult.bodyFatPercentage,
     height_cm: parsed.data.heightCm,
     muscle_mass_kg: parsed.data.muscleMassKg,
     notes: normalizeNullable(parsed.data.notes),
@@ -549,9 +600,9 @@ export async function saveClientAssessment(
     if (error) return { error: "Não foi possível salvar as circunferências.", ok: false };
   }
 
-  if (parsed.data.skinfolds.length > 0) {
+  if (savedSkinfolds.length > 0) {
     const { error } = await context.supabase.from("partner_client_assessment_skinfolds").insert(
-      parsed.data.skinfolds.map((skinfold) => ({
+      savedSkinfolds.map((skinfold) => ({
         assessment_id: assessmentId,
         metric_key: skinfold.metricKey,
         partner_id: context.partnerId,
@@ -563,16 +614,40 @@ export async function saveClientAssessment(
     if (error) return { error: "Não foi possível salvar as dobras cutâneas.", ok: false };
   }
 
-  if (!parsed.data.assessmentId) {
-    const { error } = await context.supabase.from("partner_client_body_measurements").insert({
-      body_fat_percentage: parsed.data.bodyFatPercentage,
-      measured_at: parsed.data.assessedAt,
-      notes: normalizeNullable(parsed.data.notes),
-      partner_id: context.partnerId,
-      patient_id: parsed.data.patientId,
-      weight_kg: parsed.data.weightKg,
-    });
+  const bodyMeasurementPayload = {
+    body_fat_percentage: physicalResult.bodyFatPercentage,
+    measured_at: parsed.data.assessedAt,
+    notes: normalizeNullable(parsed.data.notes),
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+    weight_kg: parsed.data.weightKg,
+  };
 
+  if (parsed.data.assessmentId && previousAssessedAt) {
+    const { data: existingMeasurement, error: measurementLookupError } = await context.supabase
+      .from("partner_client_body_measurements")
+      .select("id")
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("measured_at", previousAssessedAt)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (measurementLookupError) return { error: "Avaliação atualizada, mas a Visão Geral não foi sincronizada.", ok: false };
+
+    const { error } = existingMeasurement
+      ? await context.supabase
+        .from("partner_client_body_measurements")
+        .update(bodyMeasurementPayload)
+        .eq("id", existingMeasurement.id)
+        .eq("partner_id", context.partnerId)
+        .eq("patient_id", parsed.data.patientId)
+      : await context.supabase.from("partner_client_body_measurements").insert(bodyMeasurementPayload);
+
+    if (error) return { error: "Avaliação atualizada, mas a Visão Geral não foi sincronizada.", ok: false };
+  } else {
+    const { error } = await context.supabase.from("partner_client_body_measurements").insert(bodyMeasurementPayload);
     if (error) return { error: "Avaliação salva, mas a Visão Geral não foi sincronizada.", ok: false };
   }
 

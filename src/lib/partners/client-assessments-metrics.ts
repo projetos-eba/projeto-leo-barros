@@ -1,6 +1,13 @@
 export type AssessmentFormula = "mifflin" | "harris_benedict" | "cunningham" | "tinsley";
 export type AssessmentActivityLevel = "sedentary" | "light" | "moderate" | "active" | "athlete";
-export type AssessmentMethod = "pollock_7" | "pollock_3" | "bioimpedance" | "manual";
+export type AssessmentMethod =
+  | "guedes_3"
+  | "jackson_pollock_3"
+  | "durnin_womersley_4"
+  | "faulkner_4"
+  | "jackson_pollock_7"
+  | "bioimpedance"
+  | "manual";
 export type AssessmentGender = "female" | "male" | "non_binary" | "other" | "not_informed" | null;
 export type AssessmentBiologicalSex = "female" | "male" | "not_informed";
 
@@ -153,12 +160,19 @@ export type PartnerClientAssessmentsData = {
   };
   generatedAt: string;
   history: Array<{
+    assessmentMethod: AssessmentMethod;
     assessedAt: string;
+    bmi: number;
+    bmiClassification: string;
     bodyFatPercentage: number | null;
     dateLabel: string;
+    fatMassKg: number | null;
+    ffmi: number | null;
     heightCm: number;
     id: string;
+    leanMassKg: number | null;
     notes: string | null;
+    sumSkinfoldsMm: number | null;
     targetDays: number;
     targetWeightKg: number | null;
     title: string;
@@ -167,6 +181,7 @@ export type PartnerClientAssessmentsData = {
   kpis: {
     bodyFat: AssessmentKpi;
     bmi: AssessmentKpi & { classification: string };
+    ffmi: AssessmentKpi;
     lastAssessment: {
       dateLabel: string;
       daysAgoLabel: string;
@@ -177,10 +192,11 @@ export type PartnerClientAssessmentsData = {
     weight: AssessmentKpi;
   };
   latestAssessment: PartnerClientAssessment | null;
+  records: PartnerClientAssessment[];
   formulaEligibility: Record<AssessmentFormula, { status: "available" | "invalid_inputs" | "missing_inputs"; reason: string | null }>;
 };
 
-export type PartnerClientAssessment = Omit<PartnerClientAssessmentRawAssessment, "calculations" | "circumferences"> & {
+export type PartnerClientAssessment = Omit<PartnerClientAssessmentRawAssessment, "calculations" | "circumferences" | "skinfolds"> & {
   assessmentMethod: AssessmentMethod;
   bmi: number;
   bmiClassification: string;
@@ -192,7 +208,9 @@ export type PartnerClientAssessment = Omit<PartnerClientAssessmentRawAssessment,
     valueCm: number;
   }>;
   fatMassKg: number | null;
+  ffmi: number | null;
   leanMassKg: number | null;
+  sumSkinfoldsMm: number | null;
   skinfolds: Array<{
     id: string;
     label: string;
@@ -232,10 +250,20 @@ export const formulaLabels: Record<AssessmentFormula, string> = {
 
 export const assessmentMethodLabels: Record<AssessmentMethod, string> = {
   bioimpedance: "Bioimpedância",
+  durnin_womersley_4: "4 dobras Durnin & Womersley",
+  faulkner_4: "4 dobras Faulkner",
+  guedes_3: "3 dobras Guedes",
+  jackson_pollock_3: "3 dobras Jackson & Pollock",
+  jackson_pollock_7: "7 dobras Jackson, Pollock & Ward",
   manual: "Manual técnico",
-  pollock_3: "Pollock 3 dobras",
-  pollock_7: "Pollock 7 dobras",
 };
+
+export function normalizeAssessmentMethod(value: string | null | undefined): AssessmentMethod {
+  if (value === "pollock_7") return "jackson_pollock_7";
+  if (value === "pollock_3") return "jackson_pollock_3";
+  if (value && Object.hasOwn(assessmentMethodLabels, value)) return value as AssessmentMethod;
+  return "jackson_pollock_7";
+}
 
 export const circumferenceLabels: Record<string, string> = {
   abdomen: "Abdômen",
@@ -274,6 +302,7 @@ const circumferenceOrder = [
 export const skinfoldLabels: Record<string, string> = {
   abdominal: "Abdominal",
   axillary: "Axilar média",
+  biceps: "Bicipital",
   medial_calf: "Panturrilha medial",
   pectoral: "Peitoral",
   subscapular: "Subescapular",
@@ -285,6 +314,7 @@ export const skinfoldLabels: Record<string, string> = {
 export const skinfoldRegions: Record<string, string> = {
   abdominal: "Tronco",
   axillary: "Tronco",
+  biceps: "Membros superiores",
   medial_calf: "Membros inferiores",
   pectoral: "Tronco",
   subscapular: "Tronco",
@@ -294,6 +324,7 @@ export const skinfoldRegions: Record<string, string> = {
 };
 
 const skinfoldOrder = [
+  "biceps",
   "pectoral",
   "abdominal",
   "triceps",
@@ -303,6 +334,20 @@ const skinfoldOrder = [
   "thigh",
   "medial_calf",
 ];
+
+export const assessmentProtocolSkinfolds: Record<AssessmentMethod, string[]> = {
+  bioimpedance: [],
+  durnin_womersley_4: ["biceps", "triceps", "subscapular", "suprailiac"],
+  faulkner_4: ["triceps", "subscapular", "suprailiac", "abdominal"],
+  guedes_3: ["triceps", "suprailiac", "abdominal"],
+  jackson_pollock_3: ["pectoral", "abdominal", "thigh"],
+  jackson_pollock_7: ["pectoral", "axillary", "triceps", "subscapular", "abdominal", "suprailiac", "thigh"],
+  manual: [],
+};
+
+export function assessmentMethodUsesSkinfoldFormula(method: AssessmentMethod) {
+  return assessmentProtocolSkinfolds[method].length > 0;
+}
 
 function roundOne(value: number) {
   return Math.round(value * 10) / 10;
@@ -338,7 +383,7 @@ export function buildChartDomain(
   );
 }
 
-function dateAge(birthDate: string | null, now: Date) {
+export function calculateAgeFromBirthDate(birthDate: string | null, now: Date) {
   if (!birthDate) return null;
   const date = new Date(`${birthDate}T12:00:00`);
   let age = now.getFullYear() - date.getFullYear();
@@ -390,6 +435,11 @@ export function calculateBmi(weightKg: number, heightCm: number) {
   return roundOne(weightKg / ((heightCm / 100) ** 2));
 }
 
+export function calculateFfmi(leanMassKg: number | null, heightCm: number) {
+  if (leanMassKg === null) return null;
+  return roundOne(leanMassKg / ((heightCm / 100) ** 2));
+}
+
 export function calculateLeanMass(weightKg: number, bodyFatPercentage: number | null) {
   if (bodyFatPercentage === null) return null;
   return roundOne(weightKg * (1 - bodyFatPercentage / 100));
@@ -398,6 +448,129 @@ export function calculateLeanMass(weightKg: number, bodyFatPercentage: number | 
 export function calculateFatMass(weightKg: number, bodyFatPercentage: number | null) {
   if (bodyFatPercentage === null) return null;
   return roundOne(weightKg * bodyFatPercentage / 100);
+}
+
+export type PhysicalAssessmentCalculationInput = {
+  age: number | null;
+  assessmentMethod: AssessmentMethod;
+  biologicalSex: AssessmentBiologicalSex;
+  bodyFatPercentage: number | null;
+  heightCm: number;
+  skinfolds: Array<{
+    metricKey: string;
+    valueMm: number;
+  }>;
+  weightKg: number;
+};
+
+export type PhysicalAssessmentCalculation = {
+  bodyFatPercentage: number | null;
+  fatMassKg: number | null;
+  ffmi: number | null;
+  leanMassKg: number | null;
+  reason: string | null;
+  status: "calculated" | "manual" | "missing_inputs" | "invalid_inputs";
+  sumSkinfoldsMm: number | null;
+};
+
+export function calculatePhysicalAssessment(input: PhysicalAssessmentCalculationInput): PhysicalAssessmentCalculation {
+  const requiredSkinfolds = assessmentProtocolSkinfolds[input.assessmentMethod];
+  const manualResult = (status: PhysicalAssessmentCalculation["status"], bodyFatPercentage: number | null, reason: string | null): PhysicalAssessmentCalculation => {
+    const leanMassKg = calculateLeanMass(input.weightKg, bodyFatPercentage);
+    return {
+      bodyFatPercentage,
+      fatMassKg: calculateFatMass(input.weightKg, bodyFatPercentage),
+      ffmi: calculateFfmi(leanMassKg, input.heightCm),
+      leanMassKg,
+      reason,
+      status,
+      sumSkinfoldsMm: null,
+    };
+  };
+
+  if (requiredSkinfolds.length === 0) {
+    if (input.bodyFatPercentage === null) {
+      return manualResult("missing_inputs", null, "Informe o percentual de gordura para este método.");
+    }
+    return manualResult("manual", input.bodyFatPercentage, null);
+  }
+
+  if (input.biologicalSex === "not_informed") {
+    return manualResult("missing_inputs", null, "Informe o sexo biológico para calcular o protocolo.");
+  }
+  if (!input.age || input.age <= 0) {
+    return manualResult("missing_inputs", null, "Informe a data de nascimento para calcular o protocolo.");
+  }
+
+  const valuesByKey = new Map(input.skinfolds.map((skinfold) => [skinfold.metricKey, skinfold.valueMm]));
+  const missing = requiredSkinfolds.filter((key) => {
+    const value = valuesByKey.get(key);
+    return typeof value !== "number" || !Number.isFinite(value) || value <= 0;
+  });
+  if (missing.length > 0) {
+    return manualResult("missing_inputs", null, "Preencha todas as dobras exigidas pelo protocolo.");
+  }
+
+  const sumSkinfoldsMm = requiredSkinfolds.reduce((total, key) => total + Number(valuesByKey.get(key)), 0);
+  if (sumSkinfoldsMm <= 0) {
+    return manualResult("invalid_inputs", null, "Revise as dobras cutâneas informadas.");
+  }
+
+  const male = input.biologicalSex === "male";
+  let bodyFatPercentage = 0;
+
+  if (input.assessmentMethod === "guedes_3") {
+    const density = male
+      ? 1.17136 - 0.06706 * Math.log10(sumSkinfoldsMm)
+      : 1.16650 - 0.07063 * Math.log10(sumSkinfoldsMm);
+    bodyFatPercentage = ((4.95 / density) - 4.50) * 100;
+  } else if (input.assessmentMethod === "jackson_pollock_3") {
+    const density = male
+      ? 1.10938 - (0.0008267 * sumSkinfoldsMm) + (0.0000016 * sumSkinfoldsMm ** 2) - (0.0002574 * input.age)
+      : 1.0994921 - (0.0009929 * sumSkinfoldsMm) + (0.0000023 * sumSkinfoldsMm ** 2) - (0.0001392 * input.age);
+    bodyFatPercentage = ((4.95 / density) - 4.50) * 100;
+  } else if (input.assessmentMethod === "durnin_womersley_4") {
+    let c = 1.1620;
+    let m = 0.0630;
+    if (male) {
+      if (input.age < 20) { c = 1.1620; m = 0.0630; }
+      else if (input.age < 30) { c = 1.1631; m = 0.0632; }
+      else if (input.age < 40) { c = 1.1422; m = 0.0544; }
+      else if (input.age < 50) { c = 1.1620; m = 0.0700; }
+      else { c = 1.1715; m = 0.0779; }
+    } else {
+      if (input.age < 20) { c = 1.1549; m = 0.0678; }
+      else if (input.age < 30) { c = 1.1599; m = 0.0717; }
+      else if (input.age < 40) { c = 1.1423; m = 0.0632; }
+      else if (input.age < 50) { c = 1.1333; m = 0.0612; }
+      else { c = 1.1339; m = 0.0645; }
+    }
+    const density = c - (m * Math.log10(sumSkinfoldsMm));
+    bodyFatPercentage = ((4.95 / density) - 4.50) * 100;
+  } else if (input.assessmentMethod === "faulkner_4") {
+    bodyFatPercentage = (sumSkinfoldsMm * 0.153) + 5.783;
+  } else {
+    const density = male
+      ? 1.112 - (0.00043499 * sumSkinfoldsMm) + (0.00000055 * sumSkinfoldsMm ** 2) - (0.00028826 * input.age)
+      : 1.097 - (0.00046971 * sumSkinfoldsMm) + (0.00000056 * sumSkinfoldsMm ** 2) - (0.00012828 * input.age);
+    bodyFatPercentage = ((4.95 / density) - 4.50) * 100;
+  }
+
+  if (!Number.isFinite(bodyFatPercentage)) {
+    return manualResult("invalid_inputs", null, "Não foi possível calcular com os dados informados.");
+  }
+
+  bodyFatPercentage = roundOne(Math.max(2, Math.min(60, bodyFatPercentage)));
+  const leanMassKg = calculateLeanMass(input.weightKg, bodyFatPercentage);
+  return {
+    bodyFatPercentage,
+    fatMassKg: calculateFatMass(input.weightKg, bodyFatPercentage),
+    ffmi: calculateFfmi(leanMassKg, input.heightCm),
+    leanMassKg,
+    reason: null,
+    status: "calculated",
+    sumSkinfoldsMm: roundOne(sumSkinfoldsMm),
+  };
 }
 
 export function calculateBmr(input: CalorieCalculationInput) {
@@ -484,9 +657,12 @@ function daysAgoLabel(value: string, now: Date) {
 function mapAssessment(raw: PartnerClientAssessmentRawAssessment): PartnerClientAssessment {
   const bmi = calculateBmi(raw.weightKg, raw.heightCm);
   const leanMassKg = calculateLeanMass(raw.weightKg, raw.bodyFatPercentage);
+  const sumSkinfoldsMm = raw.skinfolds?.length
+    ? roundOne(raw.skinfolds.reduce((total, skinfold) => total + skinfold.valueMm, 0))
+    : null;
   return {
     ...raw,
-    assessmentMethod: raw.assessmentMethod ?? "pollock_7",
+    assessmentMethod: normalizeAssessmentMethod(raw.assessmentMethod),
     bmi,
     bmiClassification: bmiClassification(bmi),
     circumferences: raw.circumferences.map((item) => ({
@@ -496,7 +672,9 @@ function mapAssessment(raw: PartnerClientAssessmentRawAssessment): PartnerClient
       valueCm: item.valueCm,
     })),
     fatMassKg: calculateFatMass(raw.weightKg, raw.bodyFatPercentage),
+    ffmi: calculateFfmi(leanMassKg, raw.heightCm),
     leanMassKg,
+    sumSkinfoldsMm,
     skinfolds: (raw.skinfolds ?? []).map((item) => ({
       id: item.id,
       label: skinfoldLabels[item.metricKey] ?? item.metricKey,
@@ -516,7 +694,7 @@ export function buildPartnerClientAssessments(
     .map(mapAssessment);
   const latest = assessments.at(-1) ?? null;
   const previous = assessments.at(-2) ?? null;
-  const age = dateAge(raw.identity.birthDate, now);
+  const age = calculateAgeFromBirthDate(raw.identity.birthDate, now);
   const targetWeight = latest?.targetWeightKg ?? raw.goals?.targetWeightKg ?? latest?.weightKg ?? null;
   const targetDays = latest?.targetDays ?? 90;
 
@@ -588,8 +766,10 @@ export function buildPartnerClientAssessments(
         bodyFatPercentage: assessment.bodyFatPercentage,
         date: dateFormatter.format(new Date(assessment.assessedAt)),
         fatMassKg: assessment.fatMassKg,
+        ffmi: assessment.ffmi,
         leanMassKg: assessment.leanMassKg,
         muscleMassKg: assessment.muscleMassKg,
+        sumSkinfoldsMm: assessment.sumSkinfoldsMm,
         weightKg: assessment.weightKg,
       })),
       circumferenceSeries: assessments.map((assessment) => {
@@ -634,12 +814,19 @@ export function buildPartnerClientAssessments(
     },
     generatedAt: now.toISOString(),
     history: assessments.map((assessment) => ({
+      assessmentMethod: assessment.assessmentMethod,
       assessedAt: assessment.assessedAt,
+      bmi: assessment.bmi,
+      bmiClassification: assessment.bmiClassification,
       bodyFatPercentage: assessment.bodyFatPercentage,
       dateLabel: dateFormatter.format(new Date(assessment.assessedAt)),
+      fatMassKg: assessment.fatMassKg,
+      ffmi: assessment.ffmi,
       heightCm: assessment.heightCm,
       id: assessment.id,
+      leanMassKg: assessment.leanMassKg,
       notes: assessment.notes,
+      sumSkinfoldsMm: assessment.sumSkinfoldsMm,
       targetDays: assessment.targetDays,
       targetWeightKg: assessment.targetWeightKg,
       title: assessment.title,
@@ -652,6 +839,12 @@ export function buildPartnerClientAssessments(
         helper: latest ? latest.bmiClassification : "Sem avaliação",
         label: "IMC",
         value: latest?.bmi ?? null,
+      },
+      ffmi: {
+        delta: delta(latest?.ffmi ?? null, previous?.ffmi ?? null),
+        helper: "Massa magra ajustada pela altura",
+        label: "FFMI",
+        value: latest?.ffmi ?? null,
       },
       bodyFat: {
         delta: delta(latest?.bodyFatPercentage ?? null, previous?.bodyFatPercentage ?? null),
@@ -686,6 +879,7 @@ export function buildPartnerClientAssessments(
       },
     },
     latestAssessment: latest,
+    records: [...assessments].reverse(),
     formulaEligibility,
   };
 }

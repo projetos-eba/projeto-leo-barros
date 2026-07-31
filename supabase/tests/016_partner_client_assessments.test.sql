@@ -105,7 +105,7 @@ values (
   70,
   20,
   'moderate',
-  'pollock_7',
+  'jackson_pollock_7',
   68,
   60
 );
@@ -139,7 +139,7 @@ select is(
 
 select is(
   public.partner_client_assessments('ac100000-0000-4000-8000-000000000301')->'assessments'->0->>'assessmentMethod',
-  'pollock_7',
+  'jackson_pollock_7',
   'RPC retorna metodo de avaliacao fisica'
 );
 
@@ -154,7 +154,7 @@ values (
   'ac100000-0000-4000-8000-000000000401',
   'ac100000-0000-4000-8000-000000000201',
   'ac100000-0000-4000-8000-000000000301',
-  'abdominal',
+  'biceps',
   14.5
 );
 

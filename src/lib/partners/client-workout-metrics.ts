@@ -283,6 +283,15 @@ function numberValue(value: NumberLike) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function resolveSupabasePublicUrl(value: string | null | undefined) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!trimmed.startsWith("/storage/v1/object/public/")) return trimmed;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/g, "");
+  return supabaseUrl ? `${supabaseUrl}${trimmed}` : trimmed;
+}
+
 const shortDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "2-digit",
@@ -384,7 +393,12 @@ export function buildPartnerClientWorkout(raw: PartnerClientWorkoutRawData): Par
     ...program,
     sessions: program.sessions.map((session) => ({
       ...session,
-      exercises: [...session.exercises].sort((a, b) => a.sortOrder - b.sortOrder),
+      exercises: [...session.exercises]
+        .map((exercise) => ({
+          ...exercise,
+          thumbnailUrl: resolveSupabasePublicUrl(exercise.thumbnailUrl),
+        }))
+        .sort((a, b) => a.sortOrder - b.sortOrder),
       volumeKg: workoutVolume(session.exercises),
     })).sort((a, b) => a.sortOrder - b.sortOrder),
   }));
@@ -402,7 +416,11 @@ export function buildPartnerClientWorkout(raw: PartnerClientWorkoutRawData): Par
       dateLabel: dateFormatter.format(new Date(event.createdAt)),
     })),
     execution: buildExecutionSummary(activeProgram, raw.workoutSessions ?? [], raw.exerciseLogs ?? [], raw.setLogs ?? []),
-    library: raw.exercises,
+    library: raw.exercises.map((exercise) => ({
+      ...exercise,
+      thumbnailUrl: resolveSupabasePublicUrl(exercise.thumbnailUrl),
+      videoUrl: resolveSupabasePublicUrl(exercise.videoUrl),
+    })),
     programs,
     templates: raw.templates,
   };
