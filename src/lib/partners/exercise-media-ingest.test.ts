@@ -1,6 +1,7 @@
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -23,6 +24,9 @@ type IngestModule = {
 };
 
 let ingest: IngestModule;
+const nativeImport = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+) => Promise<IngestModule>;
 
 const staticGif = Buffer.from("R0lGODlhAQABAIABAP///wAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "base64");
 const animatedGif = Buffer.from(
@@ -36,7 +40,7 @@ function tempDir() {
 
 describe("ingest-exercise-media", () => {
   beforeAll(async () => {
-    ingest = await import("../../../scripts/dev/ingest-exercise-media.mjs") as IngestModule;
+    ingest = await nativeImport(pathToFileURL(join(process.cwd(), "scripts/dev/ingest-exercise-media.mjs")).href);
   });
 
   it("normaliza nome preservando acentos e hífens e gera slug seguro", () => {

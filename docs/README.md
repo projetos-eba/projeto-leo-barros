@@ -13,6 +13,9 @@ Leia estes documentos como fonte atual:
 | `fase-f0-next-oficial.md` | Decisao de base: Next.js App Router e o runtime oficial do produto. |
 | `identidade-supabase-atual.md` | Estado atual de identidade, roles, tabelas, migrations e Edge Functions. |
 | `integracao-local-next-supabase.md` | Como o app Next conversa com o Supabase local. |
+| `database-migrations.md` | Regras de schema, migrations, testes SQL e tipos Supabase. |
+| `deployment-database-checklist.md` | Checklist de deploy quando codigo depende de schema novo. |
+| `runbooks/supabase-schema-drift.md` | Diagnostico e resposta para drift entre Git e Supabase remoto. |
 | `sitemap-projeto-leo-barros.md` | Arquitetura alvo de rotas por Cliente, Parceiros e Admin. |
 | `DESIGN_SYSTEM.md` | Fundacao visual, tokens e padroes de interface. |
 | `contrato-provision-partner-edge-function.md` | Contrato da Edge Function de cadastro de Parceiro. |
