@@ -1,9 +1,11 @@
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 type IngestModule = {
   exerciseCodeFromSlug: (slug: string, checksum?: string) => string;
@@ -19,14 +21,44 @@ type IngestModule = {
     classifications: { duplicate: unknown[] };
     manifest: { items: Array<{ aliases: string[]; exercise_code: string }> };
   };
-  sha256: (buffer: Buffer) => string;
   slugify: (value: string) => string;
 };
 
-let ingest: IngestModule;
-const nativeImport = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<IngestModule>;
+const ingestModuleUrl = pathToFileURL(join(process.cwd(), "scripts/dev/ingest-exercise-media.mjs")).href;
+const ingestProcessScript = `
+const payload = JSON.parse(process.argv[1]);
+const ingest = await import(${JSON.stringify(ingestModuleUrl)});
+const result = await ingest[payload.fn](...payload.args);
+process.stdout.write(JSON.stringify(result));
+`;
+
+function callIngest<T>(fn: keyof IngestModule, args: unknown[]): T {
+  try {
+    const output = execFileSync(process.execPath, ["--input-type=module", "-e", ingestProcessScript, JSON.stringify({ args, fn })], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return JSON.parse(output) as T;
+  } catch (error) {
+    const failure = error as { message: string; stderr?: string; stdout?: string };
+    throw new Error((failure.stderr || failure.stdout || failure.message).trim());
+  }
+}
+
+const ingest: IngestModule = {
+  exerciseCodeFromSlug: (slug, checksum) => callIngest("exerciseCodeFromSlug", [slug, checksum]),
+  findGifFiles: (sourceDir) => callIngest("findGifFiles", [sourceDir]),
+  inspectGif: async (filePath, sourceDir) => callIngest("inspectGif", [filePath, sourceDir]),
+  normalizeDisplayName: (fileName) => callIngest("normalizeDisplayName", [fileName]),
+  parseArgs: (argv, env) => callIngest("parseArgs", [argv, env]),
+  reconcileManifest: (inspected, previousManifest) => callIngest("reconcileManifest", [inspected, previousManifest]),
+  slugify: (value) => callIngest("slugify", [value]),
+};
+
+function sha256(buffer: Buffer) {
+  return createHash("sha256").update(buffer).digest("hex");
+}
 
 const staticGif = Buffer.from("R0lGODlhAQABAIABAP///wAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "base64");
 const animatedGif = Buffer.from(
@@ -39,10 +71,6 @@ function tempDir() {
 }
 
 describe("ingest-exercise-media", () => {
-  beforeAll(async () => {
-    ingest = await nativeImport(pathToFileURL(join(process.cwd(), "scripts/dev/ingest-exercise-media.mjs")).href);
-  });
-
   it("normaliza nome preservando acentos e hífens e gera slug seguro", () => {
     expect(ingest.normalizeDisplayName("Elevação de quadril com barra (hip thrust).GIF")).toBe("Elevação de quadril com barra (hip thrust)");
     expect(ingest.normalizeDisplayName("Abdominal declinado (sit-up).gif")).toBe("Abdominal declinado (sit-up)");
@@ -71,7 +99,7 @@ describe("ingest-exercise-media", () => {
     const staticInfo = await ingest.inspectGif(staticPath, dir);
     const animatedInfo = await ingest.inspectGif(animatedPath, dir);
 
-    expect(staticInfo.checksum).toBe(ingest.sha256(staticGif));
+    expect(staticInfo.checksum).toBe(sha256(staticGif));
     expect(staticInfo.frameCount).toBeGreaterThanOrEqual(1);
     expect(staticInfo.isAnimated).toBe(false);
     expect(animatedInfo.frameCount).toBeGreaterThan(1);
@@ -87,7 +115,7 @@ describe("ingest-exercise-media", () => {
   });
 
   it("classifica duplicatas e preserva código existente por checksum em rename", () => {
-    const checksum = ingest.sha256(staticGif);
+    const checksum = sha256(staticGif);
     const previous = {
       items: [{
         aliases: [],
