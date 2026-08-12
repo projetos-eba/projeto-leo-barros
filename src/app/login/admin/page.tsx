@@ -35,8 +35,8 @@ export default async function AdminLoginPage() {
     <NextLoginForm
       expectedRole="admin"
       forgotPasswordHref="/login/admin/esqueci-senha"
-      primaryAuxiliaryHref={undefined}
-      primaryAuxiliaryLabel={undefined}
+      primaryAuxiliaryHref={null}
+      primaryAuxiliaryLabel={null}
       roleLabel="Administrador"
       subtitle="Acesso restrito à gestão da plataforma"
       supportText="Administradores são provisionados pela operação"
