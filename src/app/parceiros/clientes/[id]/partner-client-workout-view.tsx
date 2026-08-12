@@ -6,6 +6,7 @@ import {
   ArrowUp,
   BarChart3,
   CalendarDays,
+  ChevronDown,
   CheckCircle2,
   Clock3,
   Dumbbell,
@@ -14,6 +15,7 @@ import {
   Layers3,
   Library,
   ListChecks,
+  Pencil,
   Plus,
   Save,
   Search,
@@ -26,7 +28,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import {
   Dialog,
@@ -61,6 +63,7 @@ import {
   combineClientWorkoutBiset,
   createClientWorkoutProgram,
   createClientWorkoutSession,
+  deleteClientWorkoutSession,
   publishClientWorkoutProgram,
   removeClientWorkoutExercise,
   reorderClientWorkoutExercises,
@@ -69,6 +72,7 @@ import {
   sendClientWorkoutProgram,
   uncombineClientWorkoutBiset,
   updateClientWorkoutExercise,
+  updateClientWorkoutSession,
   updateClientWorkoutSet,
 } from "./actions";
 import { PartnerClientProfileHeader } from "./partner-client-profile-header";
@@ -179,27 +183,75 @@ function Button({ children, disabled, onClick, tone = "ghost", type = "button" }
   );
 }
 
-function SessionCard({ active, onClick, session }: { active: boolean; onClick: () => void; session: PartnerClientWorkoutSession }) {
+function SessionCard({
+  active,
+  canDelete,
+  menuOpen,
+  onClick,
+  onDelete,
+  onEdit,
+  onToggleMenu,
+  pending,
+  session,
+}: {
+  active: boolean;
+  canDelete: boolean;
+  menuOpen: boolean;
+  onClick: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  onToggleMenu: () => void;
+  pending: boolean;
+  session: PartnerClientWorkoutSession;
+}) {
   const trainingType = workoutTrainingTypeLabel(session);
   return (
-    <button
+    <article
       className={cn(
         "relative h-[142px] min-w-[245px] overflow-hidden rounded-[8px] border p-4 text-left transition",
         active ? "border-[#3b97e3] bg-[#10283a]" : "border-[#303746] bg-[#101923]/70 hover:border-[#526779]",
       )}
-      type="button"
-      onClick={onClick}
     >
-      <div className="flex items-center justify-between gap-3">
+      <button className="absolute inset-0 text-left" type="button" onClick={onClick}>
+        <span className="sr-only">Selecionar {sessionDisplayName(session)}</span>
+      </button>
+      <div className="pointer-events-none relative z-10 pr-7">
         <h3 className="text-[17px] font-bold text-white">{sessionDisplayName(session)}</h3>
-        <EllipsisVertical className="size-4 text-[#8b92a3]" />
+        <p className="mt-3 text-[11px] uppercase text-[#728697]">Tipo de treino</p>
+        <p className="text-[13px] font-semibold text-white">{trainingType}</p>
+        <p className="mt-3 text-[11px] uppercase text-[#728697]">Frequência</p>
+        <p className="text-[13px] font-semibold text-white">{session.frequencyPerWeek}x/semana</p>
       </div>
-      <p className="mt-3 text-[11px] uppercase text-[#728697]">Tipo de treino</p>
-      <p className="text-[13px] font-semibold text-white">{trainingType}</p>
-      <p className="mt-3 text-[11px] uppercase text-[#728697]">Frequência</p>
-      <p className="text-[13px] font-semibold text-white">{session.frequencyPerWeek}x/semana</p>
+      <button
+        aria-expanded={menuOpen}
+        aria-label={`Abrir ações de ${sessionDisplayName(session)}`}
+        className="absolute right-3 top-3 z-20 inline-flex size-8 items-center justify-center rounded-[7px] text-[#8b92a3] hover:bg-[#172433] hover:text-white"
+        disabled={pending}
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleMenu();
+        }}
+      >
+        <EllipsisVertical className="size-4" />
+      </button>
+      {menuOpen ? (
+        <div className="absolute right-3 top-11 z-30 grid w-[160px] gap-1 rounded-[8px] border border-[#303746] bg-[#0b1720] p-1 shadow-xl">
+          <button className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[12px] font-semibold text-[#d8e5ee] hover:bg-[#10283a]" type="button" onClick={onEdit}>
+            <Pencil className="size-3.5" /> Editar divisão
+          </button>
+          <button
+            className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[12px] font-semibold text-[#ff8a96] hover:bg-[#32151b] disabled:cursor-not-allowed disabled:opacity-45"
+            disabled={!canDelete}
+            type="button"
+            onClick={onDelete}
+          >
+            <Trash2 className="size-3.5" /> Excluir divisão
+          </button>
+        </div>
+      ) : null}
       <Dumbbell className="absolute -bottom-4 right-5 size-24 rotate-[-18deg] text-[#1d7ece]/15" />
-    </button>
+    </article>
   );
 }
 
@@ -327,8 +379,9 @@ function ExerciseRow({
         selected && "ring-1 ring-inset ring-[#3b97e3]",
       )}
     >
-      {exercise.bisetGroupId ? <span className="absolute inset-y-0 left-0 w-0.5 bg-[#3b97e3]" /> : null}
-      {exercise.bisetPosition ? <span className="absolute left-2 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full bg-[#3b97e3] text-[10px] font-bold text-white">{exercise.bisetPosition}</span> : null}
+      {exercise.bisetPosition === 1 ? <span className="pointer-events-none absolute bottom-0 left-[17px] top-1/2 z-20 w-0.5 bg-[#3b97e3]" /> : null}
+      {exercise.bisetPosition === 2 ? <span className="pointer-events-none absolute bottom-1/2 left-[17px] top-0 z-20 w-0.5 bg-[#3b97e3]" /> : null}
+      {exercise.bisetPosition ? <span className="absolute left-2 top-1/2 z-30 flex size-5 -translate-y-1/2 items-center justify-center rounded-full bg-[#3b97e3] text-[10px] font-bold text-white">{exercise.bisetPosition}</span> : null}
       <button
         aria-label={`Selecionar ${exercise.name} para Bi-set`}
         aria-pressed={selected}
@@ -437,6 +490,8 @@ function MusclePanel({ exercises }: { exercises: PartnerClientWorkoutExercise[] 
 }
 
 function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSummary | null }) {
+  const [collapsed, setCollapsed] = useState(true);
+
   if (!execution || execution.totalSessions === 0) {
     return (
       <section className={cn(panelClass, "mt-5 p-5")}>
@@ -463,21 +518,36 @@ function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSumma
 
   return (
     <section className={cn(panelClass, "mt-5 overflow-hidden")}>
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#303746] p-4">
-        <div>
-          <h3 className="text-[17px] font-bold text-white">Acompanhamento real</h3>
-          <p className="mt-1 text-[12px] text-[#8b92a3]">Sessões registradas pelo Cliente nos últimos 90 dias.</p>
-        </div>
-        <div className="min-w-[190px]">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-[#9aa5b6]">
-            <span>Conclusão</span>
-            <span className="text-[#8fcfff]">{execution.completionPercent}%</span>
+      <button
+        aria-expanded={!collapsed}
+        className="flex w-full flex-wrap items-center justify-between gap-3 border-b border-[#303746] p-4 text-left transition hover:bg-[#10283a]/55"
+        type="button"
+        onClick={() => setCollapsed((current) => !current)}
+      >
+        <span>
+          <span className="block text-[17px] font-bold text-white">Acompanhamento real</span>
+          <span className="mt-1 block text-[12px] text-[#8b92a3]">Sessões registradas pelo Cliente nos últimos 90 dias.</span>
+        </span>
+        <span className="flex flex-wrap items-center justify-end gap-2">
+          <span className="rounded-full border border-[#2a5c7d] bg-[#0a2c48]/55 px-3 py-1 text-[11px] font-bold text-[#8fcfff]">{execution.completionPercent}% conclusão</span>
+          <span className="rounded-full border border-[#273847] bg-[#081520] px-3 py-1 text-[11px] font-semibold text-[#c8d4df]">{execution.completedSessions}/{execution.totalSessions} treinos</span>
+          <ChevronDown className={cn("size-4 text-[#8b92a3] transition", !collapsed && "rotate-180")} />
+        </span>
+      </button>
+
+      {collapsed ? null : (
+        <>
+          <div className="border-b border-[#303746] p-4">
+            <div className="max-w-[240px]">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-[#9aa5b6]">
+                <span>Conclusão</span>
+                <span className="text-[#8fcfff]">{execution.completionPercent}%</span>
+              </div>
+              <div className="mt-2 h-2 rounded-full bg-[#07131b]">
+                <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, Math.max(0, execution.completionPercent))}%` }} />
+              </div>
+            </div>
           </div>
-          <div className="mt-2 h-2 rounded-full bg-[#07131b]">
-            <div className="h-full rounded-full bg-[#3b97e3]" style={{ width: `${Math.min(100, Math.max(0, execution.completionPercent))}%` }} />
-          </div>
-        </div>
-      </div>
 
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(({ Icon, label, value }) => (
@@ -597,6 +667,8 @@ function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSumma
           </div>
         </aside>
       </div>
+        </>
+      )}
     </section>
   );
 }
@@ -612,6 +684,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   const [notes, setNotes] = useState(program?.notes ?? "");
   const [programDialog, setProgramDialog] = useState(false);
   const [sessionDialog, setSessionDialog] = useState(false);
+  const [editingSession, setEditingSession] = useState<PartnerClientWorkoutSession | null>(null);
   const [templateDialog, setTemplateDialog] = useState(false);
   const [programModelId, setProgramModelId] = useState(workoutProgramModels[0].id);
   const [programTitle, setProgramTitle] = useState(workoutProgramModels[0].title);
@@ -624,6 +697,12 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   });
   const [templateId, setTemplateId] = useState(workout.templates[0]?.id ?? "");
   const [variations, setVariations] = useState<Record<string, string>>({});
+  const [sessionMenuId, setSessionMenuId] = useState<string | null>(null);
+  const [inlineExerciseSearchOpen, setInlineExerciseSearchOpen] = useState(false);
+  const [inlineExerciseQuery, setInlineExerciseQuery] = useState("");
+  const [inlineExerciseDropdownRect, setInlineExerciseDropdownRect] = useState<{ left: number; top: number; width: number } | null>(null);
+  const inlineExerciseInputRef = useRef<HTMLInputElement | null>(null);
+  const inlineExerciseSearchRef = useRef<HTMLDivElement | null>(null);
   const session = program?.sessions.find((item) => item.id === sessionId) ?? program?.sessions[0] ?? null;
   const firstSessionId = program?.sessions[0]?.id ?? null;
   const orderedExercises = useMemo(() => {
@@ -636,14 +715,48 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
       !normalized || `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`.toLowerCase().includes(normalized),
     );
   }, [query, workout.library]);
+  const inlineExerciseOptions = useMemo(() => {
+    const normalized = inlineExerciseQuery.trim().toLowerCase();
+    if (!normalized) return [];
+    return workout.library.filter((exercise) =>
+      `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`.toLowerCase().includes(normalized),
+    ).slice(0, 6);
+  }, [inlineExerciseQuery, workout.library]);
   const selectedRows = orderedExercises.filter((exercise) => selectedExercises.includes(exercise.id));
   const selectedBisetGroup = selectedRows.length === 2 && selectedRows[0].bisetGroupId && selectedRows[0].bisetGroupId === selectedRows[1].bisetGroupId
     ? selectedRows[0].bisetGroupId
     : null;
 
+  function updateInlineExerciseDropdownRect() {
+    const rect = inlineExerciseInputRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setInlineExerciseDropdownRect({
+      left: rect.left,
+      top: rect.bottom + 8,
+      width: rect.width,
+    });
+  }
+
   useEffect(() => {
     setExerciseOrder(session?.exercises.map((exercise) => exercise.id) ?? []);
+    setInlineExerciseSearchOpen(false);
+    setInlineExerciseQuery("");
   }, [session]);
+
+  useEffect(() => {
+    if (!inlineExerciseSearchOpen) {
+      setInlineExerciseDropdownRect(null);
+      return undefined;
+    }
+
+    updateInlineExerciseDropdownRect();
+    window.addEventListener("resize", updateInlineExerciseDropdownRect);
+    window.addEventListener("scroll", updateInlineExerciseDropdownRect, true);
+    return () => {
+      window.removeEventListener("resize", updateInlineExerciseDropdownRect);
+      window.removeEventListener("scroll", updateInlineExerciseDropdownRect, true);
+    };
+  }, [inlineExerciseSearchOpen, inlineExerciseQuery]);
 
   useEffect(() => {
     setSessionId(firstSessionId);
@@ -664,6 +777,19 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
     setSessionId(id);
     setExerciseOrder(next?.exercises.map((exercise) => exercise.id) ?? []);
     setSelectedExercises([]);
+    setSessionMenuId(null);
+  }
+
+  function addInlineExercise(exerciseId: string) {
+    if (!session) return;
+    runAction(() => addClientWorkoutExercise({
+      exerciseId,
+      patientId: overview.client.id,
+      sessionId: session.id,
+      variationName: null,
+    }));
+    setInlineExerciseSearchOpen(false);
+    setInlineExerciseQuery("");
   }
 
   function toggleExerciseSelection(id: string) {
@@ -714,7 +840,27 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
         {program ? (
           <>
             <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
-              {program.sessions.map((item) => <SessionCard active={item.id === session?.id} key={item.id} session={item} onClick={() => selectSession(item.id)} />)}
+              {program.sessions.map((item) => (
+                <SessionCard
+                  active={item.id === session?.id}
+                  canDelete={program.sessions.length > 1}
+                  key={item.id}
+                  menuOpen={sessionMenuId === item.id}
+                  pending={pending}
+                  session={item}
+                  onClick={() => selectSession(item.id)}
+                  onDelete={() => {
+                    setSessionMenuId(null);
+                    if (!window.confirm(`Excluir ${sessionDisplayName(item)}?`)) return;
+                    runAction(() => deleteClientWorkoutSession({ patientId: overview.client.id, programId: program.id, sessionId: item.id }));
+                  }}
+                  onEdit={() => {
+                    setEditingSession(item);
+                    setSessionMenuId(null);
+                  }}
+                  onToggleMenu={() => setSessionMenuId((current) => current === item.id ? null : item.id)}
+                />
+              ))}
               <button className="flex h-[142px] min-w-[150px] items-center justify-center gap-2 rounded-[8px] border border-dashed border-[#3b5870] text-[13px] font-semibold text-[#8fcfff]" type="button" onClick={() => setSessionDialog(true)}><Plus className="size-4" /> Divisão</button>
             </div>
 
@@ -722,13 +868,12 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
 
             {session ? (
               <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-                <section className={cn(panelClass, "overflow-hidden")}>
+                <section className={cn(panelClass, "overflow-visible")}>
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#303746] p-4">
                     <div>
                       <h2 className="text-[20px] font-bold text-white">{sessionDisplayName(session)} - {workoutTrainingTypeLabel(session)}</h2>
                       <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#9aa5b6]">
                         <span className="inline-flex items-center gap-1"><ListChecks className="size-3.5" /> {session.exercises.length} exercícios</span>
-                        <span className="inline-flex items-center gap-1"><Clock3 className="size-3.5" /> {session.durationMinutes} min</span>
                         <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" /> {session.frequencyPerWeek}x/semana</span>
                       </div>
                     </div>
@@ -739,7 +884,6 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                           ? <Button onClick={() => runAction(() => uncombineClientWorkoutBiset({ firstExerciseId: selectedExercises[0], patientId: overview.client.id, secondExerciseId: selectedExercises[1] }))}><Unlink className="size-4" /> Desfazer Bi-set</Button>
                           : <Button onClick={() => runAction(() => combineClientWorkoutBiset({ firstExerciseId: selectedExercises[0], patientId: overview.client.id, secondExerciseId: selectedExercises[1] }))}><Layers3 className="size-4" /> Combinar Bi-set</Button>
                       ) : null}
-                      {selectedExercises.length > 0 ? <button aria-label="Limpar seleção" className="inline-flex size-9 items-center justify-center rounded-[8px] border border-[#303746] text-[#8b92a3]" type="button" onClick={() => setSelectedExercises([])}><Unlink className="size-4" /></button> : null}
                     </div>
                   </div>
 
@@ -780,7 +924,83 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                           onSelect={() => toggleExerciseSelection(exercise.id)}
                         />
                       ))}
-                      {orderedExercises.length === 0 ? <div className="p-8 text-center text-[13px] text-[#718394]">Adicione o primeiro exercício pela biblioteca.</div> : null}
+                      {orderedExercises.length === 0 ? <div className="p-8 text-center text-[13px] text-[#718394]">Clique em Adicionar exercício para buscar na biblioteca.</div> : null}
+                      <div className="relative border-t border-[#273847] px-4 py-3">
+                        {inlineExerciseSearchOpen ? (
+                          <div
+                            className="relative max-w-[520px]"
+                            ref={inlineExerciseSearchRef}
+                            onBlur={(event) => {
+                              const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+                              if (!event.currentTarget.contains(nextTarget)) {
+                                setInlineExerciseSearchOpen(false);
+                                setInlineExerciseQuery("");
+                              }
+                            }}
+                          >
+                            <div className="relative">
+                              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
+                              <input
+                                aria-label={`Buscar exercício para ${sessionDisplayName(session)}`}
+                                autoFocus
+                                className={cn(inputClass, "w-full pl-9")}
+                                placeholder="Digite para buscar exercício..."
+                                ref={inlineExerciseInputRef}
+                                value={inlineExerciseQuery}
+                                onChange={(event) => {
+                                  setInlineExerciseQuery(event.target.value);
+                                  updateInlineExerciseDropdownRect();
+                                }}
+                                onFocus={updateInlineExerciseDropdownRect}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Escape") {
+                                    setInlineExerciseSearchOpen(false);
+                                    setInlineExerciseQuery("");
+                                  }
+                                }}
+                              />
+                            </div>
+                            {inlineExerciseQuery.trim() && inlineExerciseDropdownRect ? (
+                              <div
+                                className="fixed z-[9999] max-h-[260px] overflow-y-auto rounded-[8px] border border-[#303746] bg-[#07131b] p-1 shadow-2xl"
+                                style={{
+                                  left: inlineExerciseDropdownRect.left,
+                                  top: inlineExerciseDropdownRect.top,
+                                  width: inlineExerciseDropdownRect.width,
+                                }}
+                              >
+                                {inlineExerciseOptions.length ? inlineExerciseOptions.map((exercise) => (
+                                  <button
+                                    aria-label={`Adicionar ${exercise.name} ao ${sessionDisplayName(session)}`}
+                                    className="grid w-full grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] px-2 py-2 text-left hover:bg-[#10283a]"
+                                    disabled={pending}
+                                    key={exercise.id}
+                                    type="button"
+                                    onClick={() => addInlineExercise(exercise.id)}
+                                  >
+                                    {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
+                                    <span className="min-w-0">
+                                      <span className="block truncate text-[12px] font-semibold text-white">{exercise.name}</span>
+                                      <span className="block truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</span>
+                                    </span>
+                                    <Plus className="size-4 text-[#8fcfff]" />
+                                  </button>
+                                )) : <p className="px-3 py-2 text-[12px] text-[#718394]">Nenhum exercício encontrado.</p>}
+                              </div>
+                            ) : null}
+                            <button className="mt-2 text-[12px] font-semibold text-[#8fcfff]" type="button" onClick={() => { setInlineExerciseSearchOpen(false); setInlineExerciseQuery(""); }}>Fechar busca</button>
+                          </div>
+                        ) : (
+                          <button
+                            className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white"
+                            disabled={pending}
+                            type="button"
+                            onClick={() => setInlineExerciseSearchOpen(true)}
+                          >
+                            <Plus className="size-4" /> Adicionar exercício
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </section>
@@ -792,7 +1012,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                       <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
                       <input aria-label="Buscar exercício" className={cn(inputClass, "w-full pl-9")} placeholder="Buscar exercício..." value={query} onChange={(event) => setQuery(event.target.value)} />
                     </div>
-                    <div className="mt-3 max-h-[360px] overflow-y-auto">
+                    <div className="mt-3 max-h-[360px] overflow-y-auto pr-2 [scrollbar-gutter:stable]">
                       {visibleLibrary.map((exercise) => (
                         <article className="grid grid-cols-[36px_minmax(0,1fr)_28px] items-center gap-2 border-b border-[#273847] py-2 last:border-b-0" key={exercise.id}>
                           {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
@@ -886,7 +1106,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
               <p className="text-[12px] font-semibold text-[#9aa5b6]">Divisões criadas</p>
               <div className="grid gap-2">
                 {programSessions.map((sessionDraft, index) => (
-                  <div className="grid gap-3 rounded-[8px] border border-[#263846] bg-[#0b1823] p-3 md:grid-cols-[minmax(0,1.2fr)_110px_110px]" key={`${sessionDraft.title}-${index}`}>
+                  <div className="grid gap-3 rounded-[8px] border border-[#263846] bg-[#0b1823] p-3 md:grid-cols-[minmax(0,1fr)_120px]" key={`${sessionDraft.title}-${index}`}>
                     <label className="grid gap-1 text-[11px] text-[#9aa5b6]">
                       Tipo e músculos
                       <div className="grid gap-1">
@@ -895,7 +1115,6 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                       </div>
                     </label>
                     <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Frequência<input className={cn(inputClass, "w-full")} min="1" type="number" value={sessionDraft.frequencyPerWeek} onChange={(event) => updateProgramSession(index, { frequencyPerWeek: Number(event.target.value) })} /></label>
-                    <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Duração<input className={cn(inputClass, "w-full")} min="5" type="number" value={sessionDraft.durationMinutes} onChange={(event) => updateProgramSession(index, { durationMinutes: Number(event.target.value) })} /></label>
                   </div>
                 ))}
               </div>
@@ -910,12 +1129,42 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
           <DialogHeader><DialogTitle>Nova divisão</DialogTitle><DialogDescription className="text-[#8b92a3]">Adicione um novo tipo de treino ao programa.</DialogDescription></DialogHeader>
           <form className="grid gap-3" onSubmit={(event: FormEvent) => { event.preventDefault(); if (program) runAction(() => createClientWorkoutSession({ ...newSession, patientId: overview.client.id, programId: program.id })); setSessionDialog(false); }}>
             <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Tipo de treino<select className={inputClass} value={newSession.title} onChange={(event) => setNewSession({ ...newSession, title: event.target.value })}>{workoutTypeOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Frequência<input className={inputClass} min="1" type="number" value={newSession.frequencyPerWeek} onChange={(event) => setNewSession({ ...newSession, frequencyPerWeek: Number(event.target.value) })} /></label>
-              <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Duração (min)<input className={inputClass} min="5" type="number" value={newSession.durationMinutes} onChange={(event) => setNewSession({ ...newSession, durationMinutes: Number(event.target.value) })} /></label>
-            </div>
+            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Frequência<input className={inputClass} min="1" type="number" value={newSession.frequencyPerWeek} onChange={(event) => setNewSession({ ...newSession, frequencyPerWeek: Number(event.target.value) })} /></label>
             <div className="flex justify-end"><Button tone="primary" type="submit"><Plus className="size-4" /> Adicionar divisão</Button></div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(editingSession)} onOpenChange={(open) => { if (!open) setEditingSession(null); }}>
+        <DialogContent className="border-[#303746] bg-[#101923] text-white">
+          <DialogHeader><DialogTitle>Editar divisão</DialogTitle><DialogDescription className="text-[#8b92a3]">Ajuste nome, objetivo e frequência do bloco.</DialogDescription></DialogHeader>
+          {editingSession ? (
+            <form className="grid gap-3" onSubmit={(event: FormEvent) => {
+              event.preventDefault();
+              if (!program) return;
+              runAction(() => updateClientWorkoutSession({
+                frequencyPerWeek: editingSession.frequencyPerWeek,
+                objective: editingSession.objective,
+                patientId: overview.client.id,
+                programId: program.id,
+                sessionId: editingSession.id,
+                title: editingSession.title,
+              }));
+              setEditingSession(null);
+            }}>
+              <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Nome da divisão<input className={inputClass} value={editingSession.title} onChange={(event) => setEditingSession({ ...editingSession, title: event.target.value })} /></label>
+              <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Objetivo<select className={inputClass} value={editingSession.objective} onChange={(event) => setEditingSession({ ...editingSession, objective: event.target.value as WorkoutObjective })}>
+                <option value="hipertrofia">Hipertrofia</option>
+                <option value="forca">Força</option>
+                <option value="resistencia">Resistência</option>
+                <option value="mobilidade">Mobilidade</option>
+                <option value="reabilitacao">Reabilitação</option>
+                <option value="condicionamento">Condicionamento</option>
+              </select></label>
+              <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Frequência<input className={inputClass} min="1" type="number" value={editingSession.frequencyPerWeek} onChange={(event) => setEditingSession({ ...editingSession, frequencyPerWeek: Number(event.target.value) })} /></label>
+              <div className="flex justify-end"><Button disabled={pending} tone="primary" type="submit"><Save className="size-4" /> Salvar divisão</Button></div>
+            </form>
+          ) : null}
         </DialogContent>
       </Dialog>
 

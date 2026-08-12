@@ -290,37 +290,58 @@ function TrackingMetric({ icon, label, value, hint }: { hint: string; icon: Reac
   );
 }
 
-function TrackingLogRow({ log }: { log: PartnerClientDietMealLog }) {
+function TrackingLogRow({ log, onOpenNote }: { log: PartnerClientDietMealLog; onOpenNote: (log: PartnerClientDietMealLog) => void }) {
   return (
-    <div className="grid gap-2 border-b border-[#273847] px-4 py-3 text-[13px] last:border-b-0 sm:grid-cols-[100px_minmax(0,1fr)_86px_90px] sm:items-center">
+    <div className="grid gap-2 border-b border-[#273847] px-4 py-3 text-[13px] last:border-b-0 sm:grid-cols-[92px_minmax(0,1fr)_72px_86px_88px] sm:items-center">
       <div className="text-[#9aa5b6]">{log.dateLabel}</div>
       <div className="min-w-0">
         <p className="truncate font-bold text-white">{log.mealTitle}</p>
         <p className="text-[11px] text-[#7f91a1]">{log.timeLabel}{log.completedAtLabel ? ` · ${log.completedAtLabel}` : ""}</p>
-        {log.notes ? <p className="mt-1 line-clamp-2 text-[12px] text-[#c7d3df]">{log.notes}</p> : null}
       </div>
+      <span className="text-[11px] font-semibold text-[#d8e5ee]">{formatNumber(log.kcalConsumed)} kcal</span>
       <span className={cn("inline-flex h-7 w-fit items-center rounded-full border px-2.5 text-[11px] font-bold", statusTone(log.status))}>{log.statusLabel}</span>
-      <span className="inline-flex items-center gap-1 text-[11px] text-[#8b92a3]">
-        {log.photoLabel ? <><Camera className="size-3.5 text-[#8fcfff]" /> Foto</> : log.notes ? <><MessageSquareText className="size-3.5 text-[#8fcfff]" /> Nota</> : "Sem anexo"}
-      </span>
+      {log.notes || log.photoLabel ? (
+        <button className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-[#8fcfff] hover:text-white" type="button" onClick={() => onOpenNote(log)}>
+          {log.photoLabel ? <Camera className="size-3.5" /> : <MessageSquareText className="size-3.5" />}
+          {log.notes ? "Ver nota" : "Ver anexo"}
+        </button>
+      ) : <span className="text-[11px] text-[#8b92a3]">Sem anexo</span>}
     </div>
   );
 }
 
 function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
   const tracking = diet.tracking;
+  const [selectedLog, setSelectedLog] = useState<PartnerClientDietMealLog | null>(null);
+  const [collapsed, setCollapsed] = useState(true);
   if (!tracking) return null;
 
   const summary = tracking.summary;
   const waterTarget = diet.plan?.waterLiters ? `${formatNumber(diet.plan.waterLiters, 1)} L/dia` : "meta não definida";
-  const compatibilityTone = {
-    moderate: "border-[#6b5420] bg-[#2f260d]/55 text-[#ffd45a]",
-    strong: "border-[#1d7041] bg-[#102d21]/65 text-[#73e59b]",
-    weak: "border-[#8a2c3a] bg-[#35141b]/65 text-[#ff8f9a]",
-  }[tracking.compatibility.status];
 
   return (
     <Panel className="mt-5 overflow-hidden p-0">
+      <button
+        aria-expanded={!collapsed}
+        className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-[#101923]/45 sm:px-5"
+        type="button"
+        onClick={() => setCollapsed((value) => !value)}
+      >
+        <span className="min-w-0">
+          <span className="block text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Acompanhamento da execução</span>
+          <span className="mt-1 block text-[20px] font-bold text-white sm:text-[22px]">{tracking.periodLabel}</span>
+        </span>
+        <span className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-[#c7d3df]">
+          <span className="rounded-full border border-[#273847] bg-[#081722]/70 px-3 py-1">{summary.adherencePct}% adesão</span>
+          <span className="rounded-full border border-[#273847] bg-[#081722]/70 px-3 py-1">{formatNumber(summary.waterAverageMl)} ml água</span>
+          <span className="rounded-full border border-[#273847] bg-[#081722]/70 px-3 py-1">{formatNumber(summary.notesCount + summary.photosCount)} retorno(s)</span>
+          <span className="inline-flex size-8 items-center justify-center rounded-[8px] border border-[#303746] text-[#8fcfff]">
+            <ChevronDown className={cn("size-4 transition", !collapsed && "rotate-180")} />
+          </span>
+        </span>
+      </button>
+      {collapsed ? null : (
+        <>
       <div className="grid gap-0 divide-y divide-[#273847] xl:grid-cols-[1fr_0.82fr] xl:divide-x xl:divide-y-0">
         <div className="p-4 sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -347,25 +368,10 @@ function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
                 </div>
                 <p className="mt-1 text-[16px] font-bold text-white">{day.adherencePct}%</p>
                 <p className="text-[10px] text-[#7f91a1]">{day.completedMeals + day.partialMeals}/{day.plannedMeals} refeições</p>
+                <p className="mt-1 text-[10px] font-semibold text-[#d8e5ee]">{formatNumber(day.kcalConsumed)} kcal</p>
                 <p className="mt-1 text-[10px] text-[#8fcfff]">{formatNumber(day.waterMl)} ml</p>
               </div>
             ))}
-          </div>
-
-          <div className={cn("mt-4 rounded-[12px] border p-4", compatibilityTone)}>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.06em] opacity-80">Compatibilidade dos registros</p>
-                <h3 className="mt-1 text-[16px] font-bold text-white">{tracking.compatibility.label}</h3>
-              </div>
-              <span className="rounded-full border border-current px-2.5 py-1 text-[11px] font-bold">Últimos 7 dias</span>
-            </div>
-            <p className="mt-2 text-[12px] leading-5 text-[#d8e5ee]">{tracking.compatibility.description}</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              {tracking.compatibility.evidence.map((item) => (
-                <span className="rounded-[8px] border border-[#303746] bg-[#081722]/55 p-2 text-[11px] leading-4 text-[#c7d3df]" key={item}>{item}</span>
-              ))}
-            </div>
           </div>
 
           {tracking.insights.length ? (
@@ -382,13 +388,37 @@ function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
 
         <div className="p-4 sm:p-5">
           <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Últimos registros do Cliente</h3>
-          <div className="mt-4 overflow-hidden rounded-[12px] border border-[#273847]">
-            {tracking.mealLogs.length ? tracking.mealLogs.map((log) => <TrackingLogRow key={log.id} log={log} />) : (
+          <div className="mt-4 max-h-[420px] overflow-y-auto rounded-[12px] border border-[#273847]">
+            {tracking.mealLogs.length ? tracking.mealLogs.map((log) => <TrackingLogRow key={log.id} log={log} onOpenNote={setSelectedLog} />) : (
               <div className="p-5 text-[13px] text-[#8b92a3]">Nenhum registro diário recebido no período.</div>
             )}
           </div>
         </div>
       </div>
+      <Dialog open={Boolean(selectedLog)} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="border-[#303746] bg-[#101923] text-white sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{selectedLog?.mealTitle ?? "Registro"}</DialogTitle>
+            <DialogDescription className="text-[#8b92a3]">
+              {selectedLog ? `${selectedLog.dateLabel} · ${selectedLog.timeLabel} · ${formatNumber(selectedLog.kcalConsumed)} kcal` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-[13px] text-[#d8e5ee]">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Observação</p>
+              <p className="mt-2 rounded-[10px] border border-[#273847] bg-[#081722]/70 p-3 leading-5">{selectedLog?.notes ?? "Sem observação enviada."}</p>
+            </div>
+            {selectedLog?.photoLabel ? (
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#8b92a3]">Anexo</p>
+                <p className="mt-2 rounded-[10px] border border-[#273847] bg-[#081722]/70 p-3">{selectedLog.photoLabel}</p>
+              </div>
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+        </>
+      )}
     </Panel>
   );
 }
@@ -425,7 +455,7 @@ function MealCard({
   setQuantityEdits: (value: Record<string, string>) => void;
 }) {
   return (
-    <Panel className="overflow-hidden p-0">
+    <Panel className="overflow-visible p-0">
       <div className="grid min-h-[53px] grid-cols-[1fr_auto] items-center gap-3 border-b border-[#273847] px-4 py-3">
         <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex min-w-0 items-center gap-3">
@@ -479,13 +509,16 @@ function MealCard({
             </div>
           ))}
         </div>
-        <button className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-[#55b4ff] hover:text-white" type="button" onClick={() => onAddFood(meal.id)}>
-          <Plus className="size-4" /> Adicionar alimento
-        </button>
         {inlineSearchOpen ? (
-          <div className="mt-3 rounded-[10px] border border-[#273847] bg-[#081722]/75 p-3">
+          <div
+            className="relative mt-3 max-w-[520px]"
+            onBlur={(event) => {
+              const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+              if (!event.currentTarget.contains(nextTarget)) onCloseInlineSearch();
+            }}
+          >
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
               <input
                 aria-label={`Buscar alimento para ${meal.title}`}
                 autoFocus
@@ -493,32 +526,39 @@ function MealCard({
                 placeholder="Digite para buscar alimento..."
                 value={inlineFoodQuery}
                 onChange={(event) => onInlineFoodQueryChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") onCloseInlineSearch();
+                }}
               />
             </div>
-            <div className="mt-2 grid gap-1">
-              {inlineFoodOptions.length ? inlineFoodOptions.map((food) => (
-                <button
-                  aria-label={`Adicionar ${food.name} à refeição ${meal.title}`}
-                  className="grid gap-2 rounded-[8px] border border-transparent px-3 py-2 text-left text-[12px] transition hover:border-[#2f82bf] hover:bg-[#0a2c48]/45 sm:grid-cols-[minmax(0,1fr)_70px_92px]"
-                  disabled={pending}
-                  key={food.id}
-                  type="button"
-                  onClick={() => onAddInlineFood(food)}
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate font-bold text-white">{food.name}</span>
-                    <span className="mt-0.5 block text-[11px] text-[#6f8090]">{food.categoryLabel}</span>
-                  </span>
-                  <span className="text-[#c7d3df]">{food.servingLabel}</span>
-                  <span className="text-[#8b92a3]">P {macroText(food.protein)} · {formatNumber(food.kcal)} kcal</span>
-                </button>
-              )) : (
-                <div className="rounded-[8px] border border-dashed border-[#303746] px-3 py-3 text-[12px] text-[#8b92a3]">Nenhum alimento encontrado.</div>
-              )}
-            </div>
-            <button className="mt-2 text-[12px] font-semibold text-[#8fcfff] hover:text-white" type="button" onClick={onCloseInlineSearch}>Fechar busca</button>
+            {inlineFoodQuery.trim() ? (
+              <div className="absolute left-0 right-0 top-[44px] z-30 max-h-[260px] overflow-y-auto rounded-[10px] border border-[#273847] bg-[#0b1720] p-1 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+                {inlineFoodOptions.length ? inlineFoodOptions.map((food) => (
+                  <button
+                    aria-label={`Adicionar ${food.name} à refeição ${meal.title}`}
+                    className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[8px] px-3 py-2 text-left text-[12px] transition hover:bg-[#0a2c48]/70"
+                    disabled={pending}
+                    key={food.id}
+                    type="button"
+                    onClick={() => onAddInlineFood(food)}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-white">{food.name}</span>
+                      <span className="mt-0.5 block text-[11px] text-[#6f8090]">{food.categoryLabel} · {food.servingLabel}</span>
+                    </span>
+                    <span className="shrink-0 text-[11px] font-semibold text-[#8b92a3]">{formatNumber(food.kcal)} kcal</span>
+                  </button>
+                )) : (
+                  <div className="px-3 py-3 text-[12px] text-[#8b92a3]">Nenhum alimento encontrado.</div>
+                )}
+                <button className="w-full rounded-[8px] px-3 py-2 text-left text-[12px] font-semibold text-[#8fcfff] hover:bg-[#0a2c48]/70" type="button" onClick={onCloseInlineSearch}>Fechar busca</button>
+              </div>
+            ) : null}
           </div>
         ) : null}
+        <button className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-[#55b4ff] hover:text-white" type="button" onClick={() => onAddFood(meal.id)}>
+          <Plus className="size-4" /> Adicionar alimento
+        </button>
       </div>
     </Panel>
   );

@@ -215,10 +215,14 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByText("Dieta atual")).toBeInTheDocument();
     expect(screen.getByText("Resumo geral")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento da execução")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Acompanhamento da execução/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Compatibilidade dos registros")).not.toBeInTheDocument();
+    expect(screen.queryByText("Últimos registros do Cliente")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Acompanhamento da execução/i }));
+    expect(screen.getByRole("button", { name: /Acompanhamento da execução/i })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Dados do Cliente")).toBeInTheDocument();
-    expect(screen.getByText("Compatibilidade dos registros")).toBeInTheDocument();
-    expect(screen.getByText("Compatibilidade parcial")).toBeInTheDocument();
     expect(screen.getByText("Últimos registros do Cliente")).toBeInTheDocument();
+    expect(screen.getAllByText("98 kcal").length).toBeGreaterThan(0);
     expect(screen.getByText("Parcial")).toBeInTheDocument();
     expect(screen.getByText("Água")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Plano alimentar" })).toBeInTheDocument();
@@ -226,6 +230,17 @@ describe("PartnerClientDietView", () => {
     expect(screen.getAllByText("Considerações sobre a dieta").length).toBeGreaterThan(0);
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
+  });
+
+  it("abre observação de registro em dialog sem alongar a lista", () => {
+    render(<PartnerClientDietView diet={diet} overview={overview} />);
+
+    expect(screen.queryByText("Almoço parcial por falta de apetite.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Acompanhamento da execução/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver nota" }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Almoço parcial por falta de apetite.")).toBeInTheDocument();
   });
 
   it("adiciona alimento sugerido e consome rascunho do Cadastro", async () => {
