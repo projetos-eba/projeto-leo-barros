@@ -27,11 +27,11 @@ Aba técnica de plano alimentar do Cliente no perfil Parceiros, baseada no Figma
 - Cabeçalho do Cliente, abas alinhadas e `Dietas` implementada.
 - Resumo geral com kcal, proteínas, carboidratos, gorduras, água e objetivo calórico.
 - Plano alimentar por dia da semana, refeições e itens.
-- Busca e adição de alimentos da base de Cadastro.
+- Busca e adição de alimentos da base de Cadastro, com busca inline ao clicar em `Adicionar alimento` dentro de cada refeição e biblioteca lateral como apoio.
 - Sugestões usam rascunhos `partner_protocol_use_drafts` com `plan_context = dieta`.
 - Editar porção, remover alimento/refeição, adicionar refeição, duplicar dieta, ativar plano, enviar aviso internamente e exportar PDF via impressão local.
 - Considerações da dieta e histórico de alterações.
-- Acompanhamento da execução dos últimos 7 dias com adesão, refeições realizadas/parciais/puladas, pendências, água média, fotos e observações enviadas pelo Cliente.
+- Acompanhamento da execução dos últimos 7 dias com adesão, refeições realizadas/parciais/puladas, pendências, água média, fotos, observações enviadas pelo Cliente e leitura de compatibilidade dos registros.
 
 ## Regras
 
@@ -44,12 +44,13 @@ Aba técnica de plano alimentar do Cliente no perfil Parceiros, baseada no Figma
 - A execução diária do Cliente registra refeições como `completed`, `partial`, `skipped` ou `pending`.
 - A navegação diária em `/cliente/dieta?date=YYYY-MM-DD` deve preservar logs por data.
 - Registros parciais entram como estimativa operacional de adesão, não como consumo nutricional exato.
+- Compatibilidade dos registros avalia consistência de preenchimento nos últimos 7 dias; não comprova consumo real nem substitui validação clínica.
 - A aba do Parceiro separa prescrição de acompanhamento: o editor continua sendo a fonte da prescrição, e o painel de execução mostra o retorno real do Cliente.
 - `Gerar com IA` do Figma não aparece na v1 para evitar ação falsa.
 
 ## Validações
 
-- Unitários: cálculo por porção, distribuição macro, agregação de plano e sugestões.
-- View: render, busca/adicionar alimento, edição de porção, salvar considerações, publicar/enviar, ausência de termos proibidos.
+- Unitários: cálculo por porção, distribuição macro, agregação de plano, sugestões e compatibilidade dos registros.
+- View: render, busca inline/adicionar alimento, edição de porção, salvar considerações, publicar/enviar, ausência de termos proibidos.
 - SQL: tabelas, RPC, RLS entre parceiros e vínculo ativo obrigatório.
 - Smoke Playwright: desktop/mobile, console limpo e sem overflow horizontal.

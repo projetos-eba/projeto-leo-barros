@@ -216,6 +216,8 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByText("Resumo geral")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento da execução")).toBeInTheDocument();
     expect(screen.getByText("Dados do Cliente")).toBeInTheDocument();
+    expect(screen.getByText("Compatibilidade dos registros")).toBeInTheDocument();
+    expect(screen.getByText("Compatibilidade parcial")).toBeInTheDocument();
     expect(screen.getByText("Últimos registros do Cliente")).toBeInTheDocument();
     expect(screen.getByText("Parcial")).toBeInTheDocument();
     expect(screen.getByText("Água")).toBeInTheDocument();
@@ -229,7 +231,9 @@ describe("PartnerClientDietView", () => {
   it("adiciona alimento sugerido e consome rascunho do Cadastro", async () => {
     render(<PartnerClientDietView diet={diet} overview={overview} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Adicionar Peito de frango grelhado" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar alimento" }));
+    fireEvent.change(screen.getByLabelText("Buscar alimento para Almoço"), { target: { value: "frango" } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar Peito de frango grelhado à refeição Almoço" }));
 
     await waitFor(() => expect(addClientDietMealItem).toHaveBeenCalledWith({
       draftId: "draft-1",

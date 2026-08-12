@@ -346,6 +346,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
     });
   }, [systemFoods, systemFoodCategory, systemFoodMacro, systemFoodQuery]);
   const visibleSystemFoods = filteredSystemFoods.slice((systemFoodPage - 1) * pageSize, systemFoodPage * pageSize);
+  const importableFilteredSystemFoods = filteredSystemFoods.filter((food) => !food.alreadyImported);
   const filteredSystemExercises = useMemo(() => {
     const term = systemExerciseQuery.trim().toLowerCase();
     return systemExercises.filter((exercise) => {
@@ -552,6 +553,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
   }
 
   function toggleSystemFood(id: string) {
+    if (systemFoods.find((food) => food.id === id)?.alreadyImported) return;
     setSelectedSystemFoodIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   }
 
@@ -584,12 +586,17 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
       toast.error("Selecione ao menos um alimento.");
       return;
     }
-    if (importAll && filteredSystemFoods.length > 100 && !window.confirm(`Importar ${filteredSystemFoods.length} alimentos da biblioteca TACO?`)) return;
+    const foodIds = importAll ? importableFilteredSystemFoods.map((food) => food.id) : selectedSystemFoodIds;
+    if (foodIds.length === 0) {
+      toast.info("Todos os alimentos filtrados já estão na sua base.");
+      return;
+    }
+    if (foodIds.length > 100 && !window.confirm(`Importar ${foodIds.length} alimentos ainda não importados da biblioteca TACO?`)) return;
     startTransition(async () => {
       const result = await importSystemFoodsToPartner({
         categoryTaco: systemFoodCategory === "all" ? null : systemFoodCategory,
-        foodIds: importAll ? null : selectedSystemFoodIds,
-        importAll,
+        foodIds,
+        importAll: false,
         macro: systemFoodMacro === "all" ? null : systemFoodMacro,
         query: systemFoodQuery || null,
       });
@@ -946,10 +953,10 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
               </SelectShell>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#253847] bg-[#101a24] p-3 text-[12px] text-[#aebbc6]">
-              <span>{filteredSystemFoods.length} alimentos encontrados · {selectedSystemFoodIds.length} selecionados</span>
+              <span>{filteredSystemFoods.length} alimentos encontrados · {importableFilteredSystemFoods.length} disponíveis para importar · {selectedSystemFoodIds.length} selecionados</span>
               <div className="flex flex-wrap gap-2">
-                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={toggleVisibleSystemFoods}>Selecionar página</button>
-                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={selectFilteredSystemFoods}>Selecionar resultados</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5] disabled:cursor-not-allowed disabled:opacity-50" disabled={visibleSystemFoods.every((food) => food.alreadyImported)} type="button" onClick={toggleVisibleSystemFoods}>Selecionar página</button>
+                <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5] disabled:cursor-not-allowed disabled:opacity-50" disabled={importableFilteredSystemFoods.length === 0} type="button" onClick={selectFilteredSystemFoods}>Selecionar resultados</button>
                 <button className="rounded-[7px] border border-[#2b3d4b] px-3 py-2 font-semibold text-[#e7eef5]" type="button" onClick={() => setSelectedSystemFoodIds([])}>Limpar</button>
               </div>
             </div>
@@ -962,7 +969,7 @@ export function PartnerProtocolsView({ data }: PartnerProtocolsViewProps) {
             <Pager count={filteredSystemFoods.length} page={systemFoodPage} pageSize={pageSize} onPageChange={setSystemFoodPage} />
             <div className="flex flex-col gap-2 border-t border-[#253847] pt-4 sm:flex-row sm:justify-end">
               <button className="h-10 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5]" type="button" onClick={() => setDrawerMode(null)}>Cancelar</button>
-              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5] disabled:opacity-60" disabled={isPending || filteredSystemFoods.length === 0} type="button" onClick={() => handleSystemFoodImport(true)}>
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#2b3d4b] px-4 text-[13px] font-semibold text-[#e7eef5] disabled:opacity-60" disabled={isPending || importableFilteredSystemFoods.length === 0} type="button" onClick={() => handleSystemFoodImport(true)}>
                 {isPending ? <Loader2 className="size-4 animate-spin" /> : <UploadCloud className="size-4" />}
                 Importar tudo filtrado
               </button>
@@ -1075,9 +1082,10 @@ function optionalNumber(value: number | null, suffix = "") {
 }
 
 function SystemFoodRow({ food, onToggle, selected }: { food: SystemFood; onToggle: () => void; selected: boolean }) {
+  const disabled = food.alreadyImported;
   return (
-    <label className={cn("grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 transition hover:bg-[#132434]", selected && "bg-[#0b2b45]/60")}>
-      <input aria-label={`Selecionar ${food.name}`} checked={selected} className="mt-1 size-4 accent-[#2d9cff]" disabled={food.alreadyImported} onChange={onToggle} type="checkbox" />
+    <label aria-disabled={disabled} className={cn("grid grid-cols-[auto_minmax(0,1fr)] gap-3 px-3 py-3 transition", disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer hover:bg-[#132434]", selected && "bg-[#0b2b45]/60")}>
+      <input aria-label={disabled ? `${food.name} já importado` : `Selecionar ${food.name}`} checked={!disabled && selected} className="mt-1 size-4 accent-[#2d9cff] disabled:cursor-not-allowed" disabled={disabled} onChange={onToggle} type="checkbox" />
       <span className="min-w-0">
         <span className="flex flex-wrap items-center gap-2">
           <span className="line-clamp-1 text-[13px] font-bold text-white">{food.name}</span>
