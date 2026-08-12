@@ -29,6 +29,8 @@ import {
   PolarRadiusAxis,
   Radar,
   RadarChart,
+  ReferenceArea,
+  ReferenceLine,
   Line,
   LineChart,
   Tooltip,
@@ -59,10 +61,14 @@ import {
   buildChartDomain,
   buildCalorieProjection,
   buildDynamicNumberDomain,
+  buildReferenceChartDomain,
   calculateCalories,
   calculatePhysicalAssessment,
+  classifyByReferenceProfile,
+  compositionMetricDefinitions,
   circumferenceLabels,
   formulaLabels,
+  getCompositionReferenceProfile,
   skinfoldLabels,
 } from "@/lib/partners/client-assessments-metrics";
 import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
@@ -118,14 +124,7 @@ const skinfoldKeys = [
   "medial_calf",
 ] as const;
 
-const compositionMetrics = [
-  { key: "bodyFatPercentage", label: "% Gordura", suffix: "%" },
-  { key: "weightKg", label: "Peso corporal", suffix: " kg" },
-  { key: "fatMassKg", label: "Massa gorda", suffix: " kg" },
-  { key: "leanMassKg", label: "Massa magra", suffix: " kg" },
-  { key: "ffmi", label: "FFMI", suffix: "" },
-  { key: "muscleMassKg", label: "Massa muscular", suffix: " kg" },
-];
+const compositionMetrics = [...compositionMetricDefinitions];
 
 const formulaNotes: Record<AssessmentFormula, string> = {
   cunningham: "Baseada em massa magra estimada ou informada.",
@@ -168,40 +167,6 @@ function deltaLabel(value: number | null, suffix: string, inverse = false) {
   const good = inverse ? !positive : positive;
   const sign = positive ? "+" : "";
   return `${good ? "↗" : "↘"} ${sign}${value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}${suffix}`;
-}
-
-function classifyBodyFat(value: number | null, biologicalSex: AssessmentBiologicalSex) {
-  if (value === null) return { label: "Sem dados", tone: "text-[#8b92a3]" };
-  if (biologicalSex === "female") {
-    if (value < 14) return { label: "Essencial", tone: "text-[#8fcfff]" };
-    if (value < 21) return { label: "Atlético", tone: "text-[#58a067]" };
-    if (value < 25) return { label: "Fitness", tone: "text-[#9bd36f]" };
-    if (value < 32) return { label: "Aceitável", tone: "text-[#f0c76a]" };
-    if (value < 39) return { label: "Elevado", tone: "text-[#f48c58]" };
-    return { label: "Muito elevado", tone: "text-[#ff7b8e]" };
-  }
-  if (value < 6) return { label: "Essencial", tone: "text-[#8fcfff]" };
-  if (value < 14) return { label: "Atlético", tone: "text-[#58a067]" };
-  if (value < 18) return { label: "Fitness", tone: "text-[#9bd36f]" };
-  if (value < 25) return { label: "Aceitável", tone: "text-[#f0c76a]" };
-  if (value < 30) return { label: "Elevado", tone: "text-[#f48c58]" };
-  return { label: "Muito elevado", tone: "text-[#ff7b8e]" };
-}
-
-function classifyFfmi(value: number | null, biologicalSex: AssessmentBiologicalSex) {
-  if (value === null) return { label: "Sem dados", tone: "text-[#8b92a3]" };
-  if (biologicalSex === "female") {
-    if (value < 15) return { label: "Baixo", tone: "text-[#8fcfff]" };
-    if (value < 17) return { label: "Média", tone: "text-[#58a067]" };
-    if (value < 19) return { label: "Bom", tone: "text-[#9bd36f]" };
-    if (value < 21) return { label: "Muito alto", tone: "text-[#f0c76a]" };
-    return { label: "Elevado", tone: "text-[#ff7b8e]" };
-  }
-  if (value < 18) return { label: "Baixo", tone: "text-[#8fcfff]" };
-  if (value < 20) return { label: "Média", tone: "text-[#58a067]" };
-  if (value < 22) return { label: "Bom", tone: "text-[#9bd36f]" };
-  if (value < 25) return { label: "Muito alto", tone: "text-[#f0c76a]" };
-  return { label: "Elevado", tone: "text-[#ff7b8e]" };
 }
 
 function spectrumPosition(value: number | null, min: number, max: number) {
@@ -599,12 +564,49 @@ function CompositionChart({
   const { ref, width } = useMeasuredWidth();
   const colors = ["#3b97e3", "#a277ff", "#ff7b8e", "#58a067", "#f0c76a"];
   const visible = compositionMetrics.filter((metric) => selectedMetrics.includes(metric.key));
-  const domain = buildChartDomain(data, visible.map((metric) => metric.key), 0.14);
+  const referenceProfile = visible.length === 1 ? getCompositionReferenceProfile(visible[0].key) : null;
+  const domain = referenceProfile
+    ? buildReferenceChartDomain(data, visible.map((metric) => metric.key), referenceProfile, 0.08)
+    : buildChartDomain(data, visible.map((metric) => metric.key), 0.14);
+  const compact = width > 0 && width < 520;
 
   return (
-    <div className="h-[260px] min-w-0 overflow-visible" data-testid="client-assessments-composition-chart" ref={ref}>
+    <div className="min-w-0 overflow-visible" data-testid="client-assessments-composition-chart" ref={ref}>
       {width > 0 && data.length > 0 && visible.length > 0 ? (
-        <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: 6, top: 12 }} width={width}>
+        <>
+        <LineChart data={data} height={260} margin={{ bottom: 4, left: -10, right: compact ? 12 : 78, top: 12 }} width={width}>
+          {referenceProfile?.bands.map((band) => (
+            <ReferenceArea
+              fill={band.fill}
+              fillOpacity={0.18}
+              ifOverflow="extendDomain"
+              key={band.key}
+              stroke="transparent"
+              y1={band.min}
+              y2={band.max}
+              label={compact ? undefined : {
+                fill: "#d7dae0",
+                fontSize: 10,
+                position: "right",
+                value: band.label,
+              }}
+            />
+          ))}
+          {referenceProfile?.line ? (
+            <ReferenceLine
+              ifOverflow="extendDomain"
+              stroke="#8fcfff"
+              strokeDasharray="4 5"
+              strokeOpacity={0.7}
+              y={referenceProfile.line.value}
+              label={compact ? undefined : {
+                fill: "#8fcfff",
+                fontSize: 10,
+                position: "insideTop",
+                value: referenceProfile.line.label,
+              }}
+            />
+          ) : null}
           <CartesianGrid stroke="#31536b" strokeDasharray="4 6" strokeOpacity={0.7} vertical={false} />
           <XAxis axisLine={false} dataKey="date" tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} />
           <YAxis axisLine={false} domain={domain} tick={{ fill: "#9aa5b6", fontSize: 11 }} tickLine={false} width={42} />
@@ -629,8 +631,20 @@ function CompositionChart({
             />
           ))}
         </LineChart>
+        {referenceProfile ? (
+          <div className="mt-2 flex flex-wrap gap-2 px-1 text-[10px] font-semibold text-[#9aa5b6]">
+            {compact ? referenceProfile.bands.map((band) => (
+              <span className="inline-flex items-center gap-1.5" key={band.key}>
+                <span className="size-2 rounded-full" style={{ backgroundColor: band.fill }} />
+                {band.label}
+              </span>
+            )) : null}
+            <span>{referenceProfile.description}</span>
+          </div>
+        ) : null}
+        </>
       ) : (
-        <div className="flex h-full items-center justify-center text-[13px] text-[#708597]">Selecione ao menos uma métrica.</div>
+        <div className="flex h-[260px] items-center justify-center text-[13px] text-[#708597]">Selecione ao menos uma métrica.</div>
       )}
     </div>
   );
@@ -1025,19 +1039,17 @@ function ProfileBioDialog({
 
 function AssessmentDetailsDialog({
   assessment,
-  biologicalSex,
   onEdit,
   onOpenChange,
   open,
 }: {
   assessment: PartnerClientAssessmentsData["records"][number] | null;
-  biologicalSex: AssessmentBiologicalSex;
   onEdit: () => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
 }) {
-  const bodyFatClassification = classifyBodyFat(assessment?.bodyFatPercentage ?? null, biologicalSex);
-  const ffmiClassification = classifyFfmi(assessment?.ffmi ?? null, biologicalSex);
+  const bodyFatClassification = classifyByReferenceProfile(assessment?.bodyFatPercentage ?? null, getCompositionReferenceProfile("bodyFatPercentage"));
+  const ffmiClassification = classifyByReferenceProfile(assessment?.ffmi ?? null, getCompositionReferenceProfile("ffmi"));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1060,8 +1072,8 @@ function AssessmentDetailsDialog({
 
             <div className="grid gap-3 sm:grid-cols-3">
               <ResultSpectrum label={`IMC · ${assessment.bmiClassification}`} max={45} min={12} tone="text-[#8fcfff]" value={assessment.bmi} />
-              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={biologicalSex === "female" ? 50 : 40} min={biologicalSex === "female" ? 5 : 0} suffix="%" tone={bodyFatClassification.tone} value={assessment.bodyFatPercentage} />
-              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={biologicalSex === "female" ? 27 : 30} min={biologicalSex === "female" ? 12 : 15} tone={ffmiClassification.tone} value={assessment.ffmi} />
+              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={55} min={0} suffix="%" tone={bodyFatClassification.tone} value={assessment.bodyFatPercentage} />
+              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={35} min={12} tone={ffmiClassification.tone} value={assessment.ffmi} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -1111,7 +1123,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   const [compositionMode, setCompositionMode] = useState<"dynamic" | "stack">("dynamic");
   const [skinfoldMode, setSkinfoldMode] = useState<"general" | "region" | "radar">("general");
   const [circumferenceMode, setCircumferenceMode] = useState<"general" | "region" | "radar">("general");
-  const [selectedCompositionMetrics, setSelectedCompositionMetrics] = useState(() => compositionMetrics.map((metric) => metric.key));
+  const [selectedCompositionMetrics, setSelectedCompositionMetrics] = useState<string[]>(() => compositionMetrics.map((metric) => metric.key));
   const [selectedSkinfoldMetrics, setSelectedSkinfoldMetrics] = useState(() => assessments.skinfolds.availableMetrics.map((metric) => metric.key));
   const [selectedCircumferenceMetrics, setSelectedCircumferenceMetrics] = useState(() => assessments.circumferences.availableMetrics.slice(0, 8).map((metric) => metric.key));
   const [pendingAction, setPendingAction] = useState<"save" | "apply" | null>(null);
@@ -1187,8 +1199,8 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   const selectedAssessment = assessmentFlow.assessmentId
     ? assessments.records.find((item) => item.id === assessmentFlow.assessmentId) ?? null
     : null;
-  const bodyFatClassification = classifyBodyFat(latestAssessment?.bodyFatPercentage ?? null, assessments.client.biologicalSex);
-  const ffmiClassification = classifyFfmi(latestAssessment?.ffmi ?? null, assessments.client.biologicalSex);
+  const bodyFatClassification = classifyByReferenceProfile(latestAssessment?.bodyFatPercentage ?? null, getCompositionReferenceProfile("bodyFatPercentage"));
+  const ffmiClassification = classifyByReferenceProfile(latestAssessment?.ffmi ?? null, getCompositionReferenceProfile("ffmi"));
 
   async function saveProfileDraft() {
     setProfilePending(true);
@@ -1418,8 +1430,8 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
 
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
               <ResultSpectrum label={`IMC · ${latestAssessment?.bmiClassification ?? "Sem dados"}`} max={45} min={12} suffix="" tone="text-[#8fcfff]" value={latestAssessment?.bmi ?? null} />
-              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={assessments.client.biologicalSex === "female" ? 50 : 40} min={assessments.client.biologicalSex === "female" ? 5 : 0} suffix="%" tone={bodyFatClassification.tone} value={latestAssessment?.bodyFatPercentage ?? null} />
-              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={assessments.client.biologicalSex === "female" ? 27 : 30} min={assessments.client.biologicalSex === "female" ? 12 : 15} tone={ffmiClassification.tone} value={latestAssessment?.ffmi ?? null} />
+              <ResultSpectrum label={`% Gordura · ${bodyFatClassification.label}`} max={55} min={0} suffix="%" tone={bodyFatClassification.tone} value={latestAssessment?.bodyFatPercentage ?? null} />
+              <ResultSpectrum label={`FFMI · ${ffmiClassification.label}`} max={35} min={12} tone={ffmiClassification.tone} value={latestAssessment?.ffmi ?? null} />
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -1616,7 +1628,6 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
       />
       <AssessmentDetailsDialog
         assessment={selectedAssessment}
-        biologicalSex={assessments.client.biologicalSex}
         open={assessmentFlow.open && assessmentFlow.mode === "details"}
         onEdit={() => setAssessmentFlow((current) => ({ ...current, mode: "edit", open: true }))}
         onOpenChange={(open) => setAssessmentFlow((current) => ({ ...current, open }))}

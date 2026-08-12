@@ -3,8 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   buildHeartRateZones,
   buildPartnerClientCardio,
+  buildCardioComparison,
+  cardioActivities,
+  cardioActivityOptions,
   calculateCardioKcal,
   calculateCardioKcalPerMinute,
+  getApprovedCardioMet,
   type PartnerClientCardioRawData,
 } from "./client-cardio-metrics";
 
@@ -100,6 +104,39 @@ describe("client-cardio-metrics", () => {
       bpmStart: 108,
       key: "z2",
       percentLabel: "60-70%",
+    });
+  });
+
+  it("expõe as atividades do print com MET aprovado", () => {
+    expect(cardioActivityOptions.map((activity) => activity.label)).toEqual(expect.arrayContaining([
+      "Caminhada — Leve (3,2 km/h)",
+      "Corrida — Intenso (9,7 km/h)",
+      "Natação — Moderado (Livre)",
+      "Ciclismo — Intenso (25 km/h)",
+      "Musculação — Moderado (Moderado esforço)",
+      "Futebol — Geral (Partida recreacional)",
+      "Jiu-Jitsu — Intenso (Competição)",
+      "Assistir TV — Sedentário (Sentado)",
+      "Dormir — Descanso (Dormindo)",
+      "Sexo — Variável (Relação sexual típica)",
+    ]));
+    expect(cardioActivities.caminhada_leve_32).toMatchObject({
+      group: "Caminhada",
+      met: 2.5,
+      metClassification: "Leve (1,6-2,9 METs)",
+      metStatus: "approved",
+    });
+  });
+
+  it("calcula atividades aprovadas da tabela MET do módulo", () => {
+    expect(getApprovedCardioMet("caminhada_leve")).toBe(2.5);
+    expect(getApprovedCardioMet("natacao_moderado_livre")).toBe(5.9);
+    expect(getApprovedCardioMet("dormir_descanso")).toBe(0.9);
+    expect(getApprovedCardioMet("ciclismo_intenso_25")).toBe(12);
+    expect(calculateCardioKcal(70, cardioActivities.ciclismo_intenso_25.met ?? 0, 30)).toBe(441);
+    expect(buildCardioComparison(70, "dormir_descanso", "ciclismo_intenso_25").find((point) => point.minutes === 30)).toMatchObject({
+      comparisonKcal: 441,
+      primaryKcal: 33,
     });
   });
 

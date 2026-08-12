@@ -30,7 +30,8 @@ Aba técnica de prescrição e acompanhamento de Cardio do Cliente individual, b
 
 - KPIs: meta semanal, realizado na semana, kcal estimadas e zona predominante.
 - Calculadora editável: peso, duração, meta semanal, atividade principal, comparação e zona-alvo.
-- Catálogo fixo: caminhada leve, caminhada moderada, bicicleta leve, elíptico, corrida moderada e corrida forte.
+- Catálogo orientado a dados em `src/lib/partners/client-cardio-metrics.ts`, agrupado por Caminhada, Corrida, Ciclismo, Natação, Musculação, Esportes, Rotina/sedentário e Outros.
+- As chaves legadas de Cardio continuam válidas para preservar histórico. As atividades vindas do print de 2026-08-10 usam a tabela MET aprovada em 2026-08-11 e calculam pela fórmula oficial.
 - Gráfico comparativo por duração: 0, 15, 30, 45 e 60 minutos.
 - Resumo com kcal, kcal/min, MET e registro compacto de sessão.
 - Tabela de zonas cardíacas calculada pelo Cliente.
@@ -47,3 +48,8 @@ Aba técnica de prescrição e acompanhamento de Cardio do Cliente individual, b
 - Testes da view em `partner-client-cardio-view.test.tsx`.
 - SQL em `018_partner_client_cardio.test.sql`.
 - Smoke: `/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=cardio`.
+
+## Fonte MET operacional
+
+- Fórmula: `kcal = MET * 3,5 * peso(kg) / 200 * duração(min)`.
+- Tabela aprovada em 2026-08-11 para as atividades do print: Dormir 0,9; Assistir TV 1,1; Caminhada 3,2 km/h 2,5; Caminhada 4,0 km/h 2,9; Musculação leve 3,0; Caminhada 4,8 km/h 3,3; Musculação moderada 3,75; Caminhada 6,0 km/h 3,9; Ciclismo 16 km/h 4,0; Sexo 4,0; Natação leve 4,5; Natação moderada 5,9; Corrida 6,5 km/h 6,0; Ciclismo 20 km/h 6,0; Musculação intensa 6,0; Futebol 8,5; Corrida 9,7 km/h 9,8; Jiu-Jitsu 10,0; Natação competição 11,0; Ciclismo 25 km/h 12,0.

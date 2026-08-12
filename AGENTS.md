@@ -151,6 +151,7 @@ Scripts oficiais:
 - `npm run dev`
 - `npm run build`
 - `npm run start`
+- `npm run typecheck`
 - `npm run lint`
 - `npm run test`
 - `npm run test:watch`
@@ -188,6 +189,7 @@ Regras:
 - Nao conectar MCP a producao nem expor secrets em configuracoes, logs ou relatorios.
 
 Para codigo, executar `npm run lint`, `npm run test` e `npm run build` sempre que o ambiente permitir.
+Para PRs, release, branch protection recomendada e migracao TypeScript strict, seguir `docs/engineering-governance.md`.
 
 Vitest permanece intencionalmente no projeto como runner de testes. A presenca transitiva de Vite em `node_modules` via Vitest nao significa que a aplicacao use Vite como runtime.
 

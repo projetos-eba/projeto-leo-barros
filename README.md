@@ -28,6 +28,7 @@ O Supabase Studio local roda em `http://127.0.0.1:54323`.
 npm run dev       # Next.js em desenvolvimento
 npm run build     # build de producao
 npm run start     # servidor Next apos build
+npm run typecheck # TypeScript sem emitir arquivos
 npm run lint      # ESLint
 npm run test      # Vitest
 npm run test:watch
@@ -65,3 +66,4 @@ npm run dev:seed-client-photos-storage
 ```
 
 Use `docs/fase-f0-next-oficial.md` e os Page Profiles em `docs/page-profiles/` como referencia operacional antes de alterar telas funcionais.
+Use `docs/engineering-governance.md` como referencia para PRs, branches, release, CI e migracao TypeScript strict.

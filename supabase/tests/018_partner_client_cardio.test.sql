@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(15);
+select plan(17);
 
 select has_table('public', 'partner_client_cardio_plans', 'planos de Cardio do Cliente existem');
 select has_table('public', 'partner_client_cardio_calculations', 'cálculos de Cardio existem');
@@ -77,6 +77,41 @@ select throws_ok(
   '42501',
   null,
   'parceiro não cria Cardio para Cliente sem vínculo ativo'
+);
+
+select lives_ok(
+  $$
+    insert into public.partner_client_cardio_plans (
+      partner_id, patient_id, title, weekly_target_minutes, weight_kg, primary_activity_key, comparison_activity_key
+    ) values (
+      'a1000000-0000-4000-8000-000000000201',
+      'a1000000-0000-4000-8000-000000000301',
+      'Cardio catalogo ampliado',
+      120,
+      70,
+      'natacao_moderado_livre',
+      'ciclismo_intenso_25'
+    )
+  $$,
+  'catálogo Cardio ampliado aceita chaves novas no plano'
+);
+
+select throws_ok(
+  $$
+    insert into public.partner_client_cardio_plans (
+      partner_id, patient_id, title, weekly_target_minutes, weight_kg, primary_activity_key
+    ) values (
+      'a1000000-0000-4000-8000-000000000201',
+      'a1000000-0000-4000-8000-000000000301',
+      'Cardio inválido',
+      120,
+      70,
+      'atividade_inexistente'
+    )
+  $$,
+  '23514',
+  null,
+  'catálogo Cardio rejeita chaves desconhecidas'
 );
 
 select is(

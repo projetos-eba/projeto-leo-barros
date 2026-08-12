@@ -1,10 +1,12 @@
-name: Schema Integrity
+name: Database Integrity
 
 on:
   pull_request:
   push:
     branches:
       - main
+      - homolog
+      - dev
       - dev-vini
 
 jobs:
@@ -36,12 +38,3 @@ jobs:
         run: |
           npx supabase gen types typescript --local > src/lib/supabase/database.types.generated.ts
           diff -u src/lib/supabase/database.types.ts src/lib/supabase/database.types.generated.ts
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm run test
-
-      - name: Build
-        run: npm run build

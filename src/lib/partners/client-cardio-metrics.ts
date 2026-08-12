@@ -1,10 +1,34 @@
-export type CardioActivityKey =
-  | "bicicleta_leve"
-  | "caminhada_leve"
-  | "caminhada_moderada"
-  | "corrida_forte"
-  | "corrida_moderada"
-  | "eliptico";
+export const cardioActivityKeys = [
+  "bicicleta_leve",
+  "caminhada_leve",
+  "caminhada_moderada",
+  "corrida_forte",
+  "corrida_moderada",
+  "eliptico",
+  "caminhada_leve_32",
+  "caminhada_leve_40",
+  "caminhada_moderada_48",
+  "caminhada_moderada_60",
+  "corrida_moderada_65",
+  "corrida_intenso_97",
+  "natacao_leve_lento",
+  "natacao_moderado_livre",
+  "natacao_intenso_competicao",
+  "ciclismo_leve_16",
+  "ciclismo_moderado_20",
+  "ciclismo_intenso_25",
+  "musculacao_leve_baixo_esforco",
+  "musculacao_moderado_esforco",
+  "musculacao_intenso_vigoroso",
+  "futebol_geral_recreacional",
+  "jiu_jitsu_intenso_competicao",
+  "assistir_tv_sedentario",
+  "dormir_descanso",
+  "sexo_variavel_tipica",
+] as const;
+
+export type CardioActivityKey = typeof cardioActivityKeys[number];
+export type CardioActivityGroup = "Caminhada" | "Corrida" | "Ciclismo" | "Natação" | "Musculação" | "Esportes" | "Rotina / sedentário" | "Outros";
 
 export type CardioPlanStatus = "archived" | "draft" | "published" | "sent";
 export type CardioZoneKey = "z1" | "z2" | "z3" | "z4" | "z5";
@@ -68,10 +92,13 @@ export type PartnerClientCardioRawData = {
 };
 
 export type CardioActivity = {
+  group: CardioActivityGroup;
   intensityLabel: string;
   key: CardioActivityKey;
   label: string;
-  met: number;
+  met: number | null;
+  metClassification: string;
+  metStatus: "approved" | "pending";
   shortLabel: string;
 };
 
@@ -190,50 +217,270 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
 
 export const cardioActivities: Record<CardioActivityKey, CardioActivity> = {
   caminhada_leve: {
+    group: "Caminhada",
     intensityLabel: "Leve (1,6-2,9 METs)",
     key: "caminhada_leve",
     label: "Caminhada leve",
     met: 2.5,
+    metClassification: "Leve (1,6-2,9 METs)",
+    metStatus: "approved",
     shortLabel: "Caminhada",
   },
   caminhada_moderada: {
+    group: "Caminhada",
     intensityLabel: "Moderado (3,0-3,9 METs)",
     key: "caminhada_moderada",
     label: "Caminhada moderada",
     met: 3.5,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
     shortLabel: "Caminhada",
   },
   bicicleta_leve: {
+    group: "Ciclismo",
     intensityLabel: "Leve a moderado (4,0 METs)",
     key: "bicicleta_leve",
     label: "Bicicleta leve",
     met: 4,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
     shortLabel: "Bicicleta",
   },
   eliptico: {
+    group: "Outros",
     intensityLabel: "Moderado (5,0 METs)",
     key: "eliptico",
     label: "Elíptico",
     met: 5,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
     shortLabel: "Elíptico",
   },
   corrida_moderada: {
+    group: "Corrida",
     intensityLabel: "Moderado / vigoroso (5,0 METs)",
     key: "corrida_moderada",
     label: "Corrida moderada",
     met: 5,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
     shortLabel: "Corrida",
   },
   corrida_forte: {
+    group: "Corrida",
     intensityLabel: "Vigoroso (8,0 METs)",
     key: "corrida_forte",
     label: "Corrida forte",
     met: 8,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
     shortLabel: "Corrida",
+  },
+  caminhada_leve_32: {
+    group: "Caminhada",
+    intensityLabel: "Leve (3,2 km/h)",
+    key: "caminhada_leve_32",
+    label: "Caminhada — Leve (3,2 km/h)",
+    met: 2.5,
+    metClassification: "Leve (1,6-2,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Caminhada",
+  },
+  caminhada_leve_40: {
+    group: "Caminhada",
+    intensityLabel: "Leve (4,0 km/h)",
+    key: "caminhada_leve_40",
+    label: "Caminhada — Leve (4,0 km/h)",
+    met: 2.9,
+    metClassification: "Leve (1,6-2,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Caminhada",
+  },
+  caminhada_moderada_48: {
+    group: "Caminhada",
+    intensityLabel: "Moderado (4,8 km/h)",
+    key: "caminhada_moderada_48",
+    label: "Caminhada — Moderado (4,8 km/h)",
+    met: 3.3,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Caminhada",
+  },
+  caminhada_moderada_60: {
+    group: "Caminhada",
+    intensityLabel: "Moderado (6,0 km/h)",
+    key: "caminhada_moderada_60",
+    label: "Caminhada — Moderado (6,0 km/h)",
+    met: 3.9,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Caminhada",
+  },
+  corrida_moderada_65: {
+    group: "Corrida",
+    intensityLabel: "Moderado (6,5 km/h)",
+    key: "corrida_moderada_65",
+    label: "Corrida — Moderado (6,5 km/h)",
+    met: 6,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Corrida",
+  },
+  corrida_intenso_97: {
+    group: "Corrida",
+    intensityLabel: "Intenso (9,7 km/h)",
+    key: "corrida_intenso_97",
+    label: "Corrida — Intenso (9,7 km/h)",
+    met: 9.8,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Corrida",
+  },
+  natacao_leve_lento: {
+    group: "Natação",
+    intensityLabel: "Leve (Lento)",
+    key: "natacao_leve_lento",
+    label: "Natação — Leve (Lento)",
+    met: 4.5,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Natação",
+  },
+  natacao_moderado_livre: {
+    group: "Natação",
+    intensityLabel: "Moderado (Livre)",
+    key: "natacao_moderado_livre",
+    label: "Natação — Moderado (Livre)",
+    met: 5.9,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Natação",
+  },
+  natacao_intenso_competicao: {
+    group: "Natação",
+    intensityLabel: "Intenso (Competição)",
+    key: "natacao_intenso_competicao",
+    label: "Natação — Intenso (Competição)",
+    met: 11,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Natação",
+  },
+  ciclismo_leve_16: {
+    group: "Ciclismo",
+    intensityLabel: "Leve (16 km/h)",
+    key: "ciclismo_leve_16",
+    label: "Ciclismo — Leve (16 km/h)",
+    met: 4,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Ciclismo",
+  },
+  ciclismo_moderado_20: {
+    group: "Ciclismo",
+    intensityLabel: "Moderado (20 km/h)",
+    key: "ciclismo_moderado_20",
+    label: "Ciclismo — Moderado (20 km/h)",
+    met: 6,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Ciclismo",
+  },
+  ciclismo_intenso_25: {
+    group: "Ciclismo",
+    intensityLabel: "Intenso (25 km/h)",
+    key: "ciclismo_intenso_25",
+    label: "Ciclismo — Intenso (25 km/h)",
+    met: 12,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Ciclismo",
+  },
+  musculacao_leve_baixo_esforco: {
+    group: "Musculação",
+    intensityLabel: "Leve (Baixo esforço)",
+    key: "musculacao_leve_baixo_esforco",
+    label: "Musculação — Leve (Baixo esforço)",
+    met: 3,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Musculação",
+  },
+  musculacao_moderado_esforco: {
+    group: "Musculação",
+    intensityLabel: "Moderado (Moderado esforço)",
+    key: "musculacao_moderado_esforco",
+    label: "Musculação — Moderado (Moderado esforço)",
+    met: 3.75,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Musculação",
+  },
+  musculacao_intenso_vigoroso: {
+    group: "Musculação",
+    intensityLabel: "Intenso (Vigoroso esforço)",
+    key: "musculacao_intenso_vigoroso",
+    label: "Musculação — Intenso (Vigoroso esforço)",
+    met: 6,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Musculação",
+  },
+  futebol_geral_recreacional: {
+    group: "Esportes",
+    intensityLabel: "Geral (Partida recreacional)",
+    key: "futebol_geral_recreacional",
+    label: "Futebol — Geral (Partida recreacional)",
+    met: 8.5,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Futebol",
+  },
+  jiu_jitsu_intenso_competicao: {
+    group: "Esportes",
+    intensityLabel: "Intenso (Competição)",
+    key: "jiu_jitsu_intenso_competicao",
+    label: "Jiu-Jitsu — Intenso (Competição)",
+    met: 10,
+    metClassification: "Vigoroso (>=6,0 METs)",
+    metStatus: "approved",
+    shortLabel: "Jiu-Jitsu",
+  },
+  assistir_tv_sedentario: {
+    group: "Rotina / sedentário",
+    intensityLabel: "Sedentário (Sentado)",
+    key: "assistir_tv_sedentario",
+    label: "Assistir TV — Sedentário (Sentado)",
+    met: 1.1,
+    metClassification: "Sedentário (<=1,5 METs)",
+    metStatus: "approved",
+    shortLabel: "Assistir TV",
+  },
+  dormir_descanso: {
+    group: "Rotina / sedentário",
+    intensityLabel: "Descanso (Dormindo)",
+    key: "dormir_descanso",
+    label: "Dormir — Descanso (Dormindo)",
+    met: 0.9,
+    metClassification: "Abaixo do descanso",
+    metStatus: "approved",
+    shortLabel: "Dormir",
+  },
+  sexo_variavel_tipica: {
+    group: "Outros",
+    intensityLabel: "Variável (Relação sexual típica)",
+    key: "sexo_variavel_tipica",
+    label: "Sexo — Variável (Relação sexual típica)",
+    met: 4,
+    metClassification: "Moderado (3,0-5,9 METs)",
+    metStatus: "approved",
+    shortLabel: "Sexo",
   },
 };
 
 export const cardioActivityOptions = Object.values(cardioActivities);
+export const approvedCardioActivityOptions = cardioActivityOptions.filter((activity) => activity.metStatus === "approved");
+export const cardioActivityGroups = ["Caminhada", "Corrida", "Ciclismo", "Natação", "Musculação", "Esportes", "Rotina / sedentário", "Outros"] as const;
 
 export const cardioZoneLabels: Record<CardioZoneKey, string> = {
   z1: "Z1",
@@ -275,6 +522,15 @@ function asActivity(value: string | null | undefined, fallback: CardioActivityKe
 
 function asZone(value: string | null | undefined, fallback: CardioZoneKey): CardioZoneKey {
   return value && isCardioZoneKey(value) ? value : fallback;
+}
+
+export function isCardioActivityMetApproved(activity: CardioActivity): activity is CardioActivity & { met: number } {
+  return activity.metStatus === "approved" && typeof activity.met === "number" && Number.isFinite(activity.met);
+}
+
+export function getApprovedCardioMet(activityKey: CardioActivityKey) {
+  const activity = cardioActivities[activityKey];
+  return isCardioActivityMetApproved(activity) ? activity.met : null;
 }
 
 function round(value: number, fractionDigits = 0) {
@@ -325,6 +581,7 @@ export function buildCardioComparison(
 ): CardioComparisonPoint[] {
   const primary = cardioActivities[primaryActivityKey];
   const comparison = cardioActivities[comparisonActivityKey];
+  if (!isCardioActivityMetApproved(primary) || !isCardioActivityMetApproved(comparison)) return [];
   return [0, 15, 30, 45, 60].map((minutes) => ({
     comparisonKcal: calculateCardioKcal(weightKg, comparison.met, minutes),
     minutes,
@@ -433,6 +690,7 @@ export function buildPartnerClientCardio(raw: PartnerClientCardioRawData, now = 
   const weightKg = plan?.weightKg ?? latestCalculation?.weightKg ?? 70;
   const primaryActivity = plan?.activity ?? latestCalculation?.activity ?? cardioActivities.caminhada_leve;
   const comparisonActivity = plan?.comparisonActivity ?? latestCalculation?.comparisonActivity ?? cardioActivities.corrida_moderada;
+  const primaryMet = getApprovedCardioMet(primaryActivity.key) ?? cardioActivities.caminhada_leve.met ?? 2.5;
   const ageYears = calculateAgeYears(raw.patient.birthDate, now);
 
   return {
@@ -455,7 +713,7 @@ export function buildPartnerClientCardio(raw: PartnerClientCardioRawData, now = 
     weekSummary: {
       completedKcal,
       completedMinutes,
-      estimatedKcal: completedKcal || calculateCardioKcal(weightKg, primaryActivity.met, targetMinutes),
+      estimatedKcal: completedKcal || calculateCardioKcal(weightKg, primaryMet, targetMinutes),
       progressPct: targetMinutes > 0 ? Math.min(100, Math.round((completedMinutes / targetMinutes) * 100)) : 0,
       targetMinutes,
       targetZone,

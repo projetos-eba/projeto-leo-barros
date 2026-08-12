@@ -3,16 +3,21 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(21);
+select plan(35);
 
 select has_table('public', 'partner_exam_categories', 'categorias de exames existem');
 select has_table('public', 'partner_exam_definitions', 'definições de exames existem');
 select has_table('public', 'partner_exam_reference_ranges', 'faixas de referência existem');
 select has_table('public', 'partner_exam_alternative_units', 'unidades alternativas existem');
+select has_table('public', 'system_exam_categories', 'catálogo global de categorias de exames existe');
+select has_table('public', 'system_exam_definitions', 'catálogo global de exames existe');
+select has_table('public', 'system_exam_reference_ranges', 'faixas globais de referência existem');
+select has_table('public', 'system_exam_alternative_units', 'unidades globais alternativas existem');
 select has_table('public', 'partner_client_exam_collections', 'coletas do Cliente existem');
 select has_table('public', 'partner_client_exam_results', 'resultados do Cliente existem');
 select has_table('public', 'partner_client_exam_events', 'histórico de Exames existe');
 select has_function('public', 'partner_client_exams', array['uuid'], 'RPC da aba Exames existe');
+select has_function('public', 'sync_partner_system_exam_catalog', array['uuid'], 'função de materialização do catálogo global existe');
 
 select ok(
   has_function_privilege('authenticated', 'public.partner_client_exams(uuid)', 'execute'),
@@ -26,9 +31,61 @@ select is(
 );
 
 select is(
+  (select count(*)::integer from public.system_exam_categories where status = 'active'),
+  11,
+  'migration cria 11 categorias globais de exames'
+);
+
+select is(
+  (select count(*)::integer from public.system_exam_definitions where status = 'active'),
+  72,
+  'migration cria 72 exames globais'
+);
+
+select is(
+  (select count(*)::integer from (
+    select slug from public.system_exam_definitions group by slug having count(*) > 1
+  ) duplicated),
+  0,
+  'catálogo global não possui slugs duplicados'
+);
+
+select is(
+  (select count(*)::integer
+   from public.system_exam_definitions definition
+   where definition.status = 'active'
+     and (length(btrim(definition.name)) = 0 or length(btrim(definition.default_unit)) = 0)),
+  0,
+  'catálogo global possui nome e unidade preenchidos'
+);
+
+select is(
+  (select count(*)::integer
+   from public.partner_exam_definitions
+   where partner_id = 'a1000000-0000-4000-8000-000000000201'
+     and system_exam_definition_id is not null),
+  72,
+  'catálogo global é materializado para o parceiro fixture'
+);
+
+select lives_ok(
+  $$ select public.sync_partner_system_exam_catalog('a1000000-0000-4000-8000-000000000201'::uuid) $$,
+  'materialização do catálogo global é idempotente'
+);
+
+select is(
+  (select count(*)::integer
+   from public.partner_exam_definitions
+   where partner_id = 'a1000000-0000-4000-8000-000000000201'
+     and system_exam_definition_id is not null),
+  72,
+  'materialização idempotente não duplica exames'
+);
+
+select is(
   (select count(*)::integer from public.partner_exam_categories where partner_id = 'a1000000-0000-4000-8000-000000000201'),
   11,
-  'seed cria 11 categorias de exames'
+  'parceiro fixture possui 11 categorias de exames'
 );
 
 select is(
@@ -85,6 +142,36 @@ select is(
   jsonb_array_length(public.partner_client_exams('a1000000-0000-4000-8000-000000000301'::uuid)->'collections'),
   3,
   'RPC retorna coletas'
+);
+
+select lives_ok(
+  $$
+    insert into public.partner_exam_definitions (
+      partner_id, category_id, slug, name, default_unit, sort_order, status
+    )
+    select
+      'a1000000-0000-4000-8000-000000000201',
+      id,
+      'custom_exame_pgtap',
+      'Exame customizado pgTAP',
+      'u.a.',
+      999,
+      'active'
+    from public.partner_exam_categories
+    where partner_id = 'a1000000-0000-4000-8000-000000000201'
+    order by sort_order
+    limit 1
+  $$,
+  'parceiro continua podendo criar exame customizado'
+);
+
+select is(
+  (select system_exam_definition_id
+   from public.partner_exam_definitions
+   where partner_id = 'a1000000-0000-4000-8000-000000000201'
+     and slug = 'custom_exame_pgtap'),
+  null::uuid,
+  'exame customizado não é marcado como catálogo global'
 );
 
 select throws_ok(

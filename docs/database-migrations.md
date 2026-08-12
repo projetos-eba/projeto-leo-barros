@@ -55,3 +55,20 @@ npm run ci:schema
 - `public.partner_protocol_exercises.system_exercise_id`
 
 O teste `supabase/tests/033_global_catalog_libraries.test.sql` deve falhar se esse contrato estiver ausente.
+
+## Catalogo global de exames
+
+O catalogo padrao de exames do modulo Parceiro e estrutural e deve ser reproduzivel por Git:
+
+- `public.system_exam_categories`
+- `public.system_exam_definitions`
+- `public.system_exam_reference_ranges`
+- `public.system_exam_alternative_units`
+
+A migration `20260810181000_global_exam_catalog.sql` promoveu os 72 exames padrao e 11 categorias antes presentes no seed local para catalogo global versionado. A funcao `public.sync_partner_system_exam_catalog(partner_id)` materializa esse catalogo nas tabelas `partner_exam_*` para preservar resultados existentes, FKs, RLS e exames customizados do parceiro.
+
+Regras:
+
+- Nunca cadastrar exames padrao manualmente em producao sem migration correspondente.
+- Nao apagar exames customizados do parceiro ao sincronizar catalogo global.
+- Alteracoes futuras no catalogo global devem ser forward-only, idempotentes e cobertas por `supabase/tests/019_partner_client_exams.test.sql`.

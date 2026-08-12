@@ -130,7 +130,7 @@ const dashboard: PartnerDashboardData = {
       value: "112",
     },
     {
-      chartKey: "adherenceTarget",
+      chartKey: "monthlyRevenueCents",
       description: "Meta do mês.",
       icon: "activity",
       id: "adherenceTarget",
