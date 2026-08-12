@@ -25,9 +25,13 @@
     ],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": false,
-    "target": "ES2017",
-    "strictNullChecks": true
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "ES2018",
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "next-env.d.ts",

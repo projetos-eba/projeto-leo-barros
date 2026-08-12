@@ -13,6 +13,8 @@
     "db:status": "npx supabase status",
     "git:local": "node scripts/dev/git.mjs",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "typecheck:strict": "tsc --noEmit --project tsconfig.strict.json",
     "ci:schema": "npm run db:migration-integrity && npm run db:reset && npm run db:lint && npm run test:db",
     "db:lint": "npx supabase db lint --local",
     "db:migration-integrity": "node scripts/dev/validate-supabase-migration-integrity.mjs",

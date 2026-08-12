@@ -15,7 +15,8 @@ Aba de exames laboratoriais do Cliente individual, baseada no Figma `1:13744`, c
 - `Anamnese`, `Prescrições`, `Formulários`, `Exames` e `Fotos` agora são abas implementadas no perfil individual do Cliente.
 - `Configurações` edita o catálogo do parceiro inteiro.
 - Resultados salvos preservam snapshot de exame, categoria, unidade, conversão e referência usada.
-- O catálogo base vem de `exames-catalogo.md`: 72 exames em 11 categorias.
+- O catálogo base oficial tem 72 exames em 11 categorias e é versionado em migration como catálogo global do sistema.
+- A migration materializa o catálogo global no catálogo de cada parceiro para preservar a UI atual, FKs de resultados, RLS e exames customizados.
 
 ## Banco
 
@@ -23,6 +24,10 @@ Aba de exames laboratoriais do Cliente individual, baseada no Figma `1:13744`, c
 - `partner_exam_definitions`
 - `partner_exam_reference_ranges`
 - `partner_exam_alternative_units`
+- `system_exam_categories`
+- `system_exam_definitions`
+- `system_exam_reference_ranges`
+- `system_exam_alternative_units`
 - `partner_client_exam_collections`
 - `partner_client_exam_results`
 - `partner_client_exam_events`
@@ -45,5 +50,5 @@ Aba de exames laboratoriais do Cliente individual, baseada no Figma `1:13744`, c
 
 - Unitários de métricas em `client-exams-metrics.test.ts`.
 - Testes da view em `partner-client-exams-view.test.tsx`.
-- SQL em `019_partner_client_exams.test.sql`.
+- SQL em `019_partner_client_exams.test.sql`, incluindo contrato do catálogo global, idempotência de materialização, ausência de duplicidade e preservação de exames customizados.
 - Smoke: `/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=exames`.

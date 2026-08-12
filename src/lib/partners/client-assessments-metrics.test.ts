@@ -4,13 +4,16 @@ import {
   buildCalorieProjection,
   buildDynamicNumberDomain,
   buildPartnerClientAssessments,
+  buildReferenceChartDomain,
   calculateBmi,
   calculateBmr,
   calculateCalories,
   calculateFatMass,
   calculatePhysicalAssessment,
   calculateLeanMass,
+  classifyByReferenceProfile,
   getFormulaEligibility,
+  getCompositionReferenceProfile,
   normalizeAssessmentMethod,
   type PartnerClientAssessmentRawData,
 } from "./client-assessments-metrics";
@@ -224,6 +227,37 @@ describe("client assessments metrics", () => {
 
   it("calcula dominio dinamico sem prender o eixo em zero", () => {
     expect(buildDynamicNumberDomain([2427, 2564, 2588], 0.1)).toEqual([2406, 2609]);
+  });
+
+  it("gera faixas de referência de % gordura a partir do print aprovado", () => {
+    const profile = getCompositionReferenceProfile("bodyFatPercentage");
+
+    expect(profile?.source).toContain("Prints do usuário");
+    expect(classifyByReferenceProfile(5.9, profile)).toMatchObject({ label: "Gordura essencial" });
+    expect(classifyByReferenceProfile(6, profile)).toMatchObject({ label: "Atletas" });
+    expect(classifyByReferenceProfile(14, profile)).toMatchObject({ label: "Fitness/Saudável" });
+    expect(classifyByReferenceProfile(18, profile)).toMatchObject({ label: "Aceitável" });
+    expect(classifyByReferenceProfile(25, profile)).toMatchObject({ label: "Sobrepeso" });
+    expect(classifyByReferenceProfile(30, profile)).toMatchObject({ label: "Obesidade" });
+  });
+
+  it("gera faixas de FFMI sem afirmar diagnóstico de substâncias", () => {
+    const profile = getCompositionReferenceProfile("ffmi");
+
+    expect(profile?.line).toMatchObject({ value: 25 });
+    expect(profile?.description).toContain("não comprova uso de substâncias");
+    expect(classifyByReferenceProfile(19, profile)).toMatchObject({ label: "Média populacional" });
+    expect(classifyByReferenceProfile(20, profile)).toMatchObject({ label: "Bom desenvolvimento muscular" });
+    expect(classifyByReferenceProfile(22, profile)).toMatchObject({ label: "Alto desenvolvimento muscular" });
+    expect(classifyByReferenceProfile(25, profile)).toMatchObject({ label: "Faixa excepcional de referência" });
+  });
+
+  it("inclui faixas de referência no domínio do eixo do gráfico isolado", () => {
+    const profile = getCompositionReferenceProfile("bodyFatPercentage");
+    const domain = buildReferenceChartDomain([{ bodyFatPercentage: 14, date: "01/08/2026" }], ["bodyFatPercentage"], profile, 0.08);
+
+    expect(domain[0]).toBe(0);
+    expect(domain[1]).toBeGreaterThanOrEqual(55);
   });
 
   it("monta KPIs, historico e series de avaliacao fisica", () => {

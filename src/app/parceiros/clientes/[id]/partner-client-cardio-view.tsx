@@ -17,6 +17,8 @@ import {
   buildCardioComparison,
   cardioActivities,
   cardioActivityOptions,
+  cardioActivityGroups,
+  isCardioActivityMetApproved,
   type CardioActivityKey,
   type CardioZoneKey,
   type PartnerClientCardioData,
@@ -109,6 +111,13 @@ function ComparisonChart({ comparison, comparisonLabel, primaryLabel }: {
   comparisonLabel: string;
   primaryLabel: string;
 }) {
+  if (comparison.length === 0) {
+    return (
+      <div className="mt-5 rounded-[8px] border border-[#4d3e1b] bg-[#231b0a] p-4 text-[13px] leading-5 text-[#f0c76a]">
+        Selecione atividades com MET aprovado para visualizar o comparativo calórico.
+      </div>
+    );
+  }
   const maxKcal = Math.max(100, ...comparison.flatMap((point) => [point.primaryKcal, point.comparisonKcal]));
   const chartMax = Math.ceil(maxKcal / 100) * 100;
   const plot = { bottom: 306, left: 44, right: 500, top: 24 };
@@ -172,6 +181,7 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
 
   const activity = cardioActivities[activityKey];
   const comparisonActivity = cardioActivities[comparisonActivityKey];
+  const canCalculate = isCardioActivityMetApproved(activity) && isCardioActivityMetApproved(comparisonActivity);
   const comparison = useMemo(() => buildCardioComparison(weightKg, activityKey, comparisonActivityKey), [activityKey, comparisonActivityKey, weightKg]);
 
   const actionPayload = {
@@ -195,14 +205,19 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
   }
 
   function saveCalculation() {
-    if (!plan) return;
+    if (!plan || !canCalculate) return;
     runAction(() => saveClientCardioCalculation(actionPayload));
   }
 
   function applyCalculation() {
-    if (!plan) return;
+    if (!plan || !canCalculate) return;
     runAction(() => applyClientCardioCalculation(actionPayload));
   }
+
+  const activityOptionsByGroup = cardioActivityGroups.map((group) => ({
+    group,
+    options: cardioActivityOptions.filter((option) => option.group === group),
+  })).filter((group) => group.options.length > 0);
 
   return (
     <main className="min-h-screen bg-[#0b1720] pb-10 text-white sm:pb-12">
@@ -249,30 +264,47 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
               </div>
               <Field label="Tipo de atividade">
                 <select className={inputClass} value={activityKey} onChange={(event) => setActivityKey(event.target.value as CardioActivityKey)}>
-                  {cardioActivityOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                  {activityOptionsByGroup.map((group) => (
+                    <optgroup key={group.group} label={group.group}>
+                      {group.options.map((option) => (
+                        <option disabled={!isCardioActivityMetApproved(option)} key={option.key} value={option.key}>
+                          {option.label}{isCardioActivityMetApproved(option) ? "" : " · MET pendente"}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </Field>
               <Field label="Atividade para comparação">
                 <select className={inputClass} value={comparisonActivityKey} onChange={(event) => setComparisonActivityKey(event.target.value as CardioActivityKey)}>
-                  {cardioActivityOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                  {activityOptionsByGroup.map((group) => (
+                    <optgroup key={group.group} label={group.group}>
+                      {group.options.map((option) => (
+                        <option disabled={!isCardioActivityMetApproved(option)} key={option.key} value={option.key}>
+                          {option.label}{isCardioActivityMetApproved(option) ? "" : " · MET pendente"}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </Field>
 
               <div className="grid gap-2">
-                <ActionButton disabled={pending || !plan} tone="primary" onClick={() => setMessage("Cálculo atualizado.")}>
+                <ActionButton disabled={pending || !plan || !canCalculate} tone="primary" onClick={() => setMessage("Cálculo atualizado.")}>
                   <Activity className="size-4" />
                   Calcular
                 </ActionButton>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <ActionButton disabled={pending || !plan} onClick={saveCalculation}>
+                  <ActionButton disabled={pending || !plan || !canCalculate} onClick={saveCalculation}>
                     <Save className="size-4" />
                     Salvar cálculo
                   </ActionButton>
-                  <ActionButton disabled={pending || !plan} onClick={applyCalculation}>
+                  <ActionButton disabled={pending || !plan || !canCalculate} onClick={applyCalculation}>
                     <Send className="size-4" />
                     Calcular e aplicar plano
                   </ActionButton>
                 </div>
+                {!canCalculate ? <p className="text-[12px] font-semibold text-[#f0c76a]">Algumas atividades aguardam MET aprovado para cálculo.</p> : null}
                 {message ? <p className="text-[12px] font-semibold text-[#8fcfff]">{message}</p> : null}
               </div>
             </div>
