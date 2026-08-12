@@ -11,8 +11,8 @@ type NextLoginFormProps = {
   expectedRole?: OfficialRole;
   forgotPasswordHref?: string;
   initialErrorMessage?: string | null;
-  primaryAuxiliaryHref?: string;
-  primaryAuxiliaryLabel?: string;
+  primaryAuxiliaryHref?: string | null;
+  primaryAuxiliaryLabel?: string | null;
   roleLabel?: string;
   next?: string;
   subtitle?: string;
@@ -20,18 +20,29 @@ type NextLoginFormProps = {
   title?: string;
 };
 
-export function NextLoginForm({
-  expectedRole = "cliente",
-  forgotPasswordHref = "/login/esqueci-senha",
-  initialErrorMessage = null,
-  primaryAuxiliaryHref = "/login/primeiro-acesso",
-  primaryAuxiliaryLabel = "Primeiro acesso",
-  roleLabel = "Cliente",
-  next,
-  subtitle = "Acesse sua área de cliente para continuar",
-  supportText = "Clientes acessam somente contas ja vinculadas por um parceiro",
-  title = "Login do Cliente",
-}: NextLoginFormProps) {
+export function NextLoginForm(props: NextLoginFormProps) {
+  const {
+    expectedRole = "cliente",
+    forgotPasswordHref = "/login/esqueci-senha",
+    initialErrorMessage = null,
+    roleLabel = "Cliente",
+    next,
+    subtitle = "Acesse sua área de cliente para continuar",
+    supportText = "Clientes acessam somente contas ja vinculadas por um parceiro",
+    title = "Login do Cliente",
+  } = props;
+  const defaultPrimaryAuxiliaryHref =
+    expectedRole === "cliente" ? "/login/primeiro-acesso" : undefined;
+  const defaultPrimaryAuxiliaryLabel =
+    expectedRole === "cliente" ? "Primeiro acesso" : undefined;
+  const primaryAuxiliaryHref =
+    props.primaryAuxiliaryHref === undefined
+      ? defaultPrimaryAuxiliaryHref
+      : props.primaryAuxiliaryHref ?? undefined;
+  const primaryAuxiliaryLabel =
+    props.primaryAuxiliaryLabel === undefined
+      ? defaultPrimaryAuxiliaryLabel
+      : props.primaryAuxiliaryLabel ?? undefined;
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialErrorMessage,
   );
