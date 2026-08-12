@@ -252,7 +252,15 @@ export type PartnerClientDietTrackingEvent = {
   mealId: string | null;
 };
 
+export type PartnerClientDietTrackingCompatibility = {
+  description: string;
+  evidence: string[];
+  label: string;
+  status: "strong" | "moderate" | "weak";
+};
+
 export type PartnerClientDietTracking = {
+  compatibility: PartnerClientDietTrackingCompatibility;
   days: PartnerClientDietTrackingDay[];
   events: PartnerClientDietTrackingEvent[];
   insights: string[];
@@ -571,6 +579,58 @@ function plannedMealsForDate(plan: PartnerClientDietPlan, iso: string) {
   return (menuOptionOne.length ? menuOptionOne : day.meals).length;
 }
 
+function buildTrackingCompatibility(
+  days: PartnerClientDietTrackingDay[],
+  summary: PartnerClientDietTracking["summary"],
+): PartnerClientDietTrackingCompatibility {
+  const recordedMeals = summary.completedMeals + summary.partialMeals + summary.skippedMeals;
+  const recordedDays = days.filter((day) => day.completedMeals + day.partialMeals + day.skippedMeals > 0 || day.waterMl > 0).length;
+  const mealRecordPct = summary.plannedMeals > 0 ? Math.round((recordedMeals / summary.plannedMeals) * 100) : 0;
+  const feedbackCount = summary.notesCount + summary.photosCount;
+
+  if (summary.plannedMeals === 0) {
+    return {
+      description: "Não há refeições planejadas suficientes no período para avaliar consistência de execução.",
+      evidence: [
+        "0 refeições planejadas nos últimos 7 dias.",
+        `${recordedDays}/7 dias tiveram algum registro de água ou retorno.`,
+      ],
+      label: "Sem base suficiente",
+      status: "weak",
+    };
+  }
+
+  const status: PartnerClientDietTrackingCompatibility["status"] =
+    mealRecordPct >= 80 && recordedDays >= 5 && summary.daysWithoutRecords <= 2
+      ? "strong"
+      : mealRecordPct >= 40 || recordedDays >= 3 || feedbackCount > 0
+        ? "moderate"
+        : "weak";
+
+  const label = {
+    moderate: "Compatibilidade parcial",
+    strong: "Alta compatibilidade operacional",
+    weak: "Baixa evidência de execução",
+  }[status];
+
+  const description = {
+    moderate: "Os registros indicam uso real do acompanhamento, mas ainda têm lacunas para confirmar rotina completa.",
+    strong: "Os registros dos últimos 7 dias são consistentes com uma rotina acompanhada no app.",
+    weak: "Há pouca evidência registrada para diferenciar baixa adesão de falta de preenchimento.",
+  }[status];
+
+  return {
+    description: `${description} Esta leitura avalia registros enviados pelo Cliente; não comprova consumo real sem evidências adicionais.`,
+    evidence: [
+      `${recordedMeals}/${summary.plannedMeals} refeições planejadas tiveram algum registro.`,
+      `${recordedDays}/7 dias tiveram refeição, água ou retorno registrado.`,
+      `${summary.notesCount} nota(s) e ${summary.photosCount} foto(s) enviadas no período.`,
+    ],
+    label,
+    status,
+  };
+}
+
 function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPlan | null): PartnerClientDietTracking | null {
   if (!plan) return null;
 
@@ -672,6 +732,7 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
   ].filter(Boolean) as string[];
 
   return {
+    compatibility: buildTrackingCompatibility(trackingDays, summary),
     days: trackingDays,
     events: tracking?.events ?? [],
     insights,
