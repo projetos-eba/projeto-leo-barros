@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-03T19:34:54.655Z",
+  "generated_at": "2026-08-03T19:34:44.142Z",
   "source_name": "Biblioteca oficial de exercícios",
   "source_version": "exercise-gifs-2026-07-31",
   "items": [
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-BICICLETA",
-      "generated_at": "2026-08-03T19:34:54.643Z",
+      "generated_at": "2026-08-03T19:34:44.131Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal bicicleta",
       "original_height": 1080,
@@ -21,7 +21,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal com elevação de quadril",
       "original_height": 1080,
@@ -36,7 +36,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-CRUNCH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal crunch",
       "original_height": 1080,
@@ -51,7 +51,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-DECLINADO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal declinado",
       "original_height": 1080,
@@ -66,7 +66,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-DECLINADO-SIT-UP",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal declinado (sit-up)",
       "original_height": 1080,
@@ -81,7 +81,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-DECLINADO-COM-PESO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal declinado com peso",
       "original_height": 1080,
@@ -96,7 +96,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-INVERTIDO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal invertido",
       "original_height": 1080,
@@ -111,7 +111,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal na máquina",
       "original_height": 1080,
@@ -126,7 +126,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-NA-MAQUINA-AB-COASTER",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal na máquina ab coaster",
       "original_height": 1080,
@@ -141,7 +141,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal na polia",
       "original_height": 1080,
@@ -156,7 +156,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-SIT-UP",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal sit-up",
       "original_height": 1080,
@@ -171,7 +171,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDOMINAL-V-V-UP",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdominal V (v-up)",
       "original_height": 1080,
@@ -186,7 +186,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDUCAO-DE-QUADRIL-DEITADO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdução de quadril deitado",
       "original_height": 1080,
@@ -201,7 +201,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdução de quadril na máquina",
       "original_height": 1080,
@@ -216,7 +216,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ABDUCAO-DE-QUADRIL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Abdução de quadril na polia",
       "original_height": 1080,
@@ -231,7 +231,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AFUNDO-LUNGE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Afundo (lunge)",
       "original_height": 1080,
@@ -246,7 +246,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AFUNDO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Afundo com halteres",
       "original_height": 1080,
@@ -261,7 +261,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Afundo com rotação e kettlebell",
       "original_height": 1080,
@@ -276,7 +276,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AFUNDO-PARADO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Afundo parado com barra",
       "original_height": 1080,
@@ -291,7 +291,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-AFUNDO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento afundo com halteres",
       "original_height": 1080,
@@ -306,7 +306,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-AFUNDO-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento afundo no Smith",
       "original_height": 1080,
@@ -321,7 +321,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento búlgaro com barra",
       "original_height": 1080,
@@ -336,7 +336,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-BULGARO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento búlgaro com halteres",
       "original_height": 1080,
@@ -351,7 +351,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento com halteres",
       "original_height": 1080,
@@ -366,7 +366,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento com pausa (barra nas costas)",
       "original_height": 1080,
@@ -381,7 +381,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-COM-SALTO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento com salto",
       "original_height": 1080,
@@ -396,7 +396,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-EM-V-INVERTIDO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento em V invertido",
       "original_height": 1080,
@@ -411,7 +411,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-FRONTAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento frontal",
       "original_height": 1080,
@@ -426,7 +426,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento goblet com kettlebell",
       "original_height": 1080,
@@ -441,7 +441,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-HACK-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento hack na máquina",
       "original_height": 1080,
@@ -456,7 +456,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-NO-APARELHO-EM-V",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento no aparelho em V",
       "original_height": 1080,
@@ -471,7 +471,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento no Smith",
       "original_height": 1080,
@@ -486,7 +486,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-OVERHEAD-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento overhead com barra",
       "original_height": 1080,
@@ -501,7 +501,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-PISTOL-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento pistol (unilateral)",
       "original_height": 1080,
@@ -516,7 +516,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-PISTOL-NA-CAIXA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento pistol na caixa",
       "original_height": 1080,
@@ -531,7 +531,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-SUMO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento sumô com halteres",
       "original_height": 1080,
@@ -546,7 +546,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-SUMO-COM-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento sumô com kettlebell",
       "original_height": 1080,
@@ -561,7 +561,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-AGACHAMENTO-SUMO-LIVRE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Agachamento sumô livre",
       "original_height": 1080,
@@ -576,7 +576,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ARRANCO-SNATCH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Arranco (snatch)",
       "original_height": 1080,
@@ -591,7 +591,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ARRANCO-COM-HALTER",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Arranco com halter",
       "original_height": 1080,
@@ -606,7 +606,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ARRANCO-COM-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Arranco com kettlebell",
       "original_height": 1080,
@@ -621,7 +621,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ARRANCO-SUSPENSO-HANG-SNATCH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Arranco suspenso (hang snatch)",
       "original_height": 1080,
@@ -636,7 +636,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ARREMESSO-JERK",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Arremesso (jerk)",
       "original_height": 1080,
@@ -651,7 +651,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BALANCO-COM-KETTLEBELL-SWING",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Balanço com kettlebell (swing)",
       "original_height": 1080,
@@ -666,7 +666,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BALANCO-UNILATERAL-COM-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Balanço unilateral com kettlebell",
       "original_height": 1080,
@@ -681,7 +681,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BARRA-FIXA-PULL-UP",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Barra fixa (pull-up)",
       "original_height": 1080,
@@ -696,7 +696,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Barra fixa assistida na máquina",
       "original_height": 1080,
@@ -711,7 +711,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BARRA-FIXA-SUPINADA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Barra fixa supinada",
       "original_height": 1080,
@@ -726,7 +726,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-BOM-DIA-GOOD-MORNING",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Bom dia (good morning)",
       "original_height": 1080,
@@ -741,7 +741,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Cadeira adutora (adução de coxa)",
       "original_height": 1080,
@@ -756,7 +756,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CANIVETE-PILATES-JACKKNIFE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.140Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Canivete (pilates jackknife)",
       "original_height": 1080,
@@ -771,7 +771,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-COICE-DE-GLUTEO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Coice de glúteo",
       "original_height": 1080,
@@ -786,7 +786,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-COICE-DE-GLUTEO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Coice de glúteo na máquina",
       "original_height": 1080,
@@ -801,7 +801,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-COICE-DE-GLUTEO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Coice de glúteo na polia",
       "original_height": 1080,
@@ -816,7 +816,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CONCHA-DEITADO-DE-LADO-CLAM",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Concha deitado de lado (clam)",
       "original_height": 1080,
@@ -831,7 +831,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo com halteres",
       "original_height": 1080,
@@ -846,7 +846,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-DECLINADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo declinado com halteres",
       "original_height": 1080,
@@ -861,7 +861,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-EM-PE-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo em pé na polia",
       "original_height": 1080,
@@ -876,7 +876,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-INCLINADO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo inclinado na polia",
       "original_height": 1080,
@@ -891,7 +891,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo invertido na máquina (peck deck)",
       "original_height": 1080,
@@ -906,7 +906,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-INVERTIDO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo invertido na polia",
       "original_height": 1080,
@@ -921,7 +921,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-CRUCIFIXO-NA-POLIA-BAIXA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Crucifixo na polia baixa",
       "original_height": 1080,
@@ -936,7 +936,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DEAD-BUG-INSETO-MORTO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Dead bug (inseto morto)",
       "original_height": 1080,
@@ -951,7 +951,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento Arnold com halteres",
       "original_height": 1080,
@@ -966,7 +966,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-COM-ANILHA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento com anilha",
       "original_height": 1080,
@@ -981,7 +981,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento com halteres",
       "original_height": 1080,
@@ -996,7 +996,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento landmine",
       "original_height": 1080,
@@ -1011,7 +1011,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento landmine unilateral",
       "original_height": 1080,
@@ -1026,7 +1026,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-MILITAR",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento militar",
       "original_height": 1080,
@@ -1041,7 +1041,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento na máquina",
       "original_height": 1080,
@@ -1056,7 +1056,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento por trás da nuca",
       "original_height": 1080,
@@ -1071,7 +1071,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento sentado com barra",
       "original_height": 1080,
@@ -1086,7 +1086,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Desenvolvimento sentado com halteres",
       "original_height": 1080,
@@ -1101,7 +1101,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de glúteo e posterior (GHR)",
       "original_height": 1080,
@@ -1116,7 +1116,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de joelhos na cadeira do capitão",
       "original_height": 1080,
@@ -1131,7 +1131,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-JOELHOS-SENTADO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de joelhos sentado",
       "original_height": 1080,
@@ -1146,7 +1146,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-EM-PE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de panturrilha em pé",
       "original_height": 1080,
@@ -1161,7 +1161,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-PANTURRILHA-SENTADO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de panturrilha sentado",
       "original_height": 1080,
@@ -1176,7 +1176,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-PERNAS",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de pernas",
       "original_height": 1080,
@@ -1191,7 +1191,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-PERNAS-NA-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de pernas na barra",
       "original_height": 1080,
@@ -1206,7 +1206,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-QUADRIL-HIP-THRUST",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de quadril (hip thrust)",
       "original_height": 1080,
@@ -1221,7 +1221,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de quadril com barra (hip thrust)",
       "original_height": 1080,
@@ -1236,7 +1236,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação de quadril na máquina",
       "original_height": 1080,
@@ -1251,7 +1251,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-EM-Y-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação em Y com halteres",
       "original_height": 1080,
@@ -1266,7 +1266,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-FRONTAL-COM-BARRA-W",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação frontal com barra W",
       "original_height": 1080,
@@ -1281,7 +1281,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-FRONTAL-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação frontal com halteres",
       "original_height": 1080,
@@ -1296,7 +1296,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-FRONTAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação frontal na polia",
       "original_height": 1080,
@@ -1311,7 +1311,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral com halteres",
       "original_height": 1080,
@@ -1326,7 +1326,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral curvado com halteres",
       "original_height": 1080,
@@ -1341,7 +1341,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral na máquina",
       "original_height": 1080,
@@ -1356,7 +1356,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral na polia",
       "original_height": 1080,
@@ -1371,7 +1371,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral posterior sentado com halteres",
       "original_height": 1080,
@@ -1386,7 +1386,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elevação lateral unilateral na polia",
       "original_height": 1080,
@@ -1401,7 +1401,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ELIPTICO-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Elíptico (máquina)",
       "original_height": 1080,
@@ -1416,7 +1416,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ENCOLHIMENTO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Encolhimento com barra",
       "original_height": 1080,
@@ -1431,7 +1431,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ENCOLHIMENTO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Encolhimento com halteres",
       "original_height": 1080,
@@ -1446,7 +1446,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ENCOLHIMENTO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Encolhimento na máquina",
       "original_height": 1080,
@@ -1461,7 +1461,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ENCOLHIMENTO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Encolhimento na polia",
       "original_height": 1080,
@@ -1476,7 +1476,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ENCOLHIMENTO-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Encolhimento no Smith",
       "original_height": 1080,
@@ -1491,7 +1491,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ESCALADOR-MOUNTAIN-CLIMBER",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Escalador (mountain climber)",
       "original_height": 1080,
@@ -1506,7 +1506,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ESTEIRA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Esteira",
       "original_height": 1080,
@@ -1521,7 +1521,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de perna (cadeira extensora)",
       "original_height": 1080,
@@ -1536,7 +1536,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-PERNA-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de perna unilateral",
       "original_height": 1080,
@@ -1551,7 +1551,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps acima da cabeça na polia",
       "original_height": 1080,
@@ -1566,7 +1566,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps com halteres",
       "original_height": 1080,
@@ -1581,7 +1581,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps deitado na polia",
       "original_height": 1080,
@@ -1596,7 +1596,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps na máquina",
       "original_height": 1080,
@@ -1611,7 +1611,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps na polia",
       "original_height": 1080,
@@ -1626,7 +1626,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão de tríceps sentado com halteres",
       "original_height": 1080,
@@ -1641,7 +1641,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-EXTENSAO-LOMBAR",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Extensão lombar",
       "original_height": 1080,
@@ -1656,7 +1656,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FACE-PULL-PUXADA-FACIAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Face pull (puxada facial)",
       "original_height": 1080,
@@ -1671,7 +1671,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-ARCHER-ARQUEIRO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão archer (arqueiro)",
       "original_height": 1080,
@@ -1686,7 +1686,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-COM-PEGADA-FECHADA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão com pegada fechada",
       "original_height": 1080,
@@ -1701,7 +1701,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-BRACO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de braço",
       "original_height": 1080,
@@ -1716,7 +1716,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-PERNA-MESA-FLEXORA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de perna (mesa flexora)",
       "original_height": 1080,
@@ -1731,7 +1731,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-PERNA-COM-HALTER",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de perna com halter",
       "original_height": 1080,
@@ -1746,7 +1746,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de perna sentado (cadeira flexora)",
       "original_height": 1080,
@@ -1761,7 +1761,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de perna unilateral",
       "original_height": 1080,
@@ -1776,7 +1776,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão de perna unilateral sentado",
       "original_height": 1080,
@@ -1791,7 +1791,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-LATERAL-A-45-GRAUS",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão lateral a 45 graus",
       "original_height": 1080,
@@ -1806,7 +1806,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-LATERAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão lateral na polia",
       "original_height": 1080,
@@ -1821,7 +1821,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-FLEXAO-PIKE",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Flexão pike",
       "original_height": 1080,
@@ -1836,7 +1836,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-HIPEREXTENSAO-LOMBAR",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Hiperextensão lombar",
       "original_height": 1080,
@@ -1851,7 +1851,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEG-PRESS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Leg press",
       "original_height": 1080,
@@ -1866,7 +1866,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEG-PRESS-HORIZONTAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Leg press horizontal",
       "original_height": 1080,
@@ -1881,7 +1881,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEG-PRESS-HORIZONTAL-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Leg press horizontal unilateral",
       "original_height": 1080,
@@ -1896,7 +1896,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEG-PRESS-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.654Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Leg press unilateral",
       "original_height": 1080,
@@ -1911,7 +1911,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Levantamento terra com trap bar",
       "original_height": 1080,
@@ -1926,7 +1926,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEVANTAMENTO-TERRA-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Levantamento terra no Smith",
       "original_height": 1080,
@@ -1941,7 +1941,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Levantamento terra romeno com halteres",
       "original_height": 1080,
@@ -1956,7 +1956,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Levantamento terra sumô com pausa",
       "original_height": 1080,
@@ -1971,7 +1971,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Levantamento terra unilateral com halteres",
       "original_height": 1080,
@@ -1986,7 +1986,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Máquina de glúteo (monster glute)",
       "original_height": 1080,
@@ -2001,7 +2001,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-MERGULHO-NAS-PARALELAS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Mergulho nas paralelas",
       "original_height": 1080,
@@ -2016,7 +2016,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-MERGULHO-NO-BANCO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Mergulho no banco",
       "original_height": 1080,
@@ -2031,7 +2031,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-MERGULHO-SENTADO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Mergulho sentado na máquina",
       "original_height": 1080,
@@ -2046,7 +2046,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-MUSCLE-UP-NA-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Muscle-up na barra",
       "original_height": 1080,
@@ -2061,7 +2061,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-NADADOR-SWIMMING",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Nadador (swimming)",
       "original_height": 1080,
@@ -2076,7 +2076,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PARALELAS-ASSISTIDAS-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Paralelas assistidas na máquina",
       "original_height": 1080,
@@ -2091,7 +2091,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PES-NA-BARRA-TOES-TO-BAR",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Pés na barra (toes to bar)",
       "original_height": 1080,
@@ -2106,7 +2106,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-POLICHINELO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Polichinelo",
       "original_height": 1080,
@@ -2121,7 +2121,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PONTE-DE-GLUTEO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Ponte de glúteo",
       "original_height": 1080,
@@ -2136,7 +2136,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PONTE-DE-GLUTEO-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Ponte de glúteo unilateral",
       "original_height": 1080,
@@ -2151,7 +2151,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PRANCHA-LATERAL",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Prancha lateral",
       "original_height": 1080,
@@ -2166,7 +2166,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PRANCHA-RKC",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Prancha RKC",
       "original_height": 1080,
@@ -2181,7 +2181,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PULAR-CORDA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Pular corda",
       "original_height": 1080,
@@ -2196,7 +2196,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PULL-THROUGH-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Pull-through na polia",
       "original_height": 1080,
@@ -2211,7 +2211,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PULLOVER-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Pullover com barra",
       "original_height": 1080,
@@ -2226,7 +2226,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PULLOVER-COM-HALTER",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Pullover com halter",
       "original_height": 1080,
@@ -2241,7 +2241,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUSH-PRESS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Push press",
       "original_height": 1080,
@@ -2256,7 +2256,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-ABERTA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada aberta",
       "original_height": 1080,
@@ -2271,7 +2271,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-ABERTA-UNILATERAL",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada aberta unilateral",
       "original_height": 1080,
@@ -2286,7 +2286,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-ALTA-DO-ARRANCO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada alta do arranco",
       "original_height": 1080,
@@ -2301,7 +2301,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-ALTA-DO-TERRA-SUMO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada alta do terra sumô",
       "original_height": 1080,
@@ -2316,7 +2316,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada alta sumô com kettlebell",
       "original_height": 1080,
@@ -2331,7 +2331,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada com braços estendidos na polia",
       "original_height": 1080,
@@ -2346,7 +2346,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-COM-PEGADA-MAG",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada com pegada MAG",
       "original_height": 1080,
@@ -2361,7 +2361,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-COM-PEGADA-NEUTRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada com pegada neutra",
       "original_height": 1080,
@@ -2376,7 +2376,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-FRONTAL-PULLDOWN",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada frontal (pulldown)",
       "original_height": 1080,
@@ -2391,7 +2391,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-POR-TRAS-DA-NUCA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada por trás da nuca",
       "original_height": 1080,
@@ -2406,7 +2406,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-SUPINADA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada supinada",
       "original_height": 1080,
@@ -2421,7 +2421,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-PUXADA-UNILATERAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Puxada unilateral na polia",
       "original_height": 1080,
@@ -2436,7 +2436,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta com barra",
       "original_height": 1080,
@@ -2451,7 +2451,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-COM-BARRA-W",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta com barra W",
       "original_height": 1080,
@@ -2466,7 +2466,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta com halteres",
       "original_height": 1080,
@@ -2481,7 +2481,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta na máquina",
       "original_height": 1080,
@@ -2496,7 +2496,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta pegada supinada na máquina",
       "original_height": 1080,
@@ -2511,7 +2511,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada alta unilateral na máquina",
       "original_height": 1080,
@@ -2526,7 +2526,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-BAIXA-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada baixa na máquina",
       "original_height": 1080,
@@ -2541,7 +2541,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-BAIXA-SENTADO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada baixa sentado na polia",
       "original_height": 1080,
@@ -2556,7 +2556,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada baixa sentado no chão na polia",
       "original_height": 1080,
@@ -2571,7 +2571,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada baixa unilateral na máquina",
       "original_height": 1080,
@@ -2586,7 +2586,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-CAVALINHO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada cavalinho na máquina",
       "original_height": 1080,
@@ -2601,7 +2601,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-COM-BARRA-PEGADA-SUPINADA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada com barra pegada supinada",
       "original_height": 1080,
@@ -2616,7 +2616,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada com halteres",
       "original_height": 1080,
@@ -2631,7 +2631,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-DEITADO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada deitado com barra",
       "original_height": 1080,
@@ -2646,7 +2646,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-INCLINADA-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada inclinada com barra",
       "original_height": 1080,
@@ -2661,7 +2661,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-INCLINADA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada inclinada com halteres",
       "original_height": 1080,
@@ -2676,7 +2676,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-INVERTIDA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada invertida",
       "original_height": 1080,
@@ -2691,7 +2691,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada no Smith",
       "original_height": 1080,
@@ -2706,7 +2706,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-PENDLAY",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada Pendlay",
       "original_height": 1080,
@@ -2721,7 +2721,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-SENTADO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada sentado na máquina",
       "original_height": 1080,
@@ -2736,7 +2736,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-SENTADO-UNILATERAL-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada sentado unilateral na polia",
       "original_height": 1080,
@@ -2751,7 +2751,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMADA-UNILATERAL-COM-HALTER-SERROTE",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remada unilateral com halter (serrote)",
       "original_height": 1080,
@@ -2766,7 +2766,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-REMO-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Remo (máquina)",
       "original_height": 1080,
@@ -2781,7 +2781,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROLO-ABDOMINAL-ROLL-OUT",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rolo abdominal (roll-out)",
       "original_height": 1080,
@@ -2796,7 +2796,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-BICEPS-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de bíceps na máquina",
       "original_height": 1080,
@@ -2811,7 +2811,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de punho com barra",
       "original_height": 1080,
@@ -2826,7 +2826,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-PUNHO-COM-BARRA-W",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de punho com barra W",
       "original_height": 1080,
@@ -2841,7 +2841,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-PUNHO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de punho com halteres",
       "original_height": 1080,
@@ -2856,7 +2856,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de punho inversa com barra",
       "original_height": 1080,
@@ -2871,7 +2871,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca de punho inversa com halteres",
       "original_height": 1080,
@@ -2886,7 +2886,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DIRETA-COM-BARRA-W",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca direta com barra W",
       "original_height": 1080,
@@ -2901,7 +2901,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DIRETA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca direta com halteres",
       "original_height": 1080,
@@ -2916,7 +2916,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-DIRETA-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca direta na polia",
       "original_height": 1080,
@@ -2931,7 +2931,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-INCLINADA-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca inclinada com halteres",
       "original_height": 1080,
@@ -2946,7 +2946,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-INVERSA-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca inversa com barra",
       "original_height": 1080,
@@ -2961,7 +2961,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-MARTELO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca martelo com halteres",
       "original_height": 1080,
@@ -2976,7 +2976,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-MARTELO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca martelo na polia",
       "original_height": 1080,
@@ -2991,7 +2991,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca scott com barra",
       "original_height": 1080,
@@ -3006,7 +3006,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-SCOTT-COM-BARRA-W",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca scott com barra W",
       "original_height": 1080,
@@ -3021,7 +3021,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-SCOTT-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.141Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca scott com halteres",
       "original_height": 1080,
@@ -3036,7 +3036,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROSCA-SCOTT-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rosca scott na máquina",
       "original_height": 1080,
@@ -3051,7 +3051,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROTACAO-DE-TRONCO-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rotação de tronco na polia",
       "original_height": 1080,
@@ -3066,7 +3066,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROTACAO-EXTERNA-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rotação externa na polia",
       "original_height": 1080,
@@ -3081,7 +3081,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROTACAO-INTERNA-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rotação interna na polia",
       "original_height": 1080,
@@ -3096,7 +3096,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-ROTACAO-RUSSA-RUSSIAN-TWIST",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Rotação russa (russian twist)",
       "original_height": 1080,
@@ -3111,7 +3111,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SIMULADOR-DE-ESCADA-STEPMILL",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Simulador de escada (stepmill)",
       "original_height": 1080,
@@ -3126,7 +3126,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SKI-ERG-ERGOMETRO-DE-ESQUI",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Ski erg (ergômetro de esqui)",
       "original_height": 1080,
@@ -3141,7 +3141,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SNATCH-BALANCE",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Snatch balance",
       "original_height": 1080,
@@ -3156,7 +3156,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-STIFF-TERRA-PERNAS-RIGIDAS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Stiff (terra pernas rígidas)",
       "original_height": 1080,
@@ -3171,7 +3171,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-STIFF-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Stiff com halteres",
       "original_height": 1080,
@@ -3186,7 +3186,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-STIFF-UNILATERAL-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Stiff unilateral com barra",
       "original_height": 1080,
@@ -3201,7 +3201,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUBIDA-NO-BANCO-STEP-UP",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Subida no banco (step-up)",
       "original_height": 1080,
@@ -3216,7 +3216,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-COM-PEGADA-FECHADA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino com pegada fechada",
       "original_height": 1080,
@@ -3231,7 +3231,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-DECLINADO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino declinado na máquina",
       "original_height": 1080,
@@ -3246,7 +3246,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-COM-BARRA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado com barra",
       "original_height": 1080,
@@ -3261,7 +3261,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado com halteres",
       "original_height": 1080,
@@ -3276,7 +3276,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado com rotação e halteres",
       "original_height": 1080,
@@ -3291,7 +3291,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado na máquina",
       "original_height": 1080,
@@ -3306,7 +3306,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado na máquina (chest press)",
       "original_height": 1080,
@@ -3321,7 +3321,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-INCLINADO-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino inclinado no Smith",
       "original_height": 1080,
@@ -3336,7 +3336,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-NA-MAQUINA-CHEST-PRESS",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino na máquina (chest press)",
       "original_height": 1080,
@@ -3351,7 +3351,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-NA-MAQUINA-HAMMER",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino na máquina hammer",
       "original_height": 1080,
@@ -3366,7 +3366,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-NO-SMITH",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino no Smith",
       "original_height": 1080,
@@ -3381,7 +3381,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-RETO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino reto",
       "original_height": 1080,
@@ -3396,7 +3396,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-SUPINO-RETO-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Supino reto com halteres",
       "original_height": 1080,
@@ -3411,7 +3411,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-THRUSTER-2",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Thruster (2)",
       "original_height": 1080,
@@ -3426,7 +3426,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-THRUSTER-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Thruster com halteres",
       "original_height": 1080,
@@ -3441,7 +3441,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TOQUE-NO-OMBRO-PRANCHA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Toque no ombro (prancha)",
       "original_height": 1080,
@@ -3456,7 +3456,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TRICEPS-COICE-COM-HALTERES",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Tríceps coice com halteres",
       "original_height": 1080,
@@ -3471,7 +3471,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TRICEPS-PUSHDOWN-NA-POLIA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Tríceps pushdown na polia",
       "original_height": 1080,
@@ -3486,7 +3486,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TRICEPS-TESTA",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Tríceps testa",
       "original_height": 1080,
@@ -3501,7 +3501,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TRICEPS-TESTA-DEITADO",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Tríceps testa deitado",
       "original_height": 1080,
@@ -3516,7 +3516,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-TURKISH-GET-UP",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Turkish get-up",
       "original_height": 1080,
@@ -3531,7 +3531,7 @@
     {
       "aliases": [],
       "exercise_code": "EX-VOADOR-PECK-DECK",
-      "generated_at": "2026-08-03T19:34:54.655Z",
+      "generated_at": "2026-08-03T19:34:44.142Z",
       "media_version": "exercise-gifs-2026-07-31",
       "name": "Voador (peck deck)",
       "original_height": 1080,

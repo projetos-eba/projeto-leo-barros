@@ -14,12 +14,17 @@ Permitir que o Parceiro monte, edite, organize, publique e envie programas de tr
 - A interface usa `Clientes`; `patients` permanece apenas no schema.
 - `Cardio` agora é aba própria do perfil do Cliente. Treinos não mistura o domínio novo de Cardio, mas dados legados `cardio` fora desta aba continuam agrupados como `Treino`.
 - Exercícios prescritos referenciam `partner_protocol_exercises` e preservam snapshot de nome, imagem e grupos musculares.
+- A ação principal de adicionar exercício fica dentro da divisão, abaixo da última linha de exercício e antes da rolagem horizontal: ao clicar em `Adicionar exercício`, abre um campo compacto, a lista suspensa filtra a biblioteca conforme o nome digitado e a busca fecha ao clicar fora.
 - Um Bi-set contém exatamente dois exercícios adjacentes da mesma divisão.
+- Exercícios em Bi-set exibem bolinhas numeradas conectadas por uma linha vertical entre elas, sem faixa contínua na borda esquerda da grade.
 - A grade mostra 5 colunas de séries: séries existentes ficam editáveis, e colunas vazias aparecem como placeholders opacos clicáveis.
 - Novos exercícios entram com pelo menos 3 séries; séries adicionais copiam reps, carga e intensidade da série anterior como valor editável.
 - O volume considera apenas séries com reps e carga preenchidas.
 - O mapa muscular usa somente tons de azul e conta quantos exercícios trabalham cada grupo, considerando grupo principal e secundários uma vez por exercício: 1 exercício = nível claro, 2 a 4 = nível médio, 5 ou mais = nível forte.
 - A ordenação de exercícios é feita por setas de subir/descer no fim da linha; não há checkbox de execução do profissional.
+- Os três pontinhos de cada card de divisão permitem editar nome/objetivo/frequência e excluir a divisão quando o programa tiver mais de uma divisão.
+- A duração estimada não é exibida no card nem nos formulários de divisão.
+- O painel `Acompanhamento real` inicia recolhido por padrão e expande sob demanda, mantendo um resumo compacto visível.
 - Templates pertencem ao Parceiro, não a um Cliente, e são clonados ao aplicar.
 - Apenas um programa publicado ou enviado permanece ativo por Cliente.
 

@@ -223,6 +223,7 @@ export type PartnerClientDietTrackingDay = {
   completedMeals: number;
   dateLabel: string;
   isoDate: string;
+  kcalConsumed: number;
   partialMeals: number;
   pendingMeals: number;
   plannedMeals: number;
@@ -235,6 +236,7 @@ export type PartnerClientDietMealLog = {
   completedAtLabel: string | null;
   dateLabel: string;
   id: string;
+  kcalConsumed: number;
   mealTitle: string;
   notes: string | null;
   photoLabel: string | null;
@@ -637,6 +639,7 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
   const tracking = raw.tracking;
   const today = tracking?.today ?? isoDate(new Date(raw.generatedAt));
   const days = Array.from({ length: 7 }, (_, index) => shiftIsoDate(today, index - 6));
+  const mealsById = new Map(plan.weekDays.flatMap((day) => day.meals).map((meal) => [meal.id, meal]));
   const dailyByDate = new Map((tracking?.dailyLogs ?? []).map((log) => [log.logDate, log]));
   const mealLogs = (tracking?.mealLogs ?? []).map((log) => ({
     ...log,
@@ -659,6 +662,11 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
     const pendingMeals = Math.max(0, plannedMeals - recordedMeals);
     const adherenceBase = completedMeals + partialMeals * 0.5;
     const adherencePct = plannedMeals > 0 ? Math.round((adherenceBase / plannedMeals) * 100) : 0;
+    const kcalConsumed = roundInt(logs.reduce((total, log) => {
+      const mealKcal = mealsById.get(log.mealId)?.totals.kcal ?? 0;
+      const factor = log.status === "completed" ? 1 : log.status === "partial" ? 0.5 : 0;
+      return total + mealKcal * factor;
+    }, 0));
     const date = new Date(`${day}T12:00:00`);
 
     return {
@@ -666,6 +674,7 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
       completedMeals,
       dateLabel: dateFormatter.format(date),
       isoDate: day,
+      kcalConsumed,
       partialMeals,
       pendingMeals,
       plannedMeals,
@@ -703,7 +712,6 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
     : 0;
   summary.waterAverageMl = Math.round(summary.waterAverageMl / Math.max(1, trackingDays.length));
 
-  const mealsById = new Map(plan.weekDays.flatMap((day) => day.meals).map((meal) => [meal.id, meal]));
   const latestMealLogs = mealLogs
     .slice()
     .sort((a, b) => new Date(`${b.logDate}T12:00:00`).getTime() - new Date(`${a.logDate}T12:00:00`).getTime() || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -714,6 +722,7 @@ function buildTracking(raw: PartnerClientDietRawData, plan: PartnerClientDietPla
         completedAtLabel: log.completedAt ? dateTimeFormatter.format(new Date(log.completedAt)) : null,
         dateLabel: dateFormatter.format(new Date(`${log.logDate}T12:00:00`)),
         id: log.id,
+        kcalConsumed: roundInt((meal?.totals.kcal ?? 0) * (log.status === "completed" ? 1 : log.status === "partial" ? 0.5 : 0)),
         mealTitle: meal?.title ?? "Refeição",
         notes: log.notes,
         photoLabel: log.photoOriginalFilename,
