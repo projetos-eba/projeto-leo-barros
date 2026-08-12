@@ -13,6 +13,7 @@ dist-ssr
 .next
 deno.lock
 *.local
+*.tsbuildinfo
 
 # Environment files
 .env

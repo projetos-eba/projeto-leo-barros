@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admins: {
@@ -3835,6 +3810,7 @@ export type Database = {
           slug: string
           sort_order: number
           status: string
+          system_exam_category_id: string | null
           updated_at: string
         }
         Insert: {
@@ -3846,6 +3822,7 @@ export type Database = {
           slug: string
           sort_order?: number
           status?: string
+          system_exam_category_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -3857,6 +3834,7 @@ export type Database = {
           slug?: string
           sort_order?: number
           status?: string
+          system_exam_category_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3865,6 +3843,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_exam_categories_system_exam_category_id_fkey"
+            columns: ["system_exam_category_id"]
+            isOneToOne: false
+            referencedRelation: "system_exam_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -3881,6 +3866,7 @@ export type Database = {
           slug: string
           sort_order: number
           status: string
+          system_exam_definition_id: string | null
           updated_at: string
         }
         Insert: {
@@ -3894,6 +3880,7 @@ export type Database = {
           slug: string
           sort_order?: number
           status?: string
+          system_exam_definition_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -3907,6 +3894,7 @@ export type Database = {
           slug?: string
           sort_order?: number
           status?: string
+          system_exam_definition_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3916,6 +3904,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "partner_exam_categories"
             referencedColumns: ["id", "partner_id"]
+          },
+          {
+            foreignKeyName: "partner_exam_definitions_system_exam_definition_id_fkey"
+            columns: ["system_exam_definition_id"]
+            isOneToOne: false
+            referencedRelation: "system_exam_definitions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6229,6 +6224,168 @@ export type Database = {
           },
         ]
       }
+      system_exam_alternative_units: {
+        Row: {
+          created_at: string
+          exam_id: string
+          factor_from_default: number
+          id: string
+          status: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          factor_from_default: number
+          id?: string
+          status?: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          factor_from_default?: number
+          id?: string
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_exam_alternative_units_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "system_exam_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_exam_categories: {
+        Row: {
+          created_at: string
+          icon_key: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon_key?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon_key?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_exam_definitions: {
+        Row: {
+          category_id: string
+          created_at: string
+          default_unit: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          default_unit: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          default_unit?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_exam_definitions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "system_exam_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_exam_reference_ranges: {
+        Row: {
+          created_at: string
+          exam_id: string
+          high_value: number | null
+          id: string
+          label: string | null
+          low_value: number | null
+          sex: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          high_value?: number | null
+          id?: string
+          label?: string | null
+          low_value?: number | null
+          sex?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          high_value?: number | null
+          id?: string
+          label?: string | null
+          low_value?: number | null
+          sex?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_exam_reference_ranges_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "system_exam_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_exercise_media: {
         Row: {
           created_at: string
@@ -6990,6 +7147,10 @@ export type Database = {
         }
         Returns: string
       }
+      sync_partner_system_exam_catalog: {
+        Args: { p_partner_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -7118,9 +7279,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

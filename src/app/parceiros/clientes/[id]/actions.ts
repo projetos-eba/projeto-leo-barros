@@ -7,7 +7,8 @@ import { getCurrentProfile } from "@/lib/auth/next-guards";
 import {
   calculateCardioKcal,
   calculateCardioKcalPerMinute,
-  cardioActivities,
+  cardioActivityKeys,
+  getApprovedCardioMet,
   type CardioActivityKey,
   type CardioZoneKey,
 } from "@/lib/partners/client-cardio-metrics";
@@ -213,14 +214,7 @@ const workoutReorderSchema = z.object({
   sessionId: z.string().uuid(),
 });
 
-const cardioActivitySchema = z.enum([
-  "bicicleta_leve",
-  "caminhada_leve",
-  "caminhada_moderada",
-  "corrida_forte",
-  "corrida_moderada",
-  "eliptico",
-]);
+const cardioActivitySchema = z.enum(cardioActivityKeys);
 const cardioZoneSchema = z.enum(["z1", "z2", "z3", "z4", "z5"]);
 const cardioCalculationInputSchema = z.object({
   activityKey: cardioActivitySchema,
@@ -1145,15 +1139,16 @@ function cardioCalculationValues(input: {
   durationMinutes: number;
   weightKg: number;
 }) {
-  const activity = cardioActivities[input.activityKey];
-  const comparisonActivity = cardioActivities[input.comparisonActivityKey];
+  const met = getApprovedCardioMet(input.activityKey);
+  const comparisonMet = getApprovedCardioMet(input.comparisonActivityKey);
+  if (met === null || comparisonMet === null) return null;
   return {
-    comparisonKcalEstimate: calculateCardioKcal(input.weightKg, comparisonActivity.met, input.durationMinutes),
-    comparisonKcalPerMin: calculateCardioKcalPerMinute(input.weightKg, comparisonActivity.met),
-    comparisonMet: comparisonActivity.met,
-    kcalEstimate: calculateCardioKcal(input.weightKg, activity.met, input.durationMinutes),
-    kcalPerMin: calculateCardioKcalPerMinute(input.weightKg, activity.met),
-    met: activity.met,
+    comparisonKcalEstimate: calculateCardioKcal(input.weightKg, comparisonMet, input.durationMinutes),
+    comparisonKcalPerMin: calculateCardioKcalPerMinute(input.weightKg, comparisonMet),
+    comparisonMet,
+    kcalEstimate: calculateCardioKcal(input.weightKg, met, input.durationMinutes),
+    kcalPerMin: calculateCardioKcalPerMinute(input.weightKg, met),
+    met,
   };
 }
 
@@ -1247,6 +1242,7 @@ export async function saveClientCardioCalculation(
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
   const values = cardioCalculationValues(parsed.data);
+  if (!values) return { error: "Atividade aguardando MET aprovado para cálculo.", ok: false };
   const { data, error } = await workoutDb(context).from("partner_client_cardio_calculations")
     .insert({
       activity_key: parsed.data.activityKey,
@@ -1327,13 +1323,14 @@ export async function registerClientCardioSession(
   const context = await getPartnerContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const activity = cardioActivities[parsed.data.activityKey];
+  const met = getApprovedCardioMet(parsed.data.activityKey);
+  if (met === null) return { error: "Atividade aguardando MET aprovado para cálculo.", ok: false };
   const { data, error } = await workoutDb(context).from("partner_client_cardio_sessions")
     .insert({
       activity_key: parsed.data.activityKey,
       duration_minutes: parsed.data.durationMinutes,
-      kcal_estimate: calculateCardioKcal(parsed.data.weightKg, activity.met, parsed.data.durationMinutes),
-      met: activity.met,
+      kcal_estimate: calculateCardioKcal(parsed.data.weightKg, met, parsed.data.durationMinutes),
+      met,
       notes: normalizeNullable(parsed.data.notes),
       partner_id: context.partnerId,
       patient_id: parsed.data.patientId,

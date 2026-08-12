@@ -28,6 +28,10 @@ vi.mock("@/app/login/actions", () => ({
 
 const routerReplace = vi.fn();
 const routerRefresh = vi.fn();
+const routerBack = vi.fn();
+const routerForward = vi.fn();
+const routerPrefetch = vi.fn();
+const routerPush = vi.fn();
 const mockedUseRouter = vi.mocked(useRouter);
 const mockedGetEmailVerificationStatus = vi.mocked(getEmailVerificationStatus);
 const mockedResendEmailVerification = vi.mocked(resendEmailVerification);
@@ -46,10 +50,18 @@ describe("EmailVerificationPendingView", () => {
   beforeEach(() => {
     routerReplace.mockReset();
     routerRefresh.mockReset();
+    routerBack.mockReset();
+    routerForward.mockReset();
+    routerPrefetch.mockReset();
+    routerPush.mockReset();
     mockedUseRouter.mockReturnValue({
+      back: routerBack,
+      forward: routerForward,
+      prefetch: routerPrefetch,
+      push: routerPush,
       replace: routerReplace,
       refresh: routerRefresh,
-    } as ReturnType<typeof useRouter>);
+    });
     mockedGetEmailVerificationStatus.mockReset();
     mockedResendEmailVerification.mockReset();
     mockedLoginWithPassword.mockReset();

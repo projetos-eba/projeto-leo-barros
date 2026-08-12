@@ -9,6 +9,7 @@ Use este checklist antes de publicar codigo que depende de schema novo.
 - Confirmar branch, SHA e PR.
 - Verificar `npm run git:local -- status --short`.
 - Rodar `npm ci`.
+- Rodar `npm run typecheck`.
 - Rodar `npm run ci:schema`.
 - Rodar `npm run lint`.
 - Rodar `npm run test`.
@@ -33,3 +34,13 @@ Use este checklist antes de publicar codigo que depende de schema novo.
 - Validar via Playwright MCP o fluxo afetado.
 - Registrar evidencias em `docs/test-reports/<escopo>-YYYY-MM-DD/`.
 - Manter PR sem merge automatico ate revisao.
+
+## Branches e release
+
+O fluxo oficial de release esta em `docs/engineering-governance.md`:
+
+```text
+feature/* ou fix/* -> dev -> homolog -> main
+```
+
+`main` representa producao. PRs para `main` devem vir de `homolog`, exceto hotfix documentado.

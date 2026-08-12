@@ -7,6 +7,7 @@ import {
   workoutTrainingTypeLabel,
   workoutVolume,
   type PartnerClientWorkoutExercise,
+  type PartnerClientWorkoutSession,
 } from "./client-workout-metrics";
 
 const exercises: PartnerClientWorkoutExercise[] = [
@@ -52,7 +53,7 @@ describe("client workout metrics", () => {
   });
 
   it("deriva tipo de treino pelos grupos musculares", () => {
-    expect(workoutTrainingTypeLabel({
+    const pushSession: PartnerClientWorkoutSession = {
       durationMinutes: 60,
       exercises,
       frequencyPerWeek: 2,
@@ -61,8 +62,8 @@ describe("client workout metrics", () => {
       sortOrder: 0,
       title: "Treino A",
       volumeKg: 980,
-    })).toBe("Peito e Tríceps");
-    expect(workoutTrainingTypeLabel({
+    };
+    const defaultSession: PartnerClientWorkoutSession = {
       durationMinutes: 60,
       exercises: [],
       frequencyPerWeek: 2,
@@ -71,7 +72,10 @@ describe("client workout metrics", () => {
       sortOrder: 1,
       title: "Treino B",
       volumeKg: 0,
-    })).toBe("Costas e Bíceps");
+    };
+
+    expect(workoutTrainingTypeLabel(pushSession)).toBe("Peito e Tríceps");
+    expect(workoutTrainingTypeLabel(defaultSession)).toBe("Costas e Bíceps");
   });
 
   it("seleciona programa publicado e normaliza reps padrão", () => {

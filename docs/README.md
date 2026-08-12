@@ -15,6 +15,7 @@ Leia estes documentos como fonte atual:
 | `integracao-local-next-supabase.md` | Como o app Next conversa com o Supabase local. |
 | `database-migrations.md` | Regras de schema, migrations, testes SQL e tipos Supabase. |
 | `deployment-database-checklist.md` | Checklist de deploy quando codigo depende de schema novo. |
+| `engineering-governance.md` | Politica de PR, branches, release, CI e migracao TypeScript strict. |
 | `runbooks/supabase-schema-drift.md` | Diagnostico e resposta para drift entre Git e Supabase remoto. |
 | `sitemap-projeto-leo-barros.md` | Arquitetura alvo de rotas por Cliente, Parceiros e Admin. |
 | `DESIGN_SYSTEM.md` | Fundacao visual, tokens e padroes de interface. |

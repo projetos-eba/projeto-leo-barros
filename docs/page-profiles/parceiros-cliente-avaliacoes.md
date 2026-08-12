@@ -34,6 +34,8 @@
 - Avaliação física: resultado calculado da última avaliação, faixas de IMC/% gordura/FFMI, dobras cutâneas e circunferências reais salvas em tabelas normalizadas.
 - Histórico de avaliações: tabela técnica com data, protocolo, peso, IMC, FFMI, percentual de gordura, massa magra e massa gorda, com ações para visualizar e editar uma avaliação específica.
 - Análise gráfica: composição corporal, distribuição de dobras e painel de circunferências com seleção de variáveis e modos `Dinâmico/Stack`, `Geral/Por região/Radar`.
+- Na composição corporal, quando somente `% Gordura` ou somente `FFMI` estiver selecionado, o gráfico exibe faixas horizontais interpretativas sobre a linha histórica. As faixas foram aprovadas operacionalmente pelos prints fornecidos em 2026-08-10 e ficam centralizadas em domínio TypeScript; não devem ser tratadas como diagnóstico médico isolado.
+- Para `FFMI`, a linha de referência `25` aparece como limite natural de referência. A UI deve manter linguagem inequívoca de que FFMI isolado não comprova uso de substâncias.
 - Drawer/modal: nova avaliação e edição de avaliação existente com dados corporais, metodologia, dobras, circunferências, meta, prazo, atividade e observações.
 
 ## Segurança

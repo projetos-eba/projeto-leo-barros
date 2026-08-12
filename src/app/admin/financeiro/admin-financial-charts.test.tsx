@@ -52,9 +52,9 @@ const data = [
 ];
 
 const revenueData = [
-  { label: "jan/26", mrr: 120, newRevenue: 24 },
-  { label: "fev/26", mrr: 132, newRevenue: 18 },
-  { label: "mar/26", mrr: 141, newRevenue: 32 },
+  { label: "jan/26", month: "2026-01", mrr: 120, newRevenue: 24 },
+  { label: "fev/26", month: "2026-02", mrr: 132, newRevenue: 18 },
+  { label: "mar/26", month: "2026-03", mrr: 141, newRevenue: 32 },
 ];
 
 describe("RevenueTrendChart", () => {

@@ -1752,7 +1752,8 @@ begin
     name,
     icon_key,
     sort_order,
-    status
+    status,
+    system_exam_category_id
   )
   select distinct on (category_slug)
     target_partner_id,
@@ -1760,15 +1761,19 @@ begin
     category_name,
     category_icon,
     category_order,
-    'active'
-  from tmp_partner_exam_seed
+    'active',
+    system_category.id
+  from tmp_partner_exam_seed seed
+  left join public.system_exam_categories system_category
+    on system_category.slug = seed.category_slug
   order by category_slug, category_order
   on conflict (partner_id, slug) do update
   set
     name = excluded.name,
     icon_key = excluded.icon_key,
     sort_order = excluded.sort_order,
-    status = 'active';
+    status = 'active',
+    system_exam_category_id = excluded.system_exam_category_id;
 
   insert into public.partner_exam_definitions (
     partner_id,
@@ -1777,7 +1782,8 @@ begin
     name,
     default_unit,
     sort_order,
-    status
+    status,
+    system_exam_definition_id
   )
   select
     target_partner_id,
@@ -1786,18 +1792,22 @@ begin
     seed.exam_name,
     seed.default_unit,
     seed.exam_order,
-    'active'
+    'active',
+    system_definition.id
   from tmp_partner_exam_seed seed
   join public.partner_exam_categories category
     on category.partner_id = target_partner_id
    and category.slug = seed.category_slug
+  left join public.system_exam_definitions system_definition
+    on system_definition.slug = seed.exam_slug
   on conflict (partner_id, slug) do update
   set
     category_id = excluded.category_id,
     name = excluded.name,
     default_unit = excluded.default_unit,
     sort_order = excluded.sort_order,
-    status = 'active';
+    status = 'active',
+    system_exam_definition_id = excluded.system_exam_definition_id;
 
   insert into public.partner_exam_reference_ranges (
     partner_id,

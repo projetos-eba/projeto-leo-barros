@@ -227,6 +227,75 @@ export type AssessmentKpi = {
   value: number | null;
 };
 
+export const compositionMetricDefinitions = [
+  { key: "bodyFatPercentage", label: "% Gordura", suffix: "%" },
+  { key: "weightKg", label: "Peso corporal", suffix: " kg" },
+  { key: "fatMassKg", label: "Massa gorda", suffix: " kg" },
+  { key: "leanMassKg", label: "Massa magra", suffix: " kg" },
+  { key: "ffmi", label: "FFMI", suffix: "" },
+  { key: "muscleMassKg", label: "Massa muscular", suffix: " kg" },
+] as const;
+
+export type CompositionMetricKey = typeof compositionMetricDefinitions[number]["key"];
+
+export type AssessmentReferenceBand = {
+  fill: string;
+  key: string;
+  label: string;
+  max: number;
+  min: number;
+  tone: string;
+};
+
+export type AssessmentReferenceLine = {
+  label: string;
+  value: number;
+};
+
+export type AssessmentReferenceProfile = {
+  bands: AssessmentReferenceBand[];
+  description: string;
+  line?: AssessmentReferenceLine;
+  source: string;
+};
+
+export const bodyFatReferenceProfile: AssessmentReferenceProfile = {
+  bands: [
+    { fill: "#1d4f86", key: "essential", label: "Gordura essencial", max: 6, min: 0, tone: "text-[#8fcfff]" },
+    { fill: "#087f5b", key: "athletes", label: "Atletas", max: 14, min: 6, tone: "text-[#58a067]" },
+    { fill: "#4f9d63", key: "fitness", label: "Fitness/Saudável", max: 18, min: 14, tone: "text-[#9bd36f]" },
+    { fill: "#c6a340", key: "acceptable", label: "Aceitável", max: 25, min: 18, tone: "text-[#f0c76a]" },
+    { fill: "#c46b33", key: "overweight", label: "Sobrepeso", max: 30, min: 25, tone: "text-[#f48c58]" },
+    { fill: "#9f2537", key: "obesity", label: "Obesidade", max: 55, min: 30, tone: "text-[#ff7b8e]" },
+  ],
+  description: "Referência visual operacional fornecida em print pelo produto. Não representa diagnóstico médico isolado.",
+  source: "Prints do usuário em 2026-08-10.",
+};
+
+export const ffmiReferenceProfile: AssessmentReferenceProfile = {
+  bands: [
+    { fill: "#c6a340", key: "population_average", label: "Média populacional", max: 20, min: 18, tone: "text-[#f0c76a]" },
+    { fill: "#7aa957", key: "good_muscular_development", label: "Bom desenvolvimento muscular", max: 22, min: 20, tone: "text-[#9bd36f]" },
+    { fill: "#17864f", key: "high_muscular_development", label: "Alto desenvolvimento muscular", max: 25, min: 22, tone: "text-[#58a067]" },
+    { fill: "#9f2537", key: "exceptional_reference", label: "Faixa excepcional de referência", max: 35, min: 25, tone: "text-[#ff7b8e]" },
+  ],
+  description: "Referência visual operacional fornecida em print pelo produto. FFMI isolado não comprova uso de substâncias.",
+  line: { label: "Limite natural de referência (Casey Butt)", value: 25 },
+  source: "Prints do usuário em 2026-08-10.",
+};
+
+export function getCompositionReferenceProfile(metricKey: string): AssessmentReferenceProfile | null {
+  if (metricKey === "bodyFatPercentage") return bodyFatReferenceProfile;
+  if (metricKey === "ffmi") return ffmiReferenceProfile;
+  return null;
+}
+
+export function classifyByReferenceProfile(value: number | null, profile: AssessmentReferenceProfile | null) {
+  if (value === null || !profile) return { label: "Sem dados", tone: "text-[#8b92a3]" };
+  const band = profile.bands.find((item) => value >= item.min && value < item.max) ?? profile.bands.at(-1);
+  return { label: band?.label ?? "Sem dados", tone: band?.tone ?? "text-[#8b92a3]" };
+}
+
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "2-digit",
@@ -379,6 +448,22 @@ export function buildChartDomain(
 ): [number, number] {
   return buildDynamicNumberDomain(
     rows.flatMap((row) => keys.map((key) => row[key]).filter((value): value is number => typeof value === "number")),
+    paddingRatio,
+  );
+}
+
+export function buildReferenceChartDomain(
+  rows: Array<Record<string, number | string | null>>,
+  keys: string[],
+  profile: AssessmentReferenceProfile | null,
+  paddingRatio = 0.1,
+): [number, number] {
+  return buildDynamicNumberDomain(
+    [
+      ...rows.flatMap((row) => keys.map((key) => row[key]).filter((value): value is number => typeof value === "number")),
+      ...(profile?.bands.flatMap((band) => [band.min, band.max]) ?? []),
+      ...(profile?.line ? [profile.line.value] : []),
+    ],
     paddingRatio,
   );
 }
