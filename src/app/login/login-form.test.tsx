@@ -104,4 +104,18 @@ describe("NextLoginForm", () => {
       });
     });
   });
+
+  it("nao herda primeiro acesso no login de admin", () => {
+    render(
+      <NextLoginForm
+        expectedRole="admin"
+        primaryAuxiliaryHref={null}
+        primaryAuxiliaryLabel={null}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /Primeiro acesso/i }),
+    ).not.toBeInTheDocument();
+  });
 });
