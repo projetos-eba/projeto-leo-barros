@@ -144,6 +144,11 @@ describe("client-diet-metrics", () => {
     expect(data.tracking?.summary.adherencePct).toBe(50);
     expect(data.tracking?.summary.partialMeals).toBe(1);
     expect(data.tracking?.summary.notesCount).toBe(1);
+    expect(data.tracking?.compatibility).toMatchObject({
+      label: "Compatibilidade parcial",
+      status: "moderate",
+    });
+    expect(data.tracking?.compatibility.description).toContain("não comprova consumo real");
     expect(data.tracking?.mealLogs[0]).toMatchObject({ mealTitle: "Almoço", statusLabel: "Parcial" });
   });
 });

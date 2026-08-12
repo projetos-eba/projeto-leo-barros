@@ -33,7 +33,7 @@ Base reutilizável de protocolos do parceiro, com alimentos e exercícios usados
 - Busca, filtros por categoria/origem ou grupo/equipamento, status e modos tabela/cards.
 - Drawer de novo/editar alimento com porção, macros, micronutrientes, tags e usos sugeridos.
 - Drawer de novo/editar exercício com grupo, equipamento, nível, objetivo, prescrição padrão, vídeo YouTube/Vimeo e orientações.
-- Drawer `Importar TACO` para alimentos globais com busca, categoria TACO, macronutriente, seleção da página, seleção dos resultados filtrados, importação selecionada e importação total.
+- Drawer `Importar TACO` para alimentos globais com busca, categoria TACO, macronutriente, seleção da página, seleção dos resultados filtrados, importação selecionada e importação total apenas de itens ainda não importados.
 - Drawer `Exercícios oficiais` com busca, grupo muscular, equipamento, seleção em lote, indicação de itens já importados, poster inicial e preview animado sob demanda.
 - Drawer `CSV/TSV` para alimentos via planilha própria do parceiro.
 - Botão `Usar em plano` registra rascunho no banco para uso futuro em Dietas/Treinos.
@@ -46,6 +46,7 @@ Base reutilizável de protocolos do parceiro, com alimentos e exercícios usados
 - Não exibir `Cardio`; quando houver condicionamento, usar linguagem de `Condicionamento`.
 - `Cadastro` guarda bases reutilizáveis, não dados clínicos individuais.
 - Importar novamente o mesmo item global não gera duplicata; a chave única é `partner_id + system_*_id`.
+- Alimentos TACO já importados aparecem com indicação de estado, mas não ficam selecionáveis nas ações do drawer.
 - Itens arquivados podem ser reativados por nova importação.
 - Customizações locais não alteram o catálogo global.
 - Valores nulos da fonte TACO permanecem nulos no snapshot; campos operacionais privados respeitam constraints legadas.

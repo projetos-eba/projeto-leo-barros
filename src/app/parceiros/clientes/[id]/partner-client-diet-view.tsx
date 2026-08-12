@@ -313,6 +313,11 @@ function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
 
   const summary = tracking.summary;
   const waterTarget = diet.plan?.waterLiters ? `${formatNumber(diet.plan.waterLiters, 1)} L/dia` : "meta não definida";
+  const compatibilityTone = {
+    moderate: "border-[#6b5420] bg-[#2f260d]/55 text-[#ffd45a]",
+    strong: "border-[#1d7041] bg-[#102d21]/65 text-[#73e59b]",
+    weak: "border-[#8a2c3a] bg-[#35141b]/65 text-[#ff8f9a]",
+  }[tracking.compatibility.status];
 
   return (
     <Panel className="mt-5 overflow-hidden p-0">
@@ -347,6 +352,22 @@ function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
             ))}
           </div>
 
+          <div className={cn("mt-4 rounded-[12px] border p-4", compatibilityTone)}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.06em] opacity-80">Compatibilidade dos registros</p>
+                <h3 className="mt-1 text-[16px] font-bold text-white">{tracking.compatibility.label}</h3>
+              </div>
+              <span className="rounded-full border border-current px-2.5 py-1 text-[11px] font-bold">Últimos 7 dias</span>
+            </div>
+            <p className="mt-2 text-[12px] leading-5 text-[#d8e5ee]">{tracking.compatibility.description}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {tracking.compatibility.evidence.map((item) => (
+                <span className="rounded-[8px] border border-[#303746] bg-[#081722]/55 p-2 text-[11px] leading-4 text-[#c7d3df]" key={item}>{item}</span>
+              ))}
+            </div>
+          </div>
+
           {tracking.insights.length ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {tracking.insights.map((insight) => (
@@ -373,8 +394,14 @@ function DietTrackingPanel({ diet }: { diet: PartnerClientDietData }) {
 }
 
 function MealCard({
+  inlineFoodOptions,
+  inlineFoodQuery,
+  inlineSearchOpen,
   meal,
+  onAddInlineFood,
   onAddFood,
+  onCloseInlineSearch,
+  onInlineFoodQueryChange,
   onRemoveMeal,
   onRemoveItem,
   onUpdateItem,
@@ -382,8 +409,14 @@ function MealCard({
   quantityEdits,
   setQuantityEdits,
 }: {
+  inlineFoodOptions: PartnerClientDietFood[];
+  inlineFoodQuery: string;
+  inlineSearchOpen: boolean;
   meal: PartnerClientDietMeal;
+  onAddInlineFood: (food: PartnerClientDietFood) => void;
   onAddFood: (mealId: string) => void;
+  onCloseInlineSearch: () => void;
+  onInlineFoodQueryChange: (value: string) => void;
   onRemoveItem: (itemId: string) => void;
   onRemoveMeal: (mealId: string) => void;
   onUpdateItem: (itemId: string, quantity: number) => void;
@@ -449,6 +482,43 @@ function MealCard({
         <button className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-[#55b4ff] hover:text-white" type="button" onClick={() => onAddFood(meal.id)}>
           <Plus className="size-4" /> Adicionar alimento
         </button>
+        {inlineSearchOpen ? (
+          <div className="mt-3 rounded-[10px] border border-[#273847] bg-[#081722]/75 p-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
+              <input
+                aria-label={`Buscar alimento para ${meal.title}`}
+                autoFocus
+                className={inputClass("pl-9")}
+                placeholder="Digite para buscar alimento..."
+                value={inlineFoodQuery}
+                onChange={(event) => onInlineFoodQueryChange(event.target.value)}
+              />
+            </div>
+            <div className="mt-2 grid gap-1">
+              {inlineFoodOptions.length ? inlineFoodOptions.map((food) => (
+                <button
+                  aria-label={`Adicionar ${food.name} à refeição ${meal.title}`}
+                  className="grid gap-2 rounded-[8px] border border-transparent px-3 py-2 text-left text-[12px] transition hover:border-[#2f82bf] hover:bg-[#0a2c48]/45 sm:grid-cols-[minmax(0,1fr)_70px_92px]"
+                  disabled={pending}
+                  key={food.id}
+                  type="button"
+                  onClick={() => onAddInlineFood(food)}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold text-white">{food.name}</span>
+                    <span className="mt-0.5 block text-[11px] text-[#6f8090]">{food.categoryLabel}</span>
+                  </span>
+                  <span className="text-[#c7d3df]">{food.servingLabel}</span>
+                  <span className="text-[#8b92a3]">P {macroText(food.protein)} · {formatNumber(food.kcal)} kcal</span>
+                </button>
+              )) : (
+                <div className="rounded-[8px] border border-dashed border-[#303746] px-3 py-3 text-[12px] text-[#8b92a3]">Nenhum alimento encontrado.</div>
+              )}
+            </div>
+            <button className="mt-2 text-[12px] font-semibold text-[#8fcfff] hover:text-white" type="button" onClick={onCloseInlineSearch}>Fechar busca</button>
+          </div>
+        ) : null}
       </div>
     </Panel>
   );
@@ -463,6 +533,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   const [foodQuery, setFoodQuery] = useState("");
   const [foodCategory, setFoodCategory] = useState("all");
   const [targetMealId, setTargetMealId] = useState<string | null>(diet.plan?.weekDays.find((day) => day.meals.length > 0)?.meals[0]?.id ?? null);
+  const [inlineFoodMealId, setInlineFoodMealId] = useState<string | null>(null);
+  const [inlineFoodQuery, setInlineFoodQuery] = useState("");
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
   const [objectiveDialogOpen, setObjectiveDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
@@ -491,6 +563,13 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
       return matchesQuery && matchesCategory;
     });
   }, [diet.library, foodCategory, foodQuery, foodTab]);
+  const inlineFoodOptions = useMemo(() => {
+    const query = inlineFoodQuery.trim().toLowerCase();
+    const source = query ? diet.foods : diet.library.suggestions;
+    return source
+      .filter((food) => !query || food.searchText.includes(query))
+      .slice(0, 6);
+  }, [diet.foods, diet.library.suggestions, inlineFoodQuery]);
 
   function runAction(action: () => Promise<{ error?: string; ok: boolean }>) {
     startTransition(async () => {
@@ -549,17 +628,29 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
     });
   }
 
-  function addFood(food: PartnerClientDietFood) {
+  function addFoodToMeal(food: PartnerClientDietFood, mealId: string | null) {
     const plan = diet.plan;
-    if (!plan || !targetMealId) return;
+    if (!plan || !mealId) return;
     runAction(() => addClientDietMealItem({
       draftId: draftByFoodId.get(food.id) ?? null,
       foodId: food.id,
-      mealId: targetMealId,
+      mealId,
       patientId: overview.client.id,
       planId: plan.id,
       quantity: food.servingSize,
     }));
+    setInlineFoodMealId(null);
+    setInlineFoodQuery("");
+  }
+
+  function addFood(food: PartnerClientDietFood) {
+    addFoodToMeal(food, targetMealId);
+  }
+
+  function openInlineFoodSearch(mealId: string) {
+    setTargetMealId(mealId);
+    setInlineFoodMealId(mealId);
+    setInlineFoodQuery("");
   }
 
   return (
@@ -608,7 +699,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
               })}
             </div>
 
-            <div className="mt-5 grid gap-4 sm:mt-7 xl:grid-cols-[0.96fr_1.04fr]">
+            <div className="mt-5 grid gap-4 sm:mt-7 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
               <div className="min-w-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[22px] font-bold uppercase tracking-[0.01em] text-white sm:text-[28px]">Plano alimentar</h2>
@@ -632,12 +723,21 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                 <div className="grid gap-4">
                   {currentMeals.length ? currentMeals.map((meal) => (
                     <MealCard
+                      inlineFoodOptions={inlineFoodMealId === meal.id ? inlineFoodOptions : []}
+                      inlineFoodQuery={inlineFoodMealId === meal.id ? inlineFoodQuery : ""}
+                      inlineSearchOpen={inlineFoodMealId === meal.id}
                       key={meal.id}
                       meal={meal}
                       pending={pending}
                       quantityEdits={quantityEdits}
                       setQuantityEdits={setQuantityEdits}
-                      onAddFood={(mealId) => setTargetMealId(mealId)}
+                      onAddFood={openInlineFoodSearch}
+                      onAddInlineFood={(food) => addFoodToMeal(food, meal.id)}
+                      onCloseInlineSearch={() => {
+                        setInlineFoodMealId(null);
+                        setInlineFoodQuery("");
+                      }}
+                      onInlineFoodQueryChange={setInlineFoodQuery}
                       onRemoveMeal={(mealId) => diet.plan && runAction(() => removeClientDietMeal({ mealId, patientId: overview.client.id, planId: diet.plan!.id }))}
                       onRemoveItem={(itemId) => diet.plan && runAction(() => removeClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id }))}
                       onUpdateItem={(itemId, quantity) => diet.plan && runAction(() => updateClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id, quantity }))}
