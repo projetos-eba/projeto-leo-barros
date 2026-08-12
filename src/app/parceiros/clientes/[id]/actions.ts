@@ -174,6 +174,19 @@ const workoutSessionSchema = z.object({
   programId: z.string().uuid(),
   title: z.string().trim().min(1).max(80),
 });
+const workoutSessionUpdateSchema = z.object({
+  frequencyPerWeek: z.number().int().min(1).max(14),
+  objective: workoutObjectiveSchema,
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  title: z.string().trim().min(1).max(80),
+});
+const workoutSessionDeleteSchema = z.object({
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+});
 const workoutExerciseSchema = z.object({
   exerciseId: z.string().uuid(),
   patientId: patientIdSchema,
@@ -859,6 +872,47 @@ export async function createClientWorkoutSession(input: z.input<typeof workoutSe
   await recordWorkoutEvent(context, { detail: `${parsed.data.title} criado.`, eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
   revalidateClient(parsed.data.patientId);
   return { id: session.id, message: "Divisão criada.", ok: true };
+}
+
+export async function updateClientWorkoutSession(input: z.input<typeof workoutSessionUpdateSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionUpdateSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da divisão.", ok: false };
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { error } = await db.from("partner_workout_sessions").update({
+    frequency_per_week: parsed.data.frequencyPerWeek,
+    objective: parsed.data.objective,
+    title: parsed.data.title,
+  })
+    .eq("id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  if (error) return { error: "Não foi possível atualizar a divisão.", ok: false };
+  await recordWorkoutEvent(context, { detail: `${parsed.data.title} atualizado.`, eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClient(parsed.data.patientId);
+  return { message: "Divisão atualizada.", ok: true };
+}
+
+export async function deleteClientWorkoutSession(input: z.input<typeof workoutSessionDeleteSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionDeleteSchema.safeParse(input);
+  if (!parsed.success) return { error: "Divisão inválida.", ok: false };
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data: sessions } = await db.from("partner_workout_sessions").select("id")
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  const sessionRows = sessions as Array<{ id: string }> | null;
+  if ((sessionRows?.length ?? 0) <= 1) return { error: "Mantenha ao menos uma divisão no programa.", ok: false };
+  const { error } = await db.from("partner_workout_sessions").delete()
+    .eq("id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  if (error) return { error: "Não foi possível excluir a divisão.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Divisão excluída.", eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClient(parsed.data.patientId);
+  return { message: "Divisão excluída.", ok: true };
 }
 
 export async function addClientWorkoutExercise(input: z.input<typeof workoutExerciseSchema>): Promise<ClientOverviewActionResult> {

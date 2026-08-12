@@ -8,7 +8,9 @@ import {
   addClientWorkoutExercise,
   addClientWorkoutSet,
   combineClientWorkoutBiset,
+  deleteClientWorkoutSession,
   reorderClientWorkoutExercises,
+  updateClientWorkoutSession,
 } from "./actions";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
 
@@ -21,6 +23,7 @@ vi.mock("./actions", () => ({
   combineClientWorkoutBiset: vi.fn(),
   createClientWorkoutProgram: vi.fn(),
   createClientWorkoutSession: vi.fn(),
+  deleteClientWorkoutSession: vi.fn(),
   duplicateClientWorkoutProgram: vi.fn(),
   publishClientWorkoutProgram: vi.fn(),
   removeClientWorkoutExercise: vi.fn(),
@@ -30,6 +33,7 @@ vi.mock("./actions", () => ({
   saveClientWorkoutTemplate: vi.fn(),
   sendClientWorkoutProgram: vi.fn(),
   updateClientWorkoutExercise: vi.fn(),
+  updateClientWorkoutSession: vi.fn(),
   updateClientWorkoutSet: vi.fn(),
   uncombineClientWorkoutBiset: vi.fn(),
 }));
@@ -143,7 +147,9 @@ describe("PartnerClientWorkoutView", () => {
     vi.mocked(addClientWorkoutExercise).mockResolvedValue({ ok: true });
     vi.mocked(addClientWorkoutSet).mockResolvedValue({ ok: true });
     vi.mocked(combineClientWorkoutBiset).mockResolvedValue({ ok: true });
+    vi.mocked(deleteClientWorkoutSession).mockResolvedValue({ ok: true });
     vi.mocked(reorderClientWorkoutExercises).mockResolvedValue({ ok: true });
+    vi.mocked(updateClientWorkoutSession).mockResolvedValue({ ok: true });
   });
   afterEach(() => {
     cleanup();
@@ -155,6 +161,9 @@ describe("PartnerClientWorkoutView", () => {
     expect(screen.getByText("Prescrição de Treinos")).toBeInTheDocument();
     expect(screen.getByText("Biblioteca de exercícios")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento real")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Acompanhamento real/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Volume realizado")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Acompanhamento real/i }));
     expect(screen.getByText("Volume realizado")).toBeInTheDocument();
     expect(screen.getAllByText("Desenvolvimento").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
@@ -167,7 +176,9 @@ describe("PartnerClientWorkoutView", () => {
 
   it("adiciona exercício, sugere nova série e combina Bi-set", async () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
-    fireEvent.click(screen.getByRole("button", { name: "Adicionar Remada curvada" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar exercício" }));
+    fireEvent.change(screen.getByLabelText("Buscar exercício para Treino A"), { target: { value: "remada" } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar Remada curvada ao Treino A" }));
     await waitFor(() => expect(addClientWorkoutExercise).toHaveBeenCalled());
 
     fireEvent.click(screen.getByRole("button", { name: "Criar série 2 para Supino reto" }));
@@ -189,6 +200,46 @@ describe("PartnerClientWorkoutView", () => {
         "e2000000-0000-4000-8000-000000000302",
         "e2000000-0000-4000-8000-000000000301",
       ],
+    })));
+  });
+
+  it("edita e exclui divisão pelos três pontinhos", async () => {
+    const workoutWithTwoSessions: PartnerClientWorkoutData = {
+      ...workout,
+      activeProgram: workout.activeProgram ? {
+        ...workout.activeProgram,
+        sessions: [
+          ...workout.activeProgram.sessions,
+          {
+            durationMinutes: 50,
+            exercises: [],
+            frequencyPerWeek: 1,
+            id: "e2000000-0000-4000-8000-000000000202",
+            objective: "forca",
+            sortOrder: 1,
+            title: "Treino B",
+            volumeKg: 0,
+          },
+        ],
+      } : null,
+    };
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(<PartnerClientWorkoutView overview={overview} workout={workoutWithTwoSessions} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Treino A" }));
+    fireEvent.click(screen.getByRole("button", { name: "Editar divisão" }));
+    fireEvent.change(screen.getByLabelText("Nome da divisão"), { target: { value: "Treino Push" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar divisão" }));
+    await waitFor(() => expect(updateClientWorkoutSession).toHaveBeenCalledWith(expect.objectContaining({
+      sessionId: "e2000000-0000-4000-8000-000000000201",
+      title: "Treino Push",
+    })));
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Treino A" }));
+    fireEvent.click(screen.getByRole("button", { name: "Excluir divisão" }));
+    await waitFor(() => expect(deleteClientWorkoutSession).toHaveBeenCalledWith(expect.objectContaining({
+      sessionId: "e2000000-0000-4000-8000-000000000201",
     })));
   });
 });
