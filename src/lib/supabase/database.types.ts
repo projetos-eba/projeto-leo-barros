@@ -9,6 +9,99 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_audit_events: {
+        Row: {
+          action_key: string
+          actor_profile_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          outcome: string
+          request_id: string | null
+          resource_id: string | null
+          resource_type: string
+          target_profile_id: string | null
+        }
+        Insert: {
+          action_key: string
+          actor_profile_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          request_id?: string | null
+          resource_id?: string | null
+          resource_type: string
+          target_profile_id?: string | null
+        }
+        Update: {
+          action_key?: string
+          actor_profile_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          request_id?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          target_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_audit_events_target_profile_id_fkey"
+            columns: ["target_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_role_assignments: {
+        Row: {
+          assigned_by_profile_id: string | null
+          created_at: string
+          profile_id: string
+          role_key: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by_profile_id?: string | null
+          created_at?: string
+          profile_id: string
+          role_key: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by_profile_id?: string | null
+          created_at?: string
+          profile_id?: string
+          role_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_role_assignments_assigned_by_profile_id_fkey"
+            columns: ["assigned_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_role_assignments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admins: {
         Row: {
           created_at: string
@@ -6717,6 +6810,14 @@ export type Database = {
         Args: { p_actor_profile_id: string }
         Returns: boolean
       }
+      admin_assign_role: {
+        Args: {
+          p_actor_profile_id: string
+          p_role_key: string
+          p_target_profile_id: string
+        }
+        Returns: string
+      }
       admin_create_user_record: {
         Args: {
           p_actor_profile_id: string
@@ -6740,6 +6841,54 @@ export type Database = {
           profile_id: string
           result_status: string
         }[]
+      }
+      admin_has_capability: { Args: { p_capability: string }; Returns: boolean }
+      admin_record_audit_event: {
+        Args: {
+          p_action_key: string
+          p_actor_profile_id: string
+          p_metadata?: Json
+          p_outcome?: string
+          p_request_id?: string
+          p_resource_id?: string
+          p_resource_type: string
+          p_target_profile_id?: string
+        }
+        Returns: string
+      }
+      admin_security_auth_events: {
+        Args: { p_limit?: number; p_target_profile_id?: string }
+        Returns: {
+          action_key: string
+          created_at: string
+          event_id: string
+          ip_hint: string
+          profile_id: string
+          profile_role: string
+        }[]
+      }
+      admin_security_sessions: {
+        Args: { p_limit?: number; p_target_profile_id?: string }
+        Returns: {
+          assurance_level: string
+          created_at: string
+          expires_at: string
+          ip_hint: string
+          mfa_factor_id: string
+          profile_id: string
+          profile_role: string
+          refreshed_at: string
+          session_id: string
+          user_agent_hint: string
+        }[]
+      }
+      admin_set_professional_status: {
+        Args: {
+          p_actor_profile_id: string
+          p_partner_id: string
+          p_status: string
+        }
+        Returns: string
       }
       admin_update_user_record: {
         Args: {
@@ -6890,9 +7039,11 @@ export type Database = {
         Returns: string
       }
       current_active_admin_id: { Args: never; Returns: string }
+      current_active_admin_profile_id: { Args: never; Returns: string }
       current_active_partner_id: { Args: never; Returns: string }
       current_active_patient_id: { Args: never; Returns: string }
       current_active_profile_id: { Args: never; Returns: string }
+      current_admin_role: { Args: never; Returns: string }
       current_client_diet_plan: {
         Args: { target_date?: string }
         Returns: {

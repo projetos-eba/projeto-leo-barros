@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildPartnerClientCardio, type PartnerClientCardioRawData } from "@/lib/partners/client-cardio-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import { buildPartnerClientCardio, type PartnerClientCardioRawData } from "@/lib/partners/client-profile/cardio";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   applyClientCardioCalculation,
@@ -10,7 +10,7 @@ import {
   removeClientCardioSession,
   saveClientCardioCalculation,
   updateClientCardioPlan,
-} from "./actions";
+} from "./_actions/cardio";
 import { PartnerClientCardioView } from "./partner-client-cardio-view";
 
 const refresh = vi.fn();
@@ -19,7 +19,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh }),
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/cardio", () => ({
   applyClientCardioCalculation: vi.fn(),
   registerClientCardioSession: vi.fn(),
   removeClientCardioSession: vi.fn(),
@@ -137,6 +137,9 @@ describe("PartnerClientCardioView", () => {
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByRole("heading", { name: "Calculadora de Cardio" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comparativo Calórico" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Peso corporal")).toHaveClass("w-full", "min-w-0");
+    expect(screen.getByLabelText("Tipo de atividade")).toHaveClass("w-full", "min-w-0");
+    expect(screen.getByRole("button", { name: /Calcular e aplicar plano/i })).toHaveClass("w-full", "min-w-0");
     expect(screen.queryByRole("heading", { name: "Zonas de Frequência Cardíaca" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Zona-alvo")).not.toBeInTheDocument();
     expect(screen.getByText("Realizado na semana")).toBeInTheDocument();

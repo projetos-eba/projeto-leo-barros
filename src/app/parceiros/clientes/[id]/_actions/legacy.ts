@@ -1,0 +1,2317 @@
+"use server";
+
+import { z } from "zod";
+
+import {
+  calculateCardioKcal,
+  calculateCardioKcalPerMinute,
+  getApprovedCardioMet,
+  type CardioActivityKey,
+  type CardioZoneKey,
+} from "@/lib/partners/client-profile/cardio";
+import {
+  assessmentMethodUsesSkinfoldFormula,
+  assessmentProtocolSkinfolds,
+  calculateAgeFromBirthDate,
+  calculatePhysicalAssessment,
+  getFormulaEligibility,
+  type AssessmentActivityLevel,
+  type AssessmentBiologicalSex,
+} from "@/lib/partners/client-profile/assessments";
+import {
+  classifyExamValue,
+  convertExamValueToDefault,
+  patientReferenceSex,
+  type ExamReferenceSex,
+} from "@/lib/partners/client-profile/exams";
+import type { Json } from "@/lib/supabase/database.types";
+
+import {
+  applyCalculationSchema,
+  assessmentSchema,
+  calorieCalculationSchema,
+  completeClientProfileSchema,
+} from "./assessment-schemas";
+import {
+  cardioCalculationInputSchema,
+  cardioSessionIdSchema,
+  cardioSessionSchema,
+} from "./cardio-schemas";
+import {
+  photoComparisonNoteSchema,
+  photoSessionIdSchema,
+  photoSessionSchema,
+} from "./photo-schemas";
+import {
+  examCategorySchema,
+  examCollectionIdSchema,
+  examCollectionSchema,
+  examDefinitionIdSchema,
+  examDefinitionSchema,
+} from "./exam-schemas";
+import {
+  dietItemIdSchema,
+  dietItemSchema,
+  dietItemUpdateSchema,
+  dietMealIdSchema,
+  dietMealSchema,
+  dietNotesSchema,
+  dietPlanIdSchema,
+  dietPlanSchema,
+  dietPlanTargetsSchema,
+} from "./diet-schemas";
+
+import {
+  getPartnerActionContext,
+  normalizeNullable,
+  revalidateClientProfile,
+  revalidatePartnerClients,
+  type ClientProfileActionResult,
+} from "./shared";
+
+export type ClientOverviewActionResult = ClientProfileActionResult;
+
+const patientIdSchema = z.string().uuid();
+
+const workoutObjectiveSchema = z.enum(["forca", "hipertrofia", "resistencia", "mobilidade", "reabilitacao", "condicionamento"]);
+const workoutTechniqueSchema = z.enum(["normal", "biset", "dropset", "rest_pause", "superset", "cluster", "isometria"]);
+const workoutIntensitySchema = z.enum(["warmup", "moderate", "maximum"]);
+const workoutProgramSchema = z.object({
+  patientId: patientIdSchema,
+  sessions: z.array(z.object({
+    durationMinutes: z.number().int().min(5).max(300),
+    frequencyPerWeek: z.number().int().min(1).max(14),
+    objective: workoutObjectiveSchema,
+    title: z.string().trim().min(1).max(80),
+  })).min(1).max(8).optional(),
+  title: z.string().trim().min(2).max(140),
+});
+const workoutSessionSchema = z.object({
+  durationMinutes: z.number().int().min(5).max(300),
+  frequencyPerWeek: z.number().int().min(1).max(14),
+  objective: workoutObjectiveSchema,
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+  title: z.string().trim().min(1).max(80),
+});
+const workoutSessionUpdateSchema = z.object({
+  frequencyPerWeek: z.number().int().min(1).max(14),
+  objective: workoutObjectiveSchema,
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  title: z.string().trim().min(1).max(80),
+});
+const workoutSessionDeleteSchema = z.object({
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+});
+const workoutExerciseSchema = z.object({
+  exerciseId: z.string().uuid(),
+  patientId: patientIdSchema,
+  sessionId: z.string().uuid(),
+  variationName: z.string().trim().max(140).nullable(),
+});
+const workoutSetSchema = z.object({
+  intensity: workoutIntensitySchema,
+  loadKg: z.number().min(0).max(2000).nullable(),
+  patientId: patientIdSchema,
+  reps: z.number().int().min(1).max(500).nullable(),
+  setId: z.string().uuid(),
+});
+const workoutExerciseUpdateSchema = z.object({
+  cadence: z.string().trim().max(40).nullable(),
+  exerciseId: z.string().uuid(),
+  notes: z.string().trim().max(300).nullable(),
+  patientId: patientIdSchema,
+  restSeconds: z.number().int().min(0).max(600),
+  technique: workoutTechniqueSchema.exclude(["biset"]),
+  variationName: z.string().trim().max(140).nullable(),
+});
+const workoutIdSchema = z.object({
+  patientId: patientIdSchema,
+  programId: z.string().uuid(),
+});
+const workoutNotesSchema = workoutIdSchema.extend({
+  notes: z.string().trim().max(2000).nullable(),
+});
+const workoutBisetSchema = z.object({
+  firstExerciseId: z.string().uuid(),
+  patientId: patientIdSchema,
+  secondExerciseId: z.string().uuid(),
+});
+const workoutReorderSchema = z.object({
+  exerciseIds: z.array(z.string().uuid()).min(1).max(100),
+  patientId: patientIdSchema,
+  sessionId: z.string().uuid(),
+});
+
+type WorkoutQueryResult = {
+  data: unknown;
+  error: { message: string } | null;
+};
+
+type WorkoutQuery = PromiseLike<WorkoutQueryResult> & {
+  delete(): WorkoutQuery;
+  eq(column: string, value: unknown): WorkoutQuery;
+  in(column: string, values: unknown[]): WorkoutQuery;
+  insert(values: unknown): WorkoutQuery;
+  limit(value: number): WorkoutQuery;
+  maybeSingle(): WorkoutQuery;
+  order(column: string, options?: { ascending?: boolean }): WorkoutQuery;
+  select(columns?: string): WorkoutQuery;
+  single(): WorkoutQuery;
+  update(values: unknown): WorkoutQuery;
+  upsert(values: unknown, options?: { onConflict?: string }): WorkoutQuery;
+};
+
+type WorkoutDb = {
+  from(table: string): WorkoutQuery;
+  rpc(name: string, params: Record<string, unknown>): PromiseLike<WorkoutQueryResult>;
+};
+
+function workoutDb(context: Awaited<ReturnType<typeof getPartnerActionContext>>) {
+  return context.supabase as unknown as WorkoutDb;
+}
+
+function parseExerciseDefaultReps(value: unknown) {
+  const parsed = Number(String(value ?? "").match(/\d+/)?.[0] ?? 10);
+  return Math.max(1, Math.min(500, parsed));
+}
+
+function slugify(value: string) {
+  const slug = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return slug || "categoria";
+}
+
+export async function saveClientAssessment(
+  input: z.input<typeof assessmentSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = assessmentSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da avaliação.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data: patient, error: patientError } = await context.supabase
+    .from("patients")
+    .select("birth_date, biological_sex")
+    .eq("id", parsed.data.patientId)
+    .maybeSingle();
+  if (patientError || !patient) return { error: "Não foi possível validar os dados do Cliente.", ok: false };
+
+  const physicalResult = calculatePhysicalAssessment({
+    age: calculateAgeFromBirthDate(patient.birth_date ?? null, new Date(parsed.data.assessedAt)),
+    assessmentMethod: parsed.data.assessmentMethod,
+    biologicalSex: (patient.biological_sex ?? "not_informed") as AssessmentBiologicalSex,
+    bodyFatPercentage: parsed.data.bodyFatPercentage,
+    heightCm: parsed.data.heightCm,
+    skinfolds: parsed.data.skinfolds,
+    weightKg: parsed.data.weightKg,
+  });
+  if (physicalResult.status === "missing_inputs" || physicalResult.status === "invalid_inputs") {
+    return { error: physicalResult.reason ?? "Revise os dados da avaliação.", ok: false };
+  }
+
+  let previousAssessedAt: string | null = null;
+  if (parsed.data.assessmentId) {
+    const { data: existingAssessment, error: existingAssessmentError } = await context.supabase
+      .from("partner_client_assessments")
+      .select("assessed_at")
+      .eq("id", parsed.data.assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .maybeSingle();
+    if (existingAssessmentError || !existingAssessment) return { error: "Não foi possível localizar a avaliação.", ok: false };
+    previousAssessedAt = existingAssessment.assessed_at;
+  }
+
+  const requiredSkinfolds = assessmentProtocolSkinfolds[parsed.data.assessmentMethod];
+  const savedSkinfolds = assessmentMethodUsesSkinfoldFormula(parsed.data.assessmentMethod)
+    ? parsed.data.skinfolds.filter((skinfold) => requiredSkinfolds.includes(skinfold.metricKey))
+    : parsed.data.skinfolds;
+
+  const assessmentPayload = {
+    activity_level: parsed.data.activityLevel,
+    assessment_method: parsed.data.assessmentMethod,
+    assessed_at: parsed.data.assessedAt,
+    body_fat_percentage: physicalResult.bodyFatPercentage,
+    height_cm: parsed.data.heightCm,
+    muscle_mass_kg: parsed.data.muscleMassKg,
+    notes: normalizeNullable(parsed.data.notes),
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+    target_days: parsed.data.targetDays,
+    target_weight_kg: parsed.data.targetWeightKg,
+    title: parsed.data.title,
+    weight_kg: parsed.data.weightKg,
+  };
+
+  let assessmentId = parsed.data.assessmentId ?? null;
+
+  if (assessmentId) {
+    const { error } = await context.supabase
+      .from("partner_client_assessments")
+      .update(assessmentPayload)
+      .eq("id", assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId);
+
+    if (error) return { error: "Não foi possível atualizar a avaliação.", ok: false };
+
+    const { error: deleteError } = await context.supabase
+      .from("partner_client_assessment_circumferences")
+      .delete()
+      .eq("assessment_id", assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId);
+
+    if (deleteError) return { error: "Não foi possível atualizar as medidas.", ok: false };
+
+    const { error: skinfoldDeleteError } = await context.supabase
+      .from("partner_client_assessment_skinfolds")
+      .delete()
+      .eq("assessment_id", assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId);
+
+    if (skinfoldDeleteError) return { error: "Não foi possível atualizar as dobras cutâneas.", ok: false };
+  } else {
+    const { data, error } = await context.supabase
+      .from("partner_client_assessments")
+      .insert(assessmentPayload)
+      .select("id")
+      .single();
+
+    if (error || !data) return { error: "Não foi possível salvar a avaliação.", ok: false };
+    assessmentId = data.id;
+  }
+
+  if (parsed.data.circumferences.length > 0) {
+    const { error } = await context.supabase.from("partner_client_assessment_circumferences").insert(
+      parsed.data.circumferences.map((circumference) => ({
+        assessment_id: assessmentId,
+        metric_key: circumference.metricKey,
+        partner_id: context.partnerId,
+        patient_id: parsed.data.patientId,
+        value_cm: circumference.valueCm,
+      })),
+    );
+
+    if (error) return { error: "Não foi possível salvar as circunferências.", ok: false };
+  }
+
+  if (savedSkinfolds.length > 0) {
+    const { error } = await context.supabase.from("partner_client_assessment_skinfolds").insert(
+      savedSkinfolds.map((skinfold) => ({
+        assessment_id: assessmentId,
+        metric_key: skinfold.metricKey,
+        partner_id: context.partnerId,
+        patient_id: parsed.data.patientId,
+        value_mm: skinfold.valueMm,
+      })),
+    );
+
+    if (error) return { error: "Não foi possível salvar as dobras cutâneas.", ok: false };
+  }
+
+  const bodyMeasurementPayload = {
+    body_fat_percentage: physicalResult.bodyFatPercentage,
+    measured_at: parsed.data.assessedAt,
+    notes: normalizeNullable(parsed.data.notes),
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+    weight_kg: parsed.data.weightKg,
+  };
+
+  if (parsed.data.assessmentId && previousAssessedAt) {
+    const { data: existingMeasurement, error: measurementLookupError } = await context.supabase
+      .from("partner_client_body_measurements")
+      .select("id")
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("measured_at", previousAssessedAt)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (measurementLookupError) return { error: "Avaliação atualizada, mas a Visão Geral não foi sincronizada.", ok: false };
+
+    const { error } = existingMeasurement
+      ? await context.supabase
+        .from("partner_client_body_measurements")
+        .update(bodyMeasurementPayload)
+        .eq("id", existingMeasurement.id)
+        .eq("partner_id", context.partnerId)
+        .eq("patient_id", parsed.data.patientId)
+      : await context.supabase.from("partner_client_body_measurements").insert(bodyMeasurementPayload);
+
+    if (error) return { error: "Avaliação atualizada, mas a Visão Geral não foi sincronizada.", ok: false };
+  } else {
+    const { error } = await context.supabase.from("partner_client_body_measurements").insert(bodyMeasurementPayload);
+    if (error) return { error: "Avaliação salva, mas a Visão Geral não foi sincronizada.", ok: false };
+  }
+
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: parsed.data.assessmentId ? "Avaliação atualizada." : "Avaliação salva.", ok: true };
+}
+
+export async function saveClientCalorieCalculation(
+  input: z.input<typeof calorieCalculationSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = calorieCalculationSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o cálculo calórico.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const [{ data: patient, error: patientError }, { data: relationship, error: relationshipError }] = await Promise.all([
+    context.supabase
+    .from("patients")
+    .select("biological_sex")
+    .eq("id", parsed.data.patientId)
+    .maybeSingle(),
+    context.supabase
+      .from("partner_clients")
+      .select("id")
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("status", "active")
+      .maybeSingle(),
+  ]);
+  if (patientError || relationshipError) return { error: "Não foi possível validar os dados do Cliente.", ok: false };
+  if (!patient || !relationship) return { error: "Cliente não encontrado.", ok: false };
+
+  let bodyFatPercentage: number | null = null;
+  if (parsed.data.assessmentId) {
+    const { data: assessment, error: assessmentError } = await context.supabase
+      .from("partner_client_assessments")
+      .select("body_fat_percentage")
+      .eq("id", parsed.data.assessmentId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .maybeSingle();
+    if (assessmentError) return { error: "Não foi possível validar a avaliação.", ok: false };
+    if (!assessment) return { error: "Avaliação não encontrada.", ok: false };
+    bodyFatPercentage = assessment.body_fat_percentage;
+  }
+  const inputs = parsed.data.inputs as {
+    activityLevel?: AssessmentActivityLevel;
+  };
+  const eligibility = getFormulaEligibility({
+    activityLevel: inputs.activityLevel ?? "moderate",
+    age: 1,
+    biologicalSex: (patient?.biological_sex ?? "not_informed") as AssessmentBiologicalSex,
+    bodyFatPercentage,
+    heightCm: 100,
+    targetDays: parsed.data.targetDays,
+    targetWeightKg: parsed.data.targetWeightKg,
+    weightKg: 20,
+  });
+  if (eligibility[parsed.data.formula].status !== "available") {
+    return { error: eligibility[parsed.data.formula].reason ?? "Dados insuficientes para esta fórmula.", ok: false };
+  }
+
+  const { data, error } = await context.supabase
+    .from("partner_client_calorie_calculations")
+    .insert({
+      activity_factor: parsed.data.activityFactor,
+      assessment_id: parsed.data.assessmentId,
+      bmr_kcal: parsed.data.bmrKcal,
+      daily_energy_delta_kcal: parsed.data.dailyEnergyDeltaKcal,
+      formula: parsed.data.formula,
+      inputs: parsed.data.inputs as Json,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      projected_weight_delta_kg: parsed.data.projectedWeightDeltaKg,
+      status: "saved",
+      target_days: parsed.data.targetDays,
+      target_kcal: parsed.data.targetKcal,
+      target_weight_kg: parsed.data.targetWeightKg,
+      tdee_kcal: parsed.data.tdeeKcal,
+      weekly_energy_delta_kcal: parsed.data.weeklyEnergyDeltaKcal,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) return { error: "Não foi possível salvar o cálculo.", ok: false };
+
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: data.id, message: "Cálculo salvo.", ok: true };
+}
+
+export async function completePartnerClientProfile(
+  input: z.input<typeof completeClientProfileSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = completeClientProfileSchema.safeParse(input);
+  if (!parsed.success || new Date(`${parsed.data?.birthDate ?? ""}T12:00:00`) > new Date()) {
+    return { error: "Revise os dados cadastrais do Cliente.", ok: false };
+  }
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { data, error } = await context.supabase.rpc("complete_partner_client_profile", {
+    p_biological_sex: parsed.data.biologicalSex,
+    p_birth_date: parsed.data.birthDate,
+    p_objective: parsed.data.objective,
+    p_patient_id: parsed.data.patientId,
+  });
+  if (error || !data) return { error: "Não foi possível atualizar o cadastro do Cliente.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Cadastro atualizado.", ok: true };
+}
+
+export async function applyClientCalorieCalculation(
+  input: z.input<typeof applyCalculationSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = applyCalculationSchema.safeParse(input);
+  if (!parsed.success) return { error: "Cálculo inválido.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error: resetError } = await context.supabase
+    .from("partner_client_calorie_calculations")
+    .update({ status: "saved" })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .eq("status", "applied");
+
+  if (resetError) return { error: "Não foi possível atualizar o plano.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_calorie_calculations")
+    .update({ status: "applied" })
+    .eq("id", parsed.data.calculationId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível aplicar o cálculo.", ok: false };
+
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Cálculo aplicado ao plano atual.", ok: true };
+}
+
+async function recordWorkoutEvent(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  input: { detail: string; eventType: string; patientId: string | null; programId: string; version?: number },
+) {
+  if (!context.partnerId) return;
+  await workoutDb(context).from("partner_workout_events").insert({
+    actor_name: context.profileName,
+    detail: input.detail,
+    event_type: input.eventType,
+    partner_id: context.partnerId,
+    patient_id: input.patientId,
+    program_id: input.programId,
+    version: input.version ?? 1,
+  });
+}
+
+export async function createClientWorkoutProgram(input: z.input<typeof workoutProgramSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutProgramSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados do treino.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data, error } = await db.from("partner_workout_programs").insert({
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+    program_kind: "client",
+    status: "draft",
+    title: parsed.data.title,
+  }).select("id").single();
+  const program = data as { id: string } | null;
+  if (error || !program) return { error: "Não foi possível criar o programa.", ok: false };
+  const sessions = parsed.data.sessions?.length
+    ? parsed.data.sessions
+    : [{ durationMinutes: 60, frequencyPerWeek: 2, objective: "hipertrofia" as const, title: "Treino A" }];
+  const { error: sessionError } = await db.from("partner_workout_sessions").insert(
+    sessions.map((session, index) => ({
+      duration_minutes: session.durationMinutes,
+      frequency_per_week: session.frequencyPerWeek,
+      objective: session.objective,
+      partner_id: context.partnerId,
+      program_id: program.id,
+      sort_order: index,
+      title: session.title,
+    })),
+  );
+  if (sessionError) return { error: "Programa criado, mas não foi possível criar as divisões.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Programa de treinos criado.", eventType: "created", patientId: parsed.data.patientId, programId: program.id });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: program.id, message: "Programa criado.", ok: true };
+}
+
+export async function createClientWorkoutSession(input: z.input<typeof workoutSessionSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da divisão.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data: rows } = await db.from("partner_workout_sessions").select("sort_order")
+    .eq("partner_id", context.partnerId).eq("program_id", parsed.data.programId)
+    .order("sort_order", { ascending: false }).limit(1);
+  const last = (rows as Array<{ sort_order: number }> | null)?.[0]?.sort_order ?? -1;
+  const { data, error } = await db.from("partner_workout_sessions").insert({
+    duration_minutes: parsed.data.durationMinutes,
+    frequency_per_week: parsed.data.frequencyPerWeek,
+    objective: parsed.data.objective,
+    partner_id: context.partnerId,
+    program_id: parsed.data.programId,
+    sort_order: last + 1,
+    title: parsed.data.title,
+  }).select("id").single();
+  const session = data as { id: string } | null;
+  if (error || !session) return { error: "Não foi possível criar a divisão.", ok: false };
+  await recordWorkoutEvent(context, { detail: `${parsed.data.title} criado.`, eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: session.id, message: "Divisão criada.", ok: true };
+}
+
+export async function updateClientWorkoutSession(input: z.input<typeof workoutSessionUpdateSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionUpdateSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da divisão.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { error } = await db.from("partner_workout_sessions").update({
+    frequency_per_week: parsed.data.frequencyPerWeek,
+    objective: parsed.data.objective,
+    title: parsed.data.title,
+  })
+    .eq("id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  if (error) return { error: "Não foi possível atualizar a divisão.", ok: false };
+  await recordWorkoutEvent(context, { detail: `${parsed.data.title} atualizado.`, eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Divisão atualizada.", ok: true };
+}
+
+export async function deleteClientWorkoutSession(input: z.input<typeof workoutSessionDeleteSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionDeleteSchema.safeParse(input);
+  if (!parsed.success) return { error: "Divisão inválida.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data: sessions } = await db.from("partner_workout_sessions").select("id")
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  const sessionRows = sessions as Array<{ id: string }> | null;
+  if ((sessionRows?.length ?? 0) <= 1) return { error: "Mantenha ao menos uma divisão no programa.", ok: false };
+  const { error } = await db.from("partner_workout_sessions").delete()
+    .eq("id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("program_id", parsed.data.programId);
+  if (error) return { error: "Não foi possível excluir a divisão.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Divisão excluída.", eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Divisão excluída.", ok: true };
+}
+
+export async function addClientWorkoutExercise(input: z.input<typeof workoutExerciseSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutExerciseSchema.safeParse(input);
+  if (!parsed.success) return { error: "Exercício inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const [exerciseResult, orderResult] = await Promise.all([
+    db.from("partner_protocol_exercises")
+      .select("id,name,muscle_group,secondary_muscle_groups,default_sets,default_reps,rest_seconds,cadence,thumbnail_url")
+      .eq("id", parsed.data.exerciseId).eq("partner_id", context.partnerId).maybeSingle(),
+    db.from("partner_workout_exercises").select("sort_order")
+      .eq("partner_id", context.partnerId).eq("session_id", parsed.data.sessionId)
+      .order("sort_order", { ascending: false }).limit(1),
+  ]);
+  const { data: exerciseData, error: exerciseError } = exerciseResult;
+  const library = exerciseData as {
+    cadence: string | null; default_reps: string; default_sets: number; id: string;
+    muscle_group: string; name: string; rest_seconds: number;
+    secondary_muscle_groups: string[]; thumbnail_url: string | null;
+  } | null;
+  if (exerciseError || !library) return { error: "Exercício não encontrado em Cadastros.", ok: false };
+  const { data: orderRows } = orderResult;
+  const lastOrder = (orderRows as Array<{ sort_order: number }> | null)?.[0]?.sort_order ?? -1;
+  const { data, error } = await db.from("partner_workout_exercises").insert({
+    cadence: library.cadence,
+    exercise_id: library.id,
+    partner_id: context.partnerId,
+    rest_seconds: library.rest_seconds,
+    session_id: parsed.data.sessionId,
+    snapshot_muscle_group: library.muscle_group,
+    snapshot_name: library.name,
+    snapshot_secondary_muscle_groups: library.secondary_muscle_groups ?? [],
+    snapshot_thumbnail_url: library.thumbnail_url,
+    sort_order: lastOrder + 1,
+    technique: "normal",
+    variation_name: parsed.data.variationName,
+  }).select("id").single();
+  const prescribed = data as { id: string } | null;
+  if (error || !prescribed) return { error: "Não foi possível adicionar o exercício.", ok: false };
+  const reps = parseExerciseDefaultReps(library.default_reps);
+  const setCount = Math.max(3, Math.min(6, library.default_sets));
+  const { error: setError } = await db.from("partner_workout_sets").insert(
+    Array.from({ length: setCount }, (_, index) => ({
+      intensity: index === 0 ? "warmup" : "moderate",
+      partner_id: context.partnerId,
+      prescribed_exercise_id: prescribed.id,
+      reps,
+      set_number: index + 1,
+    })),
+  );
+  if (setError) return { error: "Exercício adicionado, mas as séries não foram criadas.", ok: false };
+  return { id: prescribed.id, message: "Exercício adicionado.", ok: true };
+}
+
+export async function updateClientWorkoutSet(input: z.input<typeof workoutSetSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSetSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a série.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_sets").update({
+    intensity: parsed.data.intensity,
+    load_kg: parsed.data.loadKg,
+    reps: parsed.data.reps,
+  }).eq("id", parsed.data.setId).eq("partner_id", context.partnerId);
+  if (error) return { error: "Não foi possível atualizar a série.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Série atualizada.", ok: true };
+}
+
+export async function addClientWorkoutSet(input: { exerciseId: string; patientId: string }): Promise<ClientOverviewActionResult> {
+  const parsed = z.object({ exerciseId: z.string().uuid(), patientId: patientIdSchema }).safeParse(input);
+  if (!parsed.success) return { error: "Exercício inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data } = await db.from("partner_workout_sets").select("set_number,reps,load_kg,intensity")
+    .eq("partner_id", context.partnerId).eq("prescribed_exercise_id", parsed.data.exerciseId)
+    .order("set_number", { ascending: false }).limit(1);
+  const previous = (data as Array<{ intensity: string; load_kg: number | null; reps: number | null; set_number: number }> | null)?.[0];
+  if (previous && previous.set_number >= 12) return { error: "Limite de séries atingido.", ok: false };
+  const { error } = await db.from("partner_workout_sets").insert({
+    intensity: previous?.intensity ?? "moderate",
+    load_kg: previous?.load_kg ?? null,
+    partner_id: context.partnerId,
+    prescribed_exercise_id: parsed.data.exerciseId,
+    reps: previous?.reps ?? null,
+    set_number: (previous?.set_number ?? 0) + 1,
+  });
+  if (error) return { error: "Não foi possível adicionar a série.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Série adicionada com a sugestão anterior.", ok: true };
+}
+
+export async function removeClientWorkoutSet(input: { patientId: string; setId: string }): Promise<ClientOverviewActionResult> {
+  const parsed = z.object({ patientId: patientIdSchema, setId: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) return { error: "Série inválida.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_sets").delete()
+    .eq("id", parsed.data.setId).eq("partner_id", context.partnerId);
+  if (error) return { error: "Não foi possível remover a série.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Série removida.", ok: true };
+}
+
+export async function updateClientWorkoutExercise(input: z.input<typeof workoutExerciseUpdateSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutExerciseUpdateSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o exercício.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_exercises").update({
+    cadence: parsed.data.cadence,
+    notes: parsed.data.notes,
+    rest_seconds: parsed.data.restSeconds,
+    technique: parsed.data.technique,
+    variation_name: parsed.data.variationName,
+  }).eq("id", parsed.data.exerciseId).eq("partner_id", context.partnerId);
+  if (error) return { error: "Não foi possível atualizar o exercício.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Exercício atualizado.", ok: true };
+}
+
+export async function removeClientWorkoutExercise(input: { exerciseId: string; patientId: string }): Promise<ClientOverviewActionResult> {
+  const parsed = z.object({ exerciseId: z.string().uuid(), patientId: patientIdSchema }).safeParse(input);
+  if (!parsed.success) return { error: "Exercício inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_exercises").delete()
+    .eq("id", parsed.data.exerciseId).eq("partner_id", context.partnerId);
+  if (error) return { error: "Não foi possível remover o exercício.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Exercício removido.", ok: true };
+}
+
+export async function combineClientWorkoutBiset(input: z.input<typeof workoutBisetSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutBisetSchema.safeParse(input);
+  if (!parsed.success || parsed.data.firstExerciseId === parsed.data.secondExerciseId) return { error: "Selecione dois exercícios.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  const { data: pairData } = await db.from("partner_workout_exercises").select("id,session_id,sort_order")
+    .eq("partner_id", context.partnerId)
+    .in("id", [parsed.data.firstExerciseId, parsed.data.secondExerciseId]);
+  const pair = pairData as Array<{ id: string; session_id: string; sort_order: number }> | null;
+  if (!pair || pair.length !== 2 || pair[0].session_id !== pair[1].session_id || Math.abs(pair[0].sort_order - pair[1].sort_order) !== 1) {
+    return { error: "O Bi-set exige dois exercícios adjacentes da mesma divisão.", ok: false };
+  }
+  const groupId = crypto.randomUUID();
+  const first = await db.from("partner_workout_exercises").update({ biset_group_id: groupId, biset_position: 1, technique: "biset" })
+    .eq("id", parsed.data.firstExerciseId).eq("partner_id", context.partnerId);
+  if (first.error) return { error: "Não foi possível criar o Bi-set.", ok: false };
+  const second = await db.from("partner_workout_exercises").update({ biset_group_id: groupId, biset_position: 2, technique: "biset" })
+    .eq("id", parsed.data.secondExerciseId).eq("partner_id", context.partnerId);
+  if (second.error) return { error: "Não foi possível concluir o Bi-set.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Bi-set criado.", ok: true };
+}
+
+export async function uncombineClientWorkoutBiset(input: z.input<typeof workoutBisetSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutBisetSchema.safeParse(input);
+  if (!parsed.success) return { error: "Bi-set inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_exercises").update({
+    biset_group_id: null,
+    biset_position: null,
+    technique: "normal",
+  }).eq("partner_id", context.partnerId).in("id", [parsed.data.firstExerciseId, parsed.data.secondExerciseId]);
+  if (error) return { error: "Não foi possível desfazer o Bi-set.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Bi-set desfeito.", ok: true };
+}
+
+export async function reorderClientWorkoutExercises(input: z.input<typeof workoutReorderSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutReorderSchema.safeParse(input);
+  if (!parsed.success) return { error: "Ordem inválida.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+  for (const [sortOrder, id] of parsed.data.exerciseIds.entries()) {
+    const { error } = await db.from("partner_workout_exercises").update({ sort_order: sortOrder })
+      .eq("id", id).eq("session_id", parsed.data.sessionId).eq("partner_id", context.partnerId);
+    if (error) return { error: "Não foi possível salvar a ordem.", ok: false };
+  }
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Ordem atualizada.", ok: true };
+}
+
+export async function saveClientWorkoutNotes(input: z.input<typeof workoutNotesSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutNotesSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise as observações.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_programs")
+    .update({ notes: normalizeNullable(parsed.data.notes), status: "draft" })
+    .eq("id", parsed.data.programId).eq("partner_id", context.partnerId).eq("patient_id", parsed.data.patientId);
+  if (error) return { error: "Não foi possível salvar as observações.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Observações do treino atualizadas.", eventType: "updated", patientId: parsed.data.patientId, programId: parsed.data.programId });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Observações salvas.", ok: true };
+}
+
+export async function duplicateClientWorkoutProgram(input: z.input<typeof workoutIdSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Programa inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { data, error } = await workoutDb(context).rpc("partner_clone_workout_program", {
+    p_as_template: false, p_patient_id: parsed.data.patientId, p_source_program_id: parsed.data.programId,
+  });
+  if (error || !data) return { error: "Não foi possível duplicar o programa.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Programa duplicado.", eventType: "duplicated", patientId: parsed.data.patientId, programId: String(data) });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: String(data), message: "Programa duplicado.", ok: true };
+}
+
+export async function saveClientWorkoutTemplate(input: z.input<typeof workoutIdSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Programa inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { data, error } = await workoutDb(context).rpc("partner_clone_workout_program", {
+    p_as_template: true, p_patient_id: parsed.data.patientId, p_source_program_id: parsed.data.programId,
+  });
+  if (error || !data) return { error: "Não foi possível salvar o template.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: String(data), message: "Template salvo.", ok: true };
+}
+
+export async function applyClientWorkoutTemplate(input: { patientId: string; templateId: string }): Promise<ClientOverviewActionResult> {
+  const parsed = z.object({ patientId: patientIdSchema, templateId: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) return { error: "Template inválido.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { data, error } = await workoutDb(context).rpc("partner_clone_workout_program", {
+    p_as_template: false, p_patient_id: parsed.data.patientId, p_source_program_id: parsed.data.templateId,
+  });
+  if (error || !data) return { error: "Não foi possível aplicar o template.", ok: false };
+  await recordWorkoutEvent(context, { detail: "Template aplicado ao Cliente.", eventType: "template_applied", patientId: parsed.data.patientId, programId: String(data) });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: String(data), message: "Template aplicado.", ok: true };
+}
+
+async function setWorkoutProgramStatus(input: z.input<typeof workoutIdSchema>, status: "published" | "sent") {
+  const parsed = workoutIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Programa inválido.", ok: false } satisfies ClientOverviewActionResult;
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false } satisfies ClientOverviewActionResult;
+  const db = workoutDb(context);
+  if (status === "published") {
+    await db.from("partner_workout_programs").update({ status: "archived" })
+      .eq("partner_id", context.partnerId).eq("patient_id", parsed.data.patientId).in("status", ["published", "sent"]);
+  }
+  const payload = status === "sent"
+    ? { sent_at: new Date().toISOString(), status }
+    : { published_at: new Date().toISOString(), status };
+  const { error } = await db.from("partner_workout_programs").update(payload)
+    .eq("id", parsed.data.programId).eq("partner_id", context.partnerId).eq("patient_id", parsed.data.patientId);
+  if (error) return { error: "Não foi possível atualizar o programa.", ok: false } satisfies ClientOverviewActionResult;
+  await recordWorkoutEvent(context, {
+    detail: status === "sent" ? "Programa enviado ao Cliente." : "Programa publicado.",
+    eventType: status, patientId: parsed.data.patientId, programId: parsed.data.programId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: status === "sent" ? "Programa enviado." : "Programa publicado.", ok: true } satisfies ClientOverviewActionResult;
+}
+
+export async function publishClientWorkoutProgram(input: z.input<typeof workoutIdSchema>) {
+  return setWorkoutProgramStatus(input, "published");
+}
+
+export async function sendClientWorkoutProgram(input: z.input<typeof workoutIdSchema>) {
+  return setWorkoutProgramStatus(input, "sent");
+}
+
+function cardioCalculationValues(input: {
+  activityKey: CardioActivityKey;
+  comparisonActivityKey: CardioActivityKey;
+  durationMinutes: number;
+  weightKg: number;
+}) {
+  const met = getApprovedCardioMet(input.activityKey);
+  const comparisonMet = getApprovedCardioMet(input.comparisonActivityKey);
+  if (met === null || comparisonMet === null) return null;
+  return {
+    comparisonKcalEstimate: calculateCardioKcal(input.weightKg, comparisonMet, input.durationMinutes),
+    comparisonKcalPerMin: calculateCardioKcalPerMinute(input.weightKg, comparisonMet),
+    comparisonMet,
+    kcalEstimate: calculateCardioKcal(input.weightKg, met, input.durationMinutes),
+    kcalPerMin: calculateCardioKcalPerMinute(input.weightKg, met),
+    met,
+  };
+}
+
+async function bumpCardioPlan(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  patientId: string,
+  planId: string,
+) {
+  if (!context.partnerId) return 1;
+  const { data } = await workoutDb(context).from("partner_client_cardio_plans")
+    .select("version")
+    .eq("id", planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId)
+    .maybeSingle();
+  const nextVersion = Number((data as { version?: number } | null)?.version ?? 1) + 1;
+  await workoutDb(context).from("partner_client_cardio_plans")
+    .update({ version: nextVersion })
+    .eq("id", planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId);
+  return nextVersion;
+}
+
+async function recordCardioEvent(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  input: {
+    detail: string;
+    details?: Json;
+    eventType: string;
+    patientId: string;
+    planId: string;
+    version?: number;
+  },
+) {
+  if (!context.partnerId) return;
+  await workoutDb(context).from("partner_client_cardio_events").insert({
+    actor_name: context.profileName,
+    detail: input.detail,
+    details: input.details ?? {},
+    event_type: input.eventType,
+    partner_id: context.partnerId,
+    patient_id: input.patientId,
+    plan_id: input.planId,
+    version: input.version ?? 1,
+  });
+}
+
+export async function updateClientCardioPlan(
+  input: z.input<typeof cardioCalculationInputSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = cardioCalculationInputSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados do Cardio.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_client_cardio_plans")
+    .update({
+      comparison_activity_key: parsed.data.comparisonActivityKey,
+      primary_activity_key: parsed.data.activityKey,
+      status: "draft",
+      target_zone: parsed.data.targetZone,
+      weekly_target_minutes: parsed.data.weeklyTargetMinutes,
+      weight_kg: parsed.data.weightKg,
+    })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível atualizar o plano de Cardio.", ok: false };
+  const version = await bumpCardioPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordCardioEvent(context, {
+    detail: "Parâmetros do plano de Cardio atualizados.",
+    eventType: "updated",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Plano de Cardio atualizado.", ok: true };
+}
+
+export async function saveClientCardioCalculation(
+  input: z.input<typeof cardioCalculationInputSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = cardioCalculationInputSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o cálculo de Cardio.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const values = cardioCalculationValues(parsed.data);
+  if (!values) return { error: "Atividade aguardando MET aprovado para cálculo.", ok: false };
+  const { data, error } = await workoutDb(context).from("partner_client_cardio_calculations")
+    .insert({
+      activity_key: parsed.data.activityKey,
+      comparison_activity_key: parsed.data.comparisonActivityKey,
+      comparison_kcal_estimate: values.comparisonKcalEstimate,
+      comparison_kcal_per_min: values.comparisonKcalPerMin,
+      comparison_met: values.comparisonMet,
+      duration_minutes: parsed.data.durationMinutes,
+      kcal_estimate: values.kcalEstimate,
+      kcal_per_min: values.kcalPerMin,
+      met: values.met,
+      parameters: {
+        weeklyTargetMinutes: parsed.data.weeklyTargetMinutes,
+      },
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      plan_id: parsed.data.planId,
+      target_zone: parsed.data.targetZone,
+      weight_kg: parsed.data.weightKg,
+    })
+    .select("id")
+    .single();
+  const calculation = data as { id: string } | null;
+  if (error || !calculation) return { error: "Não foi possível salvar o cálculo.", ok: false };
+
+  await recordCardioEvent(context, {
+    detail: "Cálculo de Cardio salvo.",
+    details: { calculationId: calculation.id },
+    eventType: "calculation_saved",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: calculation.id, message: "Cálculo de Cardio salvo.", ok: true };
+}
+
+export async function applyClientCardioCalculation(
+  input: z.input<typeof cardioCalculationInputSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = cardioCalculationInputSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o cálculo de Cardio.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_client_cardio_plans")
+    .update({
+      comparison_activity_key: parsed.data.comparisonActivityKey,
+      primary_activity_key: parsed.data.activityKey,
+      status: "draft",
+      target_zone: parsed.data.targetZone,
+      weekly_target_minutes: parsed.data.weeklyTargetMinutes,
+      weight_kg: parsed.data.weightKg,
+    })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível aplicar o cálculo ao plano.", ok: false };
+  const version = await bumpCardioPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordCardioEvent(context, {
+    detail: "Cálculo aplicado ao plano de Cardio.",
+    eventType: "calculation_applied",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Cálculo aplicado ao plano.", ok: true };
+}
+
+export async function registerClientCardioSession(
+  input: z.input<typeof cardioSessionSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = cardioSessionSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a sessão realizada.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const met = getApprovedCardioMet(parsed.data.activityKey);
+  if (met === null) return { error: "Atividade aguardando MET aprovado para cálculo.", ok: false };
+  const { data, error } = await workoutDb(context).from("partner_client_cardio_sessions")
+    .insert({
+      activity_key: parsed.data.activityKey,
+      duration_minutes: parsed.data.durationMinutes,
+      kcal_estimate: calculateCardioKcal(parsed.data.weightKg, met, parsed.data.durationMinutes),
+      met,
+      notes: normalizeNullable(parsed.data.notes),
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      performed_at: parsed.data.performedAt,
+      plan_id: parsed.data.planId,
+      target_zone: parsed.data.targetZone,
+    })
+    .select("id")
+    .single();
+  const session = data as { id: string } | null;
+  if (error || !session) return { error: "Não foi possível registrar a sessão.", ok: false };
+
+  await recordCardioEvent(context, {
+    detail: "Sessão de Cardio registrada.",
+    details: { sessionId: session.id },
+    eventType: "session_logged",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: session.id, message: "Sessão registrada.", ok: true };
+}
+
+export async function removeClientCardioSession(
+  input: z.input<typeof cardioSessionIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = cardioSessionIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Sessão inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_client_cardio_sessions")
+    .delete()
+    .eq("id", parsed.data.sessionId)
+    .eq("plan_id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível remover a sessão.", ok: false };
+  await recordCardioEvent(context, {
+    detail: "Sessão de Cardio removida.",
+    details: { sessionId: parsed.data.sessionId },
+    eventType: "session_removed",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Sessão removida.", ok: true };
+}
+
+type ExamReferenceRecord = {
+  high_value: number | null;
+  id: string;
+  low_value: number | null;
+  sex: string;
+};
+
+type ExamUnitRecord = {
+  factor_from_default: number;
+  id: string;
+  unit: string;
+};
+
+type ExamDefinitionRecord = {
+  category_id: string;
+  default_unit: string;
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type ExamCategoryRecord = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+async function recordExamEvent(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  input: {
+    collectionId?: string | null;
+    detail: string;
+    details?: Json;
+    eventType: string;
+    examId?: string | null;
+    patientId?: string | null;
+  },
+) {
+  if (!context.partnerId) return;
+  await workoutDb(context).from("partner_client_exam_events").insert({
+    actor_name: context.profileName,
+    collection_id: input.collectionId ?? null,
+    detail: input.detail,
+    details: input.details ?? {},
+    event_type: input.eventType,
+    exam_id: input.examId ?? null,
+    partner_id: context.partnerId,
+    patient_id: input.patientId ?? null,
+  });
+}
+
+async function loadExamDefinitionForAction(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  examId: string,
+) {
+  if (!context.partnerId) return null;
+  const db = workoutDb(context);
+  const { data: definitionData, error: definitionError } = await db.from("partner_exam_definitions")
+    .select("id, category_id, slug, name, default_unit")
+    .eq("id", examId)
+    .eq("partner_id", context.partnerId)
+    .eq("status", "active")
+    .maybeSingle();
+  const definition = definitionData as ExamDefinitionRecord | null;
+  if (definitionError || !definition) return null;
+
+  const { data: categoryData } = await db.from("partner_exam_categories")
+    .select("id, slug, name")
+    .eq("id", definition.category_id)
+    .eq("partner_id", context.partnerId)
+    .maybeSingle();
+  const category = categoryData as ExamCategoryRecord | null;
+  if (!category) return null;
+
+  const [{ data: referenceData }, { data: unitData }] = await Promise.all([
+    db.from("partner_exam_reference_ranges")
+      .select("id, sex, low_value, high_value")
+      .eq("exam_id", definition.id)
+      .eq("partner_id", context.partnerId)
+      .eq("status", "active"),
+    db.from("partner_exam_alternative_units")
+      .select("id, unit, factor_from_default")
+      .eq("exam_id", definition.id)
+      .eq("partner_id", context.partnerId)
+      .eq("status", "active"),
+  ]);
+
+  return {
+    alternativeUnits: ((unitData as ExamUnitRecord[] | null) ?? []).map((unit) => ({
+      factorFromDefault: Number(unit.factor_from_default),
+      id: unit.id,
+      status: "active" as const,
+      unit: unit.unit,
+    })),
+    categoryId: category.id,
+    categoryName: category.name,
+    categorySlug: category.slug,
+    defaultUnit: definition.default_unit,
+    id: definition.id,
+    name: definition.name,
+    slug: definition.slug,
+    references: ((referenceData as ExamReferenceRecord[] | null) ?? []).map((reference) => ({
+      highValue: reference.high_value === null ? null : Number(reference.high_value),
+      id: reference.id,
+      label: null,
+      lowValue: reference.low_value === null ? null : Number(reference.low_value),
+      referenceLabel: "",
+      sex: (reference.sex === "female" || reference.sex === "male" ? reference.sex : "unisex") as ExamReferenceSex,
+      sexLabel: reference.sex,
+      sortOrder: 0,
+      status: "active" as const,
+    })),
+  };
+}
+
+type ExamActionDefinition = NonNullable<Awaited<ReturnType<typeof loadExamDefinitionForAction>>>;
+
+function selectReferenceForAction(
+  references: ExamActionDefinition["references"],
+  sex: ExamReferenceSex,
+) {
+  return references.find((reference) => reference.sex === sex)
+    ?? references.find((reference) => reference.sex === "unisex")
+    ?? references[0]
+    ?? null;
+}
+
+export async function saveClientExamCollection(
+  input: z.input<typeof examCollectionSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examCollectionSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os resultados dos exames.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+
+  const { data: patientData } = await db.from("patients")
+    .select("gender")
+    .eq("id", parsed.data.patientId)
+    .maybeSingle();
+  const referenceSex = patientReferenceSex((patientData as { gender: string | null } | null)?.gender);
+
+  const collectionId = crypto.randomUUID();
+  const resultPayload: Array<Record<string, unknown>> = [];
+  for (const result of parsed.data.results) {
+    const definition = await loadExamDefinitionForAction(context, result.examId);
+    if (!definition) return { error: "Um dos exames selecionados não foi encontrado.", ok: false };
+    const converted = convertExamValueToDefault(result.value, result.unit, definition);
+    if (result.unit !== definition.defaultUnit && converted.factorFromDefault === null) {
+      return { error: `Unidade inválida para ${definition.name}.`, ok: false };
+    }
+    const reference = selectReferenceForAction(definition.references, referenceSex);
+    const status = classifyExamValue(converted.valueDefault, reference);
+    resultPayload.push({
+      collection_id: collectionId,
+      conversion_factor_from_default: converted.factorFromDefault,
+      default_unit: definition.defaultUnit,
+      exam_id: definition.id,
+      input_unit: result.unit,
+      input_value: result.value,
+      notes: normalizeNullable(result.notes),
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      reference_high: reference?.highValue ?? null,
+      reference_low: reference?.lowValue ?? null,
+      reference_sex: reference?.sex ?? "unisex",
+      snapshot_category_name: definition.categoryName,
+      snapshot_category_slug: definition.categorySlug,
+      snapshot_exam_name: definition.name,
+      snapshot_exam_slug: definition.slug,
+      status,
+      value_default: converted.valueDefault,
+    });
+  }
+
+  const { error: collectionError } = await db.from("partner_client_exam_collections")
+    .insert({
+      collected_at: parsed.data.collectedAt,
+      id: collectionId,
+      notes: normalizeNullable(parsed.data.notes),
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      status: "saved",
+      title: parsed.data.title,
+    });
+  if (collectionError) return { error: "Não foi possível salvar a coleta.", ok: false };
+
+  const { error: resultError } = await db.from("partner_client_exam_results").insert(resultPayload);
+  if (resultError) {
+    await db.from("partner_client_exam_collections")
+      .delete()
+      .eq("id", collectionId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId);
+    return { error: "Coleta criada, mas não foi possível salvar os resultados.", ok: false };
+  }
+
+  await recordExamEvent(context, {
+    collectionId,
+    detail: `${resultPayload.length} resultados de exames salvos.`,
+    details: { resultCount: resultPayload.length },
+    eventType: "collection_saved",
+    patientId: parsed.data.patientId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: collectionId, message: "Resultados salvos.", ok: true };
+}
+
+export async function removeClientExamCollection(
+  input: z.input<typeof examCollectionIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examCollectionIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Coleta inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_client_exam_collections")
+    .delete()
+    .eq("id", parsed.data.collectionId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível remover a coleta.", ok: false };
+  await recordExamEvent(context, {
+    detail: "Coleta de exames removida.",
+    details: { collectionId: parsed.data.collectionId },
+    eventType: "collection_removed",
+    patientId: parsed.data.patientId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Coleta removida.", ok: true };
+}
+
+export async function savePartnerExamDefinition(
+  input: z.input<typeof examDefinitionSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examDefinitionSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a configuração do exame.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+
+  let definitionId = parsed.data.definitionId;
+  if (definitionId) {
+    const { error } = await db.from("partner_exam_definitions")
+      .update({
+        category_id: parsed.data.categoryId,
+        default_unit: parsed.data.defaultUnit,
+        name: parsed.data.name,
+        notes: normalizeNullable(parsed.data.notes),
+        slug: parsed.data.slug,
+      })
+      .eq("id", definitionId)
+      .eq("partner_id", context.partnerId);
+    if (error) return { error: "Não foi possível atualizar o exame.", ok: false };
+  } else {
+    const { data, error } = await db.from("partner_exam_definitions")
+      .insert({
+        category_id: parsed.data.categoryId,
+        default_unit: parsed.data.defaultUnit,
+        name: parsed.data.name,
+        notes: normalizeNullable(parsed.data.notes),
+        partner_id: context.partnerId,
+        slug: parsed.data.slug,
+        status: "active",
+      })
+      .select("id")
+      .single();
+    const created = data as { id: string } | null;
+    if (error || !created) return { error: "Não foi possível criar o exame.", ok: false };
+    definitionId = created.id;
+  }
+
+  await db.from("partner_exam_reference_ranges")
+    .update({ status: "archived" })
+    .eq("exam_id", definitionId)
+    .eq("partner_id", context.partnerId)
+    .eq("status", "active");
+  await db.from("partner_exam_alternative_units")
+    .update({ status: "archived" })
+    .eq("exam_id", definitionId)
+    .eq("partner_id", context.partnerId)
+    .eq("status", "active");
+
+  const { error: referenceError } = await db.from("partner_exam_reference_ranges").insert(
+    parsed.data.references.map((reference, index) => ({
+      exam_id: definitionId,
+      high_value: reference.highValue,
+      low_value: reference.lowValue,
+      partner_id: context.partnerId,
+      sex: reference.sex,
+      sort_order: index,
+      status: "active",
+    })),
+  );
+  if (referenceError) return { error: "Exame salvo, mas as referências não foram atualizadas.", ok: false };
+
+  if (parsed.data.alternativeUnits.length > 0) {
+    const { error: unitError } = await db.from("partner_exam_alternative_units").insert(
+      parsed.data.alternativeUnits.map((unit) => ({
+        exam_id: definitionId,
+        factor_from_default: unit.factorFromDefault,
+        partner_id: context.partnerId,
+        status: "active",
+        unit: unit.unit,
+      })),
+    );
+    if (unitError) return { error: "Exame salvo, mas as unidades alternativas não foram atualizadas.", ok: false };
+  }
+
+  await recordExamEvent(context, {
+    detail: parsed.data.definitionId ? "Configuração de exame atualizada." : "Novo exame criado no catálogo.",
+    details: { definitionId, name: parsed.data.name },
+    eventType: parsed.data.definitionId ? "definition_updated" : "definition_created",
+    examId: definitionId,
+  });
+  revalidatePartnerClients();
+  return { id: definitionId, message: parsed.data.definitionId ? "Exame atualizado." : "Exame criado.", ok: true };
+}
+
+export async function createPartnerExamCategory(
+  input: z.input<typeof examCategorySchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examCategorySchema.safeParse(input);
+  if (!parsed.success) return { error: "Informe um nome válido para a categoria.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+
+  const { data: rows } = await db.from("partner_exam_categories")
+    .select("slug, sort_order")
+    .eq("partner_id", context.partnerId);
+  const existing = (rows as Array<{ slug: string; sort_order: number }> | null) ?? [];
+  const usedSlugs = new Set(existing.map((category) => category.slug));
+  const baseSlug = slugify(parsed.data.name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (usedSlugs.has(slug)) {
+    slug = `${baseSlug}_${suffix}`;
+    suffix += 1;
+  }
+
+  const sortOrder = existing.reduce((max, category) => Math.max(max, category.sort_order), -1) + 1;
+  const { data, error } = await db.from("partner_exam_categories")
+    .insert({
+      icon_key: "activity",
+      name: parsed.data.name,
+      partner_id: context.partnerId,
+      slug,
+      sort_order: sortOrder,
+      status: "active",
+    })
+    .select("id")
+    .single();
+  const category = data as { id: string } | null;
+  if (error || !category) return { error: "Não foi possível criar a categoria.", ok: false };
+
+  if (parsed.data.patientId) revalidateClientProfile(parsed.data.patientId);
+  revalidatePartnerClients();
+  return { id: category.id, message: "Categoria criada.", ok: true };
+}
+
+export async function archivePartnerExamDefinition(
+  input: z.input<typeof examDefinitionIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = examDefinitionIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Exame inválido.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_exam_definitions")
+    .update({ status: "archived" })
+    .eq("id", parsed.data.definitionId)
+    .eq("partner_id", context.partnerId);
+
+  if (error) return { error: "Não foi possível arquivar o exame.", ok: false };
+  await recordExamEvent(context, {
+    detail: "Exame arquivado no catálogo.",
+    details: { definitionId: parsed.data.definitionId },
+    eventType: "definition_archived",
+    examId: parsed.data.definitionId,
+    patientId: parsed.data.patientId ?? null,
+  });
+  if (parsed.data.patientId) revalidateClientProfile(parsed.data.patientId);
+  revalidatePartnerClients();
+  return { message: "Exame arquivado.", ok: true };
+}
+
+async function recordPhotoEvent(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  input: {
+    detail: string;
+    details?: Json;
+    eventType: string;
+    patientId: string;
+    sessionId?: string | null;
+  },
+) {
+  if (!context.partnerId) return;
+  await workoutDb(context).from("partner_client_photo_events").insert({
+    actor_name: context.profileName,
+    detail: input.detail,
+    details: input.details ?? {},
+    event_type: input.eventType,
+    partner_id: context.partnerId,
+    patient_id: input.patientId,
+    session_id: input.sessionId ?? null,
+  });
+}
+
+export async function saveClientPhotoSession(
+  input: z.input<typeof photoSessionSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = photoSessionSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a sessão de Fotos.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const expectedPrefix = `${context.partnerId}/${parsed.data.patientId}/${parsed.data.sessionId}/`;
+  if (parsed.data.photos.some((photo) => !photo.storagePath.startsWith(expectedPrefix))) {
+    return { error: "Uma das fotos não pertence a este Cliente.", ok: false };
+  }
+
+  const { error: sessionError } = await workoutDb(context).from("partner_client_photo_sessions").insert({
+    captured_at: parsed.data.capturedAt,
+    id: parsed.data.sessionId,
+    notes: normalizeNullable(parsed.data.notes),
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+    status: parsed.data.photos.length === 4 ? "complete" : "draft",
+    title: parsed.data.title,
+  });
+
+  if (sessionError) return { error: "Não foi possível criar a sessão de Fotos.", ok: false };
+
+  const { error: itemError } = await workoutDb(context).from("partner_client_photo_items").insert(
+    parsed.data.photos.map((photo) => ({
+      angle: photo.angle,
+      height_px: photo.heightPx,
+      mime_type: photo.mimeType,
+      original_filename: photo.originalFilename,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      session_id: parsed.data.sessionId,
+      size_bytes: photo.sizeBytes,
+      storage_path: photo.storagePath,
+      width_px: photo.widthPx,
+    })),
+  );
+
+  if (itemError) {
+    await workoutDb(context).from("partner_client_photo_sessions")
+      .delete()
+      .eq("id", parsed.data.sessionId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId);
+    return { error: "Sessão criada, mas não foi possível registrar as fotos.", ok: false };
+  }
+
+  await recordPhotoEvent(context, {
+    detail: `${parsed.data.photos.length} fotos registradas na sessão.`,
+    details: { photoCount: parsed.data.photos.length },
+    eventType: "session_created",
+    patientId: parsed.data.patientId,
+    sessionId: parsed.data.sessionId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: parsed.data.sessionId, message: "Sessão de Fotos salva.", ok: true };
+}
+
+export async function removeClientPhotoSession(
+  input: z.input<typeof photoSessionIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = photoSessionIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Sessão inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const db = workoutDb(context);
+
+  const { data: itemsData } = await db.from("partner_client_photo_items")
+    .select("storage_path")
+    .eq("session_id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+  const storagePaths = ((itemsData as Array<{ storage_path: string }> | null) ?? []).map((item) => item.storage_path);
+
+  const { error } = await db.from("partner_client_photo_sessions")
+    .delete()
+    .eq("id", parsed.data.sessionId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível remover a sessão.", ok: false };
+  if (storagePaths.length > 0) {
+    await context.supabase.storage.from("partner-client-photos").remove(storagePaths);
+  }
+  await recordPhotoEvent(context, {
+    detail: "Sessão de Fotos removida.",
+    details: { sessionId: parsed.data.sessionId },
+    eventType: "session_removed",
+    patientId: parsed.data.patientId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Sessão removida.", ok: true };
+}
+
+export async function saveClientPhotoComparisonNote(
+  input: z.input<typeof photoComparisonNoteSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = photoComparisonNoteSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a observação da comparação.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await workoutDb(context).from("partner_client_photo_comparison_notes").upsert({
+    after_session_id: parsed.data.afterSessionId,
+    before_session_id: parsed.data.beforeSessionId,
+    notes: parsed.data.notes,
+    partner_id: context.partnerId,
+    patient_id: parsed.data.patientId,
+  }, { onConflict: "partner_id,patient_id,before_session_id,after_session_id" });
+
+  if (error) return { error: "Não foi possível salvar a observação.", ok: false };
+  await recordPhotoEvent(context, {
+    detail: "Observação de comparação atualizada.",
+    details: {
+      afterSessionId: parsed.data.afterSessionId,
+      beforeSessionId: parsed.data.beforeSessionId,
+    },
+    eventType: "comparison_note_saved",
+    patientId: parsed.data.patientId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Observação salva.", ok: true };
+}
+
+
+async function recordDietEvent(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  input: {
+    detail: string;
+    eventType: string;
+    patientId: string;
+    planId: string;
+    version?: number;
+    details?: Json;
+  },
+) {
+  if (!context.partnerId) return;
+  await context.supabase.from("partner_client_diet_events").insert({
+    actor_name: context.profileName,
+    detail: input.detail,
+    details: input.details ?? {},
+    event_type: input.eventType,
+    partner_id: context.partnerId,
+    patient_id: input.patientId,
+    plan_id: input.planId,
+    version: input.version ?? 1,
+  });
+}
+
+async function bumpDietPlan(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  patientId: string,
+  planId: string,
+) {
+  if (!context.partnerId) return 1;
+  const { data } = await context.supabase
+    .from("partner_client_diet_plans")
+    .select("version")
+    .eq("id", planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId)
+    .maybeSingle();
+  const nextVersion = Number(data?.version ?? 1) + 1;
+  await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ version: nextVersion })
+    .eq("id", planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId);
+  return nextVersion;
+}
+
+async function syncDietPlanModule(
+  context: Awaited<ReturnType<typeof getPartnerActionContext>>,
+  patientId: string,
+  planId: string,
+) {
+  if (!context.partnerId) return;
+
+  const { data: plan } = await context.supabase
+    .from("partner_client_diet_plans")
+    .select("title, target_kcal, target_protein_g, target_carbs_g, target_fat_g")
+    .eq("id", planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId)
+    .maybeSingle();
+
+  const { data: subscription } = await context.supabase
+    .from("partner_client_plan_subscriptions")
+    .select("id")
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId)
+    .in("status", ["active", "past_due", "pending"])
+    .order("current_period_end", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!plan || !subscription) return;
+
+  const { count } = await context.supabase
+    .from("partner_client_diet_meals")
+    .select("id", { count: "exact", head: true })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", patientId)
+    .eq("plan_id", planId);
+
+  await context.supabase.from("partner_client_plan_modules").upsert({
+    module_type: "dieta",
+    partner_id: context.partnerId,
+    patient_id: patientId,
+    primary_summary: `${Number(plan.target_kcal).toLocaleString("pt-BR")} kcal/dia`,
+    secondary_summary: `P ${Number(plan.target_protein_g).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}g · C ${Number(plan.target_carbs_g).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}g · G ${Number(plan.target_fat_g).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}g · ${count ?? 0} refeições`,
+    subscription_id: subscription.id,
+    title: plan.title,
+  }, { onConflict: "subscription_id,module_type" });
+}
+
+export async function createClientDietPlan(
+  input: z.input<typeof dietPlanSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da dieta.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .insert({
+      calorie_strategy: parsed.data.calorieStrategy,
+      notes: normalizeNullable(parsed.data.notes),
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      status: "draft",
+      target_carbs_g: parsed.data.targetCarbsG,
+      target_fat_g: parsed.data.targetFatG,
+      target_kcal: parsed.data.targetKcal,
+      target_protein_g: parsed.data.targetProteinG,
+      title: parsed.data.title,
+      water_liters: parsed.data.waterLiters,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) return { error: "Não foi possível criar a dieta.", ok: false };
+
+  const starterMeals = [
+    { day_of_week: 1, meal_time: "07:00", option_label: "Cardápio 1", menu_option: 1, sort_order: 0, title: "Café da manhã" },
+    { day_of_week: 1, meal_time: "12:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 1, title: "Almoço" },
+    { day_of_week: 1, meal_time: "16:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 2, title: "Lanche" },
+    { day_of_week: 1, meal_time: "19:30", option_label: "Cardápio 1", menu_option: 1, sort_order: 3, title: "Jantar" },
+    { day_of_week: 1, meal_time: "22:00", option_label: "Cardápio 1", menu_option: 1, sort_order: 4, title: "Ceia" },
+  ];
+
+  const { error: mealError } = await context.supabase.from("partner_client_diet_meals").insert(
+    starterMeals.map((meal) => ({
+      ...meal,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      plan_id: data.id,
+    })),
+  );
+
+  if (mealError) return { error: "Dieta criada, mas não foi possível criar as refeições.", ok: false };
+
+  await recordDietEvent(context, {
+    detail: "Dieta criada.",
+    eventType: "created",
+    patientId: parsed.data.patientId,
+    planId: data.id,
+    version: 1,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: data.id, message: "Dieta criada.", ok: true };
+}
+
+export async function updateClientDietPlanTargets(
+  input: z.input<typeof dietPlanTargetsSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanTargetsSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise as metas da dieta.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .update({
+      calorie_strategy: parsed.data.calorieStrategy,
+      target_carbs_g: parsed.data.targetCarbsG,
+      target_fat_g: parsed.data.targetFatG,
+      target_kcal: parsed.data.targetKcal,
+      target_protein_g: parsed.data.targetProteinG,
+      water_liters: parsed.data.waterLiters,
+    })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível atualizar o objetivo calórico.", ok: false };
+
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Objetivo calórico e metas de macronutrientes atualizados.",
+    eventType: "targets_updated",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Objetivo calórico atualizado.", ok: true };
+}
+
+export async function saveClientDietNotes(
+  input: z.input<typeof dietNotesSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietNotesSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise as considerações.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ notes: normalizeNullable(parsed.data.notes) })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível salvar as considerações.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Considerações atualizadas.",
+    eventType: "notes_saved",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Considerações salvas.", ok: true };
+}
+
+export async function createClientDietMeal(
+  input: z.input<typeof dietMealSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietMealSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise os dados da refeição.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { count } = await context.supabase
+    .from("partner_client_diet_meals")
+    .select("id", { count: "exact", head: true })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .eq("plan_id", parsed.data.planId)
+    .eq("day_of_week", parsed.data.dayOfWeek)
+    .eq("menu_option", parsed.data.menuOption);
+
+  const { data, error } = await context.supabase
+    .from("partner_client_diet_meals")
+    .insert({
+      day_of_week: parsed.data.dayOfWeek,
+      meal_time: parsed.data.mealTime,
+      menu_option: parsed.data.menuOption,
+      option_label: parsed.data.optionLabel,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      plan_id: parsed.data.planId,
+      sort_order: count ?? 0,
+      title: parsed.data.title,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) return { error: "Não foi possível criar a refeição.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: `Refeição ${parsed.data.title} adicionada.`,
+    eventType: "meal_added",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: data.id, message: "Refeição adicionada.", ok: true };
+}
+
+export async function removeClientDietMeal(
+  input: z.input<typeof dietMealIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietMealIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Refeição inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_meals")
+    .delete()
+    .eq("id", parsed.data.mealId)
+    .eq("plan_id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível remover a refeição.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Refeição removida.",
+    eventType: "meal_removed",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Refeição removida.", ok: true };
+}
+
+export async function addClientDietMealItem(
+  input: z.input<typeof dietItemSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietItemSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise o alimento selecionado.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data: food, error: foodError } = await context.supabase
+    .from("partner_protocol_foods")
+    .select("id, name, serving_size, serving_unit, household_measure, kcal, carbs_g, protein_g, fat_g, fiber_g, sodium_mg")
+    .eq("id", parsed.data.foodId)
+    .eq("partner_id", context.partnerId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (foodError || !food) return { error: "Alimento indisponível na base de Cadastro.", ok: false };
+
+  const { count } = await context.supabase
+    .from("partner_client_diet_meal_items")
+    .select("id", { count: "exact", head: true })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .eq("meal_id", parsed.data.mealId);
+
+  const { data, error } = await context.supabase
+    .from("partner_client_diet_meal_items")
+    .insert({
+      food_id: food.id,
+      household_measure: normalizeNullable(food.household_measure),
+      meal_id: parsed.data.mealId,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      plan_id: parsed.data.planId,
+      quantity: parsed.data.quantity,
+      quantity_unit: food.serving_unit,
+      snapshot_carbs_g: food.carbs_g,
+      snapshot_fat_g: food.fat_g,
+      snapshot_fiber_g: food.fiber_g,
+      snapshot_kcal: food.kcal,
+      snapshot_name: food.name,
+      snapshot_protein_g: food.protein_g,
+      snapshot_serving_size: food.serving_size,
+      snapshot_serving_unit: food.serving_unit,
+      snapshot_sodium_mg: food.sodium_mg,
+      sort_order: count ?? 0,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) return { error: "Não foi possível adicionar o alimento.", ok: false };
+
+  const draftUpdate = parsed.data.draftId
+    ? context.supabase
+      .from("partner_protocol_use_drafts")
+      .update({ status: "used" })
+      .eq("id", parsed.data.draftId)
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("plan_context", "dieta")
+    : Promise.resolve({ error: null });
+  const [draftResult, usageResult] = await Promise.all([
+    draftUpdate,
+    context.supabase.rpc("increment_partner_protocol_usage", { p_item_id: food.id, p_item_type: "food" }),
+  ]);
+  if (draftResult.error) return { error: "Alimento adicionado, mas não foi possível atualizar o rascunho.", ok: false };
+  const { data: usageCount, error: usageError } = usageResult;
+  if (usageError || usageCount === null) return { error: "Alimento adicionado, mas não foi possível confirmar o uso na base.", ok: false };
+
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: `${food.name} adicionado à dieta.`,
+    details: { itemId: data.id },
+    eventType: "item_added",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: data.id, message: "Alimento adicionado.", ok: true };
+}
+
+export async function updateClientDietMealItem(
+  input: z.input<typeof dietItemUpdateSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietItemUpdateSchema.safeParse(input);
+  if (!parsed.success) return { error: "Revise a porção.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_meal_items")
+    .update({ quantity: parsed.data.quantity })
+    .eq("id", parsed.data.itemId)
+    .eq("plan_id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível atualizar a porção.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Porção atualizada.",
+    eventType: "item_updated",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Porção atualizada.", ok: true };
+}
+
+export async function removeClientDietMealItem(
+  input: z.input<typeof dietItemIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietItemIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Alimento inválido.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_meal_items")
+    .delete()
+    .eq("id", parsed.data.itemId)
+    .eq("plan_id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+
+  if (error) return { error: "Não foi possível remover o alimento.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Alimento removido.",
+    eventType: "item_removed",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Alimento removido.", ok: true };
+}
+
+export async function duplicateClientDietPlan(
+  input: z.input<typeof dietPlanIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Dieta inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data: plan, error: planError } = await context.supabase
+    .from("partner_client_diet_plans")
+    .select("title, target_kcal, target_protein_g, target_carbs_g, target_fat_g, water_liters, calorie_strategy, notes")
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .maybeSingle();
+  if (planError || !plan) return { error: "Dieta original não encontrada.", ok: false };
+
+  const { data: newPlan, error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .insert({
+      calorie_strategy: plan.calorie_strategy,
+      notes: plan.notes,
+      partner_id: context.partnerId,
+      patient_id: parsed.data.patientId,
+      status: "draft",
+      target_carbs_g: plan.target_carbs_g,
+      target_fat_g: plan.target_fat_g,
+      target_kcal: plan.target_kcal,
+      target_protein_g: plan.target_protein_g,
+      title: `${plan.title} (cópia)`,
+      water_liters: plan.water_liters,
+    })
+    .select("id")
+    .single();
+  if (error || !newPlan) return { error: "Não foi possível duplicar a dieta.", ok: false };
+
+  const { data: meals } = await context.supabase
+    .from("partner_client_diet_meals")
+    .select("id, day_of_week, title, meal_time, sort_order")
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .eq("plan_id", parsed.data.planId)
+    .order("sort_order");
+
+  for (const meal of meals ?? []) {
+    const { data: createdMeal } = await context.supabase
+      .from("partner_client_diet_meals")
+      .insert({
+        day_of_week: meal.day_of_week,
+        meal_time: meal.meal_time,
+        partner_id: context.partnerId,
+        patient_id: parsed.data.patientId,
+        plan_id: newPlan.id,
+        sort_order: meal.sort_order,
+        title: meal.title,
+      })
+      .select("id")
+      .single();
+
+    if (!createdMeal) continue;
+    const { data: items } = await context.supabase
+      .from("partner_client_diet_meal_items")
+      .select("food_id, quantity, quantity_unit, household_measure, snapshot_name, snapshot_serving_size, snapshot_serving_unit, snapshot_kcal, snapshot_carbs_g, snapshot_protein_g, snapshot_fat_g, snapshot_fiber_g, snapshot_sodium_mg, sort_order")
+      .eq("partner_id", context.partnerId)
+      .eq("patient_id", parsed.data.patientId)
+      .eq("meal_id", meal.id)
+      .order("sort_order");
+
+    if (items?.length) {
+      await context.supabase.from("partner_client_diet_meal_items").insert(items.map((item) => ({
+        ...item,
+        meal_id: createdMeal.id,
+        partner_id: context.partnerId,
+        patient_id: parsed.data.patientId,
+        plan_id: newPlan.id,
+      })));
+    }
+  }
+
+  await recordDietEvent(context, {
+    detail: "Dieta duplicada a partir de versão anterior.",
+    details: { sourcePlanId: parsed.data.planId },
+    eventType: "duplicated",
+    patientId: parsed.data.patientId,
+    planId: newPlan.id,
+    version: 1,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: newPlan.id, message: "Dieta duplicada.", ok: true };
+}
+
+export async function publishClientDietPlan(
+  input: z.input<typeof dietPlanIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Dieta inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ status: "superseded" })
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId)
+    .neq("id", parsed.data.planId)
+    .in("status", ["active", "scheduled"]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const reviewDate = new Date();
+  reviewDate.setDate(reviewDate.getDate() + 30);
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .update({
+      published_at: new Date().toISOString(),
+      review_on: reviewDate.toISOString().slice(0, 10),
+      starts_on: today,
+      status: "active",
+    })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+  if (error) return { error: "Não foi possível ativar a dieta.", ok: false };
+
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Plano alimentar ativado para o Cliente.",
+    eventType: "published",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Plano alimentar ativado.", ok: true };
+}
+
+export async function sendClientDietPlan(
+  input: z.input<typeof dietPlanIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Dieta inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ sent_at: new Date().toISOString() })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+  if (error) return { error: "Não foi possível registrar o envio.", ok: false };
+
+  await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Aviso do plano alimentar enviado ao Cliente.",
+    eventType: "sent",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Envio registrado.", ok: true };
+}
+
+export async function archiveClientDietPlan(
+  input: z.input<typeof dietPlanIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietPlanIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Dieta inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { error } = await context.supabase
+    .from("partner_client_diet_plans")
+    .update({ status: "archived" })
+    .eq("id", parsed.data.planId)
+    .eq("partner_id", context.partnerId)
+    .eq("patient_id", parsed.data.patientId);
+  if (error) return { error: "Não foi possível arquivar a dieta.", ok: false };
+
+  await recordDietEvent(context, {
+    detail: "Dieta arquivada.",
+    eventType: "archived",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Dieta arquivada.", ok: true };
+}

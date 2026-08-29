@@ -1,14 +1,14 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildPartnerClientPhotos, type PartnerClientPhotosRawData } from "@/lib/partners/client-photos-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import { buildPartnerClientPhotos, type PartnerClientPhotosRawData } from "@/lib/partners/client-profile/photos";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   removeClientPhotoSession,
   saveClientPhotoComparisonNote,
   saveClientPhotoSession,
-} from "./actions";
+} from "./_actions/photos";
 import { PartnerClientPhotosView } from "./partner-client-photos-view";
 
 const refresh = vi.fn();
@@ -28,7 +28,7 @@ vi.mock("@/lib/supabase/client", () => ({
   }),
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/photos", () => ({
   removeClientPhotoSession: vi.fn(),
   saveClientPhotoComparisonNote: vi.fn(),
   saveClientPhotoSession: vi.fn(),

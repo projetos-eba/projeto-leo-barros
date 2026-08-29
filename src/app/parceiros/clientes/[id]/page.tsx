@@ -8,7 +8,7 @@ import { fetchPartnerClientExams } from "@/lib/partners/client-exams-data";
 import { fetchPartnerClientOverview } from "@/lib/partners/client-overview-data";
 import { fetchPartnerClientPhotos } from "@/lib/partners/client-photos-data";
 import { fetchPartnerClientWorkout } from "@/lib/partners/client-workout-data";
-import { fetchPartnerFinanceData } from "@/lib/partners/finance-data";
+import { fetchPartnerClientFinanceData } from "@/lib/partners/finance-data";
 
 import { PartnerClientAssessmentsView } from "./partner-client-assessments-view";
 import { PartnerClientCardioView } from "./partner-client-cardio-view";
@@ -25,6 +25,7 @@ type ClienteOverviewPageProps = {
     id: string;
   }>;
   searchParams: Promise<{
+    plan?: string;
     tab?: string;
   }>;
 };
@@ -35,22 +36,18 @@ export const dynamic = "force-dynamic";
 
 export default async function ParceirosClienteOverviewPage({ params, searchParams }: ClienteOverviewPageProps) {
   const { id } = await params;
-  const { tab } = await searchParams;
+  const { plan, tab } = await searchParams;
 
   if (!uuidPattern.test(id)) {
     notFound();
   }
 
-  const overview = await fetchPartnerClientOverview(id);
-
-  if (!overview) {
-    notFound();
-  }
-
-
   if (tab === "anamnese" || tab === "prescricoes" || tab === "formularios") {
-    const clinicalWorkspace = await fetchPartnerClientClinicalWorkspace(id);
-    if (!clinicalWorkspace) {
+    const [overview, clinicalWorkspace] = await Promise.all([
+      fetchPartnerClientOverview(id),
+      fetchPartnerClientClinicalWorkspace(id, tab),
+    ]);
+    if (!overview || !clinicalWorkspace) {
       notFound();
     }
 
@@ -64,8 +61,9 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "dietas") {
-    const diet = await fetchPartnerClientDiet(id);
-    if (!diet) {
+    const selectedPlanId = plan && uuidPattern.test(plan) ? plan : undefined;
+    const [overview, diet] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientDiet(id, selectedPlanId)]);
+    if (!overview || !diet) {
       notFound();
     }
 
@@ -73,8 +71,8 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "avaliacoes") {
-    const assessments = await fetchPartnerClientAssessments(id);
-    if (!assessments) {
+    const [overview, assessments] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientAssessments(id)]);
+    if (!overview || !assessments) {
       notFound();
     }
 
@@ -82,8 +80,8 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "treinos") {
-    const workout = await fetchPartnerClientWorkout(id);
-    if (!workout) {
+    const [overview, workout] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientWorkout(id)]);
+    if (!overview || !workout) {
       notFound();
     }
 
@@ -91,8 +89,8 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "cardio") {
-    const cardio = await fetchPartnerClientCardio(id);
-    if (!cardio) {
+    const [overview, cardio] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientCardio(id)]);
+    if (!overview || !cardio) {
       notFound();
     }
 
@@ -100,8 +98,8 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "exames") {
-    const exams = await fetchPartnerClientExams(id);
-    if (!exams) {
+    const [overview, exams] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientExams(id)]);
+    if (!overview || !exams) {
       notFound();
     }
 
@@ -109,8 +107,8 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "fotos") {
-    const photos = await fetchPartnerClientPhotos(id);
-    if (!photos) {
+    const [overview, photos] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientPhotos(id)]);
+    if (!overview || !photos) {
       notFound();
     }
 
@@ -118,9 +116,12 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "planos-financeiro") {
-    const finance = await fetchPartnerFinanceData();
+    const [overview, finance] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientFinanceData(id)]);
+    if (!overview) notFound();
     return <PartnerClientFinanceView finance={finance} overview={overview} />;
   }
 
+  const overview = await fetchPartnerClientOverview(id);
+  if (!overview) notFound();
   return <PartnerClientOverviewView overview={overview} />;
 }

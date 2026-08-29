@@ -42,7 +42,7 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
   const userId = claimsData?.claims?.sub;
   const supabase = supabaseBase as unknown as SupabaseReadClient;
 
-  const [settings, integrations, activities, admins, currentProfiles] = await Promise.all([
+  const [settings, integrations, activities, admins, adminRoles, currentProfiles] = await Promise.all([
     expectData(
       asQuery<import("./settings-metrics").PlatformSettingRecord>(
         supabase
@@ -81,6 +81,15 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
       ),
       "usuarios admins",
     ),
+    expectData(
+      asQuery<import("./settings-metrics").SettingsAdminRoleRecord>(
+        supabase
+          .from("admin_role_assignments")
+          .select("profile_id, role_key")
+          .order("created_at", { ascending: true }),
+      ),
+      "funcoes administrativas",
+    ),
     userId
       ? expectData(
         asQuery<{ id: string }>(
@@ -98,6 +107,7 @@ export async function fetchAdminSettingsData(): Promise<AdminSettingsData> {
   return buildAdminSettingsData({
     activities,
     admins,
+    adminRoles,
     currentProfileId: currentProfiles[0]?.id ?? null,
     integrations,
     settings,

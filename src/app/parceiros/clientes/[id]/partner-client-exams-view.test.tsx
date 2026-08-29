@@ -1,16 +1,16 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildPartnerClientExams, type PartnerClientExamsRawData } from "@/lib/partners/client-exams-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import { buildPartnerClientExams, type PartnerClientExamsRawData } from "@/lib/partners/client-profile/exams";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   archivePartnerExamDefinition,
   removeClientExamCollection,
   saveClientExamCollection,
   savePartnerExamDefinition,
-} from "./actions";
-import { PartnerClientExamsView } from "./partner-client-exams-view";
+} from "./_actions/exams";
+import { ExamChartTooltip, PartnerClientExamsView } from "./partner-client-exams-view";
 
 const refresh = vi.fn();
 
@@ -18,7 +18,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh }),
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/exams", () => ({
   archivePartnerExamDefinition: vi.fn(),
   removeClientExamCollection: vi.fn(),
   saveClientExamCollection: vi.fn(),
@@ -93,6 +93,36 @@ const raw: PartnerClientExamsRawData = {
       title: "Atual",
       updatedAt: "2026-07-01T12:00:00.000Z",
     },
+    {
+      collectedAt: "2026-06-01",
+      createdAt: "2026-06-01T12:00:00.000Z",
+      id: "b3000000-0000-4000-8000-000000000102",
+      notes: null,
+      results: [
+        {
+          collectionId: "b3000000-0000-4000-8000-000000000102",
+          conversionFactorFromDefault: null,
+          defaultUnit: "mg/dL",
+          examId: "b3000000-0000-4000-8000-000000000201",
+          id: "b3000000-0000-4000-8000-000000000302",
+          inputUnit: "mg/dL",
+          inputValue: 100,
+          notes: null,
+          referenceHigh: 100,
+          referenceLow: 0,
+          referenceSex: "unisex",
+          snapshotCategoryName: "Perfil lipídico",
+          snapshotCategorySlug: "perfil_lipidico",
+          snapshotExamName: "LDL-colesterol",
+          snapshotExamSlug: "ldl_colesterol",
+          status: "normal",
+          valueDefault: 100,
+        },
+      ],
+      status: "saved",
+      title: "Anterior",
+      updatedAt: "2026-06-01T12:00:00.000Z",
+    },
   ],
   definitions: [
     {
@@ -139,9 +169,42 @@ describe("PartnerClientExamsView", () => {
     expect(screen.getByRole("button", { name: /Resultados/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Configurações/i })).toBeInTheDocument();
     expect(screen.getByText("Catálogo ativo")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Histórico de LDL-colesterol por data: 01\/06\/2026, 01\/07\/2026/i })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Registro de Coleta" })).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();
+  });
+
+  it("classifica o valor digitado, mantém campos separados e exibe tooltip completo", () => {
+    render(<PartnerClientExamsView exams={exams} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Resultados/i }));
+    const valueInput = screen.getByLabelText("Valor");
+    expect(valueInput).toHaveClass("w-full", "min-w-0");
+    expect(screen.getByLabelText("Unidade")).toHaveClass("w-full", "min-w-0");
+
+    fireEvent.change(valueInput, { target: { value: "100" } });
+    expect(valueInput).toHaveClass("border-[#22c55e]", "bg-[#102d21]");
+    expect(screen.getByText("Dentro da normalidade")).toBeInTheDocument();
+
+    fireEvent.change(valueInput, { target: { value: "110" } });
+    expect(valueInput).toHaveClass("border-[#eab308]", "bg-[#2c2614]");
+    expect(screen.getByText("Alteração leve")).toBeInTheDocument();
+
+    fireEvent.change(valueInput, { target: { value: "125" } });
+    expect(valueInput).toHaveClass("border-[#f97316]", "bg-[#321b0f]");
+    expect(screen.getByText("Alteração moderada")).toBeInTheDocument();
+
+    fireEvent.change(valueInput, { target: { value: "126" } });
+    expect(valueInput).toHaveClass("border-[#ef4444]", "bg-[#34141b]");
+    expect(screen.getByText("Alteração importante")).toBeInTheDocument();
+
+    const tooltip = render(<ExamChartTooltip active payload={[{ payload: exams.collections[0].results[0] }]} />);
+    const tooltipView = within(tooltip.container);
+    expect(tooltipView.getByText("Data da coleta")).toBeInTheDocument();
+    expect(tooltipView.getByText("Valor atual")).toBeInTheDocument();
+    expect(tooltipView.getByText(/Referência:/)).toBeInTheDocument();
+    expect(tooltipView.getByText("Alteração leve")).toBeInTheDocument();
   });
 
   it("salva resultados e remove coleta", async () => {

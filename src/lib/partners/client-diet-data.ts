@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 
 import {
   buildPartnerClientDiet,
@@ -23,6 +24,77 @@ type DietTrackingDb = {
   from(table: string): DietTrackingQuery;
 };
 
+type DietPlanRow = Database["public"]["Tables"]["partner_client_diet_plans"]["Row"];
+type DietMealRow = Database["public"]["Tables"]["partner_client_diet_meals"]["Row"];
+type DietMealItemRow = Database["public"]["Tables"]["partner_client_diet_meal_items"]["Row"];
+type DietEventRow = Database["public"]["Tables"]["partner_client_diet_events"]["Row"];
+
+function asRawPlan(plan: DietPlanRow, meals: DietMealRow[], items: DietMealItemRow[]): NonNullable<PartnerClientDietRawData["plan"]> {
+  const itemsByMealId = new Map<string, DietMealItemRow[]>();
+  for (const item of items) {
+    const mealItems = itemsByMealId.get(item.meal_id) ?? [];
+    mealItems.push(item);
+    itemsByMealId.set(item.meal_id, mealItems);
+  }
+
+  return {
+    calorieStrategy: plan.calorie_strategy,
+    createdAt: plan.created_at,
+    id: plan.id,
+    meals: meals.map((meal) => ({
+      dayOfWeek: meal.day_of_week,
+      id: meal.id,
+      items: (itemsByMealId.get(meal.id) ?? []).map((item) => ({
+        foodId: item.food_id,
+        householdMeasure: item.household_measure,
+        id: item.id,
+        quantity: item.quantity,
+        quantityUnit: item.quantity_unit,
+        snapshotCarbsG: item.snapshot_carbs_g,
+        snapshotFatG: item.snapshot_fat_g,
+        snapshotFiberG: item.snapshot_fiber_g,
+        snapshotKcal: item.snapshot_kcal,
+        snapshotName: item.snapshot_name,
+        snapshotProteinG: item.snapshot_protein_g,
+        snapshotServingSize: item.snapshot_serving_size,
+        snapshotServingUnit: item.snapshot_serving_unit,
+        snapshotSodiumMg: item.snapshot_sodium_mg,
+        sortOrder: item.sort_order,
+      })),
+      mealTime: meal.meal_time.slice(0, 5),
+      menuOption: meal.menu_option,
+      optionLabel: meal.option_label,
+      sortOrder: meal.sort_order,
+      title: meal.title,
+    })),
+    notes: plan.notes,
+    publishedAt: plan.published_at,
+    reviewOn: plan.review_on,
+    sentAt: plan.sent_at,
+    startsOn: plan.starts_on,
+    status: plan.status,
+    targetCarbsG: plan.target_carbs_g,
+    targetFatG: plan.target_fat_g,
+    targetKcal: plan.target_kcal,
+    targetProteinG: plan.target_protein_g,
+    title: plan.title,
+    updatedAt: plan.updated_at,
+    version: plan.version,
+    waterLiters: plan.water_liters,
+  };
+}
+
+function asRawEvents(events: DietEventRow[]): PartnerClientDietRawData["events"] {
+  return events.map((event) => ({
+    actorName: event.actor_name,
+    createdAt: event.created_at,
+    detail: event.detail,
+    eventType: event.event_type,
+    id: event.id,
+    version: event.version,
+  }));
+}
+
 function todayIsoDate() {
   const date = new Date();
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -35,19 +107,86 @@ function shiftIsoDate(value: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-export async function fetchPartnerClientDiet(patientId: string): Promise<PartnerClientDietData | null> {
+export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?: string): Promise<PartnerClientDietData | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("partner_client_diet", {
-    p_patient_id: patientId,
-  });
+  const [{ data, error }, planSummariesResult] = await Promise.all([
+    supabase.rpc("partner_client_diet", { p_patient_id: patientId }),
+    supabase
+      .from("partner_client_diet_plans")
+      .select("id, title, status, created_at, updated_at")
+      .eq("patient_id", patientId)
+      .neq("status", "archived")
+      .order("updated_at", { ascending: false }),
+  ]);
 
   if (error) {
     throw new Error(`Falha ao carregar Dietas do Cliente: ${error.message}`);
   }
 
-  if (!data) return null;
+  if (!data || planSummariesResult.error) {
+    if (planSummariesResult.error) {
+      throw new Error(`Falha ao carregar planos de Dieta: ${planSummariesResult.error.message}`);
+    }
+    return null;
+  }
 
-  const rawData = data as unknown as PartnerClientDietRawData;
+  let rawData = data as unknown as PartnerClientDietRawData;
+  rawData = {
+    ...rawData,
+    plans: (planSummariesResult.data ?? []).map((plan) => ({
+      createdAt: plan.created_at,
+      id: plan.id,
+      status: plan.status,
+      title: plan.title,
+      updatedAt: plan.updated_at,
+    })),
+  };
+
+  if (selectedPlanId && selectedPlanId !== rawData.plan?.id) {
+    const [selectedPlanResult, mealsResult, itemsResult, eventsResult] = await Promise.all([
+      supabase
+        .from("partner_client_diet_plans")
+        .select("*")
+        .eq("id", selectedPlanId)
+        .eq("patient_id", patientId)
+        .maybeSingle(),
+      supabase
+        .from("partner_client_diet_meals")
+        .select("*")
+        .eq("plan_id", selectedPlanId)
+        .eq("patient_id", patientId)
+        .order("day_of_week", { ascending: true })
+        .order("menu_option", { ascending: true })
+        .order("sort_order", { ascending: true })
+        .order("meal_time", { ascending: true }),
+      supabase
+        .from("partner_client_diet_meal_items")
+        .select("*")
+        .eq("plan_id", selectedPlanId)
+        .eq("patient_id", patientId)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("partner_client_diet_events")
+        .select("*")
+        .eq("plan_id", selectedPlanId)
+        .eq("patient_id", patientId)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const selectedPlanError = selectedPlanResult.error ?? mealsResult.error ?? itemsResult.error ?? eventsResult.error;
+    if (selectedPlanError) {
+      throw new Error(`Falha ao carregar a dieta selecionada: ${selectedPlanError.message}`);
+    }
+
+    if (selectedPlanResult.data) {
+      rawData = {
+        ...rawData,
+        events: asRawEvents(eventsResult.data ?? []),
+        plan: asRawPlan(selectedPlanResult.data, mealsResult.data ?? [], itemsResult.data ?? []),
+      };
+    }
+  }
+
   const planId = rawData.plan?.id;
   if (!planId) return buildPartnerClientDiet(rawData);
 

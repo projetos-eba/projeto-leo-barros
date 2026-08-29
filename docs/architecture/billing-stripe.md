@@ -54,6 +54,7 @@ Preparar o Projeto Leo Barros para cobrar o Parceiro por assinatura do Plano Com
 ## Webhook E Pagamentos
 
 - `customer.subscription.created`, `customer.subscription.updated` e `customer.subscription.deleted` atualizam status local da assinatura.
+- O Owner pode apenas agendar o cancelamento ao fim do ciclo ou reverter um agendamento pendente no detalhe administrativo do profissional. A solicitação passa por `admin-subscriptions`, altera `cancel_at_period_end` na Stripe e aguarda o webhook para refletir o estado local; troca de plano e cancelamento imediato não fazem parte desse comando.
 - `product.created`, `product.updated`, `product.deleted`, `price.created`, `price.updated` e `price.deleted` sincronizam o catalogo Stripe para Supabase.
 - `invoice.finalized` captura snapshot da quantidade de Clientes ativos usada para cobranca.
 - `customer.subscription.created` e `customer.subscription.updated` atualizam `partner_subscription_financial_summaries` com preview oficial da proxima cobranca da assinatura.

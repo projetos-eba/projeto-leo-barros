@@ -51,6 +51,7 @@ const settings: AdminSettingsData = {
       isCurrentUser: true,
       isProtectedLastActive: true,
       name: "Super Admin",
+      role: "owner",
       status: "active",
       statusLabel: "Ativo",
     },

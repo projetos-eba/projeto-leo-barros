@@ -9,6 +9,8 @@ select tables_are(
   'public',
   array[
     'admins',
+    'admin_audit_events',
+    'admin_role_assignments',
     'auth_email_deliveries',
     'billing_active_client_snapshots',
     'billing_payments',
