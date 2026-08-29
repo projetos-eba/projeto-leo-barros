@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PartnerClientWorkoutData } from "@/lib/partners/client-workout-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientWorkoutData } from "@/lib/partners/client-profile/workout";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   addClientWorkoutExercise,
@@ -11,12 +11,12 @@ import {
   deleteClientWorkoutSession,
   reorderClientWorkoutExercises,
   updateClientWorkoutSession,
-} from "./actions";
+} from "./_actions/workout";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
 
 const refresh = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
-vi.mock("./actions", () => ({
+vi.mock("./_actions/workout", () => ({
   addClientWorkoutExercise: vi.fn(),
   addClientWorkoutSet: vi.fn(),
   applyClientWorkoutTemplate: vi.fn(),
@@ -160,6 +160,7 @@ describe("PartnerClientWorkoutView", () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
     expect(screen.getByText("Prescrição de Treinos")).toBeInTheDocument();
     expect(screen.getByText("Biblioteca de exercícios")).toBeInTheDocument();
+    expect(screen.getByText("Carga máxima")).toHaveClass("whitespace-nowrap");
     expect(screen.getByText("Acompanhamento real")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Acompanhamento real/i })).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("Volume realizado")).not.toBeInTheDocument();
@@ -168,10 +169,47 @@ describe("PartnerClientWorkoutView", () => {
     expect(screen.getAllByText("Desenvolvimento").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Peito e Tríceps").length).toBeGreaterThan(0);
-    expect(screen.getByLabelText("Mapa muscular anterior")).toBeInTheDocument();
+    expect(screen.getAllByRole("img", { name: /Representação muscular/i })).toHaveLength(2);
     expect(screen.queryByRole("checkbox", { name: /Selecionar Supino reto/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
+  });
+
+  it("atualiza as prévias do card e do resumo quando os exercícios mudam", () => {
+    const { container, rerender } = render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-front"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-layer="front-chest"]')).toHaveLength(2);
+
+    const workoutWithBackExercise: PartnerClientWorkoutData = {
+      ...workout,
+      activeProgram: workout.activeProgram ? {
+        ...workout.activeProgram,
+        sessions: workout.activeProgram.sessions.map((session) => ({
+          ...session,
+          exercises: [{
+            ...session.exercises[0],
+            id: "back-exercise",
+            muscleGroup: "costas",
+            name: "Remada curvada",
+            secondaryMuscleGroups: ["biceps"],
+          }],
+        })),
+      } : null,
+    };
+    rerender(<PartnerClientWorkoutView overview={overview} workout={workoutWithBackExercise} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-back"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-layer="back-corners"]')).toHaveLength(2);
+
+    const workoutWithoutExercises: PartnerClientWorkoutData = {
+      ...workoutWithBackExercise,
+      activeProgram: workoutWithBackExercise.activeProgram ? {
+        ...workoutWithBackExercise.activeProgram,
+        sessions: workoutWithBackExercise.activeProgram.sessions.map((session) => ({ ...session, exercises: [] })),
+      } : null,
+    };
+    rerender(<PartnerClientWorkoutView overview={overview} workout={workoutWithoutExercises} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="none"]')).toHaveLength(2);
+    expect(container.querySelectorAll("[data-layer]")).toHaveLength(0);
   });
 
   it("adiciona exercício, sugere nova série e combina Bi-set", async () => {

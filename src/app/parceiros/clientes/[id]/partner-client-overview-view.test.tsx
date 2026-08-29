@@ -1,9 +1,9 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
-import { createClientAppointment, createClientTask, setClientTaskCompleted } from "./actions";
+import { createClientAppointment, createClientTask, setClientTaskCompleted } from "./_actions/overview";
 import { PartnerClientOverviewView } from "./partner-client-overview-view";
 
 const refresh = vi.fn();
@@ -18,7 +18,7 @@ vi.mock("./client-overview-chart", () => ({
   ),
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/overview", () => ({
   createClientAppointment: vi.fn(),
   createClientTask: vi.fn(),
   setClientTaskCompleted: vi.fn(),

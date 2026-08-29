@@ -96,6 +96,8 @@ export type PartnerFinanceData = {
   summary: PartnerFinanceSummary;
 };
 
+export type PartnerClientFinanceData = Pick<PartnerFinanceData, "contracts" | "receivables">;
+
 type PartnerRecord = {
   id: string;
   profile_id: string;
@@ -173,7 +175,11 @@ function calculateSummary(
   );
 }
 
-export async function fetchPartnerFinanceData(): Promise<PartnerFinanceData> {
+function scopePatient<T extends SupabaseReadQuery>(query: T, patientId?: string) {
+  return patientId ? query.eq("patient_id", patientId) : query;
+}
+
+export async function fetchPartnerFinanceData(patientId?: string): Promise<PartnerFinanceData> {
   const supabase = (await createClient()) as unknown as SupabaseReadClient;
   const { profile } = await getCurrentProfile();
 
@@ -204,7 +210,7 @@ export async function fetchPartnerFinanceData(): Promise<PartnerFinanceData> {
 
   const [clientRows, servicePlans, contracts, receivables] = await Promise.all([
     expectData(asQuery<PartnerClientListRow>(supabase.rpc("partner_clients_list")), "clientes do parceiro"),
-    safeFinanceData(
+    patientId ? Promise.resolve([] as PartnerServicePlan[]) : safeFinanceData(
       asQuery<PartnerServicePlan>(
         supabase
           .from("partner_service_plans")
@@ -215,26 +221,32 @@ export async function fetchPartnerFinanceData(): Promise<PartnerFinanceData> {
     ),
     safeFinanceData(
       asQuery<PartnerClientPlanContract>(
-        supabase
+        scopePatient(
+          supabase
           .from("partner_client_plan_contracts")
           .select("id, partner_id, patient_id, service_plan_id, plan_name_snapshot, category_snapshot, price_cents_snapshot, billing_interval_snapshot, duration_cycles_snapshot, includes_diet_snapshot, includes_training_snapshot, start_date, end_date, first_due_date, status, notes, created_at, updated_at")
-          .eq("partner_id", partner.id)
+          .eq("partner_id", partner.id),
+          patientId,
+        )
           .order("updated_at", { ascending: false }),
       ),
     ),
     safeFinanceData(
       asQuery<PartnerClientReceivable>(
-        supabase
+        scopePatient(
+          supabase
           .from("partner_client_receivables")
           .select("id, partner_id, patient_id, contract_id, installment_number, amount_cents, due_date, status, paid_at, payment_method, payment_reference, payment_notes")
-          .eq("partner_id", partner.id)
+          .eq("partner_id", partner.id),
+          patientId,
+        )
           .order("due_date", { ascending: true }),
       ),
     ),
   ]);
 
   const clients = clientRows
-    .filter((row) => row.relationship_status === "active")
+    .filter((row) => row.relationship_status === "active" && (!patientId || row.patient_id === patientId))
     .map((row) => ({
       email: row.email,
       id: row.patient_id,
@@ -248,5 +260,14 @@ export async function fetchPartnerFinanceData(): Promise<PartnerFinanceData> {
     receivables,
     servicePlans,
     summary: calculateSummary(servicePlans, contracts, receivables),
+  };
+}
+
+export async function fetchPartnerClientFinanceData(patientId: string): Promise<PartnerClientFinanceData> {
+  const finance = await fetchPartnerFinanceData(patientId);
+
+  return {
+    contracts: finance.contracts,
+    receivables: finance.receivables,
   };
 }

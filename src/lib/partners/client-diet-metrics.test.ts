@@ -137,6 +137,7 @@ describe("client-diet-metrics", () => {
     const data = buildPartnerClientDiet(raw);
 
     expect(data.plan?.title).toBe("Dieta de definição");
+    expect(data.plans).toEqual([expect.objectContaining({ id: "plan-1", status: "active", statusLabel: "Ativa" })]);
     expect(data.plan?.weekDays[0].meals[0].totals).toMatchObject({ kcal: 195, carbs: 42.2, protein: 3.8 });
     expect(data.library.suggestions[0].name).toBe("Arroz branco cozido");
     expect(data.drafts[0].notes).toBe("Usar no almoço");
@@ -151,5 +152,21 @@ describe("client-diet-metrics", () => {
     });
     expect(data.tracking?.compatibility.description).toContain("não comprova consumo real");
     expect(data.tracking?.mealLogs[0]).toMatchObject({ kcalConsumed: 98, mealTitle: "Almoço", statusLabel: "Parcial" });
+  });
+
+  it("mantém planos ativos e rascunhos disponíveis para seleção sem duplicar o plano atual", () => {
+    const data = buildPartnerClientDiet({
+      ...raw,
+      plans: [
+        { createdAt: raw.plan!.createdAt, id: raw.plan!.id, status: "active", title: raw.plan!.title, updatedAt: raw.plan!.updatedAt },
+        { createdAt: "2026-07-02T12:00:00.000Z", id: "plan-draft", status: "draft", title: "Dieta de ajuste", updatedAt: "2026-07-02T12:00:00.000Z" },
+      ],
+    });
+
+    expect(data.plans).toEqual([
+      expect.objectContaining({ id: "plan-1", statusLabel: "Ativa" }),
+      expect.objectContaining({ id: "plan-draft", statusLabel: "Rascunho" }),
+    ]);
+    expect(data.plans).toHaveLength(2);
   });
 });

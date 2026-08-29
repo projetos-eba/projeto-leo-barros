@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarPlus, FileDown, MessageCircle, Pencil, Phone, Target
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 import { cn } from "@/lib/utils";
 
 type ClientTab =

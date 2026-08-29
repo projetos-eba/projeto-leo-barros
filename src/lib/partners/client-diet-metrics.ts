@@ -86,6 +86,13 @@ export type PartnerClientDietRawData = {
     version: number;
     waterLiters: number;
   } | null;
+  plans?: Array<{
+    createdAt: string;
+    id: string;
+    status: string;
+    title: string;
+    updatedAt: string;
+  }>;
   tracking?: {
     dailyLogs: Array<{
       logDate: string;
@@ -199,6 +206,15 @@ export type PartnerClientDietPlan = {
   weekTotals: DietNutritionTotals;
 };
 
+export type PartnerClientDietPlanSummary = {
+  createdAt: string;
+  id: string;
+  status: DietPlanStatus;
+  statusLabel: string;
+  title: string;
+  updatedAt: string;
+};
+
 export type PartnerClientDietDraft = {
   createdAt: string;
   food: PartnerClientDietFood;
@@ -293,6 +309,7 @@ export type PartnerClientDietData = {
     suggestions: PartnerClientDietFood[];
   };
   plan: PartnerClientDietPlan | null;
+  plans: PartnerClientDietPlanSummary[];
   tracking: PartnerClientDietTracking | null;
 };
 
@@ -574,6 +591,19 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
   };
 }
 
+function mapPlanSummary(rawPlan: NonNullable<PartnerClientDietRawData["plans"]>[number]): PartnerClientDietPlanSummary {
+  const status = normalizeStatus(rawPlan.status);
+
+  return {
+    createdAt: rawPlan.createdAt,
+    id: rawPlan.id,
+    status,
+    statusLabel: dietStatusLabel(status),
+    title: rawPlan.title,
+    updatedAt: rawPlan.updatedAt,
+  };
+}
+
 function plannedMealsForDate(plan: PartnerClientDietPlan, iso: string) {
   const day = plan.weekDays.find((item) => item.dayOfWeek === isoDayOfWeek(iso));
   if (!day) return 0;
@@ -768,6 +798,13 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
   const suggestions = [...draftFoods, ...popularFoods.filter((food) => !suggestionIds.has(food.id))].slice(0, 8);
 
   const plan = raw.plan ? mapPlan(raw.plan) : null;
+  const plans = (raw.plans ?? (plan ? [{
+    createdAt: plan.createdAt,
+    id: plan.id,
+    status: plan.status,
+    title: plan.title,
+    updatedAt: plan.updatedAt,
+  }] : [])).map(mapPlanSummary);
 
   return {
     drafts,
@@ -788,6 +825,7 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
       suggestions,
     },
     plan,
+    plans,
     tracking: buildTracking(raw, plan),
   };
 }

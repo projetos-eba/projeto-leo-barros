@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildPartnerClientDiet, type PartnerClientDietRawData } from "@/lib/partners/client-diet-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import { buildPartnerClientDiet, type PartnerClientDietRawData } from "@/lib/partners/client-profile/diet";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   addClientDietMealItem,
@@ -14,16 +14,17 @@ import {
   sendClientDietPlan,
   updateClientDietMealItem,
   updateClientDietPlanTargets,
-} from "./actions";
+} from "./_actions/diet";
 import { PartnerClientDietView } from "./partner-client-diet-view";
 
 const refresh = vi.fn();
+const push = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh }),
+  useRouter: () => ({ push, refresh }),
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/diet", () => ({
   addClientDietMealItem: vi.fn(),
   archiveClientDietPlan: vi.fn(),
   createClientDietMeal: vi.fn(),
@@ -201,6 +202,7 @@ describe("PartnerClientDietView", () => {
     vi.mocked(updateClientDietMealItem).mockResolvedValue({ ok: true });
     vi.mocked(updateClientDietPlanTargets).mockResolvedValue({ ok: true });
     refresh.mockReset();
+    push.mockReset();
   });
 
   afterEach(() => {
@@ -280,6 +282,82 @@ describe("PartnerClientDietView", () => {
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
 
     expect(screen.getByRole("button", { name: /Exportar PDF/i })).toBeInTheDocument();
+  });
+
+  it("permite selecionar e ativar um rascunho sem alterar o plano ativo", async () => {
+    const draftPlanId = "e1000000-0000-4000-8000-000000000102";
+    const draftDiet = buildPartnerClientDiet({
+      ...rawDiet,
+      plan: {
+        ...rawDiet.plan!,
+        id: draftPlanId,
+        publishedAt: null,
+        startsOn: null,
+        status: "draft",
+        title: "Dieta nova",
+      },
+      plans: [
+        { createdAt: rawDiet.plan!.createdAt, id: rawDiet.plan!.id, status: "active", title: rawDiet.plan!.title, updatedAt: rawDiet.plan!.updatedAt },
+        { createdAt: "2026-07-02T12:00:00.000Z", id: draftPlanId, status: "draft", title: "Dieta nova", updatedAt: "2026-07-02T12:00:00.000Z" },
+      ],
+    });
+
+    render(<PartnerClientDietView diet={draftDiet} overview={overview} />);
+
+    expect(screen.getByLabelText("Selecionar dieta")).toHaveValue(draftPlanId);
+    expect(screen.getByText("Este rascunho ainda não está disponível ao Cliente.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Selecionar dieta"), { target: { value: rawDiet.plan!.id } });
+    expect(push).toHaveBeenCalledWith(`/parceiros/clientes/${overview.client.id}?tab=dietas&plan=${rawDiet.plan!.id}`);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ativar plano" }));
+    await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalledWith({
+      patientId: overview.client.id,
+      planId: draftPlanId,
+    }));
+  });
+
+  it("abre o rascunho recém-criado para edição", async () => {
+    const draftPlanId = "e1000000-0000-4000-8000-000000000102";
+    vi.mocked(createClientDietPlan).mockResolvedValue({ id: draftPlanId, ok: true });
+    render(<PartnerClientDietView diet={diet} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Nova dieta" }));
+    fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Dieta do rascunho" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar dieta" }));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith(`/parceiros/clientes/${overview.client.id}?tab=dietas&plan=${draftPlanId}`));
+  });
+
+  it("sincroniza a refeição de destino ao trocar para outro plano", async () => {
+    const draftPlanId = "e1000000-0000-4000-8000-000000000102";
+    const draftMealId = "meal-draft-1";
+    const draftDiet = buildPartnerClientDiet({
+      ...rawDiet,
+      plan: {
+        ...rawDiet.plan!,
+        id: draftPlanId,
+        meals: rawDiet.plan!.meals.map((meal) => ({ ...meal, id: draftMealId, items: [] })),
+        publishedAt: null,
+        startsOn: null,
+        status: "draft",
+        title: "Dieta nova",
+      },
+      plans: [
+        { createdAt: rawDiet.plan!.createdAt, id: rawDiet.plan!.id, status: "active", title: rawDiet.plan!.title, updatedAt: rawDiet.plan!.updatedAt },
+        { createdAt: "2026-07-02T12:00:00.000Z", id: draftPlanId, status: "draft", title: "Dieta nova", updatedAt: "2026-07-02T12:00:00.000Z" },
+      ],
+    });
+    const { rerender } = render(<PartnerClientDietView diet={diet} overview={overview} />);
+
+    rerender(<PartnerClientDietView diet={draftDiet} overview={overview} />);
+    await waitFor(() => expect(screen.getByLabelText("Selecionar dieta")).toHaveValue(draftPlanId));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar Peito de frango grelhado" }));
+
+    await waitFor(() => expect(addClientDietMealItem).toHaveBeenCalledWith(expect.objectContaining({
+      mealId: draftMealId,
+      planId: draftPlanId,
+    })));
   });
 
   it("configura e salva o objetivo calórico do plano atual", async () => {
