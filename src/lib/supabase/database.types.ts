@@ -2662,9 +2662,11 @@ export type Database = {
       }
       partner_client_diet_meals: {
         Row: {
+          alternative_order: number
           created_at: string
           day_of_week: number
           id: string
+          meal_group_id: string
           meal_time: string
           menu_option: number
           option_label: string
@@ -2676,9 +2678,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alternative_order?: number
           created_at?: string
           day_of_week?: number
           id?: string
+          meal_group_id?: string
           meal_time: string
           menu_option?: number
           option_label?: string
@@ -2690,9 +2694,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alternative_order?: number
           created_at?: string
           day_of_week?: number
           id?: string
+          meal_group_id?: string
           meal_time?: string
           menu_option?: number
           option_label?: string
@@ -7194,6 +7200,10 @@ export type Database = {
         Args: { p_patient_id: string }
         Returns: Json
       }
+      partner_client_diet_fiber_base: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_client_exams: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview_legacy_20260727: {
@@ -7234,6 +7244,14 @@ export type Database = {
         }
         Returns: string
       }
+      partner_create_diet_meal_alternative: {
+        Args: {
+          p_patient_id: string
+          p_plan_id: string
+          p_source_meal_id: string
+        }
+        Returns: string
+      }
       partner_import_system_exercises: {
         Args: {
           p_equipment?: string
@@ -7253,6 +7271,10 @@ export type Database = {
           p_query?: string
         }
         Returns: Json
+      }
+      partner_remove_diet_meal: {
+        Args: { p_meal_id: string; p_patient_id: string; p_plan_id: string }
+        Returns: undefined
       }
       provision_client_for_partner_records:
         | {

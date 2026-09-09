@@ -15,6 +15,7 @@ Permitir que o Parceiro monte, edite, organize, publique e envie programas de tr
 - `Cardio` agora é aba própria do perfil do Cliente. Treinos não mistura o domínio novo de Cardio, mas dados legados `cardio` fora desta aba continuam agrupados como `Treino`.
 - Exercícios prescritos referenciam `partner_protocol_exercises` e preservam snapshot de nome, imagem e grupos musculares.
 - A ação principal de adicionar exercício fica dentro da divisão, abaixo da última linha de exercício e antes da rolagem horizontal: ao clicar em `Adicionar exercício`, abre um campo compacto, a lista suspensa filtra a biblioteca conforme o nome digitado e a busca fecha ao clicar fora.
+- A grade de exercícios ocupa toda a largura disponível e tem altura determinada pelo conteúdo: sem exercícios, mantém somente o espaço do placeholder; cada exercício inserido acrescenta sua própria linha. Biblioteca, resumo muscular e observações ficam em uma faixa abaixo, com três colunas em telas largas e quebra responsiva nas menores.
 - Um Bi-set contém exatamente dois exercícios adjacentes da mesma divisão.
 - Exercícios em Bi-set exibem bolinhas numeradas conectadas por uma linha vertical entre elas, sem faixa contínua na borda esquerda da grade.
 - A grade mostra 5 colunas de séries: séries existentes ficam editáveis, e colunas vazias aparecem como placeholders opacos clicáveis.

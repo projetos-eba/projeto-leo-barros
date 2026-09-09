@@ -43,7 +43,7 @@ export const dietPlanTargetsSchema = z.object({
   waterLiters: dietPlanFields.waterLiters,
 }).superRefine(validateFiberTarget);
 export const dietNotesSchema = z.object({ notes: z.string().trim().max(2000).nullable(), patientId: patientIdSchema, planId: z.string().uuid() });
-export const dietMealSchema = z.object({ dayOfWeek: z.number().int().min(1).max(7), mealTime: z.string().regex(/^\d{2}:\d{2}$/), menuOption: z.number().int().min(1).max(4).default(1), optionLabel: z.string().trim().min(2).max(40).default("Cardápio 1"), patientId: patientIdSchema, planId: z.string().uuid(), title: z.string().trim().min(2).max(80) });
+export const dietMealSchema = z.object({ dayOfWeek: z.number().int().min(1).max(7), mealTime: z.string().regex(/^\d{2}:\d{2}$/), patientId: patientIdSchema, planId: z.string().uuid(), title: z.string().trim().min(2).max(80) });
 export const dietMealIdSchema = z.object({ mealId: z.string().uuid(), patientId: patientIdSchema, planId: z.string().uuid() });
 export const dietItemSchema = z.object({ draftId: z.string().uuid().nullable(), foodId: z.string().uuid(), mealId: z.string().uuid(), patientId: patientIdSchema, planId: z.string().uuid(), quantity: z.number().min(0.01).max(100000) });
 export const dietItemUpdateSchema = z.object({ itemId: z.string().uuid(), patientId: patientIdSchema, planId: z.string().uuid(), quantity: z.number().min(0.01).max(100000) });

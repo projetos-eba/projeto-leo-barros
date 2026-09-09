@@ -27,7 +27,7 @@ Aba técnica de plano alimentar do Cliente no perfil Parceiros, baseada no Figma
 - Cabeçalho do Cliente, abas alinhadas e `Dietas` implementada.
 - Resumo reativo ao dia e cardápio ativos: balanço energético com GET aplicado, VET real e gauge de ±30%; macronutrientes com proteína, carboidrato, gordura e fibra; distribuição calórica proporcional por refeição.
 - Água permanece como meta compacta junto ao atalho de configuração. A meta de fibra é uma faixa opcional por plano; planos históricos sem configuração mostram meta não definida.
-- Plano alimentar por dia da semana, refeições e itens.
+- Plano alimentar por dia da semana, refeições, itens e alternativas independentes por refeição. O editor ocupa toda a largura; Biblioteca de alimentos e Considerações ficam abaixo, antes do histórico. Cada alternativa começa vazia, recebe nome automático e pode ser selecionada pelo Parceiro ou Cliente sem alterar as demais refeições do dia.
 - Busca e adição de alimentos da base de Cadastro, com autocomplete compacto acima do botão `Adicionar alimento` dentro de cada refeição; a lista suspensa deve aparecer durante a digitação, fechar ao clicar fora e não abrir uma tabela fixa abaixo do card.
 - Sugestões usam rascunhos `partner_protocol_use_drafts` com `plan_context = dieta`.
 - Editar porção, remover alimento/refeição, adicionar refeição, duplicar dieta, ativar plano, enviar aviso internamente e exportar PDF via impressão local.
@@ -45,7 +45,7 @@ Aba técnica de plano alimentar do Cliente no perfil Parceiros, baseada no Figma
 - A execução diária do Cliente registra refeições como `completed`, `partial`, `skipped` ou `pending`.
 - A navegação diária em `/cliente/dieta?date=YYYY-MM-DD` deve preservar logs por data.
 - Registros parciais entram como estimativa operacional de adesão, não como consumo nutricional exato.
-- VET é a soma dos snapshots nutricionais das refeições exibidas. Balanço é `VET - GET`; a faixa central de equilíbrio é ±5% do GET. Percentuais de proteína, carboidrato e gordura usam 4, 4 e 9 kcal/g sobre o VET.
+- VET é a soma dos snapshots nutricionais das alternativas de refeição selecionadas. Balanço é `VET - GET`; a faixa central de equilíbrio é ±5% do GET. Percentuais de proteína, carboidrato e gordura usam 4, 4 e 9 kcal/g sobre o VET.
 - GET ausente, peso ausente, cardápio sem alimentos e VET zero não exibem percentuais artificiais.
 - Observações e anexos de registros ficam acessíveis por dialog ou drawer, sem alongar a lista de últimos registros.
 - A aba do Parceiro separa prescrição de acompanhamento: o editor continua sendo a fonte da prescrição, e o painel de execução mostra o retorno real do Cliente.

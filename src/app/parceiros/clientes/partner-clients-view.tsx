@@ -21,6 +21,11 @@ import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -1018,49 +1023,62 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                           <span className="hidden lg:inline-flex">
                             <StatusBadge label={row.statusLabel} status={row.status} />
                           </span>
-                          <div className="relative">
-                            <button
-                              aria-expanded={openActionMenuId === row.id}
-                              aria-haspopup="menu"
-                              className="rounded-[8px] p-1.5 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white sm:p-2"
-                              type="button"
-                              onClick={() => setOpenActionMenuId((current) => current === row.id ? null : row.id)}
-                            >
-                              <MoreVertical className="size-4" />
-                              <span className="sr-only">Abrir ações de {row.name}</span>
-                            </button>
-                            {openActionMenuId === row.id ? (
-                              <div
-                                className="absolute right-0 z-20 mt-2 w-40 overflow-hidden rounded-[10px] border border-[#303746] bg-[#161a22] py-1 text-left shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
-                                role="menu"
+                          <Popover
+                            open={openActionMenuId === row.id}
+                            onOpenChange={(open) => setOpenActionMenuId(open ? row.id : null)}
+                          >
+                            <PopoverTrigger asChild>
+                              <button
+                                aria-expanded={openActionMenuId === row.id}
+                                aria-haspopup="menu"
+                                className="rounded-[8px] p-1.5 text-[#bac1ce] hover:bg-[#0a2c48] hover:text-white sm:p-2"
+                                type="button"
                               >
-                                <button
-                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
-                                  role="menuitem"
-                                  type="button"
-                                  onClick={() => copyEmail(row)}
-                                >
-                                  Copiar e-mail
-                                </button>
-                                <button
-                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
-                                  role="menuitem"
-                                  type="button"
-                                  onClick={() => editClient(row)}
-                                >
-                                  Editar
-                                </button>
-                                <button
-                                  className="block w-full px-3 py-2 text-left text-[13px] text-[#ff7b8e] hover:bg-[#31151b]"
-                                  role="menuitem"
-                                  type="button"
-                                  onClick={() => deleteClient(row)}
-                                >
-                                  Excluir
-                                </button>
-                              </div>
-                            ) : null}
-                          </div>
+                                <MoreVertical className="size-4" />
+                                <span className="sr-only">Abrir ações de {row.name}</span>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              align="end"
+                              className="z-[100] w-40 overflow-hidden rounded-[10px] border-[#303746] bg-[#161a22] p-0 text-left shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
+                              role="menu"
+                              sideOffset={8}
+                            >
+                              <button
+                                className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
+                                role="menuitem"
+                                type="button"
+                                onClick={() => {
+                                  copyEmail(row);
+                                  setOpenActionMenuId(null);
+                                }}
+                              >
+                                Copiar e-mail
+                              </button>
+                              <button
+                                className="block w-full px-3 py-2 text-left text-[13px] text-[#d7dae0] hover:bg-[#0a2c48] hover:text-white"
+                                role="menuitem"
+                                type="button"
+                                onClick={() => {
+                                  editClient(row);
+                                  setOpenActionMenuId(null);
+                                }}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className="block w-full px-3 py-2 text-left text-[13px] text-[#ff7b8e] hover:bg-[#31151b]"
+                                role="menuitem"
+                                type="button"
+                                onClick={() => {
+                                  deleteClient(row);
+                                  setOpenActionMenuId(null);
+                                }}
+                              >
+                                Excluir
+                              </button>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </td>
                     </tr>

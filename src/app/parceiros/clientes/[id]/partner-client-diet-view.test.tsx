@@ -6,8 +6,10 @@ import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/ov
 
 import {
   addClientDietMealItem,
+  createClientDietMealAlternative,
   createClientDietMeal,
   createClientDietPlan,
+  duplicateClientDietPlan,
   publishClientDietPlan,
   removeClientDietMealItem,
   saveClientDietNotes,
@@ -27,8 +29,10 @@ vi.mock("next/navigation", () => ({
 vi.mock("./_actions/diet", () => ({
   addClientDietMealItem: vi.fn(),
   archiveClientDietPlan: vi.fn(),
+  createClientDietMealAlternative: vi.fn(),
   createClientDietMeal: vi.fn(),
   createClientDietPlan: vi.fn(),
+  duplicateClientDietPlan: vi.fn(),
   publishClientDietPlan: vi.fn(),
   removeClientDietMeal: vi.fn(),
   removeClientDietMealItem: vi.fn(),
@@ -193,8 +197,10 @@ const diet = buildPartnerClientDiet(rawDiet);
 describe("PartnerClientDietView", () => {
   beforeEach(() => {
     vi.mocked(addClientDietMealItem).mockResolvedValue({ ok: true });
+    vi.mocked(createClientDietMealAlternative).mockResolvedValue({ id: "meal-option-new", ok: true });
     vi.mocked(createClientDietMeal).mockResolvedValue({ ok: true });
     vi.mocked(createClientDietPlan).mockResolvedValue({ ok: true });
+    vi.mocked(duplicateClientDietPlan).mockResolvedValue({ id: "diet-copy", ok: true });
     vi.mocked(publishClientDietPlan).mockResolvedValue({ ok: true });
     vi.mocked(removeClientDietMealItem).mockResolvedValue({ ok: true });
     vi.mocked(saveClientDietNotes).mockResolvedValue({ ok: true });
@@ -219,6 +225,8 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByRole("heading", { name: "Macronutrientes" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Distribuição calórica por refeição" })).toBeInTheDocument();
     expect(screen.getAllByText("GET estimado").length).toBeGreaterThan(0);
+    expect(screen.getByText("A meta da dieta define o VET. Aplique o cálculo energético para definir o GET.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abrir Avaliações" })).toHaveAttribute("href", `/parceiros/clientes/${overview.client.id}?tab=avaliacoes`);
     expect(screen.getByText("Meta não definida")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento da execução")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Acompanhamento da execução/i })).toHaveAttribute("aria-expanded", "false");
@@ -277,7 +285,7 @@ describe("PartnerClientDietView", () => {
     expect(screen.getAllByText("234 kcal").length).toBeGreaterThan(0);
   });
 
-  it("segue o cardápio selecionado no resumo", () => {
+  it("segue a alternativa selecionada no resumo", () => {
     const dietWithAlternative = buildPartnerClientDiet({
       ...rawDiet,
       plan: {
@@ -297,8 +305,44 @@ describe("PartnerClientDietView", () => {
     render(<PartnerClientDietView diet={{ ...dietWithAlternative, energy: { getKcal: 2420 } }} overview={overview} />);
 
     expect(screen.getAllByText("195 kcal").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: "Cardápio 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Almoço" }));
+    fireEvent.click(screen.getByRole("button", { name: "Almoço 2" }));
     expect(screen.getAllByText("130 kcal").length).toBeGreaterThan(0);
+  });
+
+  it("cria uma alternativa vazia a partir das opções da refeição", async () => {
+    render(<PartnerClientDietView diet={diet} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Opções de Almoço" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar opção" }));
+
+    await waitFor(() => expect(createClientDietMealAlternative).toHaveBeenCalledWith({
+      mealId: "meal-1",
+      patientId: overview.client.id,
+      planId: rawDiet.plan?.id,
+    }));
+  });
+
+  it("oferece refeições pré-cadastradas e usa seletor nativo de horário ao adicionar uma refeição", async () => {
+    render(<PartnerClientDietView diet={diet} overview={overview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar refeição" }));
+    expect(screen.getByRole("option", { name: "Café da manhã" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Almoço" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Lanche da tarde" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Ceia" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Horário da refeição")).toHaveAttribute("type", "time");
+
+    fireEvent.change(screen.getByLabelText("Tipo de refeição"), { target: { value: "Ceia" } });
+    fireEvent.change(screen.getByLabelText("Horário da refeição"), { target: { value: "21:30" } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar" }));
+
+    await waitFor(() => expect(createClientDietMeal).toHaveBeenCalledWith(expect.objectContaining({
+      mealTime: "21:30",
+      patientId: overview.client.id,
+      planId: rawDiet.plan?.id,
+      title: "Ceia",
+    })));
   });
 
   it("pagina alimentos e limita sugestões sem salvar durante a digitação", () => {
@@ -346,7 +390,11 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Salvar considerações/i }));
     await waitFor(() => expect(saveClientDietNotes).toHaveBeenCalledWith({ notes: "Ajustar saladas conforme rotina.", patientId: overview.client.id, planId: rawDiet.plan?.id }));
 
-    expect(screen.queryByRole("button", { name: /Duplicar/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Mais ações" }));
+    expect(screen.getByRole("button", { name: /Duplicar dieta/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Exportar PDF/i }).length).toBeGreaterThan(1);
+    fireEvent.click(screen.getByRole("button", { name: /Duplicar dieta/i }));
+    await waitFor(() => expect(duplicateClientDietPlan).toHaveBeenCalledWith({ patientId: overview.client.id, planId: rawDiet.plan?.id }));
 
     fireEvent.click(screen.getByRole("button", { name: /Ativar plano/i }));
     await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalled());
@@ -354,7 +402,6 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Enviar aviso/i }));
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
 
-    expect(screen.getByRole("button", { name: /Exportar PDF/i })).toBeInTheDocument();
   });
 
   it("permite selecionar e ativar um rascunho sem alterar o plano ativo", async () => {
@@ -437,7 +484,11 @@ describe("PartnerClientDietView", () => {
     render(<PartnerClientDietView diet={diet} overview={overview} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Configurar objetivo calórico" }));
-    fireEvent.change(screen.getByLabelText("Calorias do objetivo"), { target: { value: "2600" } });
+    const calorieSlider = screen.getByRole("slider", { name: "Selecionar meta calórica" });
+    expect(calorieSlider).toHaveAttribute("min", "100");
+    expect(calorieSlider).toHaveAttribute("max", "8000");
+    fireEvent.change(calorieSlider, { target: { value: "2600" } });
+    expect(screen.getByLabelText("Calorias do objetivo")).toHaveValue(2600);
     fireEvent.click(screen.getByRole("button", { name: /Salvar objetivo/i }));
 
     await waitFor(() => expect(updateClientDietPlanTargets).toHaveBeenCalledWith(expect.objectContaining({

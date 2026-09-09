@@ -1,6 +1,7 @@
 export {
   addClientDietMealItem,
   archiveClientDietPlan,
+  createClientDietMealAlternative,
   createClientDietMeal,
   createClientDietPlan,
   duplicateClientDietPlan,

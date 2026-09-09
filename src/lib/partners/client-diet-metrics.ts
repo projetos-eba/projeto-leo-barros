@@ -65,7 +65,9 @@ export type PartnerClientDietRawData = {
         snapshotSodiumMg: number;
         sortOrder: number;
       }>;
+      alternativeOrder?: number;
       mealTime: string;
+      mealGroupId?: string;
       menuOption?: number;
       optionLabel?: string;
       sortOrder: number;
@@ -162,10 +164,12 @@ export type PartnerClientDietItem = DietNutritionTotals & {
 };
 
 export type PartnerClientDietMeal = {
+  alternativeOrder: number;
   dayOfWeek: number;
   id: string;
   items: PartnerClientDietItem[];
   mealTime: string;
+  mealGroupId: string;
   menuOption: number;
   optionLabel: string;
   sortOrder: number;
@@ -543,10 +547,12 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
   const meals = rawPlan.meals.map((meal): PartnerClientDietMeal => {
     const items = meal.items.map(mapItem).sort((a, b) => a.sortOrder - b.sortOrder);
     return {
+      alternativeOrder: Math.max(1, Math.round(numberValue(meal.alternativeOrder ?? meal.menuOption ?? 1))),
       dayOfWeek: numberValue(meal.dayOfWeek),
       id: meal.id,
       items,
       mealTime: meal.mealTime,
+      mealGroupId: meal.mealGroupId ?? `legacy-${numberValue(meal.dayOfWeek)}-${meal.title}-${meal.mealTime}`,
       menuOption: Math.max(1, Math.round(numberValue(meal.menuOption ?? 1))),
       optionLabel: meal.optionLabel || `Cardápio ${Math.max(1, Math.round(numberValue(meal.menuOption ?? 1)))}`,
       sortOrder: numberValue(meal.sortOrder),
@@ -616,8 +622,7 @@ function mapPlanSummary(rawPlan: NonNullable<PartnerClientDietRawData["plans"]>[
 function plannedMealsForDate(plan: PartnerClientDietPlan, iso: string) {
   const day = plan.weekDays.find((item) => item.dayOfWeek === isoDayOfWeek(iso));
   if (!day) return 0;
-  const menuOptionOne = day.meals.filter((meal) => meal.menuOption === 1);
-  return (menuOptionOne.length ? menuOptionOne : day.meals).length;
+  return new Set(day.meals.map((meal) => meal.mealGroupId)).size;
 }
 
 function buildTrackingCompatibility(

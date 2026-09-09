@@ -1921,16 +1921,13 @@ export async function createClientDietMeal(
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId)
     .eq("plan_id", parsed.data.planId)
-    .eq("day_of_week", parsed.data.dayOfWeek)
-    .eq("menu_option", parsed.data.menuOption);
+    .eq("day_of_week", parsed.data.dayOfWeek);
 
   const { data, error } = await context.supabase
     .from("partner_client_diet_meals")
     .insert({
       day_of_week: parsed.data.dayOfWeek,
       meal_time: parsed.data.mealTime,
-      menu_option: parsed.data.menuOption,
-      option_label: parsed.data.optionLabel,
       partner_id: context.partnerId,
       patient_id: parsed.data.patientId,
       plan_id: parsed.data.planId,
@@ -1953,6 +1950,34 @@ export async function createClientDietMeal(
   return { id: data.id, message: "Refeição adicionada.", ok: true };
 }
 
+export async function createClientDietMealAlternative(
+  input: z.input<typeof dietMealIdSchema>,
+): Promise<ClientOverviewActionResult> {
+  const parsed = dietMealIdSchema.safeParse(input);
+  if (!parsed.success) return { error: "Refeição inválida.", ok: false };
+
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase.rpc("partner_create_diet_meal_alternative", {
+    p_patient_id: parsed.data.patientId,
+    p_plan_id: parsed.data.planId,
+    p_source_meal_id: parsed.data.mealId,
+  });
+
+  if (error || !data) return { error: "Não foi possível criar a opção de refeição.", ok: false };
+  const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
+  await recordDietEvent(context, {
+    detail: "Opção de refeição adicionada.",
+    eventType: "meal_added",
+    patientId: parsed.data.patientId,
+    planId: parsed.data.planId,
+    version,
+  });
+  revalidateClientProfile(parsed.data.patientId);
+  return { id: data, message: "Opção de refeição adicionada.", ok: true };
+}
+
 export async function removeClientDietMeal(
   input: z.input<typeof dietMealIdSchema>,
 ): Promise<ClientOverviewActionResult> {
@@ -1962,13 +1987,11 @@ export async function removeClientDietMeal(
   const context = await getPartnerActionContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await context.supabase
-    .from("partner_client_diet_meals")
-    .delete()
-    .eq("id", parsed.data.mealId)
-    .eq("plan_id", parsed.data.planId)
-    .eq("partner_id", context.partnerId)
-    .eq("patient_id", parsed.data.patientId);
+  const { error } = await context.supabase.rpc("partner_remove_diet_meal", {
+    p_meal_id: parsed.data.mealId,
+    p_patient_id: parsed.data.patientId,
+    p_plan_id: parsed.data.planId,
+  });
 
   if (error) return { error: "Não foi possível remover a refeição.", ok: false };
   const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
