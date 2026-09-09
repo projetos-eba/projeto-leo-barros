@@ -1644,6 +1644,60 @@ export type Database = {
           },
         ]
       }
+      exercise_muscle_classifications: {
+        Row: {
+          primary_muscle_group: string | null
+          review_status: string
+          secondary_muscle_groups: string[]
+          source_key: string
+          version: string
+        }
+        Insert: {
+          primary_muscle_group?: string | null
+          review_status: string
+          secondary_muscle_groups?: string[]
+          source_key: string
+          version: string
+        }
+        Update: {
+          primary_muscle_group?: string | null
+          review_status?: string
+          secondary_muscle_groups?: string[]
+          source_key?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      exercise_muscle_repair_audit: {
+        Row: {
+          after_values: Json
+          before_values: Json
+          classification_version: string
+          id: number
+          record_id: string
+          repaired_at: string
+          table_name: string
+        }
+        Insert: {
+          after_values: Json
+          before_values: Json
+          classification_version: string
+          id?: never
+          record_id: string
+          repaired_at?: string
+          table_name: string
+        }
+        Update: {
+          after_values?: Json
+          before_values?: Json
+          classification_version?: string
+          id?: never
+          record_id?: string
+          repaired_at?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       partner_billing_trial_usage: {
         Row: {
           created_at: string
@@ -2674,6 +2728,8 @@ export type Database = {
           status: string
           target_carbs_g: number
           target_fat_g: number
+          target_fiber_max_g: number | null
+          target_fiber_min_g: number | null
           target_kcal: number
           target_protein_g: number
           title: string
@@ -2695,6 +2751,8 @@ export type Database = {
           status?: string
           target_carbs_g?: number
           target_fat_g?: number
+          target_fiber_max_g?: number | null
+          target_fiber_min_g?: number | null
           target_kcal?: number
           target_protein_g?: number
           title: string
@@ -2716,6 +2774,8 @@ export type Database = {
           status?: string
           target_carbs_g?: number
           target_fat_g?: number
+          target_fiber_max_g?: number | null
+          target_fiber_min_g?: number | null
           target_kcal?: number
           target_protein_g?: number
           title?: string
@@ -7060,6 +7120,8 @@ export type Database = {
           status: string
           target_carbs_g: number
           target_fat_g: number
+          target_fiber_max_g: number | null
+          target_fiber_min_g: number | null
           target_kcal: number
           target_protein_g: number
           title: string
@@ -7110,6 +7172,10 @@ export type Database = {
         Args: { p_client_session_id: string }
         Returns: undefined
       }
+      get_partner_client_profile: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       increment_partner_protocol_usage: {
         Args: { p_item_id: string; p_item_type: string }
         Returns: number
@@ -7124,6 +7190,10 @@ export type Database = {
       }
       partner_client_cardio: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_diet: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_diet_base: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_client_exams: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview_legacy_20260727: {
@@ -7256,6 +7326,10 @@ export type Database = {
           result_status: string
         }[]
       }
+      repair_exercise_muscle_classifications: {
+        Args: { p_dry_run?: boolean }
+        Returns: Json
+      }
       save_partner_client_anamnesis_entry: {
         Args: {
           p_content: string
@@ -7302,6 +7376,17 @@ export type Database = {
         Args: { p_partner_id: string }
         Returns: undefined
       }
+      update_partner_client_profile: {
+        Args: {
+          p_biological_sex: string
+          p_birth_date: string
+          p_display_name: string
+          p_objective: string
+          p_patient_id: string
+          p_phone: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
@@ -7320,12 +7405,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7349,11 +7434,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7374,11 +7459,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7399,11 +7484,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7416,11 +7501,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

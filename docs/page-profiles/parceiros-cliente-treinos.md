@@ -58,3 +58,17 @@ RPCs:
 - Login: `antonioferrari2002@gmail.com`
 - Cliente: `/parceiros/clientes/a1000000-0000-4000-8000-000000000301?tab=treinos`
 - Seed inclui programa publicado, divisões A/B/C, Bi-set, séries, mapa muscular e template.
+
+## Busca local — atualização de 09/09/2026
+
+- Campo e resultados têm estado próprio; digitar não renderiza toda a prescrição nem chama o servidor.
+- Busca ignora acentos e caixa, com índice preparado quando o catálogo muda.
+- Sugestões inline limitadas a seis; biblioteca lateral mostra 30 itens por vez com `Carregar mais`.
+- Escape e perda de foco fecham a busca inline; somente a seleção explícita adiciona itens.
+
+## Classificação muscular
+
+- Catálogo revisável por `source_key` em `supabase/seed-data/exercise-muscle-classifications.json`: 201 classificações explícitas e 35 pendências de revisão.
+- Reimportação de mídia não sobrescreve campos musculares; novos registros usam a classificação versionada.
+- Correção histórica operacional exige simulação prévia e registra antes/depois em auditoria privada. Preserva grupos principais já classificados e secundários informados. Não altera séries, cargas, publicação ou frequência.
+- Registros `outros` com secundários vazios são considerados sem classificação; não é possível distinguir uma escolha manual idêntica ao valor padrão sem histórico anterior.

@@ -79,6 +79,8 @@ export type PartnerClientDietRawData = {
     status: string;
     targetCarbsG: number;
     targetFatG: number;
+    targetFiberMaxG?: number | null;
+    targetFiberMinG?: number | null;
     targetKcal: number;
     targetProteinG: number;
     title: string;
@@ -196,6 +198,8 @@ export type PartnerClientDietPlan = {
   statusLabel: string;
   targetCarbs: number;
   targetFat: number;
+  targetFiberMax: number | null;
+  targetFiberMin: number | null;
   targetKcal: number;
   targetProtein: number;
   title: string;
@@ -300,6 +304,9 @@ export type PartnerClientDietTracking = {
 
 export type PartnerClientDietData = {
   drafts: PartnerClientDietDraft[];
+  energy: {
+    getKcal: number | null;
+  };
   events: PartnerClientDietEvent[];
   foods: PartnerClientDietFood[];
   generatedAt: string;
@@ -528,7 +535,7 @@ function mapItem(row: PartnerClientDietRawData["plan"] extends infer T ? T exten
   };
 }
 
-function sumTotals(items: DietNutritionTotals[]) {
+export function sumDietNutritionTotals(items: DietNutritionTotals[]) {
   return items.reduce((total, item) => addDietTotals(total, item), zeroTotals);
 }
 
@@ -544,7 +551,7 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
       optionLabel: meal.optionLabel || `Cardápio ${Math.max(1, Math.round(numberValue(meal.menuOption ?? 1)))}`,
       sortOrder: numberValue(meal.sortOrder),
       title: meal.title,
-      totals: sumTotals(items),
+      totals: sumDietNutritionTotals(items),
     };
   });
 
@@ -557,7 +564,7 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
       label,
       meals: dayMeals,
       shortLabel,
-      totals: sumTotals(dayMeals.map((meal) => meal.totals)),
+      totals: sumDietNutritionTotals(dayMeals.map((meal) => meal.totals)),
     };
   });
   const status = normalizeStatus(rawPlan.status);
@@ -580,6 +587,8 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     statusLabel: dietStatusLabel(status),
     targetCarbs: numberValue(rawPlan.targetCarbsG),
     targetFat: numberValue(rawPlan.targetFatG),
+    targetFiberMax: rawPlan.targetFiberMaxG === null || rawPlan.targetFiberMaxG === undefined ? null : numberValue(rawPlan.targetFiberMaxG),
+    targetFiberMin: rawPlan.targetFiberMinG === null || rawPlan.targetFiberMinG === undefined ? null : numberValue(rawPlan.targetFiberMinG),
     targetKcal: numberValue(rawPlan.targetKcal),
     targetProtein: numberValue(rawPlan.targetProteinG),
     title: rawPlan.title,
@@ -587,7 +596,7 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     version: numberValue(rawPlan.version),
     waterLiters: numberValue(rawPlan.waterLiters),
     weekDays,
-    weekTotals: sumTotals(weekDays.map((day) => day.totals)),
+    weekTotals: sumDietNutritionTotals(weekDays.map((day) => day.totals)),
   };
 }
 
@@ -808,6 +817,7 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
 
   return {
     drafts,
+    energy: { getKcal: null },
     events: raw.events.map((event) => ({
       actorName: event.actorName,
       createdAt: event.createdAt,

@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowLeft, CalendarPlus, FileDown, MessageCircle, Pencil, Phone, Target, Users } from "lucide-react";
+import { useState } from "react";
+import { ClientProfileDrawer } from "@/components/clients/client-profile-drawer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -72,6 +74,7 @@ export function PartnerClientProfileHeader({
   overview: PartnerClientOverviewData;
 }) {
   const router = useRouter();
+  const [bioOpen, setBioOpen] = useState(false);
   const tabHref = (tab: ClientTab) =>
     tab === "visao-geral"
       ? `/parceiros/clientes/${overview.client.id}`
@@ -90,6 +93,7 @@ export function PartnerClientProfileHeader({
 
   return (
     <>
+      {!onEditProfile && <ClientProfileDrawer patientId={overview.client.id} open={bioOpen} onOpenChange={setBioOpen} />}
       <div className="client-overview-actions flex">
         <Link className="inline-flex h-8 items-center gap-2 text-[12px] font-semibold text-[#8fcfff] hover:text-white sm:h-10 sm:text-[13px]" href="/parceiros/clientes">
           <ArrowLeft className="size-4" />
@@ -137,16 +141,16 @@ export function PartnerClientProfileHeader({
             <InfoItem className="col-span-2 sm:col-span-1" icon={<Target className="size-4" />} label="Período do plano" value={overview.client.planPeriodLabel} />
             <InfoItem className="col-span-2 sm:col-span-1" icon={<Target className="size-4" />} label="Objetivo principal" value={overview.client.objectiveLabel} />
           </div>
-          {onEditProfile ? (
+          {(
             <button
               className="client-overview-actions mt-4 inline-flex h-9 items-center gap-2 rounded-[8px] border border-[#303746] bg-[#101923] px-3 text-[12px] font-semibold text-[#d8e5ee] transition hover:border-[#3b97e3] hover:text-white"
               type="button"
-              onClick={onEditProfile}
+              onClick={onEditProfile ?? (() => setBioOpen(true))}
             >
               <Pencil className="size-3.5" />
               Editar bio
             </button>
-          ) : null}
+          )}
         </div>
 
         <div className="min-w-0 lg:pt-[102px]">

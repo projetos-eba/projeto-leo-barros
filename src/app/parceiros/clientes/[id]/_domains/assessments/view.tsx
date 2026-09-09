@@ -1,4 +1,5 @@
 "use client";
+import { ClientProfileDrawer } from "@/components/clients/client-profile-drawer";
 
 import {
   Activity,
@@ -78,7 +79,6 @@ import { cn } from "@/lib/utils";
 
 import {
   applyClientCalorieCalculation,
-  completePartnerClientProfile,
   saveClientAssessment,
   saveClientCalorieCalculation,
 } from "../../_actions/assessments";
@@ -1035,56 +1035,6 @@ function Input({
   );
 }
 
-function ProfileBioDialog({
-  draft,
-  onDraftChange,
-  onOpenChange,
-  onSubmit,
-  open,
-  pending,
-}: {
-  draft: { biologicalSex: AssessmentBiologicalSex; birthDate: string; objective: string };
-  onDraftChange: (draft: { biologicalSex: AssessmentBiologicalSex; birthDate: string; objective: string }) => void;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: () => void;
-  open: boolean;
-  pending: boolean;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-[#303746] bg-[#0b1720] p-0 text-[#f3f4f7] sm:max-w-[560px] sm:rounded-[14px]">
-        <DialogHeader className="border-b border-[#303746] px-4 py-4 text-left sm:px-6 sm:py-5">
-          <DialogTitle className="text-[20px] font-bold sm:text-[24px]">Editar bio</DialogTitle>
-          <DialogDescription className="text-[#8b92a3]">Atualize os dados usados nas fórmulas de avaliação.</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 px-4 py-4 sm:px-6 sm:py-5">
-          <Label text="Data de nascimento">
-            <Input required type="date" value={draft.birthDate} onChange={(value) => onDraftChange({ ...draft, birthDate: value })} />
-          </Label>
-          <label className="grid gap-1.5 text-[12px] font-semibold leading-4 text-[#d7dae0] sm:gap-2 sm:text-[13px]">
-            Sexo biológico
-            <select className="h-10 w-full rounded-[10px] border border-[#303746] bg-[#161a22] px-3 text-[14px] outline-none focus:border-[#3b97e3]" value={draft.biologicalSex} onChange={(event) => onDraftChange({ ...draft, biologicalSex: event.target.value as AssessmentBiologicalSex })}>
-              <option value="not_informed">Sexo não informado</option>
-              <option value="female">Feminino</option>
-              <option value="male">Masculino</option>
-            </select>
-          </label>
-          <Label text="Objetivo principal">
-            <Input required value={draft.objective} onChange={(value) => onDraftChange({ ...draft, objective: value })} />
-          </Label>
-          <div className="flex justify-end gap-2 border-t border-[#303746] pt-4">
-            <button className="h-10 rounded-[10px] border border-[#303746] px-5 text-[14px] font-semibold text-white" type="button" onClick={() => onOpenChange(false)}>Cancelar</button>
-            <button className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-[#3b97e3] px-5 text-[14px] font-semibold text-white disabled:opacity-60" disabled={pending} type="button" onClick={onSubmit}>
-              {pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-              Salvar bio
-            </button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 function AssessmentDetailsDialog({
   assessment,
   onEdit,
@@ -1176,13 +1126,7 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
   const [selectedCircumferenceMetrics, setSelectedCircumferenceMetrics] = useState(() => assessments.circumferences.availableMetrics.slice(0, 8).map((metric) => metric.key));
   const [pendingAction, setPendingAction] = useState<"save" | "apply" | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profilePending, setProfilePending] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [profileDraft, setProfileDraft] = useState({
-    biologicalSex: assessments.client.biologicalSex,
-    birthDate: assessments.client.birthDate ?? "",
-    objective: assessments.client.objective ?? "",
-  });
   const [calorieInputs, setCalorieInputs] = useState(() => {
     const latest = assessments.latestAssessment;
     const saved = (assessments.calorie.latestApplied ?? assessments.calculations[0])?.inputs ?? {};
@@ -1249,21 +1193,6 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
     : null;
   const bodyFatClassification = classifyByReferenceProfile(latestAssessment?.bodyFatPercentage ?? null, getCompositionReferenceProfile("bodyFatPercentage"));
   const ffmiClassification = classifyByReferenceProfile(latestAssessment?.ffmi ?? null, getCompositionReferenceProfile("ffmi"));
-
-  async function saveProfileDraft() {
-    setProfilePending(true);
-    setActionMessage(null);
-    try {
-      const result = await completePartnerClientProfile({ ...profileDraft, patientId: assessments.client.id });
-      setActionMessage(result.message ?? result.error ?? null);
-      if (result.ok) {
-        setProfileOpen(false);
-        router.refresh();
-      }
-    } finally {
-      setProfilePending(false);
-    }
-  }
 
   function toggleMetric(current: string[], key: string) {
     return current.includes(key) ? current.filter((item) => item !== key) : [...current, key];
@@ -1663,14 +1592,8 @@ export function PartnerClientAssessmentsView({ assessments, overview }: PartnerC
 
       </div>
 
-      <ProfileBioDialog
-        draft={profileDraft}
-        open={profileOpen}
-        pending={profilePending}
-        onDraftChange={setProfileDraft}
-        onOpenChange={setProfileOpen}
-        onSubmit={() => void saveProfileDraft()}
-      />
+      <ClientProfileDrawer patientId={assessments.client.id} open={profileOpen} onOpenChange={setProfileOpen}
+        initialBio={{ biologicalSex: assessments.client.biologicalSex, birthDate: assessments.client.birthDate ?? "", objective: assessments.client.objective ?? "" }} />
       <AssessmentDetailsDialog
         assessment={selectedAssessment}
         open={assessmentFlow.open && assessmentFlow.mode === "details"}

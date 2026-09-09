@@ -212,6 +212,23 @@ describe("PartnerClientWorkoutView", () => {
     expect(container.querySelectorAll("[data-layer]")).toHaveLength(0);
   });
 
+  it("pagina a biblioteca e mantém digitação sem adicionar exercícios", () => {
+    const library = Array.from({ length: 65 }, (_, id) => ({ ...workout.library[0], id: `library-${id}`, name: `Exercício ${id}` }));
+    render(<PartnerClientWorkoutView overview={overview} workout={{ ...workout, library }} />);
+    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(30);
+    fireEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
+    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(60);
+    fireEvent.change(screen.getByLabelText("Buscar exercício"), { target: { value: "exercicio 64" } });
+    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar exercício" }));
+    const input = screen.getByLabelText("Buscar exercício para Treino A");
+    fireEvent.change(input, { target: { value: "exercicio" } });
+    expect(screen.getAllByRole("button", { name: /ao Treino A$/ })).toHaveLength(6);
+    expect(addClientWorkoutExercise).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByLabelText("Buscar exercício para Treino A")).not.toBeInTheDocument();
+  });
+
   it("adiciona exercício, sugere nova série e combina Bi-set", async () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
     fireEvent.click(screen.getByRole("button", { name: "Adicionar exercício" }));

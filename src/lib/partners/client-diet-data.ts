@@ -75,6 +75,8 @@ function asRawPlan(plan: DietPlanRow, meals: DietMealRow[], items: DietMealItemR
     status: plan.status,
     targetCarbsG: plan.target_carbs_g,
     targetFatG: plan.target_fat_g,
+    targetFiberMaxG: plan.target_fiber_max_g,
+    targetFiberMinG: plan.target_fiber_min_g,
     targetKcal: plan.target_kcal,
     targetProteinG: plan.target_protein_g,
     title: plan.title,
@@ -107,9 +109,13 @@ function shiftIsoDate(value: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
+function withEnergy(diet: PartnerClientDietData, getKcal: number | null): PartnerClientDietData {
+  return { ...diet, energy: { getKcal } };
+}
+
 export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?: string): Promise<PartnerClientDietData | null> {
   const supabase = await createClient();
-  const [{ data, error }, planSummariesResult] = await Promise.all([
+  const [{ data, error }, planSummariesResult, getResult] = await Promise.all([
     supabase.rpc("partner_client_diet", { p_patient_id: patientId }),
     supabase
       .from("partner_client_diet_plans")
@@ -117,6 +123,14 @@ export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?:
       .eq("patient_id", patientId)
       .neq("status", "archived")
       .order("updated_at", { ascending: false }),
+    supabase
+      .from("partner_client_calorie_calculations")
+      .select("tdee_kcal")
+      .eq("patient_id", patientId)
+      .eq("status", "applied")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   if (error) {
@@ -128,6 +142,9 @@ export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?:
       throw new Error(`Falha ao carregar planos de Dieta: ${planSummariesResult.error.message}`);
     }
     return null;
+  }
+  if (getResult.error) {
+    throw new Error(`Falha ao carregar o gasto energético do Cliente: ${getResult.error.message}`);
   }
 
   let rawData = data as unknown as PartnerClientDietRawData;
@@ -188,7 +205,10 @@ export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?:
   }
 
   const planId = rawData.plan?.id;
-  if (!planId) return buildPartnerClientDiet(rawData);
+  const getKcal = typeof getResult.data?.tdee_kcal === "number" && Number.isFinite(getResult.data.tdee_kcal) && getResult.data.tdee_kcal > 0
+    ? getResult.data.tdee_kcal
+    : null;
+  if (!planId) return withEnergy(buildPartnerClientDiet(rawData), getKcal);
 
   const today = todayIsoDate();
   const fromDate = shiftIsoDate(today, -13);
@@ -230,7 +250,7 @@ export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?:
     throw new Error(`Falha ao carregar histórico diário da Dieta: ${eventsResult.error.message}`);
   }
 
-  return buildPartnerClientDiet({
+  return withEnergy(buildPartnerClientDiet({
     ...rawData,
     tracking: {
       dailyLogs: Array.isArray(dailyLogsResult.data) ? dailyLogsResult.data : [],
@@ -238,5 +258,5 @@ export async function fetchPartnerClientDiet(patientId: string, selectedPlanId?:
       mealLogs: Array.isArray(mealLogsResult.data) ? mealLogsResult.data : [],
       today,
     },
-  } as PartnerClientDietRawData);
+  } as PartnerClientDietRawData), getKcal);
 }
