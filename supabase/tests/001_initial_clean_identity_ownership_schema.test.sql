@@ -36,6 +36,8 @@ select tables_are(
     'client_workout_sessions',
     'client_workout_set_logs',
     'email_verification_tokens',
+    'exercise_muscle_classifications',
+    'exercise_muscle_repair_audit',
     'partner_calendar_blocks',
     'partner_client_adherence_snapshots',
     'partner_client_assessment_circumferences',

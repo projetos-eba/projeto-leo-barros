@@ -1,0 +1,7 @@
+{
+  "entries": 10000,
+  "indexMs": 7.980624999999975,
+  "iterations": 500,
+  "worstCaseFilterP95Ms": 0.3066249999999968,
+  "maxMs": 4.600250000000017
+}

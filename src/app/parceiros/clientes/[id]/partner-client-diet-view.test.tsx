@@ -215,7 +215,11 @@ describe("PartnerClientDietView", () => {
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByText("Dieta atual")).toBeInTheDocument();
-    expect(screen.getByText("Resumo geral")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Balanço energético" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Macronutrientes" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Distribuição calórica por refeição" })).toBeInTheDocument();
+    expect(screen.getAllByText("GET estimado").length).toBeGreaterThan(0);
+    expect(screen.getByText("Meta não definida")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento da execução")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Acompanhamento da execução/i })).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("Compatibilidade dos registros")).not.toBeInTheDocument();
@@ -226,7 +230,7 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByText("Últimos registros do Cliente")).toBeInTheDocument();
     expect(screen.getAllByText("98 kcal").length).toBeGreaterThan(0);
     expect(screen.getByText("Parcial")).toBeInTheDocument();
-    expect(screen.getByText("Água")).toBeInTheDocument();
+    expect(screen.getByText("Água: 3 L")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Plano alimentar" })).toBeInTheDocument();
     expect(screen.getByText("Adicionar alimentos")).toBeInTheDocument();
     expect(screen.getAllByText("Considerações sobre a dieta").length).toBeGreaterThan(0);
@@ -243,6 +247,75 @@ describe("PartnerClientDietView", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Almoço parcial por falta de apetite.")).toBeInTheDocument();
+  });
+
+  it("atualiza o resumo quando a dieta recebida muda", () => {
+    const configuredDiet = buildPartnerClientDiet({
+      ...rawDiet,
+      plan: { ...rawDiet.plan!, targetFiberMaxG: 30, targetFiberMinG: 25 },
+    });
+    const { rerender } = render(<PartnerClientDietView diet={{ ...configuredDiet, energy: { getKcal: 2420 } }} overview={overview} />);
+
+    expect(screen.getByText(/Déficit/)).toBeInTheDocument();
+    expect(screen.getByText("Meta 25–30 g")).toBeInTheDocument();
+    expect(screen.getAllByText("195 kcal").length).toBeGreaterThan(0);
+
+    const updatedDiet = buildPartnerClientDiet({
+      ...rawDiet,
+      plan: {
+        ...rawDiet.plan!,
+        meals: rawDiet.plan!.meals.map((meal) => ({
+          ...meal,
+          items: meal.items.map((item) => ({ ...item, quantity: 180 })),
+        })),
+        targetFiberMaxG: 30,
+        targetFiberMinG: 25,
+      },
+    });
+    rerender(<PartnerClientDietView diet={{ ...updatedDiet, energy: { getKcal: 2420 } }} overview={overview} />);
+
+    expect(screen.getAllByText("234 kcal").length).toBeGreaterThan(0);
+  });
+
+  it("segue o cardápio selecionado no resumo", () => {
+    const dietWithAlternative = buildPartnerClientDiet({
+      ...rawDiet,
+      plan: {
+        ...rawDiet.plan!,
+        meals: [
+          ...rawDiet.plan!.meals,
+          {
+            ...rawDiet.plan!.meals[0]!,
+            id: "meal-option-2",
+            items: rawDiet.plan!.meals[0]!.items.map((item) => ({ ...item, quantity: 100 })),
+            menuOption: 2,
+            optionLabel: "Cardápio 2",
+          },
+        ],
+      },
+    });
+    render(<PartnerClientDietView diet={{ ...dietWithAlternative, energy: { getKcal: 2420 } }} overview={overview} />);
+
+    expect(screen.getAllByText("195 kcal").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "Cardápio 2" }));
+    expect(screen.getAllByText("130 kcal").length).toBeGreaterThan(0);
+  });
+
+  it("pagina alimentos e limita sugestões sem salvar durante a digitação", () => {
+    const foods = Array.from({ length: 65 }, (_, id) => ({ ...diet.foods[0], id: `food-${id}`, name: `Pão ${id}`, searchText: `pão ${id}` }));
+    render(<PartnerClientDietView overview={overview} diet={{ ...diet, foods, library: { ...diet.library, suggestions: foods } }} />);
+    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(30);
+    fireEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
+    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(60);
+    fireEvent.change(screen.getByPlaceholderText("Buscar alimentos... (ex.: frango, arroz, whey)"), { target: { value: "pao 64" } });
+    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar alimento" }));
+    const input = screen.getByLabelText("Buscar alimento para Almoço");
+    fireEvent.change(input, { target: { value: "pao" } });
+    expect(screen.getAllByRole("button", { name: /à refeição Almoço$/ })).toHaveLength(6);
+    expect(addClientDietMealItem).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByLabelText("Buscar alimento para Almoço")).not.toBeInTheDocument();
   });
 
   it("adiciona alimento sugerido e consome rascunho do Cadastro", async () => {

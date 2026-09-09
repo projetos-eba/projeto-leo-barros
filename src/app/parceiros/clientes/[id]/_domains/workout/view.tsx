@@ -37,6 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { indexCatalog, searchCatalog } from "@/lib/partners/catalog-search";
 import { WorkoutMusclePreview } from "@/components/workouts/workout-muscle-preview";
 import type {
   PartnerClientWorkoutData,
@@ -638,6 +639,157 @@ function ExecutionPanel({ execution }: { execution: PartnerWorkoutExecutionSumma
   );
 }
 
+function InlineExerciseSearch({ library, sessionName, pending, onAdd }: {
+  library: PartnerClientWorkoutViewProps["workout"]["library"]; sessionName: string; pending: boolean; onAdd: (id: string) => void;
+}) {
+  const [inlineExerciseSearchOpen, setInlineExerciseSearchOpen] = useState(false);
+  const [inlineExerciseQuery, setInlineExerciseQuery] = useState("");
+  const [inlineExerciseDropdownRect, setInlineExerciseDropdownRect] = useState<{ left: number; top: number; width: number } | null>(null);
+  const inlineExerciseInputRef = useRef<HTMLInputElement | null>(null);
+  const inlineExerciseSearchRef = useRef<HTMLDivElement | null>(null);
+  const index = useMemo(() => indexCatalog(library, (exercise) => `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`), [library]);
+  const inlineExerciseOptions = useMemo(() => inlineExerciseQuery.trim() ? searchCatalog(index, inlineExerciseQuery, 6) : [], [index, inlineExerciseQuery]);
+  function updateInlineExerciseDropdownRect() {
+    const rect = inlineExerciseInputRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setInlineExerciseDropdownRect({
+      left: rect.left,
+      top: rect.bottom + 8,
+      width: rect.width,
+    });
+  }
+
+  useEffect(() => {
+    if (!inlineExerciseSearchOpen) {
+      setInlineExerciseDropdownRect(null);
+      return undefined;
+    }
+
+    updateInlineExerciseDropdownRect();
+    window.addEventListener("resize", updateInlineExerciseDropdownRect);
+    window.addEventListener("scroll", updateInlineExerciseDropdownRect, true);
+    return () => {
+      window.removeEventListener("resize", updateInlineExerciseDropdownRect);
+      window.removeEventListener("scroll", updateInlineExerciseDropdownRect, true);
+    };
+  }, [inlineExerciseSearchOpen]);
+
+  return <>
+                        {inlineExerciseSearchOpen ? (
+                          <div
+                            className="relative max-w-[520px]"
+                            ref={inlineExerciseSearchRef}
+                            onBlur={(event) => {
+                              const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+                              if (!event.currentTarget.contains(nextTarget)) {
+                                setInlineExerciseSearchOpen(false);
+                                setInlineExerciseQuery("");
+                              }
+                            }}
+                          >
+                            <div className="relative">
+                              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
+                              <input
+                                aria-label={`Buscar exercício para ${sessionName}`}
+                                autoFocus
+                                className={cn(inputClass, "w-full pl-9")}
+                                placeholder="Digite para buscar exercício..."
+                                ref={inlineExerciseInputRef}
+                                value={inlineExerciseQuery}
+                                onChange={(event) => {
+                                  setInlineExerciseQuery(event.target.value);
+                                }}
+                                onFocus={updateInlineExerciseDropdownRect}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Escape") {
+                                    setInlineExerciseSearchOpen(false);
+                                    setInlineExerciseQuery("");
+                                  }
+                                }}
+                              />
+                            </div>
+                            {inlineExerciseQuery.trim() && inlineExerciseDropdownRect ? (
+                              <div
+                                className="fixed z-[9999] max-h-[260px] overflow-y-auto rounded-[8px] border border-[#303746] bg-[#07131b] p-1 shadow-2xl"
+                                style={{
+                                  left: inlineExerciseDropdownRect.left,
+                                  top: inlineExerciseDropdownRect.top,
+                                  width: inlineExerciseDropdownRect.width,
+                                }}
+                              >
+                                {inlineExerciseOptions.length ? inlineExerciseOptions.map((exercise) => (
+                                  <button
+                                    aria-label={`Adicionar ${exercise.name} ao ${sessionName}`}
+                                    className="grid w-full grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] px-2 py-2 text-left hover:bg-[#10283a]"
+                                    disabled={pending}
+                                    key={exercise.id}
+                                    type="button"
+                                    onClick={() => { onAdd(exercise.id); setInlineExerciseSearchOpen(false); setInlineExerciseQuery(""); }}
+                                  >
+                                    {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
+                                    <span className="min-w-0">
+                                      <span className="block truncate text-[12px] font-semibold text-white">{exercise.name}</span>
+                                      <span className="block truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</span>
+                                    </span>
+                                    <Plus className="size-4 text-[#8fcfff]" />
+                                  </button>
+                                )) : <p className="px-3 py-2 text-[12px] text-[#718394]">Nenhum exercício encontrado.</p>}
+                              </div>
+                            ) : null}
+                            <button className="mt-2 text-[12px] font-semibold text-[#8fcfff]" type="button" onClick={() => { setInlineExerciseSearchOpen(false); setInlineExerciseQuery(""); }}>Fechar busca</button>
+                          </div>
+                        ) : (
+                          <button
+                            className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white"
+                            disabled={pending}
+                            type="button"
+                            onClick={() => setInlineExerciseSearchOpen(true)}
+                          >
+                            <Plus className="size-4" /> Adicionar exercício
+                          </button>
+                        )}
+  </>;
+}
+
+function ExerciseLibrary({ library, pending, onAdd }: {
+  library: PartnerClientWorkoutViewProps["workout"]["library"]; pending: boolean; onAdd: (id: string, variation: string | null) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [limit, setLimit] = useState(30);
+  const [variations, setVariations] = useState<Record<string, string>>({});
+  const index = useMemo(() => indexCatalog(library, (exercise) => `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`), [library]);
+  const visibleLibrary = useMemo(() => searchCatalog(index, query, limit + 1), [index, query, limit]);
+  return (
+                  <section className={cn(panelClass, "p-4")}>
+                    <h3 className="text-[15px] font-bold text-white">Biblioteca de exercícios</h3>
+                    <div className="relative mt-3">
+                      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
+                      <input aria-label="Buscar exercício" className={cn(inputClass, "w-full pl-9")} placeholder="Buscar exercício..." value={query} onChange={(event) => { setQuery(event.target.value); setLimit(30); }} />
+                    </div>
+                    <div className="mt-3 max-h-[360px] overflow-y-auto pr-2 [scrollbar-gutter:stable]">
+                      {visibleLibrary.slice(0, limit).map((exercise) => (
+                        <article className="grid grid-cols-[36px_minmax(0,1fr)_28px] items-center gap-2 border-b border-[#273847] py-2 last:border-b-0" key={exercise.id}>
+                          {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
+                          <div className="min-w-0">
+                            <p className="truncate text-[12px] font-semibold text-white">{exercise.name}</p>
+                            <p className="truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</p>
+                            {exercise.variations.length ? (
+                              <select aria-label={`Variação de ${exercise.name}`} className="mt-1 h-6 max-w-full rounded-[5px] border border-[#2b3b49] bg-[#091722] px-1 text-[10px] text-[#c8d4df]" value={variations[exercise.id] ?? ""} onChange={(event) => setVariations({ ...variations, [exercise.id]: event.target.value })}>
+                                <option value="">Padrão</option>
+                                {exercise.variations.map((variation) => <option key={variation} value={variation}>{variation}</option>)}
+                              </select>
+                            ) : null}
+                          </div>
+                          <button aria-label={`Adicionar ${exercise.name}`} className="inline-flex size-7 items-center justify-center rounded-[6px] bg-[#173a56] text-[#8fcfff]" disabled={pending} type="button" onClick={() => onAdd(exercise.id, variations[exercise.id] || null)}><Plus className="size-4" /></button>
+                        </article>
+                      ))}
+                    </div>
+                    {visibleLibrary.length > limit && <Button type="button" tone="ghost" onClick={() => setLimit((value) => value + 30)}>Carregar mais</Button>}
+                    <Link className="mt-3 inline-flex items-center gap-2 text-[12px] font-semibold text-[#8fcfff]" href="/parceiros/cadastros"><Library className="size-4" /> Ver todos em Cadastros</Link>
+                  </section>
+  );
+}
+
 export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWorkoutViewProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -645,7 +797,6 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   const [sessionId, setSessionId] = useState(program?.sessions[0]?.id ?? null);
   const [exerciseOrder, setExerciseOrder] = useState(() => program?.sessions[0]?.exercises.map((exercise) => exercise.id) ?? []);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
   const [notes, setNotes] = useState(program?.notes ?? "");
   const [programDialog, setProgramDialog] = useState(false);
   const [sessionDialog, setSessionDialog] = useState(false);
@@ -661,67 +812,19 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
     title: String(workoutTypeOptions[(program?.sessions.length ?? 0) % workoutTypeOptions.length]),
   });
   const [templateId, setTemplateId] = useState(workout.templates[0]?.id ?? "");
-  const [variations, setVariations] = useState<Record<string, string>>({});
   const [sessionMenuId, setSessionMenuId] = useState<string | null>(null);
-  const [inlineExerciseSearchOpen, setInlineExerciseSearchOpen] = useState(false);
-  const [inlineExerciseQuery, setInlineExerciseQuery] = useState("");
-  const [inlineExerciseDropdownRect, setInlineExerciseDropdownRect] = useState<{ left: number; top: number; width: number } | null>(null);
-  const inlineExerciseInputRef = useRef<HTMLInputElement | null>(null);
-  const inlineExerciseSearchRef = useRef<HTMLDivElement | null>(null);
   const session = program?.sessions.find((item) => item.id === sessionId) ?? program?.sessions[0] ?? null;
   const firstSessionId = program?.sessions[0]?.id ?? null;
   const orderedExercises = useMemo(() => {
     const map = new Map((session?.exercises ?? []).map((exercise) => [exercise.id, exercise]));
     return exerciseOrder.map((id) => map.get(id)).filter((item): item is PartnerClientWorkoutExercise => Boolean(item));
   }, [exerciseOrder, session]);
-  const visibleLibrary = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return workout.library.filter((exercise) =>
-      !normalized || `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`.toLowerCase().includes(normalized),
-    );
-  }, [query, workout.library]);
-  const inlineExerciseOptions = useMemo(() => {
-    const normalized = inlineExerciseQuery.trim().toLowerCase();
-    if (!normalized) return [];
-    return workout.library.filter((exercise) =>
-      `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`.toLowerCase().includes(normalized),
-    ).slice(0, 6);
-  }, [inlineExerciseQuery, workout.library]);
   const selectedRows = orderedExercises.filter((exercise) => selectedExercises.includes(exercise.id));
   const selectedBisetGroup = selectedRows.length === 2 && selectedRows[0].bisetGroupId && selectedRows[0].bisetGroupId === selectedRows[1].bisetGroupId
     ? selectedRows[0].bisetGroupId
     : null;
 
-  function updateInlineExerciseDropdownRect() {
-    const rect = inlineExerciseInputRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setInlineExerciseDropdownRect({
-      left: rect.left,
-      top: rect.bottom + 8,
-      width: rect.width,
-    });
-  }
-
-  useEffect(() => {
-    setExerciseOrder(session?.exercises.map((exercise) => exercise.id) ?? []);
-    setInlineExerciseSearchOpen(false);
-    setInlineExerciseQuery("");
-  }, [session]);
-
-  useEffect(() => {
-    if (!inlineExerciseSearchOpen) {
-      setInlineExerciseDropdownRect(null);
-      return undefined;
-    }
-
-    updateInlineExerciseDropdownRect();
-    window.addEventListener("resize", updateInlineExerciseDropdownRect);
-    window.addEventListener("scroll", updateInlineExerciseDropdownRect, true);
-    return () => {
-      window.removeEventListener("resize", updateInlineExerciseDropdownRect);
-      window.removeEventListener("scroll", updateInlineExerciseDropdownRect, true);
-    };
-  }, [inlineExerciseSearchOpen, inlineExerciseQuery]);
+  useEffect(() => { setExerciseOrder(session?.exercises.map((exercise) => exercise.id) ?? []); }, [session]);
 
   useEffect(() => {
     setSessionId(firstSessionId);
@@ -756,8 +859,6 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
       sessionId: session.id,
       variationName: null,
     }));
-    setInlineExerciseSearchOpen(false);
-    setInlineExerciseQuery("");
   }
 
   function toggleExerciseSelection(id: string) {
@@ -894,112 +995,14 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                       ))}
                       {orderedExercises.length === 0 ? <div className="p-8 text-center text-[13px] text-[#718394]">Clique em Adicionar exercício para buscar na biblioteca.</div> : null}
                       <div className="relative border-t border-[#273847] px-4 py-3">
-                        {inlineExerciseSearchOpen ? (
-                          <div
-                            className="relative max-w-[520px]"
-                            ref={inlineExerciseSearchRef}
-                            onBlur={(event) => {
-                              const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
-                              if (!event.currentTarget.contains(nextTarget)) {
-                                setInlineExerciseSearchOpen(false);
-                                setInlineExerciseQuery("");
-                              }
-                            }}
-                          >
-                            <div className="relative">
-                              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
-                              <input
-                                aria-label={`Buscar exercício para ${sessionDisplayName(session)}`}
-                                autoFocus
-                                className={cn(inputClass, "w-full pl-9")}
-                                placeholder="Digite para buscar exercício..."
-                                ref={inlineExerciseInputRef}
-                                value={inlineExerciseQuery}
-                                onChange={(event) => {
-                                  setInlineExerciseQuery(event.target.value);
-                                  updateInlineExerciseDropdownRect();
-                                }}
-                                onFocus={updateInlineExerciseDropdownRect}
-                                onKeyDown={(event) => {
-                                  if (event.key === "Escape") {
-                                    setInlineExerciseSearchOpen(false);
-                                    setInlineExerciseQuery("");
-                                  }
-                                }}
-                              />
-                            </div>
-                            {inlineExerciseQuery.trim() && inlineExerciseDropdownRect ? (
-                              <div
-                                className="fixed z-[9999] max-h-[260px] overflow-y-auto rounded-[8px] border border-[#303746] bg-[#07131b] p-1 shadow-2xl"
-                                style={{
-                                  left: inlineExerciseDropdownRect.left,
-                                  top: inlineExerciseDropdownRect.top,
-                                  width: inlineExerciseDropdownRect.width,
-                                }}
-                              >
-                                {inlineExerciseOptions.length ? inlineExerciseOptions.map((exercise) => (
-                                  <button
-                                    aria-label={`Adicionar ${exercise.name} ao ${sessionDisplayName(session)}`}
-                                    className="grid w-full grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] px-2 py-2 text-left hover:bg-[#10283a]"
-                                    disabled={pending}
-                                    key={exercise.id}
-                                    type="button"
-                                    onClick={() => addInlineExercise(exercise.id)}
-                                  >
-                                    {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
-                                    <span className="min-w-0">
-                                      <span className="block truncate text-[12px] font-semibold text-white">{exercise.name}</span>
-                                      <span className="block truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</span>
-                                    </span>
-                                    <Plus className="size-4 text-[#8fcfff]" />
-                                  </button>
-                                )) : <p className="px-3 py-2 text-[12px] text-[#718394]">Nenhum exercício encontrado.</p>}
-                              </div>
-                            ) : null}
-                            <button className="mt-2 text-[12px] font-semibold text-[#8fcfff]" type="button" onClick={() => { setInlineExerciseSearchOpen(false); setInlineExerciseQuery(""); }}>Fechar busca</button>
-                          </div>
-                        ) : (
-                          <button
-                            className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8fcfff] hover:text-white"
-                            disabled={pending}
-                            type="button"
-                            onClick={() => setInlineExerciseSearchOpen(true)}
-                          >
-                            <Plus className="size-4" /> Adicionar exercício
-                          </button>
-                        )}
+                        <InlineExerciseSearch key={session.id} library={workout.library} sessionName={sessionDisplayName(session)} pending={pending} onAdd={addInlineExercise} />
                       </div>
                     </div>
                   </div>
                 </section>
 
                 <aside className="grid content-start gap-4">
-                  <section className={cn(panelClass, "p-4")}>
-                    <h3 className="text-[15px] font-bold text-white">Biblioteca de exercícios</h3>
-                    <div className="relative mt-3">
-                      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#718394]" />
-                      <input aria-label="Buscar exercício" className={cn(inputClass, "w-full pl-9")} placeholder="Buscar exercício..." value={query} onChange={(event) => setQuery(event.target.value)} />
-                    </div>
-                    <div className="mt-3 max-h-[360px] overflow-y-auto pr-2 [scrollbar-gutter:stable]">
-                      {visibleLibrary.map((exercise) => (
-                        <article className="grid grid-cols-[36px_minmax(0,1fr)_28px] items-center gap-2 border-b border-[#273847] py-2 last:border-b-0" key={exercise.id}>
-                          {exercise.thumbnailUrl ? <img alt="" className="size-8 rounded-[6px] object-cover" src={exercise.thumbnailUrl} /> : <span className="flex size-8 items-center justify-center rounded-[6px] bg-[#0a2c48] text-[#68afe9]"><Dumbbell className="size-3.5" /></span>}
-                          <div className="min-w-0">
-                            <p className="truncate text-[12px] font-semibold text-white">{exercise.name}</p>
-                            <p className="truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</p>
-                            {exercise.variations.length ? (
-                              <select aria-label={`Variação de ${exercise.name}`} className="mt-1 h-6 max-w-full rounded-[5px] border border-[#2b3b49] bg-[#091722] px-1 text-[10px] text-[#c8d4df]" value={variations[exercise.id] ?? ""} onChange={(event) => setVariations({ ...variations, [exercise.id]: event.target.value })}>
-                                <option value="">Padrão</option>
-                                {exercise.variations.map((variation) => <option key={variation} value={variation}>{variation}</option>)}
-                              </select>
-                            ) : null}
-                          </div>
-                          <button aria-label={`Adicionar ${exercise.name}`} className="inline-flex size-7 items-center justify-center rounded-[6px] bg-[#173a56] text-[#8fcfff]" disabled={pending} type="button" onClick={() => runAction(() => addClientWorkoutExercise({ exerciseId: exercise.id, patientId: overview.client.id, sessionId: session.id, variationName: variations[exercise.id] || null }))}><Plus className="size-4" /></button>
-                        </article>
-                      ))}
-                    </div>
-                    <Link className="mt-3 inline-flex items-center gap-2 text-[12px] font-semibold text-[#8fcfff]" href="/parceiros/cadastros"><Library className="size-4" /> Ver todos em Cadastros</Link>
-                  </section>
+                  <ExerciseLibrary library={workout.library} pending={pending} onAdd={(exerciseId, variationName) => runAction(() => addClientWorkoutExercise({ exerciseId, variationName, patientId: overview.client.id, sessionId: session.id }))} />
                   <MusclePanel exercises={session.exercises} />
                   <section className={cn(panelClass, "p-4")}>
                     <h3 className="text-[15px] font-bold text-white">Observações do treino</h3>

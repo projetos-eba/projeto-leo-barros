@@ -28,7 +28,8 @@ Dar ao parceiro uma lista operacional dos seus Clientes vinculados, com busca, f
 - A criacao de Cliente nao recebe senha; convite fica `pending_delivery` ate a etapa futura de e-mail real.
 - O drawer Novo Cliente seleciona um plano ativo em vez de escopos manuais; os modulos liberados sao derivados do plano escolhido.
 - Ao concluir a criacao, a tela cria o vinculo financeiro manual com inicio, primeira cobranca e parcelas.
-- A tela nao exclui, suspende ou edita Cliente nesta fase.
+- A opção `Editar` abre drawer lateral com nome, telefone internacional, nascimento, sexo biológico e objetivo; e-mail é somente leitura. Cancelar não salva e salvar mantém a lista aberta. Exclusão e suspensão permanecem indisponíveis.
+- A leitura mínima usa `get_partner_client_profile`; a gravação transacional usa `update_partner_client_profile`, restritas ao parceiro ativo vinculado.
 
 ## Contrato visual Figma
 

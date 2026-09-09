@@ -27,6 +27,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { ClientProfileDrawer } from "@/components/clients/client-profile-drawer";
 import { createClient } from "@/lib/supabase/client";
 import type {
   PartnerClientRow,
@@ -843,9 +844,11 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
     }
   }
 
+  const [editingClientId, setEditingClientId] = useState<string | null>(null);
+
   function editClient(row: PartnerClientRow) {
     setOpenActionMenuId(null);
-    router.push(`/parceiros/clientes/${row.id}`);
+    setEditingClientId(row.id);
   }
 
   function deleteClient(row: PartnerClientRow) {
@@ -855,6 +858,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f3f4f7] sm:px-5 sm:py-8 lg:px-6 lg:py-[74px]">
+      {editingClientId && <ClientProfileDrawer key={editingClientId} patientId={editingClientId} mode="full" open onOpenChange={(open) => { if (!open) setEditingClientId(null); }} />}
       <div className="mx-auto min-w-0 max-w-[1202px]">
         <header className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>

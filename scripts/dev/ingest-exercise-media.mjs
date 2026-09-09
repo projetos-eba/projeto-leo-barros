@@ -375,6 +375,8 @@ async function publishItem(supabase, item, filePath, reportItem) {
     await uploadIfNeeded(supabase, paths.preview, previewBuffer, "image/webp"),
   ];
 
+  // Classification is owned by the versioned catalog/DB trigger, not media ingestion.
+  // Omit both muscle fields so reimports preserve professional classifications.
   const exercisePayload = {
     category: null,
     description: null,
@@ -404,9 +406,7 @@ async function publishItem(supabase, item, filePath, reportItem) {
     preview_mime_type: "image/webp",
     preview_size_bytes: previewBuffer.length,
     preview_storage_path: paths.preview,
-    primary_muscle_group: null,
     publication_status: "published",
-    secondary_muscle_groups: [],
     slug: item.slug,
     source_checksum: item.source_checksum,
     source_gif_storage_path: paths.source,
