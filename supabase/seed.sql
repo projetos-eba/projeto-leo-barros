@@ -2097,6 +2097,19 @@ Evitar ultraprocessados e altas fontes de açúcar.',
     ('e1000000-0000-4000-8000-000000000214', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Jantar', '19:30', 2, 'Cardápio 2', 3, now() - interval '12 days', now() - interval '2 days'),
     ('e1000000-0000-4000-8000-000000000215', 'e1000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', 1, 'Ceia', '22:00', 2, 'Cardápio 2', 4, now() - interval '12 days', now() - interval '2 days');
 
+  update public.partner_client_diet_meals as alternative_meal
+  set
+    meal_group_id = primary_meal.meal_group_id,
+    alternative_order = 2
+  from public.partner_client_diet_meals as primary_meal
+  where alternative_meal.plan_id = 'e1000000-0000-4000-8000-000000000101'
+    and alternative_meal.menu_option = 2
+    and primary_meal.plan_id = alternative_meal.plan_id
+    and primary_meal.menu_option = 1
+    and primary_meal.day_of_week = alternative_meal.day_of_week
+    and primary_meal.title = alternative_meal.title
+    and primary_meal.meal_time = alternative_meal.meal_time;
+
   insert into public.partner_client_diet_meal_items (
     id,
     plan_id,

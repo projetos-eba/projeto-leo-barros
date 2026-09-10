@@ -2,6 +2,7 @@
 
 import { Beef, Droplets, Flame, Leaf, Settings, Wheat } from "lucide-react";
 import { type ReactNode, useMemo } from "react";
+import Link from "next/link";
 
 import {
   buildDietSummary,
@@ -13,6 +14,7 @@ import type { PartnerClientDietMeal } from "@/lib/partners/client-profile/diet";
 import { cn } from "@/lib/utils";
 
 type DietSummaryProps = {
+  assessmentHref: string;
   fiberTargetMaxG: number | null;
   fiberTargetMinG: number | null;
   getKcal: number | null;
@@ -75,7 +77,7 @@ function EnergyCard({ accent, label, value, detail }: { accent: string; detail: 
   );
 }
 
-function EnergyBalance({ data }: { data: ReturnType<typeof buildDietSummary> }) {
+function EnergyBalance({ assessmentHref, data }: { assessmentHref: string; data: ReturnType<typeof buildDietSummary> }) {
   const balanceDetail = data.balance.percent === null ? "Registre e aplique uma avaliação" : `${data.balance.label} · ${data.balance.percent > 0 ? "+" : ""}${formatNumber(data.balance.percent, 1)}% do GET`;
   const balanceAccent = data.balance.label === "Déficit" ? "text-[#8fcfff]" : data.balance.label === "Superávit" ? "text-[#f2c84b]" : data.balance.label === "Equilíbrio" ? "text-[#62d98b]" : "text-[#8b92a3]";
   return (
@@ -86,6 +88,12 @@ function EnergyBalance({ data }: { data: ReturnType<typeof buildDietSummary> }) 
         <EnergyCard accent="text-[#8fcfff]" detail={data.hasFoods ? "Total do cardápio selecionado" : "Adicione alimentos ao cardápio"} label="VET prescrito" value={formatKcal(data.totals.kcal)} />
         <EnergyCard accent={balanceAccent} detail={balanceDetail} label="Balanço energético" value={formatSignedKcal(data.balance.kcal)} />
       </div>
+      {data.getKcal === null ? (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#273847] bg-[#0d1822]/75 px-3 py-2.5">
+          <p className="text-[12px] text-[#8b92a3]">A meta da dieta define o VET. Aplique o cálculo energético para definir o GET.</p>
+          <Link className="inline-flex h-8 shrink-0 items-center rounded-[7px] border border-[#3b97e3] px-3 text-[12px] font-semibold text-[#8fcfff] transition hover:bg-[#0a2c48] hover:text-white" href={assessmentHref}>Abrir Avaliações</Link>
+        </div>
+      ) : null}
       <EnergyBalanceGauge {...data.gauge} />
     </SummaryPanel>
   );
@@ -157,7 +165,7 @@ function MealCalorieDistribution({ data }: { data: ReturnType<typeof buildDietSu
   );
 }
 
-export function DietSummary({ fiberTargetMaxG, fiberTargetMinG, getKcal, meals, onConfigure, waterLiters, weightKg }: DietSummaryProps) {
+export function DietSummary({ assessmentHref, fiberTargetMaxG, fiberTargetMinG, getKcal, meals, onConfigure, waterLiters, weightKg }: DietSummaryProps) {
   const data = useMemo(() => buildDietSummary({ fiberTargetMaxG, fiberTargetMinG, getKcal, meals, weightKg }), [fiberTargetMaxG, fiberTargetMinG, getKcal, meals, weightKg]);
   const getKcalValue = getKcal !== null && Number.isFinite(getKcal) && getKcal > 0 ? getKcal : null;
 
@@ -167,7 +175,7 @@ export function DietSummary({ fiberTargetMaxG, fiberTargetMinG, getKcal, meals, 
         <span className="inline-flex items-center gap-1.5"><Droplets className="size-3.5 text-[#8fcfff]" /> Água: {formatNumber(waterLiters, 1)} L</span>
         <button aria-label="Configurar objetivo calórico" className="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#303746] px-2 text-[#8fcfff] transition hover:border-[#3b97e3] hover:text-white" type="button" onClick={onConfigure}><Settings className="size-3.5" /> Configurar metas</button>
       </div>
-      <EnergyBalance data={{ ...data, balance: getKcalValue === null ? { ...data.balance, kcal: null, label: "Indisponível", percent: null } : data.balance, getKcal: getKcalValue }} />
+      <EnergyBalance assessmentHref={assessmentHref} data={{ ...data, balance: getKcalValue === null ? { ...data.balance, kcal: null, label: "Indisponível", percent: null } : data.balance, getKcal: getKcalValue }} />
       <MacroSummary data={data} />
       <MealCalorieDistribution data={data} />
     </div>

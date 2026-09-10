@@ -10,10 +10,12 @@ import type { PartnerClientDietMeal } from "./client-diet-metrics";
 
 function meal(id: string, title: string, kcal: number): PartnerClientDietMeal {
   return {
+    alternativeOrder: 1,
     dayOfWeek: 1,
     id,
     items: kcal > 0 ? [{ carbs: 0, fat: 0, fiber: 0, foodId: null, householdMeasure: null, id: `${id}-item`, kcal, name: title, protein: 0, quantity: 1, quantityLabel: "1 g", quantityUnit: "g", sodium: 0, sortOrder: 0 }] : [],
     mealTime: "12:00",
+    mealGroupId: id,
     menuOption: 1,
     optionLabel: "Cardápio 1",
     sortOrder: 0,

@@ -936,7 +936,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
             <ExecutionPanel execution={workout.execution} />
 
             {session ? (
-              <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="mt-5">
                 <section className={cn(panelClass, "overflow-visible")}>
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#303746] p-4">
                     <div>
@@ -1001,7 +1001,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                   </div>
                 </section>
 
-                <aside className="grid content-start gap-4">
+                <aside className="mt-4 grid gap-4 lg:grid-cols-3">
                   <ExerciseLibrary library={workout.library} pending={pending} onAdd={(exerciseId, variationName) => runAction(() => addClientWorkoutExercise({ exerciseId, variationName, patientId: overview.client.id, sessionId: session.id }))} />
                   <MusclePanel exercises={session.exercises} />
                   <section className={cn(panelClass, "p-4")}>

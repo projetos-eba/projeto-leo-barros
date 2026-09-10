@@ -7,6 +7,8 @@ import {
   Check,
   ChevronDown,
   Clock,
+  Copy,
+  Download,
   Droplets,
   Ellipsis,
   Flame,
@@ -34,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { PartnerClientDietData, PartnerClientDietFood, PartnerClientDietMeal, PartnerClientDietMealLog, PartnerClientDietTrackingStatus } from "@/lib/partners/client-profile/diet";
 import { dietDayLabels, type DietFoodTab } from "@/lib/partners/client-profile/diet";
 import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
@@ -41,8 +44,11 @@ import { cn } from "@/lib/utils";
 
 import {
   addClientDietMealItem,
+  archiveClientDietPlan,
+  createClientDietMealAlternative,
   createClientDietMeal,
   createClientDietPlan,
+  duplicateClientDietPlan,
   publishClientDietPlan,
   removeClientDietMeal,
   removeClientDietMealItem,
@@ -77,6 +83,12 @@ type NewMealForm = {
 };
 
 const futureTabs = ["Anamnese", "Prescrições", "Formulários"];
+const CALORIE_TARGET_MAX = 8000;
+const CALORIE_TARGET_MIN = 100;
+const CALORIE_TARGET_STEP = 50;
+const mealTitleOptions = ["Café da manhã", "Lanche da manhã", "Almoço", "Lanche", "Lanche da tarde", "Jantar", "Ceia"] as const;
+const customMealTitleOption = "__custom__";
+const defaultNewMeal: NewMealForm = { mealTime: "07:00", title: "Café da manhã" };
 const foodTabs: Array<{ id: DietFoodTab; label: string }> = [
   { id: "suggestions", label: "Sugestões" },
   { id: "favorites", label: "Favoritos" },
@@ -167,6 +179,46 @@ function formatNumber(value: number, maximumFractionDigits = 0) {
 
 function macroText(value: number) {
   return `${formatNumber(value, 1)} g`;
+}
+
+function clampCalorieTarget(value: number) {
+  if (!Number.isFinite(value)) return CALORIE_TARGET_MIN;
+  return Math.min(CALORIE_TARGET_MAX, Math.max(CALORIE_TARGET_MIN, Math.round(value)));
+}
+
+function CalorieTargetControl({ value, onValueChange }: { onValueChange: (value: number) => void; value: number }) {
+  const safeValue = clampCalorieTarget(value);
+  const percentage = ((safeValue - CALORIE_TARGET_MIN) / (CALORIE_TARGET_MAX - CALORIE_TARGET_MIN)) * 100;
+
+  return (
+    <div className="rounded-[10px] border border-[#273847] bg-[#0d1822]/75 p-3 sm:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <label className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]" htmlFor="calorie-target-slider">Meta calórica</label>
+        <div className="flex items-center gap-2">
+          <input aria-label="Calorias do objetivo" className="h-8 w-[98px] rounded-[7px] border border-[#3b97e3] bg-[#101923] px-2 text-right text-[13px] font-bold text-white outline-none focus:ring-2 focus:ring-[#3b97e3]/30" id="calorie-target-input" max={CALORIE_TARGET_MAX} min={CALORIE_TARGET_MIN} step={CALORIE_TARGET_STEP} type="number" value={safeValue} onChange={(event) => onValueChange(clampCalorieTarget(Number(event.target.value)))} />
+          <span className="text-[12px] font-semibold text-[#8b92a3]">kcal</span>
+        </div>
+      </div>
+      <input aria-label="Selecionar meta calórica" className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-[#263847] accent-[#2d9cff] [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-[3px] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#2d9cff] [&::-moz-range-thumb]:bg-[#e8f5ff] [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-[3px] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#2d9cff] [&::-webkit-slider-thumb]:bg-[#e8f5ff]" id="calorie-target-slider" max={CALORIE_TARGET_MAX} min={CALORIE_TARGET_MIN} step={CALORIE_TARGET_STEP} style={{ background: `linear-gradient(to right, #2d9cff 0%, #2d9cff ${percentage}%, #263847 ${percentage}%, #263847 100%)` }} type="range" value={safeValue} onChange={(event) => onValueChange(Number(event.target.value))} />
+      <div className="mt-2 flex justify-between text-[11px] font-semibold text-[#718394]"><span>{formatNumber(CALORIE_TARGET_MIN)} kcal</span><span>{formatNumber(CALORIE_TARGET_MAX)} kcal</span></div>
+    </div>
+  );
+}
+
+function mealOptionLabel(meal: PartnerClientDietMeal) {
+  return meal.alternativeOrder === 1 ? meal.title : `${meal.title} ${meal.alternativeOrder}`;
+}
+
+function groupMealAlternatives(meals: PartnerClientDietMeal[]) {
+  return Array.from(meals.reduce((groups, meal) => {
+    const alternatives = groups.get(meal.mealGroupId) ?? [];
+    alternatives.push(meal);
+    groups.set(meal.mealGroupId, alternatives);
+    return groups;
+  }, new Map<string, PartnerClientDietMeal[]>())).map(([groupId, alternatives]) => ({
+    alternatives: alternatives.slice().sort((a, b) => a.alternativeOrder - b.alternativeOrder || a.sortOrder - b.sortOrder),
+    groupId,
+  })).sort((a, b) => a.alternatives[0]!.sortOrder - b.alternatives[0]!.sortOrder || a.alternatives[0]!.mealTime.localeCompare(b.alternatives[0]!.mealTime));
 }
 
 function ModulePill({ scope }: { scope: string }) {
@@ -448,28 +500,34 @@ function FoodLibrary({ diet, disabled, onAdd }: { diet: PartnerClientDietViewPro
 }
 
 function MealCard({
+  alternatives,
   foods,
   inlineSearchOpen,
   meal,
   onAddInlineFood,
+  onAddAlternative,
   onAddFood,
   onCloseInlineSearch,
   onRemoveMeal,
   onRemoveItem,
   onUpdateItem,
+  onSelectAlternative,
   pending,
   quantityEdits,
   setQuantityEdits,
 }: {
+  alternatives: PartnerClientDietMeal[];
   foods: PartnerClientDietFood[];
   inlineSearchOpen: boolean;
   meal: PartnerClientDietMeal;
   onAddInlineFood: (food: PartnerClientDietFood) => void;
+  onAddAlternative: (mealId: string) => void;
   onAddFood: (mealId: string) => void;
   onCloseInlineSearch: () => void;
   onRemoveItem: (itemId: string) => void;
   onRemoveMeal: (mealId: string) => void;
   onUpdateItem: (itemId: string, quantity: number) => void;
+  onSelectAlternative: (mealId: string) => void;
   pending: boolean;
   quantityEdits: Record<string, string>;
   setQuantityEdits: (value: Record<string, string>) => void;
@@ -480,28 +538,37 @@ function MealCard({
         <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex min-w-0 items-center gap-3">
             <Utensils className="size-4 shrink-0 text-[#68afe9]" />
-            <p className="truncate text-[15px] font-bold text-white">{meal.title}</p>
-            <ChevronDown className="size-4 shrink-0 text-[#8193a3]" />
+            <p className="truncate text-[15px] font-bold text-white">{mealOptionLabel(meal)}</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button aria-label={`Opções de ${meal.title}`} className="inline-flex size-7 shrink-0 items-center justify-center rounded-[6px] text-[#8193a3] hover:bg-[#102333] hover:text-white" type="button"><ChevronDown className="size-4" /></button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="z-[100] w-56 border-[#303746] bg-[#101923] p-1 text-[#d8e5ee]" sideOffset={8}>
+                {alternatives.map((alternative) => <button className={cn("block w-full rounded-[6px] px-3 py-2 text-left text-[12px] font-semibold hover:bg-[#0a2c48]", alternative.id === meal.id && "bg-[#0a2c48] text-white")} key={alternative.id} type="button" onClick={() => onSelectAlternative(alternative.id)}>{mealOptionLabel(alternative)}</button>)}
+                <button className="mt-1 flex w-full items-center gap-2 rounded-[6px] border-t border-[#273847] px-3 py-2 text-left text-[12px] font-semibold text-[#8fcfff] hover:bg-[#0a2c48]" disabled={pending} type="button" onClick={() => onAddAlternative(meal.id)}><Plus className="size-3.5" /> Adicionar opção</button>
+              </PopoverContent>
+            </Popover>
           </div>
           <span className="text-[13px] font-semibold text-[#c7d3df]">{meal.mealTime}</span>
           <span className="text-[13px] font-semibold text-white">{formatNumber(meal.totals.kcal)} kcal</span>
           <span className="rounded-[5px] bg-[#0e2c1e] px-2 py-1 text-[11px] font-semibold text-[#62d98b]">P {macroText(meal.totals.protein)}</span>
           <span className="rounded-[5px] bg-[#302813] px-2 py-1 text-[11px] font-semibold text-[#f2c84b]">C {macroText(meal.totals.carbs)}</span>
           <span className="rounded-[5px] bg-[#32171b] px-2 py-1 text-[11px] font-semibold text-[#f27882]">G {macroText(meal.totals.fat)}</span>
+          <span className="rounded-[5px] bg-[#1a242d] px-2 py-1 text-[11px] font-semibold text-[#c7d3df]">F {macroText(meal.totals.fiber)}</span>
         </div>
         <IconButton disabled={pending} label={`Remover refeição ${meal.title}`} onClick={() => onRemoveMeal(meal.id)}><Trash2 className="size-4" /></IconButton>
       </div>
 
       <div className="px-4 py-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_44px_36px] gap-3 border-b border-[#273847] pb-2 text-[10px] font-bold uppercase tracking-[0.05em] text-[#748696] max-md:hidden">
-          <span>Alimento</span><span>Porção</span><span className="text-[#62d98b]">PTN</span><span className="text-[#f2c84b]">CARB</span><span className="text-[#f27882]">GORD</span><span>Kcal</span><span />
+        <div className="grid grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_52px_44px_36px] gap-3 border-b border-[#273847] pb-2 text-[10px] font-bold uppercase tracking-[0.05em] text-[#748696] max-md:hidden">
+          <span>Alimento</span><span>Porção</span><span className="text-[#62d98b]">PTN</span><span className="text-[#f2c84b]">CARB</span><span className="text-[#f27882]">GORD</span><span className="text-[#c7d3df]">FIBRA</span><span>Kcal</span><span />
         </div>
         <div className="grid gap-1 pt-2">
           {meal.items.length === 0 ? (
             <div className="rounded-[10px] border border-dashed border-[#303746] px-4 py-5 text-[13px] text-[#8b92a3]">Nenhum alimento nesta refeição.</div>
           ) : meal.items.map((item) => (
             <div className="rounded-[8px] px-1 py-2 text-[13px] text-[#d8e5ee] hover:bg-[#101923]/60" key={item.id}>
-              <div className="grid grid-cols-[minmax(0,1fr)_74px_36px] items-center gap-2 md:grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_44px_36px] md:gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_74px_36px] items-center gap-2 md:grid-cols-[minmax(0,1fr)_88px_52px_52px_52px_52px_44px_36px] md:gap-3">
                 <p className="min-w-0 truncate font-semibold text-white">{item.name}</p>
                 <label className="sr-only" htmlFor={`quantity-${item.id}`}>Quantidade de {item.name}</label>
                 <input
@@ -517,6 +584,7 @@ function MealCard({
                 <span className="hidden font-semibold text-[#62d98b] md:inline">{macroText(item.protein)}</span>
                 <span className="hidden font-semibold text-[#f2c84b] md:inline">{macroText(item.carbs)}</span>
                 <span className="hidden font-semibold text-[#f27882] md:inline">{macroText(item.fat)}</span>
+                <span className="hidden font-semibold text-[#c7d3df] md:inline">{macroText(item.fiber)}</span>
                 <span className="hidden md:inline">{formatNumber(item.kcal)}</span>
                 <IconButton className="justify-self-end max-md:col-start-3 max-md:row-start-1" disabled={pending} label={`Remover ${item.name}`} onClick={() => onRemoveItem(item.id)}><Trash2 className="size-3.5" /></IconButton>
               </div>
@@ -524,6 +592,7 @@ function MealCard({
                 <span className="rounded-[5px] bg-[#0e2c1e] px-2 py-1 text-[#62d98b]">P {macroText(item.protein)}</span>
                 <span className="rounded-[5px] bg-[#302813] px-2 py-1 text-[#f2c84b]">C {macroText(item.carbs)}</span>
                 <span className="rounded-[5px] bg-[#32171b] px-2 py-1 text-[#f27882]">G {macroText(item.fat)}</span>
+                <span className="rounded-[5px] bg-[#1a242d] px-2 py-1 text-[#c7d3df]">F {macroText(item.fiber)}</span>
                 <span className="rounded-[5px] bg-[#102333] px-2 py-1 text-[#c7d3df]">{formatNumber(item.kcal)} kcal</span>
               </div>
             </div>
@@ -542,14 +611,15 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selectedDay, setSelectedDay] = useState(() => diet.plan?.weekDays.find((day) => day.meals.length > 0)?.dayOfWeek ?? 1);
-  const [selectedMenuOption, setSelectedMenuOption] = useState(1);
+  const [selectedAlternatives, setSelectedAlternatives] = useState<Record<string, string>>({});
   const [targetMealId, setTargetMealId] = useState<string | null>(diet.plan?.weekDays.find((day) => day.meals.length > 0)?.meals[0]?.id ?? null);
   const [inlineFoodMealId, setInlineFoodMealId] = useState<string | null>(null);
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
   const [objectiveDialogOpen, setObjectiveDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
   const [newPlan, setNewPlan] = useState<NewPlanForm>(emptyPlanForm);
-  const [newMeal, setNewMeal] = useState<NewMealForm>({ mealTime: "16:30", title: "Nova refeição" });
+  const [newMeal, setNewMeal] = useState<NewMealForm>(defaultNewMeal);
   const [notes, setNotes] = useState(diet.plan?.notes ?? "");
   const [objectiveForm, setObjectiveForm] = useState(() => ({
     calorieStrategy: (diet.plan?.calorieStrategy ?? "maintenance") as NewPlanForm["calorieStrategy"],
@@ -557,21 +627,22 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
     targetFatG: diet.plan?.targetFat ?? 0,
     targetFiberMaxG: diet.plan?.targetFiberMax ?? null,
     targetFiberMinG: diet.plan?.targetFiberMin ?? null,
-    targetKcal: diet.plan?.targetKcal ?? 0,
+    targetKcal: clampCalorieTarget(diet.plan?.targetKcal ?? CALORIE_TARGET_MIN),
     targetProteinG: diet.plan?.targetProtein ?? 0,
     waterLiters: diet.plan?.waterLiters ?? 0,
   }));
   const [quantityEdits, setQuantityEdits] = useState<Record<string, string>>({});
   const currentDay = diet.plan?.weekDays.find((day) => day.dayOfWeek === selectedDay) ?? null;
-  const currentMeals = (currentDay?.meals ?? []).filter((meal) => meal.menuOption === selectedMenuOption);
+  const currentMealGroups = useMemo(() => groupMealAlternatives(currentDay?.meals ?? []), [currentDay]);
+  const currentMeals = useMemo(() => currentMealGroups.map(({ alternatives, groupId }) => alternatives.find((meal) => meal.id === selectedAlternatives[groupId]) ?? alternatives[0]!).filter(Boolean), [currentMealGroups, selectedAlternatives]);
   const draftByFoodId = useMemo(() => new Map(diet.drafts.map((draft) => [draft.food.id, draft.id])), [diet.drafts]);
 
   useEffect(() => {
     const firstDayWithMeals = diet.plan?.weekDays.find((day) => day.meals.length > 0);
-    const firstMeal = firstDayWithMeals?.meals.find((meal) => meal.menuOption === 1) ?? firstDayWithMeals?.meals[0] ?? null;
+    const firstMeal = firstDayWithMeals?.meals[0] ?? null;
 
     setSelectedDay(firstDayWithMeals?.dayOfWeek ?? 1);
-    setSelectedMenuOption(firstMeal?.menuOption ?? 1);
+    setSelectedAlternatives({});
     setTargetMealId(firstMeal?.id ?? null);
     setInlineFoodMealId(null);
     setNotes(diet.plan?.notes ?? "");
@@ -581,7 +652,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
       targetFatG: diet.plan?.targetFat ?? 0,
       targetFiberMaxG: diet.plan?.targetFiberMax ?? null,
       targetFiberMinG: diet.plan?.targetFiberMin ?? null,
-      targetKcal: diet.plan?.targetKcal ?? 0,
+      targetKcal: clampCalorieTarget(diet.plan?.targetKcal ?? CALORIE_TARGET_MIN),
       targetProteinG: diet.plan?.targetProtein ?? 0,
       waterLiters: diet.plan?.waterLiters ?? 0,
     });
@@ -629,8 +700,6 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
       const result = await createClientDietMeal({
         dayOfWeek: selectedDay,
         mealTime: newMeal.mealTime,
-        menuOption: selectedMenuOption,
-        optionLabel: `Cardápio ${selectedMenuOption}`,
         patientId: overview.client.id,
         planId: plan.id,
         title: newMeal.title,
@@ -638,6 +707,11 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
       if (result.ok) setMealDialogOpen(false);
       return result;
     });
+  }
+
+  function openMealDialog() {
+    setNewMeal(defaultNewMeal);
+    setMealDialogOpen(true);
   }
 
   function handleUpdateObjective(event: FormEvent<HTMLFormElement>) {
@@ -711,11 +785,25 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                 <PrimaryButton className="px-3" disabled={pending} onClick={() => setPlanDialogOpen(true)}><Plus className="size-4" /> Nova dieta</PrimaryButton>
                 <GhostButton disabled={pending} onClick={() => runAction(() => publishClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Check className="size-4" /> Ativar plano</GhostButton>
                 <PrimaryButton className="col-span-2 px-3 sm:col-span-1" disabled={pending} onClick={() => runAction(() => sendClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}><Send className="size-4" /> Enviar aviso</PrimaryButton>
-                <IconButton label="Mais ações"><Ellipsis className="size-4" /></IconButton>
+                <Popover open={actionsOpen} onOpenChange={setActionsOpen}>
+                  <PopoverTrigger asChild>
+                    <button aria-label="Mais ações" className="inline-flex size-9 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923]/70 text-[#b8c7d4] transition hover:border-[#3b97e3] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" disabled={pending} type="button"><Ellipsis className="size-4" /></button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="z-[80] w-[190px] border-[#303746] bg-[#101923] p-1.5 text-[#d8e5ee] shadow-[0_16px_32px_rgba(0,0,0,0.38)]">
+                    <button className="flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[13px] font-semibold transition hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => { setActionsOpen(false); runAction(() => duplicateClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }), (result) => result.id && router.push(planUrl(result.id))); }}>
+                      <Copy className="size-4 text-[#8fcfff]" /> Duplicar dieta
+                    </button>
+                    <div className="my-1 h-px bg-[#273847]" />
+                    <button className="flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-[13px] font-semibold transition hover:bg-[#0a2c48] hover:text-white" type="button" onClick={() => { setActionsOpen(false); window.print(); }}>
+                      <Download className="size-4 text-[#8fcfff]" /> Exportar PDF
+                    </button>
+                  </PopoverContent>
+                </Popover>
               </div>
             </section>
 
             <DietSummary
+              assessmentHref={`/parceiros/clientes/${overview.client.id}?tab=avaliacoes`}
               fiberTargetMaxG={diet.plan.targetFiberMax}
               fiberTargetMinG={diet.plan.targetFiberMin}
               getKcal={diet.energy.getKcal}
@@ -728,38 +816,28 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
             <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
               {dietDayLabels.map((day) => {
                 const dayData = diet.plan?.weekDays.find((item) => item.dayOfWeek === day.dayOfWeek);
+                const dayMeals = day.dayOfWeek === selectedDay
+                  ? currentMeals
+                  : groupMealAlternatives(dayData?.meals ?? []).map(({ alternatives }) => alternatives[0]!);
+                const displayedKcal = dayMeals.reduce((total, meal) => total + meal.totals.kcal, 0);
                 return (
                   <button className={cn("h-10 shrink-0 rounded-[8px] border px-4 text-[13px] font-semibold transition", selectedDay === day.dayOfWeek ? "border-[#3b97e3] bg-[#0a2c48] text-white" : "border-[#303746] bg-[#101923]/65 text-[#8b92a3] hover:text-white")} key={day.dayOfWeek} type="button" onClick={() => setSelectedDay(day.dayOfWeek)}>
-                    {day.shortLabel} · {formatNumber(dayData?.totals.kcal ?? 0)} kcal
+                    {day.shortLabel} · {formatNumber(displayedKcal)} kcal
                   </button>
                 );
               })}
             </div>
 
-            <div className="mt-5 grid gap-4 sm:mt-7 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
+            <div className="mt-5 sm:mt-7">
               <div className="min-w-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="text-[22px] font-bold uppercase tracking-[0.01em] text-white sm:text-[28px]">Plano alimentar</h2>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {[1, 2].map((option) => (
-                      <button
-                        className={cn("h-10 rounded-[8px] border px-4 text-[13px] font-semibold transition", selectedMenuOption === option ? "border-[#3b97e3] bg-[#0a2c48] text-white" : "border-[#303746] bg-[#101923]/65 text-[#8b92a3] hover:text-white")}
-                        key={option}
-                        type="button"
-                        onClick={() => {
-                          setSelectedMenuOption(option);
-                          setTargetMealId((currentDay?.meals ?? []).find((meal) => meal.menuOption === option)?.id ?? null);
-                        }}
-                      >
-                        Cardápio {option}
-                      </button>
-                    ))}
-                    <GhostButton disabled={pending} onClick={() => setMealDialogOpen(true)}><Plus className="size-4" /> Adicionar refeição</GhostButton>
-                  </div>
+                  <GhostButton disabled={pending} onClick={openMealDialog}><Plus className="size-4" /> Adicionar refeição</GhostButton>
                 </div>
                 <div className="grid gap-4">
                   {currentMeals.length ? currentMeals.map((meal) => (
                     <MealCard
+                      alternatives={currentMealGroups.find((group) => group.groupId === meal.mealGroupId)?.alternatives ?? [meal]}
                       foods={diet.foods}
                       inlineSearchOpen={inlineFoodMealId === meal.id}
                       key={meal.id}
@@ -768,19 +846,21 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                       quantityEdits={quantityEdits}
                       setQuantityEdits={setQuantityEdits}
                       onAddFood={openInlineFoodSearch}
+                      onAddAlternative={(mealId) => diet.plan && runAction(() => createClientDietMealAlternative({ mealId, patientId: overview.client.id, planId: diet.plan!.id }))}
                       onAddInlineFood={(food) => addFoodToMeal(food, meal.id)}
                       onCloseInlineSearch={() => {
                         setInlineFoodMealId(null);
                                           }}
                       onRemoveMeal={(mealId) => diet.plan && runAction(() => removeClientDietMeal({ mealId, patientId: overview.client.id, planId: diet.plan!.id }))}
                       onRemoveItem={(itemId) => diet.plan && runAction(() => removeClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id }))}
+                      onSelectAlternative={(mealId) => setSelectedAlternatives((current) => ({ ...current, [meal.mealGroupId]: mealId }))}
                       onUpdateItem={(itemId, quantity) => diet.plan && runAction(() => updateClientDietMealItem({ itemId, patientId: overview.client.id, planId: diet.plan!.id, quantity }))}
                     />
                   )) : <Panel className="p-6 text-[13px] text-[#8b92a3]">Nenhuma refeição cadastrada para este dia neste cardápio.</Panel>}
                 </div>
               </div>
 
-              <div className="grid min-w-0 gap-4">
+              <div className="mt-4 grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
                 <Panel className="p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Adicionar alimentos</h2>
@@ -873,8 +953,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
             <DialogDescription className="text-[#8b92a3]">Atualize a estratégia, os macronutrientes, a fibra e a meta de hidratação do plano atual.</DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={handleUpdateObjective}>
+            <CalorieTargetControl value={objectiveForm.targetKcal} onValueChange={(targetKcal) => setObjectiveForm({ ...objectiveForm, targetKcal })} />
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Calorias"><input aria-label="Calorias do objetivo" className={inputClass()} min="0" type="number" value={objectiveForm.targetKcal} onChange={(event) => setObjectiveForm({ ...objectiveForm, targetKcal: Number(event.target.value) })} /></Field>
               <Field label="Água (L)"><input className={inputClass()} min="0" step="0.1" type="number" value={objectiveForm.waterLiters} onChange={(event) => setObjectiveForm({ ...objectiveForm, waterLiters: Number(event.target.value) })} /></Field>
               <Field label="Proteínas (g)"><input className={inputClass()} min="0" type="number" value={objectiveForm.targetProteinG} onChange={(event) => setObjectiveForm({ ...objectiveForm, targetProteinG: Number(event.target.value) })} /></Field>
               <Field label="Carboidratos (g)"><input className={inputClass()} min="0" type="number" value={objectiveForm.targetCarbsG} onChange={(event) => setObjectiveForm({ ...objectiveForm, targetCarbsG: Number(event.target.value) })} /></Field>
@@ -904,8 +984,18 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
             <DialogDescription className="text-[#8b92a3]">A refeição será adicionada ao dia selecionado.</DialogDescription>
           </DialogHeader>
           <form className="grid gap-4" onSubmit={handleCreateMeal}>
-            <Field label="Nome da refeição"><input className={inputClass()} value={newMeal.title} onChange={(event) => setNewMeal({ ...newMeal, title: event.target.value })} /></Field>
-            <Field label="Horário"><input className={inputClass()} type="time" value={newMeal.mealTime} onChange={(event) => setNewMeal({ ...newMeal, mealTime: event.target.value })} /></Field>
+            <Field label="Tipo de refeição">
+              <select
+                className={inputClass()}
+                value={mealTitleOptions.includes(newMeal.title as (typeof mealTitleOptions)[number]) ? newMeal.title : customMealTitleOption}
+                onChange={(event) => setNewMeal({ ...newMeal, title: event.target.value === customMealTitleOption ? "" : event.target.value })}
+              >
+                {mealTitleOptions.map((title) => <option key={title} value={title}>{title}</option>)}
+                <option value={customMealTitleOption}>Outra refeição</option>
+              </select>
+            </Field>
+            {mealTitleOptions.includes(newMeal.title as (typeof mealTitleOptions)[number]) ? null : <Field label="Nome personalizado"><input className={inputClass()} placeholder="Ex.: Pré-treino" value={newMeal.title} onChange={(event) => setNewMeal({ ...newMeal, title: event.target.value })} /></Field>}
+            <Field label="Horário"><input aria-label="Horário da refeição" className={inputClass()} step="300" type="time" value={newMeal.mealTime} onChange={(event) => setNewMeal({ ...newMeal, mealTime: event.target.value })} /></Field>
             <div className="flex justify-end gap-2 pt-2">
               <GhostButton onClick={() => setMealDialogOpen(false)}>Cancelar</GhostButton>
               <PrimaryButton disabled={pending} type="submit"><Plus className="size-4" /> Adicionar</PrimaryButton>
@@ -936,10 +1026,11 @@ function FoodRow({ disabled, food, onAdd, suggested }: { disabled: boolean; food
       <IconButton className="justify-self-end sm:col-start-5 sm:row-start-1" disabled={disabled} label={`Adicionar ${food.name}`} onClick={onAdd}><Plus className="size-4" /></IconButton>
       <div className="col-span-2 flex flex-wrap gap-2 text-[11px] font-semibold sm:contents">
         <span className="rounded-[5px] bg-[#102333] px-2 py-1 text-[#c7d3df] sm:bg-transparent sm:p-0">{food.servingLabel}</span>
-        <span className="hidden text-[#9aa5b6] sm:inline">P {macroText(food.protein)} · C {macroText(food.carbs)} · G {macroText(food.fat)}</span>
+        <span className="hidden text-[#9aa5b6] sm:inline">P {macroText(food.protein)} · C {macroText(food.carbs)} · G {macroText(food.fat)} · F {macroText(food.fiber)}</span>
         <span className="rounded-[5px] bg-[#0e2c1e] px-2 py-1 text-[#62d98b] sm:hidden">P {macroText(food.protein)}</span>
         <span className="rounded-[5px] bg-[#302813] px-2 py-1 text-[#f2c84b] sm:hidden">C {macroText(food.carbs)}</span>
         <span className="rounded-[5px] bg-[#32171b] px-2 py-1 text-[#f27882] sm:hidden">G {macroText(food.fat)}</span>
+        <span className="rounded-[5px] bg-[#1a242d] px-2 py-1 text-[#c7d3df] sm:hidden">F {macroText(food.fiber)}</span>
         <span className="rounded-[5px] bg-[#102333] px-2 py-1 font-semibold text-white sm:bg-transparent sm:p-0">{formatNumber(food.kcal)}<span className="sm:hidden"> kcal</span></span>
       </div>
     </div>

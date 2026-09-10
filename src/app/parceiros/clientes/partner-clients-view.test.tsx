@@ -143,6 +143,17 @@ describe("PartnerClientsView", () => {
     expect(push).toHaveBeenCalledWith("/parceiros/clientes/patient-2");
   });
 
+  it("exibe as ações do cliente em um popover", () => {
+    render(<PartnerClientsView clients={clients} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Carlos Eduardo Santos" }));
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Copiar e-mail" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Editar" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Excluir" })).toBeInTheDocument();
+  });
+
   it("valida e cria Cliente pela Edge Function", async () => {
     invoke.mockResolvedValue({
       data: {

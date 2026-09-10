@@ -42,6 +42,7 @@ function asRawPlan(plan: DietPlanRow, meals: DietMealRow[], items: DietMealItemR
     createdAt: plan.created_at,
     id: plan.id,
     meals: meals.map((meal) => ({
+      alternativeOrder: meal.alternative_order,
       dayOfWeek: meal.day_of_week,
       id: meal.id,
       items: (itemsByMealId.get(meal.id) ?? []).map((item) => ({
@@ -62,6 +63,7 @@ function asRawPlan(plan: DietPlanRow, meals: DietMealRow[], items: DietMealItemR
         sortOrder: item.sort_order,
       })),
       mealTime: meal.meal_time.slice(0, 5),
+      mealGroupId: meal.meal_group_id,
       menuOption: meal.menu_option,
       optionLabel: meal.option_label,
       sortOrder: meal.sort_order,
