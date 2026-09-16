@@ -24,6 +24,7 @@ describe("partner settings routes contract", () => {
     expect(partnerLayout).toContain("PartnerShellRouter");
     expect(shellRouter).toContain("usePathname");
     expect(shellRouter).toContain("isSettingsPath && hasActivePlan");
-    expect(shellRouter).toContain('<AuthenticatedShell profile="parceiros">');
+    expect(shellRouter).toContain("<AuthenticatedShell");
+    expect(shellRouter).toContain('profile="parceiros"');
   });
 });

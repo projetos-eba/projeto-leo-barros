@@ -165,7 +165,7 @@ function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: 
           alt={`Antes - ${beforePhoto.angleLabel}`}
           className="absolute inset-0 h-full min-h-[420px] w-full object-contain transition-transform"
           src={beforePhoto.imageUrl}
-          style={{ transform: `scale(${zoom / 100})` }}
+          style={{ clipPath: `inset(0 ${100 - revealPosition}% 0 0)`, transform: `scale(${zoom / 100})` }}
         />
       ) : <div className="flex h-full min-h-[420px] items-center justify-center text-[13px] text-[#8b92a3]">Ângulo indisponível</div>}
       {afterPhoto ? (
@@ -210,14 +210,16 @@ function Dropzone({ angle, file, onChange }: {
   );
 }
 
-function TimelineRow({ active, onRemove, onSelect, session }: {
+function TimelineRow({ active, canCompareWith, onCompare, onRemove, onSelect, session }: {
   active: boolean;
+  canCompareWith: boolean;
+  onCompare: () => void;
   onRemove: () => void;
   onSelect: () => void;
   session: PartnerClientPhotoSession;
 }) {
   return (
-    <article className={cn("grid gap-4 rounded-[10px] border p-4 md:grid-cols-[220px_minmax(0,1fr)_170px] md:items-center", active ? "border-[#2d9cff] bg-[#071c30]" : "border-[#25313d] bg-[#08131d]")}>
+    <article className={cn("grid gap-4 rounded-[10px] border p-4 md:grid-cols-[220px_minmax(0,1fr)_250px] md:items-center", active ? "border-[#2d9cff] bg-[#071c30]" : "border-[#25313d] bg-[#08131d]")}>
       <div className="flex items-center gap-4">
         <label className="relative flex size-7 shrink-0 cursor-pointer items-center justify-center">
           <input
@@ -254,6 +256,7 @@ function TimelineRow({ active, onRemove, onSelect, session }: {
         })}
       </div>
       <div className="flex justify-end gap-2">
+        {canCompareWith ? <ActionButton onClick={onCompare}><ArrowLeftRight className="size-4" />Comparar</ActionButton> : null}
         <button
           aria-label={`Remover sessão ${session.capturedDateLabel}`}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#71313a] bg-[#2b1218] px-4 text-[13px] font-semibold text-[#ff8d98] transition hover:border-[#ef626c]"
@@ -300,7 +303,6 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
   const comparisonNote = before && after
     ? photos.comparisonNotes.find((note) => note.beforeSessionId === before.id && note.afterSessionId === after.id) ?? null
     : null;
-  const canCompare = Boolean(selectedSession?.completed && comparisonCandidates.length > 0);
   const comparison = useMemo(() => ({
     angleAvailability: buildAngleAvailability(before, after),
     deltas: buildPhotoDeltas(before?.measurements ?? null, after?.measurements ?? null),
@@ -323,8 +325,9 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
     );
   }
 
-  function openComparison() {
-    if (!canCompare) return;
+  function compareWithSession(session: PartnerClientPhotoSession) {
+    if (!selectedSession?.completed || !session.completed || session.id === selectedSession.id) return;
+    setComparisonSessionId(session.id);
     setComparisonMode("side-by-side");
     setRevealPosition(50);
     setComparisonOpen(true);
@@ -422,8 +425,10 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
             {photos.sessions.length ? photos.sessions.map((session) => (
               <TimelineRow
                 active={session.id === selectedSessionId}
+                canCompareWith={Boolean(selectedSession?.completed && session.completed && session.id !== selectedSession.id)}
                 key={session.id}
                 session={session}
+                onCompare={() => compareWithSession(session)}
                 onRemove={() => runAction(() => removeClientPhotoSession({ patientId: overview.client.id, sessionId: session.id }))}
                 onSelect={() => selectSession(session)}
               />
@@ -445,7 +450,6 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
                 <p className="mt-1 text-[14px] text-[#9aa5b6]">{selectedSession.title} · {selectedSession.capturedDateLabel} às {selectedSession.capturedTimeLabel}</p>
                 {!selectedSession.completed ? <p className="mt-1 text-[12px] text-[#f0c76a]">Complete os quatro ângulos para comparar esta sessão.</p> : null}
               </div>
-              <ActionButton disabled={!canCompare} onClick={openComparison}><ArrowLeftRight className="size-4" />Comparar evolução</ActionButton>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {photoAngles.map((angle) => {

@@ -23,7 +23,6 @@ import {
   AlertCircle,
   CalendarDays,
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -1112,16 +1111,6 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
         <div>
           <h1 className="text-[24px] font-bold leading-8 text-white sm:text-[30px] sm:leading-10">Agenda de Parceiros</h1>
           <p className="mt-1 text-[12px] leading-4 text-[#a4afbb] sm:mt-2 sm:text-[15px] sm:leading-6">Gerencie compromissos e otimize a colaboração com seus clientes.</p>
-        </div>
-        <div className="hidden items-center gap-4 sm:flex">
-          <div className="hidden text-right md:block">
-            <p className="text-[15px] font-bold text-white">{agenda.partnerName}</p>
-            <p className="text-[13px] text-[#9aa8b5]">Profissional</p>
-          </div>
-          <span className="flex size-10 items-center justify-center rounded-full border border-[#314353] bg-[#111b27] text-[14px] font-bold text-white">
-            {agenda.partnerName.charAt(0)}
-          </span>
-          <ChevronDown className="size-4 text-[#9aa8b5]" />
         </div>
       </header>
 

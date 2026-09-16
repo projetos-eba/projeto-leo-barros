@@ -21,7 +21,7 @@ export function PartnerShellRouter({ accountName, children, hasActivePlan }: Par
   const isSettingsPath = isPartnerSettingsPath(pathname);
 
   if (isSettingsPath && hasActivePlan) {
-    return <PartnerSettingsShell accountName={accountName}>{children}</PartnerSettingsShell>;
+    return <PartnerSettingsShell>{children}</PartnerSettingsShell>;
   }
 
   if (isBillingPath) {

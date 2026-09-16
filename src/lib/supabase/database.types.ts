@@ -7258,6 +7258,7 @@ export type Database = {
         Args: { p_client_session_id: string }
         Returns: undefined
       }
+      get_partner_account_profile: { Args: never; Returns: Json }
       get_partner_client_profile: {
         Args: { p_patient_id: string }
         Returns: Json
@@ -7486,6 +7487,16 @@ export type Database = {
         Args: { p_partner_id: string }
         Returns: undefined
       }
+      update_partner_account_profile: {
+        Args: {
+          p_display_name: string
+          p_phone: string
+          p_professional_registry_number: string
+          p_professional_registry_type: string
+          p_professional_type: string
+        }
+        Returns: boolean
+      }
       update_partner_client_profile: {
         Args: {
           p_biological_sex: string
@@ -7629,4 +7640,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
