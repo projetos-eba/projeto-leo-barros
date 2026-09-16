@@ -578,11 +578,16 @@ export function buildCardioComparison(
   weightKg: number,
   primaryActivityKey: CardioActivityKey,
   comparisonActivityKey: CardioActivityKey,
+  weeklyTargetMinutes = 60,
 ): CardioComparisonPoint[] {
   const primary = cardioActivities[primaryActivityKey];
   const comparison = cardioActivities[comparisonActivityKey];
   if (!isCardioActivityMetApproved(primary) || !isCardioActivityMetApproved(comparison)) return [];
-  return [0, 15, 30, 45, 60].map((minutes) => ({
+  const targetMinutes = Number.isFinite(weeklyTargetMinutes) ? Math.max(0, Math.round(weeklyTargetMinutes)) : 0;
+  const intervals = [0, 1, 2, 3, 4].map((division) => Math.round((targetMinutes * division) / 4));
+  const comparisonMinutes = [...new Set(intervals)];
+
+  return comparisonMinutes.map((minutes) => ({
     comparisonKcal: calculateCardioKcal(weightKg, comparison.met, minutes),
     minutes,
     primaryKcal: calculateCardioKcal(weightKg, primary.met, minutes),
@@ -695,7 +700,7 @@ export function buildPartnerClientCardio(raw: PartnerClientCardioRawData, now = 
 
   return {
     calculations,
-    comparison: buildCardioComparison(weightKg, primaryActivity.key, comparisonActivity.key),
+    comparison: buildCardioComparison(weightKg, primaryActivity.key, comparisonActivity.key, targetMinutes),
     events: raw.events.map((event) => ({
       ...event,
       dateLabel: dateTimeFormatter.format(new Date(event.createdAt)),

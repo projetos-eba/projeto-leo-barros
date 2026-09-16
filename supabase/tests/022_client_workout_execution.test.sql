@@ -123,6 +123,14 @@ values (
   10,
   50,
   'moderate'
+), (
+  'ce100000-0000-4000-8000-000000000802',
+  'ce100000-0000-4000-8000-000000000201',
+  'ce100000-0000-4000-8000-000000000701',
+  2,
+  12,
+  40,
+  'warmup'
 );
 
 reset role;
@@ -139,8 +147,16 @@ select isnt(public.client_workout_log_set(
   9,
   true
 ), null, 'Cliente registra série');
+select isnt(public.client_workout_log_set(
+  (select id from public.client_workout_sessions limit 1),
+  'ce100000-0000-4000-8000-000000000802'::uuid,
+  42,
+  10,
+  true
+), null, 'Cliente registra série de aquecimento');
 select is((select count(*)::integer from public.client_workout_sessions), 1, 'Cliente lê a própria sessão');
-select is((select count(*)::integer from public.client_workout_set_logs), 1, 'Cliente lê a própria série');
+select is((select count(*)::integer from public.client_workout_set_logs), 2, 'Cliente lê as próprias séries');
+select is((select total_volume_kg from public.client_workout_sessions limit 1), 468::numeric, 'Volume realizado exclui aquecimento');
 
 reset role;
 set local role authenticated;

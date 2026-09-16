@@ -7,12 +7,15 @@ import { logoutPartner } from "@/app/login/actions";
 import { PlatformLogo } from "@/components/branding/platform-logo";
 import { usePlatformBranding } from "@/components/branding/use-platform-branding";
 import { Button } from "@/components/ui/button";
+import { PartnerAccountMenu } from "./partner-account-menu";
 
 type PartnerBillingShellProps = {
+  accountName?: string | null;
   children: ReactNode;
+  hasActivePlan?: boolean;
 };
 
-export function PartnerBillingShell({ children }: PartnerBillingShellProps) {
+export function PartnerBillingShell({ accountName, children, hasActivePlan = false }: PartnerBillingShellProps) {
   const branding = usePlatformBranding();
 
   return (
@@ -30,6 +33,7 @@ export function PartnerBillingShell({ children }: PartnerBillingShellProps) {
           </Link>
 
           <div className="flex items-center gap-2">
+            <PartnerAccountMenu accountName={accountName} planActive={hasActivePlan} />
             <Button asChild className="rounded-[8px]" size="sm" variant="outline">
               <Link href="/planos">Planos</Link>
             </Button>

@@ -33,6 +33,7 @@ export default async function ParceirosLayout({ children }: ParceirosLayoutProps
 
   const { profile } = await getCurrentProfile();
   let hasActivePlan = false;
+  let accountName: string | null = null;
 
   if (profile?.role === "parceiro") {
     const headerList = await headers();
@@ -42,11 +43,17 @@ export default async function ParceirosLayout({ children }: ParceirosLayoutProps
       profileId: profile.id,
       supabase,
     });
+    const { data: accountProfile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", profile.id)
+      .maybeSingle();
+    accountName = accountProfile?.display_name ?? null;
 
     if (!hasActivePlan && !isPartnerRouteAvailableWithoutActivePlan(pathname)) {
       redirect("/planos");
     }
   }
 
-  return <PartnerShellRouter hasActivePlan={hasActivePlan}>{children}</PartnerShellRouter>;
+  return <PartnerShellRouter accountName={accountName} hasActivePlan={hasActivePlan}>{children}</PartnerShellRouter>;
 }

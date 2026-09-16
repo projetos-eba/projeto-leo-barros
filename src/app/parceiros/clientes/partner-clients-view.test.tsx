@@ -5,6 +5,7 @@ import { PartnerClientsView } from "./partner-clients-view";
 import type { PartnerClientsData } from "@/lib/partners/clients-metrics";
 import { createClient } from "@/lib/supabase/client";
 import { assignPlanToClient } from "../planos-financeiro/actions";
+import { removePartnerClient } from "./actions";
 
 const refresh = vi.fn();
 const push = vi.fn();
@@ -20,6 +21,10 @@ vi.mock("@/lib/supabase/client", () => ({
 
 vi.mock("../planos-financeiro/actions", () => ({
   assignPlanToClient: vi.fn(),
+}));
+
+vi.mock("./actions", () => ({
+  removePartnerClient: vi.fn(),
 }));
 
 const clients: PartnerClientsData = {
@@ -102,6 +107,8 @@ describe("PartnerClientsView", () => {
     invoke.mockReset();
     vi.mocked(assignPlanToClient).mockReset();
     vi.mocked(assignPlanToClient).mockResolvedValue({ message: "Plano vinculado ao cliente.", ok: true });
+    vi.mocked(removePartnerClient).mockReset();
+    vi.mocked(removePartnerClient).mockResolvedValue({ message: "Cliente excluído da sua carteira.", ok: true });
     push.mockReset();
     refresh.mockReset();
   });
@@ -152,6 +159,45 @@ describe("PartnerClientsView", () => {
     expect(screen.getByRole("menuitem", { name: "Copiar e-mail" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Editar" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Excluir" })).toBeInTheDocument();
+  });
+
+  it("confirma e remove o Cliente da carteira", async () => {
+    render(<PartnerClientsView clients={clients} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Carlos Eduardo Santos" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Excluir" }));
+
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("Excluir Cliente da carteira?");
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("Carlos Eduardo Santos");
+
+    fireEvent.click(screen.getByRole("button", { name: "Excluir Cliente" }));
+
+    await waitFor(() => expect(removePartnerClient).toHaveBeenCalledWith({ patientId: "patient-1" }));
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    expect(screen.getByRole("status")).toHaveTextContent("Cliente excluído da sua carteira.");
+  });
+
+  it("mantém o Cliente quando a exclusão é cancelada", () => {
+    render(<PartnerClientsView clients={clients} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Carlos Eduardo Santos" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Excluir" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(removePartnerClient).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  });
+
+  it("mantém a confirmação aberta e informa a falha ao excluir", async () => {
+    vi.mocked(removePartnerClient).mockResolvedValue({ error: "Não foi possível excluir o Cliente da sua carteira.", ok: false });
+    render(<PartnerClientsView clients={clients} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ações de Carlos Eduardo Santos" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Excluir" }));
+    fireEvent.click(screen.getByRole("button", { name: "Excluir Cliente" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível excluir o Cliente da sua carteira.");
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   });
 
   it("valida e cria Cliente pela Edge Function", async () => {

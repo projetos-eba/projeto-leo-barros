@@ -10,6 +10,7 @@ import {
   combineClientWorkoutBiset,
   deleteClientWorkoutSession,
   reorderClientWorkoutExercises,
+  saveClientWorkoutSessionDefaults,
   updateClientWorkoutSession,
 } from "./_actions/workout";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
@@ -30,6 +31,7 @@ vi.mock("./_actions/workout", () => ({
   removeClientWorkoutSet: vi.fn(),
   reorderClientWorkoutExercises: vi.fn(),
   saveClientWorkoutNotes: vi.fn(),
+  saveClientWorkoutSessionDefaults: vi.fn(),
   saveClientWorkoutTemplate: vi.fn(),
   sendClientWorkoutProgram: vi.fn(),
   updateClientWorkoutExercise: vi.fn(),
@@ -61,14 +63,14 @@ const workout: PartnerClientWorkoutData = {
           bisetGroupId: null, bisetPosition: null, cadence: "2-0-2-0",
           exerciseId: "d1000000-0000-4000-8000-000000000202", id: "e2000000-0000-4000-8000-000000000301",
           muscleGroup: "peito", name: "Supino reto", notes: null, restSeconds: 90,
-          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000401", intensity: "moderate", loadKg: 50, reps: 10, setNumber: 1 }],
+          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000401", intensity: "moderate", loadKg: 50, reps: 10, rir: null, setNumber: 1 }],
           sortOrder: 0, technique: "normal", thumbnailUrl: null, variationName: null,
         },
         {
           bisetGroupId: null, bisetPosition: null, cadence: null,
           exerciseId: "d1000000-0000-4000-8000-000000000205", id: "e2000000-0000-4000-8000-000000000302",
           muscleGroup: "ombros", name: "Desenvolvimento", notes: null, restSeconds: 90,
-          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000402", intensity: "moderate", loadKg: 20, reps: 10, setNumber: 1 }],
+          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000402", intensity: "moderate", loadKg: 20, reps: 10, rir: null, setNumber: 1 }],
           sortOrder: 1, technique: "normal", thumbnailUrl: null, variationName: null,
         },
       ],
@@ -149,6 +151,7 @@ describe("PartnerClientWorkoutView", () => {
     vi.mocked(combineClientWorkoutBiset).mockResolvedValue({ ok: true });
     vi.mocked(deleteClientWorkoutSession).mockResolvedValue({ ok: true });
     vi.mocked(reorderClientWorkoutExercises).mockResolvedValue({ ok: true });
+    vi.mocked(saveClientWorkoutSessionDefaults).mockResolvedValue({ ok: true });
     vi.mocked(updateClientWorkoutSession).mockResolvedValue({ ok: true });
   });
   afterEach(() => {
@@ -245,6 +248,24 @@ describe("PartnerClientWorkoutView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Selecionar Desenvolvimento para Bi-set" }));
     fireEvent.click(screen.getByRole("button", { name: /Combinar Bi-set/i }));
     await waitFor(() => expect(combineClientWorkoutBiset).toHaveBeenCalled());
+  });
+
+  it("salva as predefinições da divisão e limita o total a seis séries", async () => {
+    render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
+    fireEvent.click(screen.getByRole("button", { name: "Abrir predefinições de Treino A" }));
+    fireEvent.change(screen.getByLabelText("Aquecimento séries"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Aquecimento repetições"), { target: { value: "12" } });
+    fireEvent.change(screen.getByLabelText("Aquecimento RIR"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Carga moderada séries"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("Carga moderada repetições"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carga moderada RIR"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Carga máxima séries"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Carga máxima repetições"), { target: { value: "8" } });
+    fireEvent.change(screen.getByLabelText("Carga máxima RIR"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar predefinições" }));
+    await waitFor(() => expect(saveClientWorkoutSessionDefaults).toHaveBeenCalledWith(expect.objectContaining({
+      maximumSets: 2, moderateSets: 3, restSeconds: 90, warmupSets: 1,
+    })));
   });
 
   it("reordena exercícios pelos controles de subir e descer", async () => {

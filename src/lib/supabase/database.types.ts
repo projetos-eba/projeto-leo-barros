@@ -5700,6 +5700,79 @@ export type Database = {
           },
         ]
       }
+      partner_workout_session_defaults: {
+        Row: {
+          created_at: string
+          maximum_reps: number | null
+          maximum_rir: number | null
+          maximum_sets: number
+          moderate_reps: number | null
+          moderate_rir: number | null
+          moderate_sets: number
+          partner_id: string
+          rest_seconds: number
+          session_id: string
+          updated_at: string
+          warmup_reps: number | null
+          warmup_rir: number | null
+          warmup_sets: number
+        }
+        Insert: {
+          created_at?: string
+          maximum_reps?: number | null
+          maximum_rir?: number | null
+          maximum_sets?: number
+          moderate_reps?: number | null
+          moderate_rir?: number | null
+          moderate_sets?: number
+          partner_id: string
+          rest_seconds: number
+          session_id: string
+          updated_at?: string
+          warmup_reps?: number | null
+          warmup_rir?: number | null
+          warmup_sets?: number
+        }
+        Update: {
+          created_at?: string
+          maximum_reps?: number | null
+          maximum_rir?: number | null
+          maximum_sets?: number
+          moderate_reps?: number | null
+          moderate_rir?: number | null
+          moderate_sets?: number
+          partner_id?: string
+          rest_seconds?: number
+          session_id?: string
+          updated_at?: string
+          warmup_reps?: number | null
+          warmup_rir?: number | null
+          warmup_sets?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_session_defaults_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_session_defaults_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "partner_workout_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_session_defaults_session_partner_fkey"
+            columns: ["session_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_sessions"
+            referencedColumns: ["id", "partner_id"]
+          },
+        ]
+      }
       partner_workout_sessions: {
         Row: {
           created_at: string
@@ -5770,6 +5843,7 @@ export type Database = {
           partner_id: string
           prescribed_exercise_id: string
           reps: number | null
+          rir: number | null
           set_number: number
           updated_at: string
         }
@@ -5781,6 +5855,7 @@ export type Database = {
           partner_id: string
           prescribed_exercise_id: string
           reps?: number | null
+          rir?: number | null
           set_number: number
           updated_at?: string
         }
@@ -5792,6 +5867,7 @@ export type Database = {
           partner_id?: string
           prescribed_exercise_id?: string
           reps?: number | null
+          rir?: number | null
           set_number?: number
           updated_at?: string
         }
@@ -7063,6 +7139,10 @@ export type Database = {
         Returns: Json
       }
       client_workout_dashboard: { Args: { p_date?: string }; Returns: Json }
+      client_workout_dashboard_legacy: {
+        Args: { p_date?: string }
+        Returns: Json
+      }
       client_workout_finish_session: {
         Args: { p_client_session_id: string }
         Returns: Json
@@ -7220,6 +7300,10 @@ export type Database = {
         Returns: Json
       }
       partner_client_workouts: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_workouts_legacy: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_clients_list: {
         Args: never
         Returns: {
@@ -7348,6 +7432,10 @@ export type Database = {
           result_status: string
         }[]
       }
+      remove_partner_client: {
+        Args: { p_patient_id: string }
+        Returns: boolean
+      }
       repair_exercise_muscle_classifications: {
         Args: { p_dry_run?: boolean }
         Returns: Json
@@ -7427,12 +7515,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7456,11 +7544,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7481,11 +7569,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7506,11 +7594,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7523,11 +7611,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

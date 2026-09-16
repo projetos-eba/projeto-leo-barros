@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildPartnerClientPhotos, type PartnerClientPhotosRawData } from "@/lib/partners/client-profile/photos";
@@ -89,6 +89,8 @@ const raw: PartnerClientPhotosRawData = {
       photos: [
         { angle: "front", createdAt: "2026-05-01T10:00:00.000Z", cropData: {}, heightPx: 1448, id: "f4000000-0000-4000-8000-000000000201", mimeType: "image/png", originalFilename: "front.png", sizeBytes: 1000, storagePath: "partner/client/session/front.png", widthPx: 1086 },
         { angle: "back", createdAt: "2026-05-01T10:00:00.000Z", cropData: {}, heightPx: 1448, id: "f4000000-0000-4000-8000-000000000202", mimeType: "image/png", originalFilename: "back.png", sizeBytes: 1000, storagePath: "partner/client/session/back.png", widthPx: 1086 },
+        { angle: "left", createdAt: "2026-05-01T10:00:00.000Z", cropData: {}, heightPx: 1448, id: "f4000000-0000-4000-8000-000000000203", mimeType: "image/png", originalFilename: "left.png", sizeBytes: 1000, storagePath: "partner/client/session/left.png", widthPx: 1086 },
+        { angle: "right", createdAt: "2026-05-01T10:00:00.000Z", cropData: {}, heightPx: 1448, id: "f4000000-0000-4000-8000-000000000204", mimeType: "image/png", originalFilename: "right.png", sizeBytes: 1000, storagePath: "partner/client/session/right.png", widthPx: 1086 },
       ],
       status: "complete",
       title: "6ª sessão",
@@ -110,6 +112,19 @@ const raw: PartnerClientPhotosRawData = {
       title: "8ª sessão",
       updatedAt: "2026-06-01T10:00:00.000Z",
     },
+    {
+      capturedAt: "2026-07-01T10:00:00.000Z",
+      createdAt: "2026-07-01T10:00:00.000Z",
+      id: "f4000000-0000-4000-8000-000000000103",
+      measurements: { armCm: null, calfCm: null, hipCm: null, thighCm: null, waistCm: null, weightKg: null },
+      notes: "Rascunho",
+      photos: [
+        { angle: "front", createdAt: "2026-07-01T10:00:00.000Z", cropData: {}, heightPx: 1448, id: "f4000000-0000-4000-8000-000000000209", mimeType: "image/png", originalFilename: "front.png", sizeBytes: 1000, storagePath: "partner/client/session3/front.png", widthPx: 1086 },
+      ],
+      status: "draft",
+      title: "9ª sessão",
+      updatedAt: "2026-07-01T10:00:00.000Z",
+    },
   ],
 };
 
@@ -128,26 +143,56 @@ describe("PartnerClientPhotosView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renderiza Fotos com perfil, linha do tempo e comparação sob demanda", () => {
+  it("exige a seleção de uma sessão completa antes de comparar", () => {
     render(<PartnerClientPhotosView overview={overview} photos={photos} />);
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Fotos" })).toHaveAttribute("href", expect.stringContaining("tab=fotos"));
     expect(screen.getByRole("heading", { name: "Nova sessão de fotos" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Fotos da sessão" })).toBeInTheDocument();
     expect(screen.getByText("Linha do tempo")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Fotos da sessão" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Comparação de evolução" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: "Comparar" })[0]);
+    expect(screen.queryByRole("button", { name: "Comparar" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
+    expect(screen.getByRole("heading", { name: "Fotos da sessão" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
     expect(screen.getByRole("heading", { name: "Comparação de evolução" })).toBeInTheDocument();
+    const comparisonSelect = screen.getByLabelText("Comparar com");
+    expect(within(comparisonSelect).getByRole("option", { name: "01/05/2026" })).toBeInTheDocument();
+    expect(within(comparisonSelect).queryByRole("option", { name: "01/06/2026" })).not.toBeInTheDocument();
+    expect(within(comparisonSelect).queryByRole("option", { name: "01/07/2026" })).not.toBeInTheDocument();
+    expect(screen.getByText("Sessão A - 01/05/2026")).toBeInTheDocument();
+    expect(screen.getByText("Sessão B - 01/06/2026")).toBeInTheDocument();
     expect(screen.getAllByText("-3 cm").length).toBeGreaterThan(0);
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();
   });
 
+  it("desabilita a comparação de rascunhos e oferece o modo revelador", () => {
+    render(<PartnerClientPhotosView overview={overview} photos={photos} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/07/2026" }));
+    expect(screen.getByRole("button", { name: "Comparar evolução" })).toBeDisabled();
+    expect(screen.getByText("Complete os quatro ângulos para comparar esta sessão.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
+    expect(screen.getByRole("button", { name: "Lado a lado" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Revelador" }));
+    expect(screen.getByRole("button", { name: "Revelador" })).toHaveAttribute("aria-pressed", "true");
+
+    const slider = screen.getByRole("slider", { name: "Posição do revelador" });
+    fireEvent.change(slider, { target: { value: "75" } });
+    expect(slider).toHaveValue("75");
+    expect(slider).toHaveAttribute("aria-valuetext", "75% revelado");
+  });
+
   it("salva observação e remove sessão", async () => {
     render(<PartnerClientPhotosView overview={overview} photos={photos} />);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Comparar" })[0]);
+    fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
     fireEvent.change(screen.getByDisplayValue("Boa evolução."), { target: { value: "Manter conduta." } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 

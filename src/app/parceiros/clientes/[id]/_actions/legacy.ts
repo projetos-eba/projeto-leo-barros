@@ -118,10 +118,10 @@ const workoutSetSchema = z.object({
   loadKg: z.number().min(0).max(2000).nullable(),
   patientId: patientIdSchema,
   reps: z.number().int().min(1).max(500).nullable(),
+  rir: z.number().int().min(0).max(10).nullable(),
   setId: z.string().uuid(),
 });
 const workoutExerciseUpdateSchema = z.object({
-  cadence: z.string().trim().max(40).nullable(),
   exerciseId: z.string().uuid(),
   notes: z.string().trim().max(300).nullable(),
   patientId: patientIdSchema,
@@ -145,6 +145,32 @@ const workoutReorderSchema = z.object({
   exerciseIds: z.array(z.string().uuid()).min(1).max(100),
   patientId: patientIdSchema,
   sessionId: z.string().uuid(),
+});
+const workoutSessionDefaultsSchema = z.object({
+  maximumReps: z.number().int().min(1).max(500).nullable(),
+  maximumRir: z.number().int().min(0).max(10).nullable(),
+  maximumSets: z.number().int().min(0).max(6),
+  moderateReps: z.number().int().min(1).max(500).nullable(),
+  moderateRir: z.number().int().min(0).max(10).nullable(),
+  moderateSets: z.number().int().min(0).max(6),
+  patientId: patientIdSchema,
+  restSeconds: z.number().int().min(0).max(600),
+  sessionId: z.string().uuid(),
+  warmupReps: z.number().int().min(1).max(500).nullable(),
+  warmupRir: z.number().int().min(0).max(10).nullable(),
+  warmupSets: z.number().int().min(0).max(6),
+}).superRefine((value, context) => {
+  const phases = [
+    ["warmup", value.warmupSets, value.warmupReps, value.warmupRir],
+    ["moderate", value.moderateSets, value.moderateReps, value.moderateRir],
+    ["maximum", value.maximumSets, value.maximumReps, value.maximumRir],
+  ] as const;
+  const total = value.warmupSets + value.moderateSets + value.maximumSets;
+  if (total < 1 || total > 6) context.addIssue({ code: z.ZodIssueCode.custom, message: "Defina de 1 a 6 séries." });
+  phases.forEach(([phase, sets, reps, rir]) => {
+    if (sets === 0 && (reps !== null || rir !== null)) context.addIssue({ code: z.ZodIssueCode.custom, message: `Limpe os valores de ${phase}.` });
+    if (sets > 0 && (reps === null || rir === null)) context.addIssue({ code: z.ZodIssueCode.custom, message: `Preencha repetições e RIR de ${phase}.` });
+  });
 });
 
 type WorkoutQueryResult = {
@@ -639,7 +665,6 @@ export async function addClientWorkoutExercise(input: z.input<typeof workoutExer
   const { data: orderRows } = orderResult;
   const lastOrder = (orderRows as Array<{ sort_order: number }> | null)?.[0]?.sort_order ?? -1;
   const { data, error } = await db.from("partner_workout_exercises").insert({
-    cadence: library.cadence,
     exercise_id: library.id,
     partner_id: context.partnerId,
     rest_seconds: library.rest_seconds,
@@ -654,14 +679,33 @@ export async function addClientWorkoutExercise(input: z.input<typeof workoutExer
   }).select("id").single();
   const prescribed = data as { id: string } | null;
   if (error || !prescribed) return { error: "Não foi possível adicionar o exercício.", ok: false };
-  const reps = parseExerciseDefaultReps(library.default_reps);
-  const setCount = Math.max(3, Math.min(6, library.default_sets));
+  const { data: defaultsData } = await db.from("partner_workout_session_defaults")
+    .select("warmup_sets,warmup_reps,warmup_rir,moderate_sets,moderate_reps,moderate_rir,maximum_sets,maximum_reps,maximum_rir,rest_seconds")
+    .eq("session_id", parsed.data.sessionId).eq("partner_id", context.partnerId).maybeSingle();
+  const defaults = defaultsData as {
+    maximum_reps: number | null; maximum_rir: number | null; maximum_sets: number;
+    moderate_reps: number | null; moderate_rir: number | null; moderate_sets: number;
+    rest_seconds: number; warmup_reps: number | null; warmup_rir: number | null; warmup_sets: number;
+  } | null;
+  if (defaults) {
+    const { error: restError } = await db.from("partner_workout_exercises").update({ rest_seconds: defaults.rest_seconds })
+      .eq("id", prescribed.id).eq("partner_id", context.partnerId);
+    if (restError) return { error: "Exercício adicionado, mas não foi possível aplicar o intervalo.", ok: false };
+  }
+  const defaultSets = defaults
+    ? ([
+      ...Array.from({ length: defaults.warmup_sets }, () => ({ intensity: "warmup", reps: defaults.warmup_reps, rir: defaults.warmup_rir })),
+      ...Array.from({ length: defaults.moderate_sets }, () => ({ intensity: "moderate", reps: defaults.moderate_reps, rir: defaults.moderate_rir })),
+      ...Array.from({ length: defaults.maximum_sets }, () => ({ intensity: "maximum", reps: defaults.maximum_reps, rir: defaults.maximum_rir })),
+    ])
+    : Array.from({ length: Math.max(3, Math.min(6, library.default_sets)) }, (_, index) => ({ intensity: index === 0 ? "warmup" : "moderate", reps: parseExerciseDefaultReps(library.default_reps), rir: null }));
   const { error: setError } = await db.from("partner_workout_sets").insert(
-    Array.from({ length: setCount }, (_, index) => ({
-      intensity: index === 0 ? "warmup" : "moderate",
+    defaultSets.map((set, index) => ({
+      intensity: set.intensity,
       partner_id: context.partnerId,
       prescribed_exercise_id: prescribed.id,
-      reps,
+      reps: set.reps,
+      rir: set.rir,
       set_number: index + 1,
     })),
   );
@@ -678,6 +722,7 @@ export async function updateClientWorkoutSet(input: z.input<typeof workoutSetSch
     intensity: parsed.data.intensity,
     load_kg: parsed.data.loadKg,
     reps: parsed.data.reps,
+    rir: parsed.data.rir,
   }).eq("id", parsed.data.setId).eq("partner_id", context.partnerId);
   if (error) return { error: "Não foi possível atualizar a série.", ok: false };
   revalidateClientProfile(parsed.data.patientId);
@@ -690,17 +735,18 @@ export async function addClientWorkoutSet(input: { exerciseId: string; patientId
   const context = await getPartnerActionContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
   const db = workoutDb(context);
-  const { data } = await db.from("partner_workout_sets").select("set_number,reps,load_kg,intensity")
+  const { data } = await db.from("partner_workout_sets").select("set_number,reps,load_kg,intensity,rir")
     .eq("partner_id", context.partnerId).eq("prescribed_exercise_id", parsed.data.exerciseId)
     .order("set_number", { ascending: false }).limit(1);
-  const previous = (data as Array<{ intensity: string; load_kg: number | null; reps: number | null; set_number: number }> | null)?.[0];
-  if (previous && previous.set_number >= 12) return { error: "Limite de séries atingido.", ok: false };
+  const previous = (data as Array<{ intensity: string; load_kg: number | null; reps: number | null; rir: number | null; set_number: number }> | null)?.[0];
+  if (previous && previous.set_number >= 6) return { error: "Limite de seis séries atingido.", ok: false };
   const { error } = await db.from("partner_workout_sets").insert({
     intensity: previous?.intensity ?? "moderate",
     load_kg: previous?.load_kg ?? null,
     partner_id: context.partnerId,
     prescribed_exercise_id: parsed.data.exerciseId,
     reps: previous?.reps ?? null,
+    rir: previous?.rir ?? null,
     set_number: (previous?.set_number ?? 0) + 1,
   });
   if (error) return { error: "Não foi possível adicionar a série.", ok: false };
@@ -726,7 +772,6 @@ export async function updateClientWorkoutExercise(input: z.input<typeof workoutE
   const context = await getPartnerActionContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
   const { error } = await workoutDb(context).from("partner_workout_exercises").update({
-    cadence: parsed.data.cadence,
     notes: parsed.data.notes,
     rest_seconds: parsed.data.restSeconds,
     technique: parsed.data.technique,
@@ -735,6 +780,30 @@ export async function updateClientWorkoutExercise(input: z.input<typeof workoutE
   if (error) return { error: "Não foi possível atualizar o exercício.", ok: false };
   revalidateClientProfile(parsed.data.patientId);
   return { message: "Exercício atualizado.", ok: true };
+}
+
+export async function saveClientWorkoutSessionDefaults(input: z.input<typeof workoutSessionDefaultsSchema>): Promise<ClientOverviewActionResult> {
+  const parsed = workoutSessionDefaultsSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Revise as predefinições.", ok: false };
+  const context = await getPartnerActionContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+  const { error } = await workoutDb(context).from("partner_workout_session_defaults").upsert({
+    maximum_reps: parsed.data.maximumReps,
+    maximum_rir: parsed.data.maximumRir,
+    maximum_sets: parsed.data.maximumSets,
+    moderate_reps: parsed.data.moderateReps,
+    moderate_rir: parsed.data.moderateRir,
+    moderate_sets: parsed.data.moderateSets,
+    partner_id: context.partnerId,
+    rest_seconds: parsed.data.restSeconds,
+    session_id: parsed.data.sessionId,
+    warmup_reps: parsed.data.warmupReps,
+    warmup_rir: parsed.data.warmupRir,
+    warmup_sets: parsed.data.warmupSets,
+  }, { onConflict: "session_id" });
+  if (error) return { error: "Não foi possível salvar as predefinições.", ok: false };
+  revalidateClientProfile(parsed.data.patientId);
+  return { message: "Predefinições salvas.", ok: true };
 }
 
 export async function removeClientWorkoutExercise(input: { exerciseId: string; patientId: string }): Promise<ClientOverviewActionResult> {

@@ -100,6 +100,7 @@ select tables_are(
     'partner_workout_events',
     'partner_workout_exercises',
     'partner_workout_programs',
+    'partner_workout_session_defaults',
     'partner_workout_sessions',
     'partner_workout_sets',
     'partners',

@@ -39,7 +39,7 @@ export default async function PartnerGeneralSettingsPage() {
     <main className="mx-auto w-full max-w-6xl px-5 py-6 text-[#f1f6fa] md:px-8 lg:px-10 lg:py-[35px]">
       <header className="border-b border-[#244454]/70 pb-6">
         <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Configuracoes</p>
-        <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Geral</h1>
+        <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Minha Conta</h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
           Consulte os dados principais do perfil profissional vinculado a sua conta.
         </p>

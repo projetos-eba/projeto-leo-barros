@@ -39,8 +39,8 @@ function formatTime(seconds: number) {
   return `${minutes}:${rest}`;
 }
 
-function prescribedRange(values: Array<number | null>) {
-  const clean = values.filter((value): value is number => value !== null);
+function prescribedRange(values: Array<number | null | undefined>) {
+  const clean = values.filter((value): value is number => typeof value === "number");
   if (!clean.length) return "Livre";
   const min = Math.min(...clean);
   const max = Math.max(...clean);
@@ -168,8 +168,8 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
                   <p className="mt-1 text-[15px] font-black text-white">{workoutTechniqueLabels[exercise.technique]}</p>
                 </div>
                 <div className="rounded-[13px] border border-[#223646] bg-[#0d1822]/82 p-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">Cadência</p>
-                  <p className="mt-1 text-[15px] font-black text-white">{exercise.cadence ?? "Controlada"}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">RIR</p>
+                  <p className="mt-1 text-[15px] font-black text-white">{prescribedRange(exercise.sets.map((set) => set.rir))}</p>
                 </div>
                 <div className="rounded-[13px] border border-[#223646] bg-[#0d1822]/82 p-3">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#78c6ff]">Execução</p>
@@ -257,6 +257,7 @@ export function ClientWorkoutExecutionView({ execution }: ClientWorkoutExecution
                       <input className="h-12 rounded-[10px] border border-[#2a4052] bg-[#07141d] px-4 text-[16px] font-bold text-white outline-none focus:border-[#1f8dff]" defaultValue={nextSet.log?.reps ?? nextSet.reps ?? ""} min="1" name="reps" step="1" type="number" />
                     </label>
                   </div>
+                  {nextSet.rir !== null ? <p className="rounded-[10px] border border-[#214563] bg-[#071d32] px-3 py-2 text-[13px] font-semibold text-[#9ed6ff]">Meta desta série: {nextSet.rir} RIR</p> : null}
                   <button className="inline-flex h-13 items-center justify-center gap-2 rounded-[12px] bg-[#0d74ff] px-5 py-4 text-[16px] font-bold text-white transition hover:bg-[#2290ff] disabled:opacity-60" disabled={pending} type="submit">
                     <CheckCircle2 className="size-5" />
                     Marcar série como concluída
