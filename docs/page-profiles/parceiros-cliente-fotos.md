@@ -12,8 +12,8 @@
 ## Funcionalidades
 - Nova sessão com data, observações e quatro ângulos: frente, costas, lado esquerdo e lado direito.
 - Upload client-side para Storage privado e registro por server action.
-- Linha do tempo com miniaturas, status completo/rascunho, visualizar e remover sessão.
-- Comparação antes/depois com seleção de sessões, troca de ordem, tabs por ângulo, zoom e abertura em tela cheia.
+- Linha do tempo com miniaturas, status completo/rascunho, seleção circular de uma sessão e remoção.
+- Comparação disponível após selecionar uma sessão completa, com escolha apenas entre as demais sessões completas. A ordem antes/depois é cronológica; tabs por ângulo, zoom, tela cheia e modos lado a lado ou revelador sobreposto são suportados.
 - Resumo comparativo usa medidas reais das avaliações físicas mais próximas das sessões.
 - Observações do profissional são salvas por par de sessões.
 - Exportação inicial gera PDF simples com datas, deltas, observações e disponibilidade de ângulos.

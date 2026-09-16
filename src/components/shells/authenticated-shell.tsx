@@ -49,6 +49,7 @@ import { usePlatformBranding } from "@/components/branding/use-platform-branding
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ClientShellIdentity } from "@/lib/clients/home-data";
 import { cn } from "@/lib/utils";
+import { PartnerAccountMenu } from "./partner-account-menu";
 
 type ShellProfile = "cliente" | "parceiros" | "admin";
 
@@ -113,12 +114,14 @@ const shellDefinitions: Record<ShellProfile, ShellDefinition> = {
 };
 
 type AuthenticatedShellProps = {
+  accountName?: string | null;
   children: ReactNode;
   clientIdentity?: ClientShellIdentity | null;
+  hasActivePlan?: boolean;
   profile: ShellProfile;
 };
 
-export function AuthenticatedShell({ children, clientIdentity, profile }: AuthenticatedShellProps) {
+export function AuthenticatedShell({ accountName, children, clientIdentity, hasActivePlan = false, profile }: AuthenticatedShellProps) {
   const pathname = usePathname() ?? "";
   const branding = usePlatformBranding();
   const [logoutPending, startLogoutTransition] = useTransition();
@@ -252,7 +255,14 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
     const visibleNavigation = definition.navigation.filter((item) => !(isPartner && item.href === "/parceiros/configuracoes"));
 
     return (
-      <div className="min-h-screen bg-[#0b1720] text-[#f1f6fa]">
+      <div className="relative min-h-screen bg-[#0b1720] text-[#f1f6fa]">
+        {isPartner ? (
+          <PartnerAccountMenu
+            accountName={accountName}
+            className="fixed right-5 top-3 z-50 hidden lg:block"
+            planActive={hasActivePlan}
+          />
+        ) : null}
         {isPartner ? (
           <header className="sticky top-0 z-40 border-b border-[#142432] bg-[#0b1720]/96 backdrop-blur-xl lg:hidden">
             <div className="flex h-14 items-center justify-between gap-3 px-3">
@@ -264,6 +274,7 @@ export function AuthenticatedShell({ children, clientIdentity, profile }: Authen
                 </div>
               </Link>
               <div className="flex items-center gap-1.5">
+                <PartnerAccountMenu accountName={accountName} className="sm:hidden" planActive={hasActivePlan} />
                 <Link
                   aria-label="Configurações"
                   className="flex size-9 items-center justify-center rounded-[8px] text-[#8a99a6] hover:bg-[#102a36]/70 hover:text-[#cfddea]"

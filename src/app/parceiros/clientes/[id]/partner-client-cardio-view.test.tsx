@@ -137,6 +137,8 @@ describe("PartnerClientCardioView", () => {
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
     expect(screen.getByRole("heading", { name: "Calculadora de Cardio" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comparativo Calórico" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Comparativo calórico por duração")).toBeInTheDocument();
+    expect(screen.getAllByText("180 min").length).toBeGreaterThan(0);
     expect(screen.getByLabelText("Peso corporal")).toHaveClass("w-full", "min-w-0");
     expect(screen.getByLabelText("Tipo de atividade")).toHaveClass("w-full", "min-w-0");
     expect(screen.getByRole("button", { name: /Calcular e aplicar plano/i })).toHaveClass("w-full", "min-w-0");
@@ -152,7 +154,7 @@ describe("PartnerClientCardioView", () => {
 
     fireEvent.change(screen.getByLabelText("Peso corporal"), { target: { value: "80" } });
     fireEvent.change(screen.getByLabelText("Tipo de atividade"), { target: { value: "corrida_forte" } });
-    expect(screen.getAllByText("336 kcal").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("2016 kcal").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: /Salvar cálculo/i }));
     await waitFor(() => expect(saveClientCardioCalculation).toHaveBeenCalledWith(expect.objectContaining({

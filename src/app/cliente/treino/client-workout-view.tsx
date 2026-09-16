@@ -70,6 +70,14 @@ function clampPercent(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+function rirRange(values: Array<number | null | undefined>) {
+  const clean = values.filter((value): value is number => typeof value === "number");
+  if (!clean.length) return "—";
+  const minimum = Math.min(...clean);
+  const maximum = Math.max(...clean);
+  return minimum === maximum ? String(minimum) : `${minimum}–${maximum}`;
+}
+
 function Panel({ children, className, dataTestId }: { children: ReactNode; className?: string; dataTestId?: string }) {
   return (
     <section
@@ -438,7 +446,7 @@ function ExerciseList({ session }: { session: ClientWorkoutSession }) {
                 <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">{exercise.sets.length} séries</span>
                 <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">{exercise.prescribedRepsLabel}</span>
                 <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">{exercise.restSeconds}s descanso</span>
-                {exercise.cadence ? <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">Cadência {exercise.cadence}</span> : null}
+                {exercise.sets.some((set) => set.rir !== null && set.rir !== undefined) ? <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">RIR {rirRange(exercise.sets.map((set) => set.rir))}</span> : null}
                 {exercise.technique && exercise.technique !== "normal" ? <span className="rounded-[9px] bg-[#2d250a] px-2.5 py-1.5 text-[#ffd45a]">{workoutTechniqueLabels[exercise.technique]}</span> : null}
                 {exercise.bisetGroupId && exercise.bisetPosition === 2 ? <span className="rounded-[9px] bg-[#111f2b] px-2.5 py-1.5">Descanse após o par</span> : null}
               </div>

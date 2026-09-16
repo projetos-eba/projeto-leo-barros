@@ -12,6 +12,7 @@ export {
   removeClientWorkoutSet,
   reorderClientWorkoutExercises,
   saveClientWorkoutNotes,
+  saveClientWorkoutSessionDefaults,
   saveClientWorkoutTemplate,
   sendClientWorkoutProgram,
   uncombineClientWorkoutBiset,

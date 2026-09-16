@@ -18,8 +18,17 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Popover,
   PopoverContent,
@@ -42,6 +51,7 @@ import type {
 } from "@/lib/partners/clients-metrics";
 import { cn } from "@/lib/utils";
 import { assignPlanToClient } from "../planos-financeiro/actions";
+import { removePartnerClient } from "./actions";
 
 type PartnerClientsViewProps = {
   clients: PartnerClientsData;
@@ -816,6 +826,9 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
   const [page, setPage] = useState(1);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
+  const [clientToRemove, setClientToRemove] = useState<PartnerClientRow | null>(null);
+  const [removalError, setRemovalError] = useState<string | null>(null);
+  const [isRemovingClient, startRemovingClientTransition] = useTransition();
   const pageSize = 6;
 
   const filteredRows = useMemo(() => {
@@ -856,9 +869,27 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
     setEditingClientId(row.id);
   }
 
-  function deleteClient(row: PartnerClientRow) {
+  function requestClientRemoval(row: PartnerClientRow) {
     setOpenActionMenuId(null);
-    setActionMessage(`Exclusão de ${row.name} ainda não está disponível nesta tela.`);
+    setActionMessage(null);
+    setRemovalError(null);
+    setClientToRemove(row);
+  }
+
+  function removeClient() {
+    if (!clientToRemove) return;
+
+    startRemovingClientTransition(async () => {
+      const result = await removePartnerClient({ patientId: clientToRemove.id });
+      if (!result.ok) {
+        setRemovalError(result.error ?? "Não foi possível excluir o Cliente da sua carteira.");
+        return;
+      }
+
+      setClientToRemove(null);
+      setActionMessage(result.message ?? "Cliente excluído da sua carteira.");
+      router.refresh();
+    });
   }
 
   return (
@@ -1071,7 +1102,7 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
                                 role="menuitem"
                                 type="button"
                                 onClick={() => {
-                                  deleteClient(row);
+                                  requestClientRemoval(row);
                                   setOpenActionMenuId(null);
                                 }}
                               >
@@ -1142,6 +1173,43 @@ export function PartnerClientsView({ clients }: PartnerClientsViewProps) {
         onOpenChange={setNewClientOpen}
         servicePlans={clients.servicePlans}
       />
+
+      <AlertDialog
+        open={Boolean(clientToRemove)}
+        onOpenChange={(open) => {
+          if (!open && !isRemovingClient) {
+            setClientToRemove(null);
+            setRemovalError(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-[460px] border-[#303746] bg-[#181d25] p-5 text-[#f3f4f7] sm:rounded-[12px] sm:p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[18px] text-[#f3f4f7]">Excluir Cliente da carteira?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[14px] leading-5 text-[#bac1ce]">
+              {clientToRemove ? <>Você deixará de acompanhar <strong className="font-semibold text-[#f3f4f7]">{clientToRemove.name}</strong>. A conta e os registros do Cliente serão preservados.</> : null}
+            </AlertDialogDescription>
+            {removalError ? <p className="text-[13px] text-[#ff7b8e]" role="alert">{removalError}</p> : null}
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-2 gap-2 sm:space-x-0">
+            <AlertDialogCancel
+              className="mt-0 h-10 border-[#303746] bg-[#161a22] px-4 text-[#f3f4f7] hover:bg-[#232a35] hover:text-white"
+              disabled={isRemovingClient}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <button
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-[#c9475c] px-4 text-[14px] font-medium text-white transition-colors hover:bg-[#d9566c] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isRemovingClient}
+              type="button"
+              onClick={removeClient}
+            >
+              {isRemovingClient ? <Loader2 className="size-4 animate-spin" /> : null}
+              Excluir Cliente
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

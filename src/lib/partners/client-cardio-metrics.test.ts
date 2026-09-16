@@ -140,6 +140,16 @@ describe("client-cardio-metrics", () => {
     });
   });
 
+  it("divide o comparativo em quatro partes da meta semanal", () => {
+    const comparison = buildCardioComparison(70, "caminhada_leve", "corrida_moderada", 180);
+
+    expect(comparison.map((point) => point.minutes)).toEqual([0, 45, 90, 135, 180]);
+    expect(comparison.at(-1)).toMatchObject({
+      comparisonKcal: 1103,
+      primaryKcal: 551,
+    });
+  });
+
   it("monta resumo semanal, zona predominante e comparação", () => {
     const data = buildPartnerClientCardio(raw, new Date("2026-07-02T12:00:00.000Z"));
 
@@ -148,9 +158,10 @@ describe("client-cardio-metrics", () => {
     expect(data.weekSummary.progressPct).toBe(90);
     expect(data.weekSummary.completedKcal).toBe(932);
     expect(data.weekSummary.targetZoneLabel).toBe("Z2");
-    expect(data.comparison.find((point) => point.minutes === 30)).toMatchObject({
-      comparisonKcal: 184,
-      primaryKcal: 92,
+    expect(data.comparison.find((point) => point.minutes === 90)).toMatchObject({
+      comparisonKcal: 551,
+      primaryKcal: 276,
     });
+    expect(data.comparison.at(-1)?.minutes).toBe(180);
   });
 });

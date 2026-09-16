@@ -5,7 +5,6 @@ import {
   Camera,
   CheckCircle2,
   Download,
-  Eye,
   ImagePlus,
   Info,
   Maximize2,
@@ -18,7 +17,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import {
   buildAngleAvailability,
@@ -141,6 +140,50 @@ function PhotoFrame({ label, photo, session, zoom }: {
   );
 }
 
+function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: {
+  activeAngle: PhotoAngle;
+  after: PartnerClientPhotoSession | null;
+  before: PartnerClientPhotoSession | null;
+  revealPosition: number;
+  zoom: number;
+}) {
+  const beforePhoto = before?.photosByAngle[activeAngle] ?? null;
+  const afterPhoto = after?.photosByAngle[activeAngle] ?? null;
+
+  return (
+    <section className="relative min-h-[420px] overflow-hidden rounded-[8px] border border-[#303746] bg-[#111923]">
+      <div className="absolute left-4 top-4 z-20">
+        <span className="rounded-[6px] bg-[#083f75] px-3 py-1 text-[13px] font-bold text-[#62baff]">Antes</span>
+        <p className="mt-2 text-[14px] font-semibold text-white">{before?.capturedDateLabel ?? "--/--/----"}</p>
+      </div>
+      <div className="absolute right-4 top-4 z-20 text-right">
+        <span className="rounded-[6px] bg-[#164c25] px-3 py-1 text-[13px] font-bold text-[#68df88]">Depois</span>
+        <p className="mt-2 text-[14px] font-semibold text-white">{after?.capturedDateLabel ?? "--/--/----"}</p>
+      </div>
+      {beforePhoto ? (
+        <img
+          alt={`Antes - ${beforePhoto.angleLabel}`}
+          className="absolute inset-0 h-full min-h-[420px] w-full object-contain transition-transform"
+          src={beforePhoto.imageUrl}
+          style={{ transform: `scale(${zoom / 100})` }}
+        />
+      ) : <div className="flex h-full min-h-[420px] items-center justify-center text-[13px] text-[#8b92a3]">Ângulo indisponível</div>}
+      {afterPhoto ? (
+        <img
+          alt={`Depois - ${afterPhoto.angleLabel}`}
+          className="absolute inset-0 h-full min-h-[420px] w-full object-contain transition-transform"
+          src={afterPhoto.imageUrl}
+          style={{ clipPath: `inset(0 0 0 ${revealPosition}%)`, transform: `scale(${zoom / 100})` }}
+        />
+      ) : null}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_24%,rgba(255,255,255,0.25)_24%,rgba(255,255,255,0.25)_24.4%,transparent_24.4%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_50.4%,transparent_50.4%,transparent_76%,rgba(255,255,255,0.18)_76%,rgba(255,255,255,0.18)_76.4%,transparent_76.4%)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 z-30 w-px bg-white shadow-[0_0_0_1px_rgba(3,12,20,0.55)]" style={{ left: `${revealPosition}%` }}>
+        <span className="absolute left-1/2 top-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#9ecded] bg-[#071923] text-[11px] font-bold text-white">↔</span>
+      </div>
+    </section>
+  );
+}
+
 function Dropzone({ angle, file, onChange }: {
   angle: { label: string; value: PhotoAngle };
   file: File | null;
@@ -167,17 +210,28 @@ function Dropzone({ angle, file, onChange }: {
   );
 }
 
-function TimelineRow({ active, onCompare, onRemove, onView, session }: {
+function TimelineRow({ active, onRemove, onSelect, session }: {
   active: boolean;
-  onCompare: () => void;
   onRemove: () => void;
-  onView: () => void;
+  onSelect: () => void;
   session: PartnerClientPhotoSession;
 }) {
   return (
     <article className={cn("grid gap-4 rounded-[10px] border p-4 md:grid-cols-[220px_minmax(0,1fr)_170px] md:items-center", active ? "border-[#2d9cff] bg-[#071c30]" : "border-[#25313d] bg-[#08131d]")}>
       <div className="flex items-center gap-4">
-        <span className={cn("size-7 rounded-full border-2", active ? "border-[#2d9cff] bg-[#2d9cff]" : "border-[#748190]")} />
+        <label className="relative flex size-7 shrink-0 cursor-pointer items-center justify-center">
+          <input
+            aria-label={`Selecionar sessão ${session.capturedDateLabel}`}
+            checked={active}
+            className="peer sr-only"
+            name="photo-session"
+            type="radio"
+            onChange={onSelect}
+          />
+          <span className="flex size-7 items-center justify-center rounded-full border-2 border-[#748190] transition peer-checked:border-[#2d9cff] peer-checked:bg-[#2d9cff]">
+            {active ? <CheckCircle2 className="size-4 text-white" /> : null}
+          </span>
+        </label>
         <div>
           <p className="text-[18px] font-bold text-white">{session.capturedDateLabel}</p>
           <p className="text-[13px] text-[#8b92a3]">{session.title} · {session.capturedTimeLabel}</p>
@@ -200,8 +254,6 @@ function TimelineRow({ active, onCompare, onRemove, onView, session }: {
         })}
       </div>
       <div className="flex justify-end gap-2">
-        <ActionButton onClick={onView}><Eye className="size-4" />Ver</ActionButton>
-        <ActionButton onClick={onCompare}><ArrowLeftRight className="size-4" />Comparar</ActionButton>
         <button
           aria-label={`Remover sessão ${session.capturedDateLabel}`}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#71313a] bg-[#2b1218] px-4 text-[13px] font-semibold text-[#ff8d98] transition hover:border-[#ef626c]"
@@ -223,39 +275,58 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
   const [capturedAt, setCapturedAt] = useState(todayDateTimeValue());
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState<FileDraft>({ back: null, front: null, left: null, right: null });
-  const [selectedSessionId, setSelectedSessionId] = useState(photos.sessions[0]?.id ?? "");
+  const [selectedSessionId, setSelectedSessionId] = useState("");
   const [comparisonOpen, setComparisonOpen] = useState(false);
-  const [beforeId, setBeforeId] = useState(photos.comparison.before?.id ?? photos.sessions[1]?.id ?? photos.sessions[0]?.id ?? "");
-  const [afterId, setAfterId] = useState(photos.comparison.after?.id ?? photos.sessions[0]?.id ?? "");
+  const [comparisonSessionId, setComparisonSessionId] = useState("");
   const [activeAngle, setActiveAngle] = useState<PhotoAngle>("front");
+  const [comparisonMode, setComparisonMode] = useState<"side-by-side" | "reveal">("side-by-side");
+  const [revealPosition, setRevealPosition] = useState(50);
   const [zoom, setZoom] = useState(100);
-  const [noteDraft, setNoteDraft] = useState(photos.comparison.note?.notes ?? "");
+  const [noteDraft, setNoteDraft] = useState("");
 
-  const before = photos.sessions.find((session) => session.id === beforeId) ?? null;
-  const after = photos.sessions.find((session) => session.id === afterId) ?? null;
-  const selectedSession = photos.sessions.find((session) => session.id === selectedSessionId) ?? photos.sessions[0] ?? null;
+  const selectedSession = photos.sessions.find((session) => session.id === selectedSessionId) ?? null;
+  const completeSessions = useMemo(() => photos.sessions.filter((session) => session.completed), [photos.sessions]);
+  const comparisonCandidates = useMemo(
+    () => selectedSession?.completed ? completeSessions.filter((session) => session.id !== selectedSession.id) : [],
+    [completeSessions, selectedSession],
+  );
+  const comparisonSession = comparisonCandidates.find((session) => session.id === comparisonSessionId) ?? comparisonCandidates[0] ?? null;
+  const { after, before } = useMemo(() => {
+    if (!selectedSession || !comparisonSession) return { after: null, before: null };
+    return new Date(selectedSession.capturedAt) <= new Date(comparisonSession.capturedAt)
+      ? { after: comparisonSession, before: selectedSession }
+      : { after: selectedSession, before: comparisonSession };
+  }, [comparisonSession, selectedSession]);
+  const comparisonNote = before && after
+    ? photos.comparisonNotes.find((note) => note.beforeSessionId === before.id && note.afterSessionId === after.id) ?? null
+    : null;
+  const canCompare = Boolean(selectedSession?.completed && comparisonCandidates.length > 0);
   const comparison = useMemo(() => ({
     angleAvailability: buildAngleAvailability(before, after),
     deltas: buildPhotoDeltas(before?.measurements ?? null, after?.measurements ?? null),
     intervalDays: before && after ? intervalDays(before.capturedAt, after.capturedAt) : null,
   }), [after, before]);
 
+  useEffect(() => {
+    setNoteDraft(comparisonNote?.notes ?? "");
+  }, [comparisonNote?.notes]);
+
   function handleFileChange(angle: PhotoAngle, file: File | null) {
     setFiles((current) => ({ ...current, [angle]: file }));
   }
 
-  function viewSession(session: PartnerClientPhotoSession) {
+  function selectSession(session: PartnerClientPhotoSession) {
     setSelectedSessionId(session.id);
     setComparisonOpen(false);
+    setComparisonSessionId(
+      completeSessions.find((item) => item.id !== session.id)?.id ?? "",
+    );
   }
 
-  function compareFromSession(session: PartnerClientPhotoSession) {
-    const olderSession = photos.sessions.find((item) => item.id !== session.id && new Date(item.capturedAt) < new Date(session.capturedAt))
-      ?? photos.sessions.find((item) => item.id !== session.id)
-      ?? null;
-    setSelectedSessionId(session.id);
-    setAfterId(session.id);
-    if (olderSession) setBeforeId(olderSession.id);
+  function openComparison() {
+    if (!canCompare) return;
+    setComparisonMode("side-by-side");
+    setRevealPosition(50);
     setComparisonOpen(true);
   }
 
@@ -353,9 +424,8 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
                 active={session.id === selectedSessionId}
                 key={session.id}
                 session={session}
-                onCompare={() => compareFromSession(session)}
                 onRemove={() => runAction(() => removeClientPhotoSession({ patientId: overview.client.id, sessionId: session.id }))}
-                onView={() => viewSession(session)}
+                onSelect={() => selectSession(session)}
               />
             )) : (
               <div className="flex min-h-40 flex-col items-center justify-center rounded-[8px] border border-dashed border-[#303746] text-center">
@@ -373,8 +443,9 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
               <div>
                 <h2 className="text-[20px] font-bold text-white">Fotos da sessão</h2>
                 <p className="mt-1 text-[14px] text-[#9aa5b6]">{selectedSession.title} · {selectedSession.capturedDateLabel} às {selectedSession.capturedTimeLabel}</p>
+                {!selectedSession.completed ? <p className="mt-1 text-[12px] text-[#f0c76a]">Complete os quatro ângulos para comparar esta sessão.</p> : null}
               </div>
-              <ActionButton onClick={() => compareFromSession(selectedSession)}><ArrowLeftRight className="size-4" />Comparar evolução</ActionButton>
+              <ActionButton disabled={!canCompare} onClick={openComparison}><ArrowLeftRight className="size-4" />Comparar evolução</ActionButton>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {photoAngles.map((angle) => {
@@ -431,17 +502,14 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
                   <p className="mt-1 text-[13px] text-[#9aa5b6]">Compare o progresso entre duas sessões de fotos.</p>
                 </div>
                 <div className="flex flex-wrap items-end gap-3">
-                  <Field label="Sessão A (Antes)">
-                    <select className={inputClass} value={beforeId} onChange={(event) => setBeforeId(event.target.value)}>
-                      {photos.sessions.map((session) => <option key={session.id} value={session.id}>{session.capturedDateLabel}</option>)}
+                  <Field label="Sessão selecionada">
+                    <span className={cn(inputClass, "flex items-center")}>{selectedSession?.capturedDateLabel ?? "--/--/----"}</span>
+                  </Field>
+                  <Field label="Comparar com">
+                    <select className={inputClass} value={comparisonSession?.id ?? ""} onChange={(event) => setComparisonSessionId(event.target.value)}>
+                      {comparisonCandidates.map((session) => <option key={session.id} value={session.id}>{session.capturedDateLabel}</option>)}
                     </select>
                   </Field>
-                  <Field label="Sessão B (Depois)">
-                    <select className={inputClass} value={afterId} onChange={(event) => setAfterId(event.target.value)}>
-                      {photos.sessions.map((session) => <option key={session.id} value={session.id}>{session.capturedDateLabel}</option>)}
-                    </select>
-                  </Field>
-                  <ActionButton onClick={() => { setBeforeId(afterId); setAfterId(beforeId); }}><ArrowLeftRight className="size-4" />Trocar ordem</ActionButton>
                   <a className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#3b97e3] bg-[#2d9cff] px-4 text-[13px] font-semibold text-white" href={`/parceiros/clientes/${overview.client.id}/fotos/exportar`}>
                     <Download className="size-4" />Exportar comparação
                   </a>
@@ -461,16 +529,49 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
                 ))}
               </div>
 
-              <div className="relative mt-4 grid gap-1 lg:grid-cols-2">
-                <PhotoFrame label="Antes" photo={before?.photosByAngle[activeAngle] ?? null} session={before} zoom={zoom} />
-                <PhotoFrame label="Depois" photo={after?.photosByAngle[activeAngle] ?? null} session={after} zoom={zoom} />
-                <span className="absolute left-1/2 top-1/2 hidden size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#303746] bg-[#07121c] text-white lg:flex"><ArrowLeftRight className="size-5" /></span>
-                <div className="absolute bottom-4 left-4 flex overflow-hidden rounded-[8px] border border-[#303746] bg-[#101923]">
+              <div className="mt-4 flex gap-2 rounded-[8px] border border-[#303746] bg-[#08131d] p-2">
+                <button
+                  aria-pressed={comparisonMode === "side-by-side"}
+                  className={cn("h-9 rounded-[7px] px-4 text-[13px] font-semibold transition", comparisonMode === "side-by-side" ? "bg-[#2d9cff] text-white" : "text-[#b7c3cf] hover:bg-[#101923]")}
+                  type="button"
+                  onClick={() => setComparisonMode("side-by-side")}
+                >
+                  Lado a lado
+                </button>
+                <button
+                  aria-pressed={comparisonMode === "reveal"}
+                  className={cn("h-9 rounded-[7px] px-4 text-[13px] font-semibold transition", comparisonMode === "reveal" ? "bg-[#2d9cff] text-white" : "text-[#b7c3cf] hover:bg-[#101923]")}
+                  type="button"
+                  onClick={() => setComparisonMode("reveal")}
+                >
+                  Revelador
+                </button>
+              </div>
+
+              <div className={cn("relative mt-4", comparisonMode === "side-by-side" ? "grid gap-1 lg:grid-cols-2" : "")}>
+                {comparisonMode === "side-by-side" ? <>
+                  <PhotoFrame label="Antes" photo={before?.photosByAngle[activeAngle] ?? null} session={before} zoom={zoom} />
+                  <PhotoFrame label="Depois" photo={after?.photosByAngle[activeAngle] ?? null} session={after} zoom={zoom} />
+                  <span className="absolute left-1/2 top-1/2 hidden size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#303746] bg-[#07121c] text-white lg:flex"><ArrowLeftRight className="size-5" /></span>
+                </> : <>
+                  <RevealPhotoFrame activeAngle={activeAngle} after={after} before={before} revealPosition={revealPosition} zoom={zoom} />
+                  <input
+                    aria-label="Posição do revelador"
+                    aria-valuetext={`${revealPosition}% revelado`}
+                    className="absolute inset-0 z-40 h-full w-full cursor-ew-resize opacity-0"
+                    max="100"
+                    min="0"
+                    type="range"
+                    value={revealPosition}
+                    onChange={(event) => setRevealPosition(Number(event.target.value))}
+                  />
+                </>}
+                <div className="absolute bottom-4 left-4 z-50 flex overflow-hidden rounded-[8px] border border-[#303746] bg-[#101923]">
                   <button className="flex size-10 items-center justify-center text-[#c8d1dc]" type="button" onClick={() => setZoom((value) => Math.max(80, value - 10))}><ZoomOut className="size-4" /></button>
                   <span className="flex h-10 min-w-16 items-center justify-center text-[13px] font-semibold text-white">{zoom}%</span>
                   <button className="flex size-10 items-center justify-center text-[#c8d1dc]" type="button" onClick={() => setZoom((value) => Math.min(150, value + 10))}><ZoomIn className="size-4" /></button>
                 </div>
-                <div className="absolute bottom-4 right-4 flex gap-2">
+                <div className="absolute bottom-4 right-4 z-50 flex gap-2">
                   <button className="flex size-10 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923] text-white" type="button" onClick={() => window.open(after?.photosByAngle[activeAngle]?.imageUrl ?? before?.photosByAngle[activeAngle]?.imageUrl, "_blank")}><Maximize2 className="size-4" /></button>
                   <button className="flex size-10 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923] text-white" type="button"><Camera className="size-4" /></button>
                 </div>

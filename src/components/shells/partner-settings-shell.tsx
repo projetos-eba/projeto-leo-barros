@@ -10,17 +10,19 @@ import { logoutPartner } from "@/app/login/actions";
 import { PlatformLogo } from "@/components/branding/platform-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PartnerAccountMenu } from "./partner-account-menu";
 
 type PartnerSettingsShellProps = {
+  accountName?: string | null;
   children: ReactNode;
 };
 
 const settingsItems = [
-  { href: "/parceiros/configuracoes/geral", icon: UserRound, label: "Geral" },
+  { href: "/parceiros/configuracoes/geral", icon: UserRound, label: "Minha Conta" },
   { href: "/parceiros/configuracoes/assinatura", icon: CreditCard, label: "Assinatura" },
 ] as const;
 
-export function PartnerSettingsShell({ children }: PartnerSettingsShellProps) {
+export function PartnerSettingsShell({ accountName, children }: PartnerSettingsShellProps) {
   const pathname = usePathname() ?? "";
   const [logoutPending, startLogoutTransition] = useTransition();
 
@@ -36,6 +38,7 @@ export function PartnerSettingsShell({ children }: PartnerSettingsShellProps) {
             </span>
           </Link>
           <div className="flex items-center gap-1.5">
+            <PartnerAccountMenu accountName={accountName} className="sm:hidden" planActive />
             <Link
               aria-label="Voltar ao painel"
               className="flex size-9 items-center justify-center rounded-[8px] text-[#8a99a6] hover:bg-[#102a36]/70 hover:text-[#cfddea]"
@@ -119,6 +122,7 @@ export function PartnerSettingsShell({ children }: PartnerSettingsShellProps) {
           </nav>
 
           <div className="mt-auto space-y-2 pb-5">
+            <PartnerAccountMenu accountName={accountName} className="mb-3 hidden lg:block" planActive />
             <div className="flex h-10 items-center gap-3 rounded-[8px] px-3 text-[14px] font-semibold text-[#cfddea]">
               <Settings className="size-5 shrink-0" />
               <span>Configuracoes</span>

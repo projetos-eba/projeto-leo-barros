@@ -20,6 +20,7 @@ import {
   Save,
   Search,
   Send,
+  Settings2,
   Sparkles,
   TrendingUp,
   Trash2,
@@ -70,6 +71,7 @@ import {
   removeClientWorkoutExercise,
   reorderClientWorkoutExercises,
   saveClientWorkoutNotes,
+  saveClientWorkoutSessionDefaults,
   saveClientWorkoutTemplate,
   sendClientWorkoutProgram,
   uncombineClientWorkoutBiset,
@@ -86,7 +88,7 @@ type PartnerClientWorkoutViewProps = {
 
 const panelClass = "min-w-0 rounded-[8px] border border-[rgba(65,80,92,0.71)] bg-[linear-gradient(153deg,rgba(42,63,79,0.35)_8%,rgba(96,144,181,0)_79%)]";
 const inputClass = "h-9 rounded-[7px] border border-[#2b3b49] bg-[#091722] px-2 text-[12px] text-white outline-none focus:border-[#3b97e3]";
-const setSlotNumbers = [1, 2, 3, 4, 5] as const;
+const setSlotNumbers = [1, 2, 3, 4, 5, 6] as const;
 const workoutTypeOptions = [
   "Peito e Tríceps",
   "Costas e Bíceps",
@@ -257,6 +259,114 @@ function SessionCard({
   );
 }
 
+function SessionDefaultsDialog({
+  onOpenChange,
+  open,
+  patientId,
+  pending,
+  runAction,
+  session,
+}: {
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  patientId: string;
+  pending: boolean;
+  runAction: (action: () => Promise<{ error?: string; ok: boolean }>) => void;
+  session: PartnerClientWorkoutSession;
+}) {
+  const defaults = session.defaults;
+  const [draft, setDraft] = useState({
+    maximumReps: defaults?.maximumReps?.toString() ?? "",
+    maximumRir: defaults?.maximumRir?.toString() ?? "",
+    maximumSets: defaults?.maximumSets?.toString() ?? "0",
+    moderateReps: defaults?.moderateReps?.toString() ?? "",
+    moderateRir: defaults?.moderateRir?.toString() ?? "",
+    moderateSets: defaults?.moderateSets?.toString() ?? "0",
+    restSeconds: defaults?.restSeconds?.toString() ?? "90",
+    warmupReps: defaults?.warmupReps?.toString() ?? "",
+    warmupRir: defaults?.warmupRir?.toString() ?? "",
+    warmupSets: defaults?.warmupSets?.toString() ?? "0",
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    setDraft({
+      maximumReps: defaults?.maximumReps?.toString() ?? "",
+      maximumRir: defaults?.maximumRir?.toString() ?? "",
+      maximumSets: defaults?.maximumSets?.toString() ?? "0",
+      moderateReps: defaults?.moderateReps?.toString() ?? "",
+      moderateRir: defaults?.moderateRir?.toString() ?? "",
+      moderateSets: defaults?.moderateSets?.toString() ?? "0",
+      restSeconds: defaults?.restSeconds?.toString() ?? "90",
+      warmupReps: defaults?.warmupReps?.toString() ?? "",
+      warmupRir: defaults?.warmupRir?.toString() ?? "",
+      warmupSets: defaults?.warmupSets?.toString() ?? "0",
+    });
+  }, [defaults, open]);
+
+  const total = Number(draft.warmupSets || 0) + Number(draft.moderateSets || 0) + Number(draft.maximumSets || 0);
+  const phases = [
+    { key: "warmup", label: "Aquecimento" },
+    { key: "moderate", label: "Carga moderada" },
+    { key: "maximum", label: "Carga máxima" },
+  ] as const;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="border-[#303746] bg-[#101923] text-white sm:max-w-[720px]">
+        <DialogHeader>
+          <DialogTitle>Predefinições da sessão</DialogTitle>
+          <DialogDescription className="text-[#8b92a3]">Os valores serão aplicados automaticamente aos novos exercícios desta divisão.</DialogDescription>
+        </DialogHeader>
+        <form className="grid gap-4" onSubmit={(event) => {
+          event.preventDefault();
+          const numberOrNull = (value: string) => value === "" ? null : Number(value);
+          runAction(() => saveClientWorkoutSessionDefaults({
+            maximumReps: numberOrNull(draft.maximumReps), maximumRir: numberOrNull(draft.maximumRir), maximumSets: Number(draft.maximumSets || 0),
+            moderateReps: numberOrNull(draft.moderateReps), moderateRir: numberOrNull(draft.moderateRir), moderateSets: Number(draft.moderateSets || 0),
+            patientId, restSeconds: Number(draft.restSeconds || 0), sessionId: session.id,
+            warmupReps: numberOrNull(draft.warmupReps), warmupRir: numberOrNull(draft.warmupRir), warmupSets: Number(draft.warmupSets || 0),
+          }));
+          onOpenChange(false);
+        }}>
+          <div className="grid gap-3 rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3">
+            <label className="grid gap-1 text-[12px] text-[#9aa5b6]">Intervalo padrão (segundos)
+              <input aria-label="Intervalo padrão" className={inputClass} inputMode="numeric" max={600} min={0} value={draft.restSeconds} onChange={(event) => setDraft({ ...draft, restSeconds: event.target.value })} />
+            </label>
+          </div>
+          <div className="grid gap-3">
+            {phases.map(({ key, label }) => {
+              const prefix = key === "warmup" ? "warmup" : key === "moderate" ? "moderate" : "maximum";
+              const setsKey = `${prefix}Sets` as const;
+              const repsKey = `${prefix}Reps` as const;
+              const rirKey = `${prefix}Rir` as const;
+              const enabled = Number(draft[setsKey] || 0) > 0;
+              return (
+                <fieldset className="grid gap-2 rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3 sm:grid-cols-[minmax(130px,1fr)_110px_110px_110px] sm:items-end" key={key}>
+                  <legend className="px-1 text-[13px] font-semibold text-white">{label}</legend>
+                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Séries
+                    <input aria-label={`${label} séries`} className={inputClass} inputMode="numeric" max={6} min={0} value={draft[setsKey]} onChange={(event) => setDraft({ ...draft, [setsKey]: event.target.value })} />
+                  </label>
+                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Repetições
+                    <input aria-label={`${label} repetições`} className={inputClass} disabled={!enabled} inputMode="numeric" max={500} min={1} value={draft[repsKey]} onChange={(event) => setDraft({ ...draft, [repsKey]: event.target.value })} />
+                  </label>
+                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">RIR
+                    <input aria-label={`${label} RIR`} className={inputClass} disabled={!enabled} inputMode="numeric" max={10} min={0} value={draft[rirKey]} onChange={(event) => setDraft({ ...draft, [rirKey]: event.target.value })} />
+                  </label>
+                </fieldset>
+              );
+            })}
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className={cn("text-[12px]", total >= 1 && total <= 6 ? "text-[#8b92a3]" : "text-[#ff8a96]")}>{total}/6 séries configuradas</span>
+            <Button disabled={pending || total < 1 || total > 6} tone="primary" type="submit"><Save className="size-4" /> Salvar predefinições</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function SetSlot({ exerciseId, exerciseName, patientId, pending, runAction, set, setNumber }: {
   exerciseId: string;
   exerciseName: string;
@@ -269,11 +379,13 @@ function SetSlot({ exerciseId, exerciseName, patientId, pending, runAction, set,
   const [reps, setReps] = useState(set?.reps?.toString() ?? "");
   const [load, setLoad] = useState(set?.loadKg?.toString() ?? "");
   const [intensity, setIntensity] = useState<WorkoutIntensity>(set?.intensity ?? (setNumber === 1 ? "warmup" : "moderate"));
+  const [rir, setRir] = useState(set?.rir?.toString() ?? "");
 
   useEffect(() => {
     setReps(set?.reps?.toString() ?? "");
     setLoad(set?.loadKg?.toString() ?? "");
     setIntensity(set?.intensity ?? (setNumber === 1 ? "warmup" : "moderate"));
+    setRir(set?.rir?.toString() ?? "");
   }, [set, setNumber]);
 
   if (!set) {
@@ -303,6 +415,7 @@ function SetSlot({ exerciseId, exerciseName, patientId, pending, runAction, set,
       loadKg: load === "" ? null : Number(load.replace(",", ".")),
       patientId,
       reps: reps === "" ? null : Number(reps),
+      rir: rir === "" ? null : Number(rir),
       setId: activeSet.id,
     }));
   }
@@ -310,7 +423,7 @@ function SetSlot({ exerciseId, exerciseName, patientId, pending, runAction, set,
   const meta = intensityMeta[intensity];
   const Icon = meta.Icon;
   return (
-    <div className="grid min-h-[86px] content-center gap-1 border-l border-[#273847] px-2 py-2">
+    <div className="grid min-h-[108px] content-center gap-1 border-l border-[#273847] px-2 py-2">
       <button
         aria-label={`Intensidade da série ${activeSet.setNumber}`}
         className={cn("mx-auto inline-flex size-6 items-center justify-center rounded-[6px]", meta.className)}
@@ -327,6 +440,7 @@ function SetSlot({ exerciseId, exerciseName, patientId, pending, runAction, set,
       </button>
       <input aria-label={`Repetições da série ${activeSet.setNumber}`} className="h-7 min-w-0 rounded-[5px] border border-[#263846] bg-[#081520] px-1 text-center text-[12px] text-white outline-none focus:border-[#3b97e3]" inputMode="numeric" placeholder="Rep" value={reps} onBlur={() => persist()} onChange={(event) => setReps(event.target.value)} />
       <input aria-label={`Carga da série ${activeSet.setNumber}`} className="h-7 min-w-0 rounded-[5px] border border-[#263846] bg-[#081520] px-1 text-center text-[12px] text-white outline-none focus:border-[#3b97e3]" inputMode="decimal" placeholder="Kg" value={load} onBlur={() => persist()} onChange={(event) => setLoad(event.target.value)} />
+      <input aria-label={`RIR da série ${activeSet.setNumber}`} className="h-6 min-w-0 rounded-[5px] border border-[#263846] bg-[#081520] px-1 text-center text-[10px] text-white outline-none focus:border-[#3b97e3]" inputMode="numeric" max={10} min={0} placeholder="RIR" value={rir} onBlur={() => persist()} onChange={(event) => setRir(event.target.value)} />
     </div>
   );
 }
@@ -355,7 +469,6 @@ function ExerciseRow({
   selected: boolean;
 }) {
   const [rest, setRest] = useState(exercise.restSeconds.toString());
-  const [cadence, setCadence] = useState(exercise.cadence ?? "");
   const [technique, setTechnique] = useState<WorkoutTechnique>(exercise.technique);
   const [notes, setNotes] = useState(exercise.notes ?? "");
   const setsByNumber = useMemo(() => new Map(exercise.sets.map((set) => [set.setNumber, set])), [exercise.sets]);
@@ -363,7 +476,6 @@ function ExerciseRow({
   function persistMeta(nextTechnique = technique) {
     if (nextTechnique === "biset") return;
     runAction(() => updateClientWorkoutExercise({
-      cadence: cadence || null,
       exerciseId: exercise.id,
       notes: notes || null,
       patientId,
@@ -376,7 +488,7 @@ function ExerciseRow({
   return (
     <article
       className={cn(
-        "relative grid min-w-[1028px] grid-cols-[232px_repeat(5,72px)_86px_112px_minmax(140px,1fr)_96px] border-b border-[#273847] bg-[#0b1822]/80 last:border-b-0",
+        "relative grid min-w-[1100px] grid-cols-[232px_repeat(6,72px)_86px_112px_minmax(140px,1fr)_96px] border-b border-[#273847] bg-[#0b1822]/80 last:border-b-0",
         exercise.bisetGroupId && "bg-[#0d1d2a]",
         selected && "ring-1 ring-inset ring-[#3b97e3]",
       )}
@@ -422,7 +534,6 @@ function ExerciseRow({
           {Object.entries(workoutTechniqueLabels).filter(([key]) => key !== "biset").map(([key, label]) => <option key={key} value={key}>{label}</option>)}
           {exercise.technique === "biset" ? <option value="biset">Bi-set</option> : null}
         </select>
-        <input aria-label={`Cadência de ${exercise.name}`} className={cn(inputClass, "mt-1 w-[100px] text-center")} placeholder="2-0-2-1" value={cadence} onBlur={() => persistMeta()} onChange={(event) => setCadence(event.target.value)} />
       </div>
       <div className="flex min-w-0 items-center border-l border-[#273847] p-2">
         <input aria-label={`Observação de ${exercise.name}`} className={cn(inputClass, "min-w-0 flex-1")} placeholder="Observação" value={notes} onBlur={() => persistMeta()} onChange={(event) => setNotes(event.target.value)} />
@@ -813,6 +924,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   });
   const [templateId, setTemplateId] = useState(workout.templates[0]?.id ?? "");
   const [sessionMenuId, setSessionMenuId] = useState<string | null>(null);
+  const [sessionDefaultsDialog, setSessionDefaultsDialog] = useState(false);
   const session = program?.sessions.find((item) => item.id === sessionId) ?? program?.sessions[0] ?? null;
   const firstSessionId = program?.sessions[0]?.id ?? null;
   const orderedExercises = useMemo(() => {
@@ -940,7 +1052,10 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                 <section className={cn(panelClass, "overflow-visible")}>
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#303746] p-4">
                     <div>
-                      <h2 className="text-[20px] font-bold text-white">{sessionDisplayName(session)} - {workoutTrainingTypeLabel(session)}</h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-[20px] font-bold text-white">{sessionDisplayName(session)} - {workoutTrainingTypeLabel(session)}</h2>
+                        <button aria-label={`Abrir predefinições de ${sessionDisplayName(session)}`} className="inline-flex size-8 items-center justify-center rounded-[7px] text-[#8fcfff] transition hover:bg-[#10283a] hover:text-white" disabled={pending} type="button" onClick={() => setSessionDefaultsDialog(true)}><Settings2 className="size-4" /></button>
+                      </div>
                       <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#9aa5b6]">
                         <span className="inline-flex items-center gap-1"><ListChecks className="size-3.5" /> {session.exercises.length} exercícios</span>
                         <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" /> {session.frequencyPerWeek}x/semana</span>
@@ -969,8 +1084,8 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                     })}
                   </div>
                   <div className="overflow-x-auto">
-                    <div className="min-w-[1028px]">
-                      <div className="grid grid-cols-[232px_repeat(5,72px)_86px_112px_minmax(140px,1fr)_96px] border-b border-[#303746] bg-[#07131b] text-[10px] font-bold uppercase text-[#718394]">
+                    <div className="min-w-[1100px]">
+                      <div className="grid grid-cols-[232px_repeat(6,72px)_86px_112px_minmax(140px,1fr)_96px] border-b border-[#303746] bg-[#07131b] text-[10px] font-bold uppercase text-[#718394]">
                         <span className="p-3">Exercício</span>
                         {setSlotNumbers.map((setNumber) => <span className="grid place-items-center gap-1 p-2 text-center" key={setNumber}><Dumbbell className="size-3.5 text-[#3b97e3]" />Série {setNumber}</span>)}
                         <span className="p-3 text-center">Intervalo</span>
@@ -1010,6 +1125,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                     <div className="mt-2 flex items-center justify-between"><span className="text-[10px] text-[#718394]">{notes.length}/2000</span><Button disabled={pending} onClick={() => runAction(() => saveClientWorkoutNotes({ notes: notes || null, patientId: overview.client.id, programId: program.id }))}><Save className="size-4" /> Salvar</Button></div>
                   </section>
                 </aside>
+                <SessionDefaultsDialog open={sessionDefaultsDialog} onOpenChange={setSessionDefaultsDialog} patientId={overview.client.id} pending={pending} runAction={runAction} session={session} />
               </div>
             ) : null}
 

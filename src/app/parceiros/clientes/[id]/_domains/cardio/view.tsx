@@ -12,6 +12,15 @@ import {
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useMemo, useState, useTransition } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   buildCardioComparison,
@@ -118,40 +127,42 @@ function ComparisonChart({ comparison, comparisonLabel, primaryLabel }: {
       </div>
     );
   }
-  const maxKcal = Math.max(100, ...comparison.flatMap((point) => [point.primaryKcal, point.comparisonKcal]));
-  const chartMax = Math.ceil(maxKcal / 100) * 100;
-  const plot = { bottom: 306, left: 44, right: 500, top: 24 };
-  const x = (minutes: number) => plot.left + (minutes / 60) * (plot.right - plot.left);
-  const y = (kcal: number) => plot.bottom - (kcal / chartMax) * (plot.bottom - plot.top);
-  const primaryPath = comparison.map((point, index) => `${index === 0 ? "M" : "L"} ${x(point.minutes)} ${y(point.primaryKcal)}`).join(" ");
-  const comparisonPath = comparison.map((point, index) => `${index === 0 ? "M" : "L"} ${x(point.minutes)} ${y(point.comparisonKcal)}`).join(" ");
-  const yTicks = [0, Math.round(chartMax * 0.33), Math.round(chartMax * 0.66), chartMax];
-
   return (
     <div className="mt-5">
       <div className="flex flex-wrap gap-4 text-[11px] font-semibold">
         <span className="inline-flex items-center gap-2 text-[#8fcfff]"><span className="size-2 rounded-full bg-[#3b97e3]" />{primaryLabel}</span>
         <span className="inline-flex items-center gap-2 text-[#70d690]"><span className="size-2 rounded-full bg-[#58c587]" />{comparisonLabel}</span>
       </div>
-      <svg aria-label="Comparativo calórico por duração" className="mt-2 h-[330px] w-full sm:h-[360px]" preserveAspectRatio="none" viewBox="0 0 544 334">
-        {yTicks.map((tick) => (
-          <g key={tick}>
-            <line stroke="#23445b" strokeDasharray="5 7" strokeWidth="1" x1={plot.left} x2={plot.right} y1={y(tick)} y2={y(tick)} />
-            <text fill="#8b92a3" fontSize="11" textAnchor="end" x="36" y={y(tick) + 4}>{tick}</text>
-          </g>
-        ))}
-        {[0, 15, 30, 45, 60].map((minutes) => (
-          <text fill="#8b92a3" fontSize="11" key={minutes} textAnchor="middle" x={x(minutes)} y="328">{minutes} min</text>
-        ))}
-        <path d={primaryPath} fill="none" stroke="#3b97e3" strokeLinecap="round" strokeWidth="3" />
-        <path d={comparisonPath} fill="none" stroke="#58c587" strokeLinecap="round" strokeWidth="3" />
-        {comparison.map((point) => (
-          <g key={point.minutes}>
-            <circle cx={x(point.minutes)} cy={y(point.primaryKcal)} fill="#3b97e3" r="4" />
-            <circle cx={x(point.minutes)} cy={y(point.comparisonKcal)} fill="#58c587" r="4" />
-          </g>
-        ))}
-      </svg>
+      <div aria-label="Comparativo calórico por duração" className="mt-2 h-[330px] w-full sm:h-[360px]">
+        <ResponsiveContainer height="100%" minWidth={0} width="100%">
+          <LineChart data={comparison} margin={{ bottom: 8, left: -14, right: 16, top: 16 }}>
+            <CartesianGrid stroke="#23445b" strokeDasharray="5 7" vertical={false} />
+            <XAxis
+              dataKey="minutes"
+              stroke="#8b92a3"
+              tick={{ fill: "#8b92a3", fontSize: 11 }}
+              tickFormatter={(minutes: number) => `${minutes} min`}
+              tickLine={false}
+            />
+            <YAxis
+              allowDecimals={false}
+              stroke="#8b92a3"
+              tick={{ fill: "#8b92a3", fontSize: 11 }}
+              tickFormatter={(kcal: number) => formatNumber(kcal)}
+              tickLine={false}
+              width={48}
+            />
+            <Tooltip
+              contentStyle={{ background: "#071923", border: "1px solid #2f82bf", borderRadius: 8, color: "#fff" }}
+              cursor={{ stroke: "#79c7ff", strokeDasharray: "4 4" }}
+              formatter={(value, name) => [`${formatNumber(Number(value ?? 0))} kcal`, String(name ?? "")]}
+              labelFormatter={(minutes) => `${Number(minutes ?? 0)} min`}
+            />
+            <Line activeDot={{ r: 6 }} dataKey="primaryKcal" dot={{ r: 4 }} name={primaryLabel} stroke="#3b97e3" strokeLinecap="round" strokeWidth={3} type="monotone" />
+            <Line activeDot={{ r: 6 }} dataKey="comparisonKcal" dot={{ r: 4 }} name={comparisonLabel} stroke="#58c587" strokeLinecap="round" strokeWidth={3} type="monotone" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {comparison.filter((point) => point.minutes > 0).map((point) => (
           <div className="rounded-[8px] border border-[#263846] bg-[#0b1823] p-3" key={point.minutes}>
@@ -182,7 +193,10 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
   const activity = cardioActivities[activityKey];
   const comparisonActivity = cardioActivities[comparisonActivityKey];
   const canCalculate = isCardioActivityMetApproved(activity) && isCardioActivityMetApproved(comparisonActivity);
-  const comparison = useMemo(() => buildCardioComparison(weightKg, activityKey, comparisonActivityKey), [activityKey, comparisonActivityKey, weightKg]);
+  const comparison = useMemo(
+    () => buildCardioComparison(weightKg, activityKey, comparisonActivityKey, weeklyTargetMinutes),
+    [activityKey, comparisonActivityKey, weeklyTargetMinutes, weightKg],
+  );
 
   const actionPayload = {
     activityKey,

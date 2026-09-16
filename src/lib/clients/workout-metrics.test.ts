@@ -58,8 +58,8 @@ const raw: ClientWorkoutRawData = {
             restSeconds: 90,
             secondaryMuscleGroups: ["triceps", "ombros"],
             sets: [
-              { id: "set-1", intensity: "warmup", loadKg: 40, reps: 12, setNumber: 1 },
-              { id: "set-2", intensity: "moderate", loadKg: 60, reps: 10, setNumber: 2 },
+              { id: "set-1", intensity: "warmup", loadKg: 40, reps: 12, rir: null, setNumber: 1 },
+              { id: "set-2", intensity: "moderate", loadKg: 60, reps: 10, rir: null, setNumber: 2 },
             ],
             sortOrder: 0,
             technique: "normal",
@@ -85,7 +85,7 @@ const raw: ClientWorkoutRawData = {
     { clientSessionId: "log-1", completedAt: "2026-07-02T12:30:00.000Z", exerciseLogId: "exercise-log-1", id: "set-log-2", loadKg: 60, prescribedExerciseId: "exercise-1", prescribedSetId: "set-2", reps: 10, setNumber: 2, status: "completed" },
   ],
   workoutSessions: [
-    { completedAt: "2026-07-02T13:00:00.000Z", durationMinutes: 60, id: "log-1", notes: null, prescribedSessionId: "session-1", programId: "program-1", startedAt: "2026-07-02T12:00:00.000Z", status: "completed", totalVolumeKg: 1080, workoutDate: "2026-07-02" },
+    { completedAt: "2026-07-02T13:00:00.000Z", durationMinutes: 60, id: "log-1", notes: null, prescribedSessionId: "session-1", programId: "program-1", startedAt: "2026-07-02T12:00:00.000Z", status: "completed", totalVolumeKg: 600, workoutDate: "2026-07-02" },
   ],
 };
 
@@ -98,7 +98,7 @@ describe("buildClientWorkout", () => {
     expect(workout.todaySession?.trainingLabel).toBe("Peito e Tríceps");
     expect(workout.todaySession?.muscleHeat.map((item) => item.group)).toContain("peito");
     expect(workout.summary.totalSets).toBe(2);
-    expect(workout.summary.totalVolumeKg).toBe(1080);
+    expect(workout.summary.totalVolumeKg).toBe(600);
     expect(workout.history[0]?.statusLabel).toBe("Concluído");
     expect(workout.executionSessions[0]?.currentSet).toBeNull();
     expect(workout.cardio).toMatchObject({
@@ -135,8 +135,8 @@ describe("buildClientWorkout", () => {
                 restSeconds: 75,
                 secondaryMuscleGroups: ["biceps"],
                 sets: [
-                  { id: "set-3", intensity: "moderate", loadKg: 45, reps: 12, setNumber: 1 },
-                  { id: "set-4", intensity: "moderate", loadKg: 45, reps: 12, setNumber: 2 },
+                  { id: "set-3", intensity: "moderate", loadKg: 45, reps: 12, rir: null, setNumber: 1 },
+                  { id: "set-4", intensity: "moderate", loadKg: 45, reps: 12, rir: null, setNumber: 2 },
                 ],
                 sortOrder: 0,
                 technique: "normal",

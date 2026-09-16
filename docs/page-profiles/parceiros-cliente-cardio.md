@@ -32,7 +32,7 @@ Aba técnica de prescrição e acompanhamento de Cardio do Cliente individual, b
 - Calculadora editável: peso, duração, meta semanal, atividade principal, comparação e zona-alvo.
 - Catálogo orientado a dados em `src/lib/partners/client-cardio-metrics.ts`, agrupado por Caminhada, Corrida, Ciclismo, Natação, Musculação, Esportes, Rotina/sedentário e Outros.
 - As chaves legadas de Cardio continuam válidas para preservar histórico. As atividades vindas do print de 2026-08-10 usam a tabela MET aprovada em 2026-08-11 e calculam pela fórmula oficial.
-- Gráfico comparativo por duração: 0, 15, 30, 45 e 60 minutos.
+- Gráfico comparativo por duração: início e quatro divisões proporcionais à meta semanal. Para uma meta de 180 minutos: 0, 45, 90, 135 e 180 minutos. O gráfico possui tooltip com as kcal de cada atividade.
 - Resumo com kcal, kcal/min, MET e registro compacto de sessão.
 - Tabela de zonas cardíacas calculada pelo Cliente.
 

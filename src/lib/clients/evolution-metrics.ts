@@ -233,7 +233,7 @@ export function buildClientEvolution(raw: ClientEvolutionRawData): ClientEvoluti
   const programRows = raw.workout.program?.sessions.map((session, index) => {
     const sets = session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
     const volume = session.exercises.reduce((sum, exercise) => (
-      sum + exercise.sets.reduce((setSum, set) => setSum + numberValue(set.loadKg) * numberValue(set.reps), 0)
+      sum + exercise.sets.reduce((setSum, set) => setSum + (set.intensity !== "warmup" ? numberValue(set.loadKg) * numberValue(set.reps) : 0), 0)
     ), 0);
     return {
       durationLabel: `${numberValue(session.durationMinutes)} min`,
