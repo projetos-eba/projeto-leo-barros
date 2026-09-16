@@ -156,7 +156,7 @@ describe("PartnerClientPhotosView", () => {
 
     fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
     expect(screen.getByRole("heading", { name: "Fotos da sessão" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar" }));
     expect(screen.getByRole("heading", { name: "Comparação de evolução" })).toBeInTheDocument();
     const comparisonSelect = screen.getByLabelText("Comparar com");
     expect(within(comparisonSelect).getByRole("option", { name: "01/05/2026" })).toBeInTheDocument();
@@ -169,15 +169,15 @@ describe("PartnerClientPhotosView", () => {
     expect(screen.queryByText(/CPF/i)).not.toBeInTheDocument();
   });
 
-  it("desabilita a comparação de rascunhos e oferece o modo revelador", () => {
+  it("não oferece comparação para rascunhos e oferece o modo revelador", () => {
     render(<PartnerClientPhotosView overview={overview} photos={photos} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/07/2026" }));
-    expect(screen.getByRole("button", { name: "Comparar evolução" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Comparar" })).not.toBeInTheDocument();
     expect(screen.getByText("Complete os quatro ângulos para comparar esta sessão.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
-    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar" }));
     expect(screen.getByRole("button", { name: "Lado a lado" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "Revelador" }));
     expect(screen.getByRole("button", { name: "Revelador" })).toHaveAttribute("aria-pressed", "true");
@@ -186,13 +186,15 @@ describe("PartnerClientPhotosView", () => {
     fireEvent.change(slider, { target: { value: "75" } });
     expect(slider).toHaveValue("75");
     expect(slider).toHaveAttribute("aria-valuetext", "75% revelado");
+    expect(screen.getByAltText("Antes - Frente")).toHaveStyle({ clipPath: "inset(0 25% 0 0)" });
+    expect(screen.getByAltText("Depois - Frente")).toHaveStyle({ clipPath: "inset(0 0 0 75%)" });
   });
 
   it("salva observação e remove sessão", async () => {
     render(<PartnerClientPhotosView overview={overview} photos={photos} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
-    fireEvent.click(screen.getByRole("button", { name: "Comparar evolução" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar" }));
     fireEvent.change(screen.getByDisplayValue("Boa evolução."), { target: { value: "Manter conduta." } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 

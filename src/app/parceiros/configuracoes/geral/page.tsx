@@ -1,6 +1,12 @@
 import { Mail, Phone, UserRound } from "lucide-react";
 
 import { requirePartnerBillingContext } from "@/lib/billing/data";
+import {
+  formatPartnerPhone,
+  type PartnerAccountData,
+} from "@/lib/auth/partner-account-contracts";
+
+import { PartnerAccountForm } from "./partner-account-form";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +32,15 @@ export default async function PartnerGeneralSettingsPage() {
     .eq("id", partnerId)
     .maybeSingle();
 
+  const accountData: PartnerAccountData = {
+    displayName: profile?.display_name ?? "",
+    email: profile?.email ?? "",
+    phone: profile?.phone ?? "",
+    professionalType: partner?.professional_type as PartnerAccountData["professionalType"],
+    professionalRegistryType: partner?.professional_registry_type ?? "",
+    professionalRegistryNumber: partner?.professional_registry_number ?? "",
+  };
+
   const rows = [
     ["Nome", displayValue(profile?.display_name)],
     ["Nome profissional", displayValue(partner?.professional_name)],
@@ -38,11 +53,16 @@ export default async function PartnerGeneralSettingsPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-6 text-[#f1f6fa] md:px-8 lg:px-10 lg:py-[35px]">
       <header className="border-b border-[#244454]/70 pb-6">
-        <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Configuracoes</p>
-        <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Minha Conta</h1>
-        <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
-          Consulte os dados principais do perfil profissional vinculado a sua conta.
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#5db7ef]">Configuracoes</p>
+            <h1 className="mt-2 text-[30px] font-bold leading-[36px] text-[#f4f8fb] md:text-[34px]">Minha Conta</h1>
+            <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-[#8ca1af]">
+              Consulte e atualize os dados principais do perfil profissional vinculado a sua conta.
+            </p>
+          </div>
+          <PartnerAccountForm initialData={accountData} />
+        </div>
       </header>
 
       <section className="mt-7 grid gap-4 md:grid-cols-3">
@@ -59,7 +79,7 @@ export default async function PartnerGeneralSettingsPage() {
         <div className="rounded-[8px] border border-[#2b4a5d]/90 bg-[#0d2635]/80 p-5">
           <Phone className="size-5 text-[#5db7ef]" />
           <p className="mt-4 text-[13px] text-[#8ca1af]">Telefone</p>
-          <p className="mt-1 text-[22px] font-bold text-[#f1f6fa]">{displayValue(profile?.phone)}</p>
+          <p className="mt-1 text-[22px] font-bold text-[#f1f6fa]">{formatPartnerPhone(profile?.phone ?? "") || "Nao informado"}</p>
         </div>
       </section>
 
