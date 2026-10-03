@@ -2324,19 +2324,22 @@ export async function publishClientDietPlan(
   const context = await getPartnerActionContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  await context.supabase
+  const { error: supersedeError } = await context.supabase
     .from("partner_client_diet_plans")
     .update({ status: "superseded" })
     .eq("partner_id", context.partnerId)
     .eq("patient_id", parsed.data.patientId)
     .neq("id", parsed.data.planId)
     .in("status", ["active", "scheduled"]);
+  if (supersedeError) {
+    return { error: "Não foi possível preparar a publicação da dieta.", ok: false };
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   const reviewDate = new Date();
   reviewDate.setDate(reviewDate.getDate() + 30);
 
-  const { error } = await context.supabase
+  const { data: publishedPlan, error } = await context.supabase
     .from("partner_client_diet_plans")
     .update({
       published_at: new Date().toISOString(),
@@ -2346,8 +2349,12 @@ export async function publishClientDietPlan(
     })
     .eq("id", parsed.data.planId)
     .eq("partner_id", context.partnerId)
-    .eq("patient_id", parsed.data.patientId);
-  if (error) return { error: "Não foi possível ativar a dieta.", ok: false };
+    .eq("patient_id", parsed.data.patientId)
+    .select("id")
+    .maybeSingle();
+  if (error || !publishedPlan) {
+    return { error: "Não foi possível ativar a dieta.", ok: false };
+  }
 
   const version = await bumpDietPlan(context, parsed.data.patientId, parsed.data.planId);
   await syncDietPlanModule(context, parsed.data.patientId, parsed.data.planId);
