@@ -172,7 +172,7 @@ describe("PartnerClientWorkoutView", () => {
     expect(screen.getAllByText("Desenvolvimento").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Peito e Tríceps").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("img", { name: /Representação muscular/i })).toHaveLength(2);
+    expect(screen.getAllByRole("img", { name: /Representação muscular/i })).toHaveLength(3);
     expect(screen.queryByRole("checkbox", { name: /Selecionar Supino reto/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
@@ -180,8 +180,9 @@ describe("PartnerClientWorkoutView", () => {
 
   it("atualiza as prévias do card e do resumo quando os exercícios mudam", () => {
     const { container, rerender } = render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
-    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-front"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[data-layer="front-chest"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-front"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="front-chest"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="full-front-chest"]')).toHaveLength(1);
 
     const workoutWithBackExercise: PartnerClientWorkoutData = {
       ...workout,
@@ -200,8 +201,9 @@ describe("PartnerClientWorkoutView", () => {
       } : null,
     };
     rerender(<PartnerClientWorkoutView overview={overview} workout={workoutWithBackExercise} />);
-    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-back"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[data-layer="back-corners"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-back"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="back-corners"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="full-back-corners"]')).toHaveLength(1);
 
     const workoutWithoutExercises: PartnerClientWorkoutData = {
       ...workoutWithBackExercise,
@@ -218,11 +220,11 @@ describe("PartnerClientWorkoutView", () => {
   it("pagina a biblioteca e mantém digitação sem adicionar exercícios", () => {
     const library = Array.from({ length: 65 }, (_, id) => ({ ...workout.library[0], id: `library-${id}`, name: `Exercício ${id}` }));
     render(<PartnerClientWorkoutView overview={overview} workout={{ ...workout, library }} />);
-    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(30);
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(30);
     fireEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
-    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(60);
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(60);
     fireEvent.change(screen.getByLabelText("Buscar exercício"), { target: { value: "exercicio 64" } });
-    expect(screen.getAllByRole("button", { name: /^Adicionar Exercício / })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Adicionar exercício" }));
     const input = screen.getByLabelText("Buscar exercício para Treino A");
     fireEvent.change(input, { target: { value: "exercicio" } });
@@ -255,16 +257,13 @@ describe("PartnerClientWorkoutView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Abrir predefinições de Treino A" }));
     fireEvent.change(screen.getByLabelText("Aquecimento séries"), { target: { value: "1" } });
     fireEvent.change(screen.getByLabelText("Aquecimento repetições"), { target: { value: "12" } });
-    fireEvent.change(screen.getByLabelText("Aquecimento RIR"), { target: { value: "4" } });
     fireEvent.change(screen.getByLabelText("Carga moderada séries"), { target: { value: "3" } });
     fireEvent.change(screen.getByLabelText("Carga moderada repetições"), { target: { value: "10" } });
-    fireEvent.change(screen.getByLabelText("Carga moderada RIR"), { target: { value: "2" } });
     fireEvent.change(screen.getByLabelText("Carga máxima séries"), { target: { value: "2" } });
     fireEvent.change(screen.getByLabelText("Carga máxima repetições"), { target: { value: "8" } });
-    fireEvent.change(screen.getByLabelText("Carga máxima RIR"), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar predefinições" }));
     await waitFor(() => expect(saveClientWorkoutSessionDefaults).toHaveBeenCalledWith(expect.objectContaining({
-      maximumSets: 2, moderateSets: 3, restSeconds: 90, warmupSets: 1,
+      maximumRir: null, maximumSets: 2, moderateRir: null, moderateSets: 3, restSeconds: 90, warmupRir: null, warmupSets: 1,
     })));
   });
 

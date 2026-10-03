@@ -190,6 +190,33 @@ describe("PartnerClientPhotosView", () => {
     expect(screen.getByAltText("Depois - Frente")).toHaveStyle({ clipPath: "inset(0 0 0 75%)" });
   });
 
+  it("permite redimensionar e alinhar cada foto de forma independente", () => {
+    render(<PartnerClientPhotosView overview={overview} photos={photos} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Selecionar sessão 01/06/2026" }));
+    fireEvent.click(screen.getByRole("button", { name: "Comparar" }));
+    expect(screen.queryByRole("heading", { name: "Ajuste de alinhamento" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ajustar imagem" }));
+    expect(screen.getByRole("heading", { name: "Ajuste de alinhamento" })).toBeInTheDocument();
+
+    const beforeScale = screen.getByRole("slider", { name: "Escala Antes" });
+    const afterScale = screen.getByRole("slider", { name: "Escala Depois" });
+    const beforeHorizontal = screen.getByRole("slider", { name: "Posição horizontal Antes" });
+    fireEvent.change(beforeScale, { target: { value: "120" } });
+    fireEvent.change(afterScale, { target: { value: "90" } });
+    fireEvent.change(beforeHorizontal, { target: { value: "-10" } });
+
+    expect(screen.getByAltText("Antes - Frente")).toHaveStyle({ transform: "translate(-10%, 0%) scale(1.2)" });
+    expect(screen.getByAltText("Depois - Frente")).toHaveStyle({ transform: "translate(0%, 0%) scale(0.9)" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Restaurar ajustes" }));
+    expect(beforeScale).toHaveValue("100");
+    expect(afterScale).toHaveValue("100");
+    expect(beforeHorizontal).toHaveValue("0");
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("heading", { name: "Ajuste de alinhamento" })).not.toBeInTheDocument();
+  });
+
   it("salva observação e remove sessão", async () => {
     render(<PartnerClientPhotosView overview={overview} photos={photos} />);
 

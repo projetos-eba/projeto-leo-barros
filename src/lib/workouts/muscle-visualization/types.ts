@@ -26,6 +26,8 @@ export type MuscleHeatInput = {
 };
 
 export type MusclePreviewView =
+  | "full-front"
+  | "full-back"
   | "upper-front"
   | "upper-back"
   | "lower-front"
@@ -33,11 +35,14 @@ export type MusclePreviewView =
 
 export type MuscleAssetLayer = {
   asset: string;
+  clipPath?: string;
   group: MappableMuscleGroup;
   height: number;
   id: string;
   left: number;
   top: number;
+  transform?: string;
+  transformOrigin?: string;
   width: number;
 };
 

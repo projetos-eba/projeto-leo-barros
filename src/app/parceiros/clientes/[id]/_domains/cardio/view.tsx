@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   CartesianGrid,
   Line,
@@ -27,6 +27,7 @@ import {
   cardioActivities,
   cardioActivityOptions,
   cardioActivityGroups,
+  calculateCardioKcal,
   isCardioActivityMetApproved,
   type CardioActivityKey,
   type CardioZoneKey,
@@ -43,6 +44,7 @@ import {
 import { PartnerClientProfileHeader } from "../../partner-client-profile-header";
 
 type PartnerClientCardioViewProps = {
+  assessmentWeightKg: number | null;
   cardio: PartnerClientCardioData;
   overview: PartnerClientOverviewData;
 };
@@ -176,19 +178,21 @@ function ComparisonChart({ comparison, comparisonLabel, primaryLabel }: {
   );
 }
 
-export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardioViewProps) {
+export function PartnerClientCardioView({ assessmentWeightKg, cardio, overview }: PartnerClientCardioViewProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const plan = cardio.plan;
-  const initialWeight = plan?.weightKg ?? cardio.latestCalculation?.weightKg ?? 70;
-  const initialDuration = cardio.latestCalculation?.durationMinutes ?? 30;
+  const initialWeight = assessmentWeightKg ?? plan?.weightKg ?? cardio.latestCalculation?.weightKg ?? 70;
   const [weightKg, setWeightKg] = useState(initialWeight);
-  const [durationMinutes, setDurationMinutes] = useState(initialDuration);
   const [weeklyTargetMinutes, setWeeklyTargetMinutes] = useState(plan?.weeklyTargetMinutes ?? 180);
   const [activityKey, setActivityKey] = useState<CardioActivityKey>(plan?.activity.key ?? "caminhada_leve");
   const [comparisonActivityKey, setComparisonActivityKey] = useState<CardioActivityKey>(plan?.comparisonActivity.key ?? "corrida_moderada");
   const targetZone: CardioZoneKey = plan?.targetZone ?? "z2";
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (assessmentWeightKg !== null) setWeightKg(assessmentWeightKg);
+  }, [assessmentWeightKg]);
 
   const activity = cardioActivities[activityKey];
   const comparisonActivity = cardioActivities[comparisonActivityKey];
@@ -201,7 +205,7 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
   const actionPayload = {
     activityKey,
     comparisonActivityKey,
-    durationMinutes,
+    durationMinutes: Math.max(1, weeklyTargetMinutes),
     patientId: overview.client.id,
     planId: plan?.id ?? "",
     targetZone,
@@ -226,6 +230,15 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
   function applyCalculation() {
     if (!plan || !canCalculate) return;
     runAction(() => applyClientCardioCalculation(actionPayload));
+  }
+
+  function calculate() {
+    if (!plan || !canCalculate || !Number.isFinite(weightKg) || !Number.isFinite(weeklyTargetMinutes)) {
+      setMessage("Revise o peso e a meta semanal para calcular.");
+      return;
+    }
+    const kcal = calculateCardioKcal(weightKg, activity.met ?? 0, Math.max(1, weeklyTargetMinutes));
+    setMessage(`Cálculo atualizado: ${formatNumber(kcal)} kcal.`);
   }
 
   const activityOptionsByGroup = cardioActivityGroups.map((group) => ({
@@ -265,15 +278,11 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
             <div className="mt-6 grid min-w-0 gap-4">
               <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                 <Field label="Peso corporal">
-                  <input className={inputClass} inputMode="decimal" min={20} step="0.1" type="number" value={weightKg} onChange={(event) => setWeightKg(Number(event.target.value))} />
+                  <input aria-label="Peso corporal" className={inputClass} inputMode="decimal" min={20} step="0.1" type="number" value={weightKg} onChange={(event) => setWeightKg(Number(event.target.value))} />
+                  {assessmentWeightKg !== null ? <span className="text-[11px] font-normal normal-case tracking-normal text-[#8b92a3]">Última avaliação: {formatNumber(assessmentWeightKg, 1)} kg</span> : null}
                 </Field>
                 <Field label="Meta semanal">
                   <input className={inputClass} inputMode="numeric" min={0} step={5} type="number" value={weeklyTargetMinutes} onChange={(event) => setWeeklyTargetMinutes(Number(event.target.value))} />
-                </Field>
-              </div>
-              <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-                <Field label="Duração do cálculo">
-                  <input className={inputClass} inputMode="numeric" min={1} step={5} type="number" value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} />
                 </Field>
               </div>
               <Field label="Tipo de atividade">
@@ -304,7 +313,7 @@ export function PartnerClientCardioView({ cardio, overview }: PartnerClientCardi
               </Field>
 
               <div className="grid min-w-0 gap-2">
-                <ActionButton disabled={pending || !plan || !canCalculate} tone="primary" onClick={() => setMessage("Cálculo atualizado.")}>
+                <ActionButton disabled={pending || !plan || !canCalculate} tone="primary" onClick={calculate}>
                   <Activity className="size-4" />
                   Calcular
                 </ActionButton>

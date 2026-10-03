@@ -169,7 +169,7 @@ const workoutSessionDefaultsSchema = z.object({
   if (total < 1 || total > 6) context.addIssue({ code: z.ZodIssueCode.custom, message: "Defina de 1 a 6 séries." });
   phases.forEach(([phase, sets, reps, rir]) => {
     if (sets === 0 && (reps !== null || rir !== null)) context.addIssue({ code: z.ZodIssueCode.custom, message: `Limpe os valores de ${phase}.` });
-    if (sets > 0 && (reps === null || rir === null)) context.addIssue({ code: z.ZodIssueCode.custom, message: `Preencha repetições e RIR de ${phase}.` });
+    if (sets > 0 && reps === null) context.addIssue({ code: z.ZodIssueCode.custom, message: `Preencha as repetições de ${phase}.` });
   });
 });
 
@@ -1114,7 +1114,10 @@ export async function applyClientCardioCalculation(
   const context = await getPartnerActionContext();
   if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
 
-  const { error } = await workoutDb(context).from("partner_client_cardio_plans")
+  const values = cardioCalculationValues(parsed.data);
+  if (!values) return { error: "Atividade aguardando MET aprovado para cálculo.", ok: false };
+
+  const { data: updatedPlan, error } = await workoutDb(context).from("partner_client_cardio_plans")
     .update({
       comparison_activity_key: parsed.data.comparisonActivityKey,
       primary_activity_key: parsed.data.activityKey,
@@ -1125,9 +1128,11 @@ export async function applyClientCardioCalculation(
     })
     .eq("id", parsed.data.planId)
     .eq("partner_id", context.partnerId)
-    .eq("patient_id", parsed.data.patientId);
+    .eq("patient_id", parsed.data.patientId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) return { error: "Não foi possível aplicar o cálculo ao plano.", ok: false };
+  if (error || !updatedPlan) return { error: "Não foi possível aplicar o cálculo ao plano.", ok: false };
   const version = await bumpCardioPlan(context, parsed.data.patientId, parsed.data.planId);
   await recordCardioEvent(context, {
     detail: "Cálculo aplicado ao plano de Cardio.",

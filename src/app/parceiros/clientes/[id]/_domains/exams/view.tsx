@@ -306,6 +306,7 @@ function ExamHistoryChart({ results }: { results: PartnerClientExamResult[] }) {
           <XAxis
             axisLine={false}
             dataKey="collectedLabel"
+            interval="preserveStartEnd"
             minTickGap={12}
             tick={{ fill: "#8b92a3", fontFamily: "Rethink Sans", fontSize: 10 }}
             tickLine={false}

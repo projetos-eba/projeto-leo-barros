@@ -76,12 +76,15 @@ describe("ParceirosClienteOverviewPage", () => {
     await ParceirosClienteOverviewPage(pageProps(tab));
 
     expect(fetchPartnerClientOverview).toHaveBeenCalledWith(clientId);
+    if (tab === "cardio") {
+      expect(fetchPartnerClientAssessments).toHaveBeenCalledWith(clientId);
+    }
     if (loader === fetchPartnerClientDiet) {
       expect(loader).toHaveBeenCalledWith(clientId, undefined);
     } else {
       expect(loader).toHaveBeenCalledWith(clientId);
     }
-    domainLoaders.filter((candidate) => candidate !== loader).forEach((candidate) => {
+    domainLoaders.filter((candidate) => candidate !== loader && !(tab === "cardio" && candidate === fetchPartnerClientAssessments)).forEach((candidate) => {
       expect(candidate).not.toHaveBeenCalled();
     });
   });

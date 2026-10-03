@@ -133,6 +133,26 @@ describe("PartnerAgendaView", () => {
     expect(screen.getByText("Fim da agenda do dia")).toBeInTheDocument();
   });
 
+  it("mostra todos os compromissos do dia na visualização mensal", () => {
+    const agendaWithBusyDay: PartnerAgendaData = {
+      ...agenda,
+      appointments: [
+        ...agenda.appointments,
+        { ...agenda.appointments[0], id: "appt-2", title: "Avaliação de evolução" },
+        { ...agenda.appointments[0], id: "appt-3", title: "Retorno de acompanhamento" },
+        { ...agenda.appointments[0], id: "appt-4", title: "Consulta presencial detalhada" },
+      ],
+    };
+
+    render(<PartnerAgendaView agenda={agendaWithBusyDay} />);
+
+    expect(screen.getByRole("button", { name: "Consulta de acompanhamento" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Avaliação de evolução" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retorno de acompanhamento" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Consulta presencial detalhada" })).toBeInTheDocument();
+    expect(screen.queryByText(/^\+\d+ compromissos$/)).not.toBeInTheDocument();
+  });
+
   it("cria compromisso e bloqueia horário pelo drawer", async () => {
     render(<PartnerAgendaView agenda={agenda} />);
 

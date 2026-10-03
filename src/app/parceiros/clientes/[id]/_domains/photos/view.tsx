@@ -10,15 +10,21 @@ import {
   Maximize2,
   MoreVertical,
   Save,
+  Settings2,
   Trash2,
   UploadCloud,
-  ZoomIn,
-  ZoomOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   buildAngleAvailability,
   buildPhotoDeltas,
@@ -46,6 +52,15 @@ type PartnerClientPhotosViewProps = {
 };
 
 type FileDraft = Record<PhotoAngle, File | null>;
+type PhotoAlignment = {
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+function createDefaultAlignments(): Record<PhotoAngle, PhotoAlignment> {
+  return Object.fromEntries(photoAngles.map((angle) => [angle.value, { scale: 100, offsetX: 0, offsetY: 0 }])) as Record<PhotoAngle, PhotoAlignment>;
+}
 
 const panelClass = "min-w-0 rounded-[8px] border border-[rgba(65,80,92,0.71)] bg-[linear-gradient(153deg,rgba(42,63,79,0.35)_8%,rgba(96,144,181,0)_79%)]";
 const inputClass = "h-10 rounded-[8px] border border-[#303746] bg-[#081520] px-3 text-[13px] text-white outline-none transition focus:border-[#3b97e3]";
@@ -111,11 +126,11 @@ function Field({ children, label }: { children: ReactNode; label: string }) {
   );
 }
 
-function PhotoFrame({ label, photo, session, zoom }: {
+function PhotoFrame({ alignment, label, photo, session }: {
+  alignment: PhotoAlignment;
   label: "Antes" | "Depois";
   photo: PartnerClientPhotoSession["photos"][number] | null;
   session: PartnerClientPhotoSession | null;
-  zoom: number;
 }) {
   return (
     <section className="relative min-h-[420px] overflow-hidden rounded-[8px] border border-[#303746] bg-[#111923]">
@@ -130,7 +145,7 @@ function PhotoFrame({ label, photo, session, zoom }: {
           alt={`${label} - ${photo.angleLabel}`}
           className="h-full min-h-[420px] w-full object-contain transition-transform"
           src={photo.imageUrl}
-          style={{ transform: `scale(${zoom / 100})` }}
+          style={{ transform: `translate(${alignment.offsetX}%, ${alignment.offsetY}%) scale(${alignment.scale / 100})` }}
         />
       ) : (
         <div className="flex h-full min-h-[420px] items-center justify-center text-[13px] text-[#8b92a3]">Ângulo indisponível</div>
@@ -140,12 +155,13 @@ function PhotoFrame({ label, photo, session, zoom }: {
   );
 }
 
-function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: {
+function RevealPhotoFrame({ activeAngle, after, afterAlignment, before, beforeAlignment, revealPosition }: {
   activeAngle: PhotoAngle;
   after: PartnerClientPhotoSession | null;
+  afterAlignment: PhotoAlignment;
   before: PartnerClientPhotoSession | null;
+  beforeAlignment: PhotoAlignment;
   revealPosition: number;
-  zoom: number;
 }) {
   const beforePhoto = before?.photosByAngle[activeAngle] ?? null;
   const afterPhoto = after?.photosByAngle[activeAngle] ?? null;
@@ -165,7 +181,7 @@ function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: 
           alt={`Antes - ${beforePhoto.angleLabel}`}
           className="absolute inset-0 h-full min-h-[420px] w-full object-contain transition-transform"
           src={beforePhoto.imageUrl}
-          style={{ clipPath: `inset(0 ${100 - revealPosition}% 0 0)`, transform: `scale(${zoom / 100})` }}
+          style={{ clipPath: `inset(0 ${100 - revealPosition}% 0 0)`, transform: `translate(${beforeAlignment.offsetX}%, ${beforeAlignment.offsetY}%) scale(${beforeAlignment.scale / 100})` }}
         />
       ) : <div className="flex h-full min-h-[420px] items-center justify-center text-[13px] text-[#8b92a3]">Ângulo indisponível</div>}
       {afterPhoto ? (
@@ -173,7 +189,7 @@ function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: 
           alt={`Depois - ${afterPhoto.angleLabel}`}
           className="absolute inset-0 h-full min-h-[420px] w-full object-contain transition-transform"
           src={afterPhoto.imageUrl}
-          style={{ clipPath: `inset(0 0 0 ${revealPosition}%)`, transform: `scale(${zoom / 100})` }}
+          style={{ clipPath: `inset(0 0 0 ${revealPosition}%)`, transform: `translate(${afterAlignment.offsetX}%, ${afterAlignment.offsetY}%) scale(${afterAlignment.scale / 100})` }}
         />
       ) : null}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_24%,rgba(255,255,255,0.25)_24%,rgba(255,255,255,0.25)_24.4%,transparent_24.4%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_50.4%,transparent_50.4%,transparent_76%,rgba(255,255,255,0.18)_76%,rgba(255,255,255,0.18)_76.4%,transparent_76.4%)]" />
@@ -181,6 +197,33 @@ function RevealPhotoFrame({ activeAngle, after, before, revealPosition, zoom }: 
         <span className="absolute left-1/2 top-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#9ecded] bg-[#071923] text-[11px] font-bold text-white">↔</span>
       </div>
     </section>
+  );
+}
+
+function AlignmentControls({ alignment, label, onChange }: {
+  alignment: PhotoAlignment;
+  label: "Antes" | "Depois";
+  onChange: (field: keyof PhotoAlignment, value: number) => void;
+}) {
+  return (
+    <div className="grid gap-3 rounded-[8px] border border-[#303746] bg-[#08131d] p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[13px] font-bold text-white">{label}</p>
+        <span className={cn("rounded-[6px] px-2 py-1 text-[11px] font-bold", label === "Antes" ? "bg-[#083f75] text-[#62baff]" : "bg-[#164c25] text-[#68df88]")}>{alignment.scale}%</span>
+      </div>
+      <label className="grid gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
+        <span className="flex items-center justify-between"><span>Escala</span><span className="normal-case text-[#c8d1dc]">{alignment.scale}%</span></span>
+        <input aria-label={`Escala ${label}`} className="accent-[#2d9cff]" max="150" min="80" step="5" type="range" value={alignment.scale} onChange={(event) => onChange("scale", Number(event.target.value))} />
+      </label>
+      <label className="grid gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
+        <span className="flex items-center justify-between"><span>Posição horizontal</span><span className="normal-case text-[#c8d1dc]">{alignment.offsetX > 0 ? "+" : ""}{alignment.offsetX}%</span></span>
+        <input aria-label={`Posição horizontal ${label}`} className="accent-[#2d9cff]" max="20" min="-20" step="1" type="range" value={alignment.offsetX} onChange={(event) => onChange("offsetX", Number(event.target.value))} />
+      </label>
+      <label className="grid gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8b92a3]">
+        <span className="flex items-center justify-between"><span>Posição vertical</span><span className="normal-case text-[#c8d1dc]">{alignment.offsetY > 0 ? "+" : ""}{alignment.offsetY}%</span></span>
+        <input aria-label={`Posição vertical ${label}`} className="accent-[#2d9cff]" max="20" min="-20" step="1" type="range" value={alignment.offsetY} onChange={(event) => onChange("offsetY", Number(event.target.value))} />
+      </label>
+    </div>
   );
 }
 
@@ -284,7 +327,9 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
   const [activeAngle, setActiveAngle] = useState<PhotoAngle>("front");
   const [comparisonMode, setComparisonMode] = useState<"side-by-side" | "reveal">("side-by-side");
   const [revealPosition, setRevealPosition] = useState(50);
-  const [zoom, setZoom] = useState(100);
+  const [beforeAlignments, setBeforeAlignments] = useState<Record<PhotoAngle, PhotoAlignment>>(createDefaultAlignments);
+  const [afterAlignments, setAfterAlignments] = useState<Record<PhotoAngle, PhotoAlignment>>(createDefaultAlignments);
+  const [alignmentDialogOpen, setAlignmentDialogOpen] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
 
   const selectedSession = photos.sessions.find((session) => session.id === selectedSessionId) ?? null;
@@ -313,6 +358,11 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
     setNoteDraft(comparisonNote?.notes ?? "");
   }, [comparisonNote?.notes]);
 
+  useEffect(() => {
+    setBeforeAlignments(createDefaultAlignments());
+    setAfterAlignments(createDefaultAlignments());
+  }, [after?.id, before?.id]);
+
   function handleFileChange(angle: PhotoAngle, file: File | null) {
     setFiles((current) => ({ ...current, [angle]: file }));
   }
@@ -331,6 +381,19 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
     setComparisonMode("side-by-side");
     setRevealPosition(50);
     setComparisonOpen(true);
+  }
+
+  function updateAlignment(side: "before" | "after", field: keyof PhotoAlignment, value: number) {
+    const setter = side === "before" ? setBeforeAlignments : setAfterAlignments;
+    setter((current) => ({
+      ...current,
+      [activeAngle]: { ...current[activeAngle], [field]: value },
+    }));
+  }
+
+  function resetAlignments() {
+    setBeforeAlignments(createDefaultAlignments());
+    setAfterAlignments(createDefaultAlignments());
   }
 
   async function handleCreateSession(event: FormEvent<HTMLFormElement>) {
@@ -554,11 +617,11 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
 
               <div className={cn("relative mt-4", comparisonMode === "side-by-side" ? "grid gap-1 lg:grid-cols-2" : "")}>
                 {comparisonMode === "side-by-side" ? <>
-                  <PhotoFrame label="Antes" photo={before?.photosByAngle[activeAngle] ?? null} session={before} zoom={zoom} />
-                  <PhotoFrame label="Depois" photo={after?.photosByAngle[activeAngle] ?? null} session={after} zoom={zoom} />
+                  <PhotoFrame alignment={beforeAlignments[activeAngle]} label="Antes" photo={before?.photosByAngle[activeAngle] ?? null} session={before} />
+                  <PhotoFrame alignment={afterAlignments[activeAngle]} label="Depois" photo={after?.photosByAngle[activeAngle] ?? null} session={after} />
                   <span className="absolute left-1/2 top-1/2 hidden size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#303746] bg-[#07121c] text-white lg:flex"><ArrowLeftRight className="size-5" /></span>
                 </> : <>
-                  <RevealPhotoFrame activeAngle={activeAngle} after={after} before={before} revealPosition={revealPosition} zoom={zoom} />
+                  <RevealPhotoFrame activeAngle={activeAngle} after={after} afterAlignment={afterAlignments[activeAngle]} before={before} beforeAlignment={beforeAlignments[activeAngle]} revealPosition={revealPosition} />
                   <input
                     aria-label="Posição do revelador"
                     aria-valuetext={`${revealPosition}% revelado`}
@@ -570,16 +633,35 @@ export function PartnerClientPhotosView({ overview, photos }: PartnerClientPhoto
                     onChange={(event) => setRevealPosition(Number(event.target.value))}
                   />
                 </>}
-                <div className="absolute bottom-4 left-4 z-50 flex overflow-hidden rounded-[8px] border border-[#303746] bg-[#101923]">
-                  <button className="flex size-10 items-center justify-center text-[#c8d1dc]" type="button" onClick={() => setZoom((value) => Math.max(80, value - 10))}><ZoomOut className="size-4" /></button>
-                  <span className="flex h-10 min-w-16 items-center justify-center text-[13px] font-semibold text-white">{zoom}%</span>
-                  <button className="flex size-10 items-center justify-center text-[#c8d1dc]" type="button" onClick={() => setZoom((value) => Math.min(150, value + 10))}><ZoomIn className="size-4" /></button>
-                </div>
+                <button
+                  aria-label="Ajustar imagem"
+                  className="absolute bottom-4 left-4 z-50 flex size-10 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923] text-white"
+                  type="button"
+                  onClick={() => setAlignmentDialogOpen(true)}
+                >
+                  <Settings2 className="size-4" />
+                </button>
                 <div className="absolute bottom-4 right-4 z-50 flex gap-2">
                   <button className="flex size-10 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923] text-white" type="button" onClick={() => window.open(after?.photosByAngle[activeAngle]?.imageUrl ?? before?.photosByAngle[activeAngle]?.imageUrl, "_blank")}><Maximize2 className="size-4" /></button>
                   <button className="flex size-10 items-center justify-center rounded-[8px] border border-[#303746] bg-[#101923] text-white" type="button"><Camera className="size-4" /></button>
                 </div>
               </div>
+
+              <Dialog open={alignmentDialogOpen} onOpenChange={setAlignmentDialogOpen}>
+                <DialogContent className="max-h-[90vh] max-w-[760px] overflow-y-auto border-[#303746] bg-[#0b1720] text-white">
+                  <DialogHeader className="text-left">
+                    <DialogTitle className="text-[20px] font-bold text-white">Ajuste de alinhamento</DialogTitle>
+                    <DialogDescription className="text-[#8b92a3]">Redimensione e mova cada foto para aproximar o enquadramento.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    <AlignmentControls alignment={beforeAlignments[activeAngle]} label="Antes" onChange={(field, value) => updateAlignment("before", field, value)} />
+                    <AlignmentControls alignment={afterAlignments[activeAngle]} label="Depois" onChange={(field, value) => updateAlignment("after", field, value)} />
+                  </div>
+                  <div className="flex justify-end">
+                    <ActionButton onClick={resetAlignments}>Restaurar ajustes</ActionButton>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 {[before, after].map((session, index) => (

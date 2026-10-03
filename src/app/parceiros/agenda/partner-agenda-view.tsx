@@ -338,7 +338,7 @@ function AppointmentPill({ appointment, onSelect }: { appointment: PartnerAgenda
   return (
     <button
       className={cn(
-        "max-w-full truncate rounded-[6px] border px-2 py-1 text-left text-[11px] leading-4 text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]",
+        "w-full rounded-[6px] border px-2 py-1 text-left text-[11px] leading-4 text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]",
         typeColorClasses[appointment.appointmentType],
       )}
       onClick={onSelect}
@@ -403,16 +403,13 @@ function MonthView({
               {day.label}
             </button>
             <div className="mt-3 flex flex-col gap-1.5">
-              {day.appointments.slice(0, 2).map((appointment) => (
+              {day.appointments.map((appointment) => (
                 <AppointmentPill appointment={appointment} key={appointment.id} onSelect={() => onSelectAppointment(appointment)} />
               ))}
               {day.blocks.length > 0 ? (
                 <span className="truncate rounded-[6px] border border-[#435160] bg-[#1b2530] px-2 py-1 text-[11px] text-[#aeb9c4]">
                   {day.blocks.length} bloqueio{day.blocks.length > 1 ? "s" : ""}
                 </span>
-              ) : null}
-              {day.appointments.length > 2 ? (
-                <span className="text-[11px] font-medium text-[#68afe9]">+{day.appointments.length - 2} compromissos</span>
               ) : null}
             </div>
           </div>
