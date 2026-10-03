@@ -17,9 +17,9 @@ const raw: PartnerClientCardioRawData = {
     {
       activityKey: "caminhada_leve",
       comparisonActivityKey: "corrida_moderada",
-      comparisonKcalEstimate: 184,
-      comparisonKcalPerMin: 6.1,
-      comparisonMet: 5,
+      comparisonKcalEstimate: 221,
+      comparisonKcalPerMin: 7.4,
+      comparisonMet: 6,
       createdAt: "2026-07-01T12:00:00.000Z",
       durationMinutes: 30,
       id: "calculation-1",
@@ -58,8 +58,8 @@ const raw: PartnerClientCardioRawData = {
       createdAt: "2026-07-01T10:00:00.000Z",
       durationMinutes: 60,
       id: "session-1",
-      kcalEstimate: 368,
-      met: 5,
+      kcalEstimate: 441,
+      met: 6,
       notes: null,
       performedAt: "2026-06-30T10:00:00.000Z",
       targetZone: "z2",
@@ -128,6 +128,35 @@ describe("client-cardio-metrics", () => {
     });
   });
 
+  it("mantém os valores MET das 20 atividades de referência do módulo", () => {
+    expect(cardioActivities).toEqual(expect.objectContaining({
+      assistir_tv_sedentario: expect.objectContaining({ met: 1.1 }),
+      caminhada_leve_32: expect.objectContaining({ met: 2.5 }),
+      caminhada_leve_40: expect.objectContaining({ met: 2.9 }),
+      caminhada_moderada_48: expect.objectContaining({ met: 3.3 }),
+      caminhada_moderada_60: expect.objectContaining({ met: 3.9 }),
+      ciclismo_intenso_25: expect.objectContaining({ met: 12 }),
+      ciclismo_leve_16: expect.objectContaining({ met: 4 }),
+      ciclismo_moderado_20: expect.objectContaining({ met: 6 }),
+      corrida_intenso_97: expect.objectContaining({ met: 9.8 }),
+      corrida_moderada_65: expect.objectContaining({ met: 6 }),
+      dormir_descanso: expect.objectContaining({ met: 0.9 }),
+      futebol_geral_recreacional: expect.objectContaining({ met: 8.5 }),
+      jiu_jitsu_intenso_competicao: expect.objectContaining({ met: 10 }),
+      musculacao_intenso_vigoroso: expect.objectContaining({ met: 6 }),
+      musculacao_leve_baixo_esforco: expect.objectContaining({ met: 3 }),
+      musculacao_moderado_esforco: expect.objectContaining({ met: 3.75 }),
+      natacao_intenso_competicao: expect.objectContaining({ met: 11 }),
+      natacao_leve_lento: expect.objectContaining({ met: 4.5 }),
+      natacao_moderado_livre: expect.objectContaining({ met: 5.9 }),
+      sexo_variavel_tipica: expect.objectContaining({ met: 4 }),
+    }));
+    expect(cardioActivities.corrida_moderada).toMatchObject({
+      label: "Corrida — Moderado (6,5 km/h)",
+      met: 6,
+    });
+  });
+
   it("calcula atividades aprovadas da tabela MET do módulo", () => {
     expect(getApprovedCardioMet("caminhada_leve")).toBe(2.5);
     expect(getApprovedCardioMet("natacao_moderado_livre")).toBe(5.9);
@@ -145,7 +174,7 @@ describe("client-cardio-metrics", () => {
 
     expect(comparison.map((point) => point.minutes)).toEqual([0, 45, 90, 135, 180]);
     expect(comparison.at(-1)).toMatchObject({
-      comparisonKcal: 1103,
+      comparisonKcal: 1323,
       primaryKcal: 551,
     });
   });
@@ -156,10 +185,10 @@ describe("client-cardio-metrics", () => {
     expect(data.plan?.title).toBe("Cardio base");
     expect(data.weekSummary.completedMinutes).toBe(162);
     expect(data.weekSummary.progressPct).toBe(90);
-    expect(data.weekSummary.completedKcal).toBe(932);
+    expect(data.weekSummary.completedKcal).toBe(1005);
     expect(data.weekSummary.targetZoneLabel).toBe("Z2");
     expect(data.comparison.find((point) => point.minutes === 90)).toMatchObject({
-      comparisonKcal: 551,
+      comparisonKcal: 662,
       primaryKcal: 276,
     });
     expect(data.comparison.at(-1)?.minutes).toBe(180);

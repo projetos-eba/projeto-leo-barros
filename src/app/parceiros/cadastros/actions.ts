@@ -5,10 +5,23 @@ import { z } from "zod";
 
 import { getCurrentProfile } from "@/lib/auth/next-guards";
 import {
+  equipmentLabels,
+  foodCategoryLabels,
+  foodSourceLabels,
+  levelLabels,
+  muscleGroupLabels,
   normalizeProtocolVideoUrl,
+  objectiveLabels,
   parseProtocolTags,
+  type PartnerProtocolExercise,
+  type PartnerProtocolExerciseEquipment,
+  type PartnerProtocolExerciseLevel,
+  type PartnerProtocolExerciseMuscleGroup,
+  type PartnerProtocolExerciseObjective,
+  type PartnerProtocolFood,
   type PartnerProtocolFoodCategory,
   type PartnerProtocolFoodSource,
+  type PartnerProtocolStatus,
 } from "@/lib/partners/protocols-metrics";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
@@ -24,6 +37,12 @@ export type PartnerProtocolsActionResult = {
   ok: boolean;
   reactivated?: number;
   requested?: number;
+};
+
+export type PartnerProtocolReadResult<T> = {
+  error?: string;
+  item?: T;
+  ok: boolean;
 };
 
 const uuidSchema = z.string().uuid();
@@ -157,6 +176,101 @@ function optionalRpcText(value: string | null | undefined) {
 
 function revalidateProtocols() {
   revalidatePath("/parceiros/cadastros");
+}
+
+export async function getPartnerProtocolFoodForEdit(foodId: string): Promise<PartnerProtocolReadResult<PartnerProtocolFood>> {
+  if (!uuidSchema.safeParse(foodId).success) return { error: "Alimento inválido.", ok: false };
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase
+    .from("partner_protocol_foods")
+    .select("id,name,category,source,serving_size,serving_unit,household_measure,kcal,carbs_g,protein_g,fat_g,fiber_g,sodium_mg,notes,tags,suggested_uses,status,system_food_id,usage_count,updated_at")
+    .eq("id", foodId)
+    .eq("partner_id", context.partnerId)
+    .maybeSingle();
+
+  if (error || !data) return { error: "Alimento não encontrado.", ok: false };
+  const category = data.category as PartnerProtocolFoodCategory;
+  const source = data.source as PartnerProtocolFoodSource;
+  const status = data.status as PartnerProtocolStatus;
+  return {
+    item: {
+      carbs: Number(data.carbs_g),
+      category,
+      categoryLabel: foodCategoryLabels[category],
+      fat: Number(data.fat_g),
+      fiber: Number(data.fiber_g),
+      householdMeasure: data.household_measure,
+      id: data.id,
+      kcal: Number(data.kcal),
+      name: data.name,
+      notes: data.notes,
+      protein: Number(data.protein_g),
+      servingLabel: `${data.serving_size} ${data.serving_unit}`,
+      servingSize: Number(data.serving_size),
+      servingUnit: data.serving_unit,
+      sodium: Number(data.sodium_mg),
+      source,
+      sourceLabel: foodSourceLabels[source],
+      status,
+      suggestedUses: data.suggested_uses ?? [],
+      systemFoodId: data.system_food_id,
+      tags: data.tags ?? [],
+      updatedAt: data.updated_at,
+      usageCount: data.usage_count,
+    },
+    ok: true,
+  };
+}
+
+export async function getPartnerProtocolExerciseForEdit(exerciseId: string): Promise<PartnerProtocolReadResult<PartnerProtocolExercise>> {
+  if (!uuidSchema.safeParse(exerciseId).success) return { error: "Exercício inválido.", ok: false };
+  const context = await getPartnerContext();
+  if (!context.partnerId) return { error: context.error ?? "Acesso indisponível.", ok: false };
+
+  const { data, error } = await context.supabase
+    .from("partner_protocol_exercises")
+    .select("id,name,muscle_group,secondary_muscle_groups,equipment,level,objective,default_sets,default_reps,rest_seconds,cadence,video_url,thumbnail_url,instructions,tags,variations,status,system_exercise_id,usage_count,updated_at")
+    .eq("id", exerciseId)
+    .eq("partner_id", context.partnerId)
+    .maybeSingle();
+
+  if (error || !data) return { error: "Exercício não encontrado.", ok: false };
+  const muscleGroup = data.muscle_group as PartnerProtocolExerciseMuscleGroup;
+  const equipment = data.equipment as PartnerProtocolExerciseEquipment;
+  const level = data.level as PartnerProtocolExerciseLevel;
+  const objective = data.objective as PartnerProtocolExerciseObjective;
+  const status = data.status as PartnerProtocolStatus;
+  return {
+    item: {
+      cadence: data.cadence,
+      defaultReps: data.default_reps,
+      defaultSets: data.default_sets,
+      equipment,
+      equipmentLabel: equipmentLabels[equipment],
+      id: data.id,
+      instructions: data.instructions,
+      level,
+      levelLabel: levelLabels[level],
+      muscleGroup,
+      muscleGroupLabel: muscleGroupLabels[muscleGroup],
+      name: data.name,
+      objective,
+      objectiveLabel: objectiveLabels[objective],
+      restSeconds: data.rest_seconds,
+      secondaryMuscleGroups: (data.secondary_muscle_groups ?? []) as PartnerProtocolExerciseMuscleGroup[],
+      status,
+      systemExerciseId: data.system_exercise_id,
+      tags: data.tags ?? [],
+      thumbnailUrl: data.thumbnail_url,
+      updatedAt: data.updated_at,
+      usageCount: data.usage_count,
+      variations: data.variations ?? [],
+      videoUrl: data.video_url,
+    },
+    ok: true,
+  };
 }
 
 async function recordProtocolEvent(

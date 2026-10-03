@@ -60,14 +60,16 @@ const overview: PartnerClientOverviewData = {
   weight: { delta: 1.2, target: 80, value: 78.4 },
 };
 
+const assessmentWeightKg = 78.4;
+
 const raw: PartnerClientCardioRawData = {
   calculations: [
     {
       activityKey: "caminhada_leve",
       comparisonActivityKey: "corrida_moderada",
-      comparisonKcalEstimate: 184,
-      comparisonKcalPerMin: 6.1,
-      comparisonMet: 5,
+      comparisonKcalEstimate: 221,
+      comparisonKcalPerMin: 7.4,
+      comparisonMet: 6,
       createdAt: "2026-07-01T12:00:00.000Z",
       durationMinutes: 30,
       id: "calculation-1",
@@ -104,8 +106,8 @@ const raw: PartnerClientCardioRawData = {
       createdAt: "2026-07-01T10:00:00.000Z",
       durationMinutes: 60,
       id: "session-1",
-      kcalEstimate: 368,
-      met: 5,
+      kcalEstimate: 441,
+      met: 6,
       notes: null,
       performedAt: "2026-07-01T10:00:00.000Z",
       targetZone: "z2",
@@ -131,7 +133,7 @@ describe("PartnerClientCardioView", () => {
   });
 
   it("renderiza a aba Cardio sem CPF ou Pacientes", () => {
-    render(<PartnerClientCardioView cardio={cardio} overview={overview} />);
+    render(<PartnerClientCardioView assessmentWeightKg={assessmentWeightKg} cardio={cardio} overview={overview} />);
 
     expect(screen.getByRole("heading", { name: "Ana Ribeiro" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
@@ -139,6 +141,9 @@ describe("PartnerClientCardioView", () => {
     expect(screen.getByRole("heading", { name: "Comparativo Calórico" })).toBeInTheDocument();
     expect(screen.getByLabelText("Comparativo calórico por duração")).toBeInTheDocument();
     expect(screen.getAllByText("180 min").length).toBeGreaterThan(0);
+    expect(screen.getByLabelText("Peso corporal")).toHaveValue(78.4);
+    expect(screen.getByText("Última avaliação: 78,4 kg")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Duração do cálculo")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Peso corporal")).toHaveClass("w-full", "min-w-0");
     expect(screen.getByLabelText("Tipo de atividade")).toHaveClass("w-full", "min-w-0");
     expect(screen.getByRole("button", { name: /Calcular e aplicar plano/i })).toHaveClass("w-full", "min-w-0");
@@ -150,7 +155,7 @@ describe("PartnerClientCardioView", () => {
   });
 
   it("recalcula visualmente e executa ações do cálculo", async () => {
-    render(<PartnerClientCardioView cardio={cardio} overview={overview} />);
+    render(<PartnerClientCardioView assessmentWeightKg={assessmentWeightKg} cardio={cardio} overview={overview} />);
 
     fireEvent.change(screen.getByLabelText("Peso corporal"), { target: { value: "80" } });
     fireEvent.change(screen.getByLabelText("Tipo de atividade"), { target: { value: "corrida_forte" } });
@@ -175,9 +180,9 @@ describe("PartnerClientCardioView", () => {
   });
 
   it("mantém leitura de sessões realizadas e permite remover registro existente", async () => {
-    render(<PartnerClientCardioView cardio={cardio} overview={overview} />);
+    render(<PartnerClientCardioView assessmentWeightKg={assessmentWeightKg} cardio={cardio} overview={overview} />);
 
-    fireEvent.click(screen.getByLabelText("Remover sessão Corrida moderada"));
+    fireEvent.click(screen.getByLabelText("Remover sessão Corrida — Moderado (6,5 km/h)"));
     await waitFor(() => expect(removeClientCardioSession).toHaveBeenCalledWith({
       patientId: overview.client.id,
       planId: raw.plan?.id,

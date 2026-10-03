@@ -18,12 +18,13 @@ Permitir que o Parceiro monte, edite, organize, publique e envie programas de tr
 - A grade de exercícios ocupa toda a largura disponível e tem altura determinada pelo conteúdo: sem exercícios, mantém somente o espaço do placeholder; cada exercício inserido acrescenta sua própria linha. Biblioteca, resumo muscular e observações ficam em uma faixa abaixo, com três colunas em telas largas e quebra responsiva nas menores.
 - Um Bi-set contém exatamente dois exercícios adjacentes da mesma divisão.
 - Exercícios em Bi-set exibem bolinhas numeradas conectadas por uma linha vertical entre elas, sem faixa contínua na borda esquerda da grade.
-- A grade mostra 6 colunas de séries: séries existentes ficam editáveis, e colunas vazias aparecem como placeholders opacos clicáveis.
-- Cada divisão possui predefinições acessadas pelo ícone de engrenagem junto ao nome: séries, repetições e RIR para aquecimento, carga moderada e carga máxima, além de um intervalo único. A soma das fases fica entre 1 e 6 e preenche apenas exercícios adicionados depois de salvar.
+- A grade mostra 6 colunas de séries: séries existentes ficam editáveis, RIR é opcional, e colunas vazias aparecem como placeholders opacos clicáveis.
+- Cada divisão possui predefinições acessadas pelo ícone de engrenagem junto ao nome: séries, repetições e RIR opcional para aquecimento, carga moderada e carga máxima, além de um intervalo único. A soma das fases fica entre 1 e 6 e preenche apenas exercícios adicionados depois de salvar.
 - A grade mostra até 6 séries, permite editar RIR por série e não exibe cadência. O volume prescrito e realizado exclui séries de aquecimento.
 - Novos exercícios entram com pelo menos 3 séries; séries adicionais copiam reps, carga e intensidade da série anterior como valor editável.
 - O volume considera apenas séries com reps e carga preenchidas.
-- O mapa muscular usa somente tons de azul e conta quantos exercícios trabalham cada grupo, considerando grupo principal e secundários uma vez por exercício: 1 exercício = nível claro, 2 a 4 = nível médio, 5 ou mais = nível forte.
+- O mapa muscular usa somente tons de azul, soma todos os exercícios das divisões do programa atual e mostra anatomia frontal e posterior simultaneamente. Conta grupo principal e secundários uma vez por exercício: 1 exercício = nível claro, 2 a 4 = nível médio, 5 ou mais = nível forte.
+- A biblioteca lateral é consultiva: `Editar` abre o item no perfil sem adicioná-lo à divisão; a inclusão de exercício permanece exclusivamente na busca dentro da divisão.
 - A ordenação de exercícios é feita por setas de subir/descer no fim da linha; não há checkbox de execução do profissional.
 - Os três pontinhos de cada card de divisão permitem editar nome/objetivo/frequência e excluir a divisão quando o programa tiver mais de uma divisão.
 - A duração estimada não é exibida no card nem nos formulários de divisão.

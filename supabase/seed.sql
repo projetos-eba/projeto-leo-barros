@@ -1567,11 +1567,11 @@ begin
     'caminhada_leve',
     'corrida_moderada',
     2.5,
-    5.0,
+    6.0,
     92,
-    184,
+    221,
     3.1,
-    6.1,
+    7.4,
     'z2',
     '{"weeklyTargetMinutes": 180, "fixture": true}'::jsonb,
     now() - interval '2 days'
@@ -1592,7 +1592,7 @@ begin
     created_at
   )
   values
-    ('c3000000-0000-4000-8000-000000000301', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '1 day 7 hours', 60, 'corrida_moderada', 5.0, 368, 'z2', 'Ritmo confortável.', now() - interval '2 days'),
+    ('c3000000-0000-4000-8000-000000000301', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '1 day 7 hours', 60, 'corrida_moderada', 6.0, 441, 'z2', 'Ritmo confortável.', now() - interval '2 days'),
     ('c3000000-0000-4000-8000-000000000302', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '3 days 7 hours', 52, 'eliptico', 5.0, 319, 'z2', 'Sem dor articular.', now() - interval '1 day'),
     ('c3000000-0000-4000-8000-000000000303', 'c3000000-0000-4000-8000-000000000101', target_partner_id, 'a1000000-0000-4000-8000-000000000301', date_trunc('week', now()) + interval '2 days 8 hours', 50, 'bicicleta_leve', 4.0, 245, 'z2', 'Pedal leve pós-treino.', now() - interval '6 hours');
 

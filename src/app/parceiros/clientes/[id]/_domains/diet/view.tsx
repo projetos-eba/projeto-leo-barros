@@ -15,6 +15,7 @@ import {
   History,
   Lock,
   MessageSquareText,
+  Pencil,
   Plus,
   Save,
   Search,
@@ -37,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ProtocolLibraryEditorSheet } from "@/components/partners/protocol-library-editor-sheet";
 import type { PartnerClientDietData, PartnerClientDietFood, PartnerClientDietMeal, PartnerClientDietMealLog, PartnerClientDietTrackingStatus } from "@/lib/partners/client-profile/diet";
 import { dietDayLabels, type DietFoodTab } from "@/lib/partners/client-profile/diet";
 import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
@@ -462,7 +464,7 @@ function InlineFoodSearch({ foods, mealTitle, pending, onAddInlineFood, onCloseI
   </>;
 }
 
-function FoodLibrary({ diet, disabled, onAdd }: { diet: PartnerClientDietViewProps["diet"]; disabled: boolean; onAdd: (food: PartnerClientDietFood) => void }) {
+function FoodLibrary({ diet, onEdit }: { diet: PartnerClientDietViewProps["diet"]; onEdit: (id: string) => void }) {
   const [foodTab, setFoodTab] = useState<DietFoodTab>("suggestions");
   const [foodQuery, setFoodQuery] = useState("");
   const [foodCategory, setFoodCategory] = useState("all");
@@ -492,7 +494,7 @@ function FoodLibrary({ diet, disabled, onAdd }: { diet: PartnerClientDietViewPro
                       <span>Alimento</span><span>Porção</span><span>Macros</span><span>Kcal</span><span />
                     </div>
                     {visibleFoods.length ? visibleFoods.slice(0, limit).map((food) => (
-                      <FoodRow disabled={disabled} food={food} key={food.id} suggested={drafts.some((draft) => draft.food.id === food.id)} onAdd={() => onAdd(food)} />
+                      <FoodRow food={food} key={food.id} suggested={drafts.some((draft) => draft.food.id === food.id)} onEdit={() => onEdit(food.id)} />
                     )) : <div className="rounded-[10px] border border-dashed border-[#303746] px-4 py-5 text-[13px] text-[#8b92a3]">Nenhum alimento encontrado.</div>}
                   </div>
                   {visibleFoods.length > limit && <GhostButton onClick={() => setLimit((value) => value + 30)}>Carregar mais</GhostButton>}
@@ -612,8 +614,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
   const [pending, startTransition] = useTransition();
   const [selectedDay, setSelectedDay] = useState(() => diet.plan?.weekDays.find((day) => day.meals.length > 0)?.dayOfWeek ?? 1);
   const [selectedAlternatives, setSelectedAlternatives] = useState<Record<string, string>>({});
-  const [targetMealId, setTargetMealId] = useState<string | null>(diet.plan?.weekDays.find((day) => day.meals.length > 0)?.meals[0]?.id ?? null);
   const [inlineFoodMealId, setInlineFoodMealId] = useState<string | null>(null);
+  const [libraryFoodId, setLibraryFoodId] = useState<string | null>(null);
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [objectiveDialogOpen, setObjectiveDialogOpen] = useState(false);
@@ -639,11 +641,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
 
   useEffect(() => {
     const firstDayWithMeals = diet.plan?.weekDays.find((day) => day.meals.length > 0);
-    const firstMeal = firstDayWithMeals?.meals[0] ?? null;
-
     setSelectedDay(firstDayWithMeals?.dayOfWeek ?? 1);
     setSelectedAlternatives({});
-    setTargetMealId(firstMeal?.id ?? null);
     setInlineFoodMealId(null);
     setNotes(diet.plan?.notes ?? "");
     setObjectiveForm({
@@ -742,12 +741,7 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
     setInlineFoodMealId(null);
   }
 
-  function addFood(food: PartnerClientDietFood) {
-    addFoodToMeal(food, targetMealId);
-  }
-
   function openInlineFoodSearch(mealId: string) {
-    setTargetMealId(mealId);
     setInlineFoodMealId(mealId);
   }
 
@@ -862,13 +856,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
 
               <div className="mt-4 grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
                 <Panel className="p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Adicionar alimentos</h2>
-                    <select className={inputClass("w-[210px]")} value={targetMealId ?? ""} onChange={(event) => setTargetMealId(event.target.value)}>
-                      {currentMeals.map((meal) => <option key={meal.id} value={meal.id}>{meal.title}</option>)}
-                    </select>
-                  </div>
-                  <FoodLibrary diet={diet} disabled={pending || !targetMealId} onAdd={addFood} />
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.06em] text-white">Biblioteca de alimentos</h2>
+                  <FoodLibrary diet={diet} onEdit={setLibraryFoodId} />
                 </Panel>
 
                 <Panel className="p-4">
@@ -903,6 +892,15 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
                 )) : <div className="p-5 text-[13px] text-[#8b92a3]">Sem alterações registradas.</div>}
               </Panel>
             </section>
+
+            <div className="sticky bottom-0 z-20 mt-5 flex flex-wrap justify-end gap-2 border-t border-[#303746] bg-[#0b1720]/95 py-4 backdrop-blur">
+              <GhostButton disabled={pending} onClick={() => runAction(() => saveClientDietNotes({ notes, patientId: overview.client.id, planId: diet.plan!.id }))}>
+                <Save className="size-4" /> Salvar alterações
+              </GhostButton>
+              <PrimaryButton disabled={pending} onClick={() => runAction(() => publishClientDietPlan({ patientId: overview.client.id, planId: diet.plan!.id }))}>
+                <Send className="size-4" /> Publicar plano
+              </PrimaryButton>
+            </div>
           </>
         ) : (
           <Panel className="mt-8 p-8 text-center">
@@ -913,6 +911,8 @@ export function PartnerClientDietView({ diet, overview }: PartnerClientDietViewP
           </Panel>
         )}
       </div>
+
+      <ProtocolLibraryEditorSheet itemId={libraryFoodId} kind="food" open={libraryFoodId !== null} onOpenChange={(open) => { if (!open) setLibraryFoodId(null); }} />
 
       <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
         <DialogContent className="border-[#303746] bg-[#101923] text-white sm:max-w-[620px]">
@@ -1016,14 +1016,14 @@ function MiniInfo({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FoodRow({ disabled, food, onAdd, suggested }: { disabled: boolean; food: PartnerClientDietFood; onAdd: () => void; suggested: boolean }) {
+function FoodRow({ food, onEdit, suggested }: { food: PartnerClientDietFood; onEdit: () => void; suggested: boolean }) {
   return (
     <div className="grid min-h-[49px] grid-cols-[minmax(0,1fr)_36px] gap-2 border-b border-[#273847] py-3 text-[13px] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_72px_112px_48px_28px] sm:items-center sm:gap-3">
       <div className="min-w-0">
         <p className="truncate font-semibold text-white">{food.name}</p>
         <p className="mt-0.5 text-[11px] text-[#6f8090]">{food.categoryLabel}{suggested ? " · sugestão" : ""}</p>
       </div>
-      <IconButton className="justify-self-end sm:col-start-5 sm:row-start-1" disabled={disabled} label={`Adicionar ${food.name}`} onClick={onAdd}><Plus className="size-4" /></IconButton>
+      <IconButton className="justify-self-end sm:col-start-5 sm:row-start-1" label={`Editar ${food.name}`} onClick={onEdit}><Pencil className="size-4" /></IconButton>
       <div className="col-span-2 flex flex-wrap gap-2 text-[11px] font-semibold sm:contents">
         <span className="rounded-[5px] bg-[#102333] px-2 py-1 text-[#c7d3df] sm:bg-transparent sm:p-0">{food.servingLabel}</span>
         <span className="hidden text-[#9aa5b6] sm:inline">P {macroText(food.protein)} · C {macroText(food.carbs)} · G {macroText(food.fat)} · F {macroText(food.fiber)}</span>

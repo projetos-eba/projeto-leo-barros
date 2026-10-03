@@ -240,7 +240,9 @@ describe("PartnerClientDietView", () => {
     expect(screen.getByText("Parcial")).toBeInTheDocument();
     expect(screen.getByText("Água: 3 L")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Plano alimentar" })).toBeInTheDocument();
-    expect(screen.getByText("Adicionar alimentos")).toBeInTheDocument();
+    const libraryHeading = screen.getByText("Biblioteca de alimentos");
+    expect(libraryHeading).toBeInTheDocument();
+    expect(libraryHeading.parentElement!.querySelector(":scope > select")).toBeNull();
     expect(screen.getAllByText("Considerações sobre a dieta").length).toBeGreaterThan(0);
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
@@ -348,11 +350,11 @@ describe("PartnerClientDietView", () => {
   it("pagina alimentos e limita sugestões sem salvar durante a digitação", () => {
     const foods = Array.from({ length: 65 }, (_, id) => ({ ...diet.foods[0], id: `food-${id}`, name: `Pão ${id}`, searchText: `pão ${id}` }));
     render(<PartnerClientDietView overview={overview} diet={{ ...diet, foods, library: { ...diet.library, suggestions: foods } }} />);
-    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(30);
+    expect(screen.getAllByRole("button", { name: /^Editar Pão / })).toHaveLength(30);
     fireEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
-    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(60);
+    expect(screen.getAllByRole("button", { name: /^Editar Pão / })).toHaveLength(60);
     fireEvent.change(screen.getByPlaceholderText("Buscar alimentos... (ex.: frango, arroz, whey)"), { target: { value: "pao 64" } });
-    expect(screen.getAllByRole("button", { name: /^Adicionar Pão / })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /^Editar Pão / })).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Adicionar alimento" }));
     const input = screen.getByLabelText("Buscar alimento para Almoço");
     fireEvent.change(input, { target: { value: "pao" } });
@@ -396,8 +398,11 @@ describe("PartnerClientDietView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Duplicar dieta/i }));
     await waitFor(() => expect(duplicateClientDietPlan).toHaveBeenCalledWith({ patientId: overview.client.id, planId: rawDiet.plan?.id }));
 
-    fireEvent.click(screen.getByRole("button", { name: /Ativar plano/i }));
-    await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "Publicar plano" }));
+    await waitFor(() => expect(publishClientDietPlan).toHaveBeenCalledWith({
+      patientId: overview.client.id,
+      planId: rawDiet.plan?.id,
+    }));
 
     fireEvent.click(screen.getByRole("button", { name: /Enviar aviso/i }));
     await waitFor(() => expect(sendClientDietPlan).toHaveBeenCalled());
@@ -472,7 +477,9 @@ describe("PartnerClientDietView", () => {
 
     rerender(<PartnerClientDietView diet={draftDiet} overview={overview} />);
     await waitFor(() => expect(screen.getByLabelText("Selecionar dieta")).toHaveValue(draftPlanId));
-    fireEvent.click(screen.getByRole("button", { name: "Adicionar Peito de frango grelhado" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar alimento" }));
+    fireEvent.change(screen.getByLabelText("Buscar alimento para Almoço"), { target: { value: "frango" } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar Peito de frango grelhado à refeição Almoço" }));
 
     await waitFor(() => expect(addClientDietMealItem).toHaveBeenCalledWith(expect.objectContaining({
       mealId: draftMealId,

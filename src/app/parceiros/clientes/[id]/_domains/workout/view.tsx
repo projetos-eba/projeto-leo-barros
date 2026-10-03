@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dialog";
 import { indexCatalog, searchCatalog } from "@/lib/partners/catalog-search";
 import { WorkoutMusclePreview } from "@/components/workouts/workout-muscle-preview";
+import { ProtocolLibraryEditorSheet } from "@/components/partners/protocol-library-editor-sheet";
 import type {
   PartnerClientWorkoutData,
   PartnerClientWorkoutExercise,
@@ -342,17 +343,19 @@ function SessionDefaultsDialog({
               const rirKey = `${prefix}Rir` as const;
               const enabled = Number(draft[setsKey] || 0) > 0;
               return (
-                <fieldset className="grid gap-2 rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3 sm:grid-cols-[minmax(130px,1fr)_110px_110px_110px] sm:items-end" key={key}>
+                <fieldset className="min-w-0 rounded-[8px] border border-[#273847] bg-[#081520]/75 p-3" key={key}>
                   <legend className="px-1 text-[13px] font-semibold text-white">{label}</legend>
-                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Séries
-                    <input aria-label={`${label} séries`} className={inputClass} inputMode="numeric" max={6} min={0} value={draft[setsKey]} onChange={(event) => setDraft({ ...draft, [setsKey]: event.target.value })} />
-                  </label>
-                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">Repetições
-                    <input aria-label={`${label} repetições`} className={inputClass} disabled={!enabled} inputMode="numeric" max={500} min={1} value={draft[repsKey]} onChange={(event) => setDraft({ ...draft, [repsKey]: event.target.value })} />
-                  </label>
-                  <label className="grid gap-1 text-[11px] text-[#9aa5b6]">RIR
-                    <input aria-label={`${label} RIR`} className={inputClass} disabled={!enabled} inputMode="numeric" max={10} min={0} value={draft[rirKey]} onChange={(event) => setDraft({ ...draft, [rirKey]: event.target.value })} />
-                  </label>
+                  <div className="grid min-w-0 gap-3 sm:grid-cols-3">
+                    <label className="grid min-w-0 gap-1 text-[11px] text-[#9aa5b6]">Séries
+                      <input aria-label={`${label} séries`} className={inputClass} inputMode="numeric" max={6} min={0} value={draft[setsKey]} onChange={(event) => setDraft({ ...draft, [setsKey]: event.target.value })} />
+                    </label>
+                    <label className="grid min-w-0 gap-1 text-[11px] text-[#9aa5b6]">Repetições
+                      <input aria-label={`${label} repetições`} className={inputClass} disabled={!enabled} inputMode="numeric" max={500} min={1} value={draft[repsKey]} onChange={(event) => setDraft({ ...draft, [repsKey]: event.target.value })} />
+                    </label>
+                    <label className="grid min-w-0 gap-1 text-[11px] text-[#9aa5b6]">RIR <span className="font-normal text-[#718394]">(opcional)</span>
+                      <input aria-label={`${label} RIR`} className={inputClass} disabled={!enabled} inputMode="numeric" max={10} min={0} value={draft[rirKey]} onChange={(event) => setDraft({ ...draft, [rirKey]: event.target.value })} />
+                    </label>
+                  </div>
                 </fieldset>
               );
             })}
@@ -552,7 +555,7 @@ function MusclePanel({ exercises }: { exercises: PartnerClientWorkoutExercise[] 
   return (
     <section className={cn(panelClass, "p-4")}>
       <h3 className="text-[15px] font-bold text-white">Resumo muscular</h3>
-      <p className="mt-1 text-[11px] leading-4 text-[#8b92a3]">Regiões atualizadas conforme os exercícios prescritos.</p>
+      <p className="mt-1 text-[11px] leading-4 text-[#8b92a3]">Regiões atualizadas conforme todos os exercícios do programa atual.</p>
       <div className="mt-3 flex justify-center overflow-hidden rounded-[8px] border border-[#1e3343] bg-[#07141d]/55 py-2">
         <WorkoutMusclePreview exercises={exercises} mode="summary" />
       </div>
@@ -862,12 +865,11 @@ function InlineExerciseSearch({ library, sessionName, pending, onAdd }: {
   </>;
 }
 
-function ExerciseLibrary({ library, pending, onAdd }: {
-  library: PartnerClientWorkoutViewProps["workout"]["library"]; pending: boolean; onAdd: (id: string, variation: string | null) => void;
+function ExerciseLibrary({ library, onEdit }: {
+  library: PartnerClientWorkoutViewProps["workout"]["library"]; onEdit: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(30);
-  const [variations, setVariations] = useState<Record<string, string>>({});
   const index = useMemo(() => indexCatalog(library, (exercise) => `${exercise.name} ${workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}`), [library]);
   const visibleLibrary = useMemo(() => searchCatalog(index, query, limit + 1), [index, query, limit]);
   return (
@@ -884,14 +886,8 @@ function ExerciseLibrary({ library, pending, onAdd }: {
                           <div className="min-w-0">
                             <p className="truncate text-[12px] font-semibold text-white">{exercise.name}</p>
                             <p className="truncate text-[10px] text-[#718394]">{workoutMuscleLabels[exercise.muscleGroup] ?? exercise.muscleGroup}</p>
-                            {exercise.variations.length ? (
-                              <select aria-label={`Variação de ${exercise.name}`} className="mt-1 h-6 max-w-full rounded-[5px] border border-[#2b3b49] bg-[#091722] px-1 text-[10px] text-[#c8d4df]" value={variations[exercise.id] ?? ""} onChange={(event) => setVariations({ ...variations, [exercise.id]: event.target.value })}>
-                                <option value="">Padrão</option>
-                                {exercise.variations.map((variation) => <option key={variation} value={variation}>{variation}</option>)}
-                              </select>
-                            ) : null}
                           </div>
-                          <button aria-label={`Adicionar ${exercise.name}`} className="inline-flex size-7 items-center justify-center rounded-[6px] bg-[#173a56] text-[#8fcfff]" disabled={pending} type="button" onClick={() => onAdd(exercise.id, variations[exercise.id] || null)}><Plus className="size-4" /></button>
+                          <button aria-label={`Editar ${exercise.name}`} className="inline-flex size-7 items-center justify-center rounded-[6px] bg-[#173a56] text-[#8fcfff] transition hover:bg-[#235273]" type="button" onClick={() => onEdit(exercise.id)}><Pencil className="size-3.5" /></button>
                         </article>
                       ))}
                     </div>
@@ -906,6 +902,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
   const [pending, startTransition] = useTransition();
   const program = workout.activeProgram;
   const [sessionId, setSessionId] = useState(program?.sessions[0]?.id ?? null);
+  const [libraryExerciseId, setLibraryExerciseId] = useState<string | null>(null);
   const [exerciseOrder, setExerciseOrder] = useState(() => program?.sessions[0]?.exercises.map((exercise) => exercise.id) ?? []);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [notes, setNotes] = useState(program?.notes ?? "");
@@ -1117,8 +1114,8 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                 </section>
 
                 <aside className="mt-4 grid gap-4 lg:grid-cols-3">
-                  <ExerciseLibrary library={workout.library} pending={pending} onAdd={(exerciseId, variationName) => runAction(() => addClientWorkoutExercise({ exerciseId, variationName, patientId: overview.client.id, sessionId: session.id }))} />
-                  <MusclePanel exercises={session.exercises} />
+                  <ExerciseLibrary library={workout.library} onEdit={setLibraryExerciseId} />
+                  <MusclePanel exercises={program.sessions.flatMap((item) => item.exercises)} />
                   <section className={cn(panelClass, "p-4")}>
                     <h3 className="text-[15px] font-bold text-white">Observações do treino</h3>
                     <textarea aria-label="Observações do treino" className="mt-3 min-h-[150px] w-full resize-y rounded-[8px] border border-[#303746] bg-[#091722] p-3 text-[12px] leading-5 text-white outline-none focus:border-[#3b97e3]" maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} />
@@ -1126,6 +1123,7 @@ export function PartnerClientWorkoutView({ overview, workout }: PartnerClientWor
                   </section>
                 </aside>
                 <SessionDefaultsDialog open={sessionDefaultsDialog} onOpenChange={setSessionDefaultsDialog} patientId={overview.client.id} pending={pending} runAction={runAction} session={session} />
+                <ProtocolLibraryEditorSheet itemId={libraryExerciseId} kind="exercise" open={libraryExerciseId !== null} onOpenChange={(open) => { if (!open) setLibraryExerciseId(null); }} />
               </div>
             ) : null}
 

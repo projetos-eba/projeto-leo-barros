@@ -89,12 +89,22 @@ export default async function ParceirosClienteOverviewPage({ params, searchParam
   }
 
   if (tab === "cardio") {
-    const [overview, cardio] = await Promise.all([fetchPartnerClientOverview(id), fetchPartnerClientCardio(id)]);
+    const [overview, cardio, assessments] = await Promise.all([
+      fetchPartnerClientOverview(id),
+      fetchPartnerClientCardio(id),
+      fetchPartnerClientAssessments(id),
+    ]);
     if (!overview || !cardio) {
       notFound();
     }
 
-    return <PartnerClientCardioView cardio={cardio} overview={overview} />;
+    return (
+      <PartnerClientCardioView
+        assessmentWeightKg={assessments?.latestAssessment?.weightKg ?? null}
+        cardio={cardio}
+        overview={overview}
+      />
+    );
   }
 
   if (tab === "exames") {

@@ -19,6 +19,30 @@ function isMappable(group: ReturnType<typeof normalizeMuscleGroup>): group is Ma
   return Boolean(group && muscleAssetRegistry[group as MappableMuscleGroup]);
 }
 
+export function deriveWorkoutMusclePreviewForView(
+  heat: MuscleHeatInput[],
+  view: MusclePreviewView,
+): WorkoutMusclePreviewModel {
+  const layers = new Map<string, MusclePreviewLayer>();
+  const groups: MappableMuscleGroup[] = [];
+
+  heat.forEach((item) => {
+    const group = normalizeMuscleGroup(item.group);
+    if (!isMappable(group)) return;
+    const mappedLayers = muscleAssetRegistry[group]?.[view] ?? [];
+    if (!mappedLayers.length) return;
+    groups.push(group);
+    mappedLayers.forEach((layer) => {
+      const existing = layers.get(layer.id);
+      if (!existing || item.score > existing.score) {
+        layers.set(layer.id, { ...layer, level: item.level, opacity: opacityForLevel(item.level), score: item.score });
+      }
+    });
+  });
+
+  return { groups, layers: Array.from(layers.values()), view: groups.length ? view : null };
+}
+
 export function deriveWorkoutMusclePreview(
   heat: MuscleHeatInput[],
   options: { primaryGroups?: string[] } = {},

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveWorkoutMusclePreview, normalizeMuscleGroup } from "./index";
+import { deriveWorkoutMusclePreview, deriveWorkoutMusclePreviewForView, normalizeMuscleGroup } from "./index";
 
 describe("workout muscle visualization", () => {
   it("normaliza grupos canônicos, aliases e entradas desconhecidas", () => {
@@ -77,5 +77,11 @@ describe("workout muscle visualization", () => {
 
     expect(preview.layers).toHaveLength(1);
     expect(preview.layers[0]).toMatchObject({ id: "front-chest", level: 3, opacity: 1, score: 5 });
+  });
+
+  it("deriva as camadas de uma vista escolhida sem ocultar o outro lado do resumo", () => {
+    const heat = [{ group: "peito", level: 2 as const, score: 2 }, { group: "costas", level: 3 as const, score: 5 }];
+    expect(deriveWorkoutMusclePreviewForView(heat, "upper-front").layers.map((layer) => layer.id)).toEqual(["front-chest"]);
+    expect(deriveWorkoutMusclePreviewForView(heat, "upper-back").layers.map((layer) => layer.id)).toEqual(["back-corners"]);
   });
 });
