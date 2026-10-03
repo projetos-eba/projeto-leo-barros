@@ -23,7 +23,6 @@ import {
   AlertCircle,
   CalendarDays,
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -339,7 +338,7 @@ function AppointmentPill({ appointment, onSelect }: { appointment: PartnerAgenda
   return (
     <button
       className={cn(
-        "max-w-full truncate rounded-[6px] border px-2 py-1 text-left text-[11px] leading-4 text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]",
+        "w-full rounded-[6px] border px-2 py-1 text-left text-[11px] leading-4 text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]",
         typeColorClasses[appointment.appointmentType],
       )}
       onClick={onSelect}
@@ -404,16 +403,13 @@ function MonthView({
               {day.label}
             </button>
             <div className="mt-3 flex flex-col gap-1.5">
-              {day.appointments.slice(0, 2).map((appointment) => (
+              {day.appointments.map((appointment) => (
                 <AppointmentPill appointment={appointment} key={appointment.id} onSelect={() => onSelectAppointment(appointment)} />
               ))}
               {day.blocks.length > 0 ? (
                 <span className="truncate rounded-[6px] border border-[#435160] bg-[#1b2530] px-2 py-1 text-[11px] text-[#aeb9c4]">
                   {day.blocks.length} bloqueio{day.blocks.length > 1 ? "s" : ""}
                 </span>
-              ) : null}
-              {day.appointments.length > 2 ? (
-                <span className="text-[11px] font-medium text-[#68afe9]">+{day.appointments.length - 2} compromissos</span>
               ) : null}
             </div>
           </div>
@@ -1112,16 +1108,6 @@ export function PartnerAgendaView({ agenda }: PartnerAgendaViewProps) {
         <div>
           <h1 className="text-[24px] font-bold leading-8 text-white sm:text-[30px] sm:leading-10">Agenda de Parceiros</h1>
           <p className="mt-1 text-[12px] leading-4 text-[#a4afbb] sm:mt-2 sm:text-[15px] sm:leading-6">Gerencie compromissos e otimize a colaboração com seus clientes.</p>
-        </div>
-        <div className="hidden items-center gap-4 sm:flex">
-          <div className="hidden text-right md:block">
-            <p className="text-[15px] font-bold text-white">{agenda.partnerName}</p>
-            <p className="text-[13px] text-[#9aa8b5]">Profissional</p>
-          </div>
-          <span className="flex size-10 items-center justify-center rounded-full border border-[#314353] bg-[#111b27] text-[14px] font-bold text-white">
-            {agenda.partnerName.charAt(0)}
-          </span>
-          <ChevronDown className="size-4 text-[#9aa8b5]" />
         </div>
       </header>
 

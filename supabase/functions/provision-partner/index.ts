@@ -283,6 +283,12 @@ Deno.serve(async (request) => {
     );
   }
 
+  const { data: canCreateProfessional, error: capabilityError } = await callerClient
+    .rpc("admin_has_capability", { p_capability: "professional.status.write" });
+  if (capabilityError || canCreateProfessional !== true) {
+    return errorResponse(403, requestId, { code: "FORBIDDEN", message: "A operação não é permitida." }, origin);
+  }
+
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -528,6 +534,19 @@ Deno.serve(async (request) => {
   const httpStatus = resultStatus === "created"
     ? (resultInviteStatus === "pending_delivery" ? 202 : 201)
     : 200;
+
+  if (resultStatus === "created") {
+    await adminClient.rpc("admin_record_audit_event", {
+      p_actor_profile_id: callerProfile.id,
+      p_action_key: "professional.created",
+      p_resource_type: "partner",
+      p_resource_id: provisioned.partner_id,
+      p_target_profile_id: provisioned.profile_id,
+      p_outcome: "succeeded",
+      p_request_id: requestId,
+      p_metadata: { professionalType },
+    });
+  }
 
   return response(
     httpStatus,

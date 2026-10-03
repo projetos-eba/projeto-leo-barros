@@ -1,0 +1,82 @@
+[
+  {
+    "path": "/workout-body/base/lower-back.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/base/lower-front.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/base/upper-back.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/base/upper-front.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/back/costas.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/back/gluteos.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/back/ombros.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/back/triceps.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/front/abdominal.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/front/biceps.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/front/ombros.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/front/peito.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/lower/panturrilha-back.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/lower/panturrilha-front.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/lower/posteriores-back.png",
+    "status": 200,
+    "contentType": "image/png"
+  },
+  {
+    "path": "/workout-body/muscles/lower/posteriores-front.png",
+    "status": 200,
+    "contentType": "image/png"
+  }
+]

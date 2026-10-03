@@ -23,8 +23,8 @@ const exercises: PartnerClientWorkoutExercise[] = [
     restSeconds: 90,
     secondaryMuscleGroups: ["triceps", "ombros"],
     sets: [
-      { id: "set-1", intensity: "moderate", loadKg: 50, reps: 10, setNumber: 1 },
-      { id: "set-2", intensity: "maximum", loadKg: 60, reps: 8, setNumber: 2 },
+      { id: "set-1", intensity: "moderate", loadKg: 50, reps: 10, rir: null, setNumber: 1 },
+      { id: "set-2", intensity: "maximum", loadKg: 60, reps: 8, rir: null, setNumber: 2 },
     ],
     sortOrder: 0,
     technique: "normal",
@@ -37,6 +37,7 @@ describe("client workout metrics", () => {
   it("calcula volume apenas com séries completas", () => {
     expect(workoutVolume(exercises)).toBe(980);
     expect(workoutVolume([{ ...exercises[0], sets: [{ ...exercises[0].sets[0], loadKg: null }] }])).toBe(0);
+    expect(workoutVolume([{ ...exercises[0], sets: [{ ...exercises[0].sets[0], intensity: "warmup" }] }])).toBe(0);
   });
 
   it("conta exercícios por músculo e usa níveis fixos de azul", () => {

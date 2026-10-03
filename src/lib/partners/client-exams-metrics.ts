@@ -1,6 +1,17 @@
 export type ExamReferenceSex = "female" | "male" | "unisex";
 export type ExamResultStatus = "high" | "low" | "normal" | "unknown";
+export type ExamDeviationLevel = "mild" | "moderate" | "normal" | "severe" | "unknown";
+export type ExamDeviationTone = "blue" | "green" | "orange" | "red" | "yellow";
 export type PartnerExamStatus = "active" | "archived";
+
+export type ExamValueAssessment = {
+  deviationLabel: string;
+  deviationLevel: ExamDeviationLevel;
+  deviationPct: number | null;
+  deviationTone: ExamDeviationTone;
+  status: ExamResultStatus;
+  statusLabel: string;
+};
 
 export type PartnerClientExamsRawData = {
   categories: Array<{
@@ -135,6 +146,10 @@ export type PartnerClientExamResult = {
   conversionFactorFromDefault: number | null;
   defaultUnit: string;
   deltaPct: number | null;
+  deviationLabel: string;
+  deviationLevel: ExamDeviationLevel;
+  deviationPct: number | null;
+  deviationTone: ExamDeviationTone;
   examId: string;
   id: string;
   inputUnit: string;
@@ -146,7 +161,7 @@ export type PartnerClientExamResult = {
   referenceSex: ExamReferenceSex;
   status: ExamResultStatus;
   statusLabel: string;
-  statusTone: "blue" | "green" | "red" | "yellow";
+  statusTone: ExamDeviationTone;
   trendLabel: string;
   valueDefault: number;
   valueLabel: string;
@@ -262,11 +277,6 @@ function asReferenceSex(value: string): ExamReferenceSex {
   return "unisex";
 }
 
-function asResultStatus(value: string): ExamResultStatus {
-  if (value === "high" || value === "low" || value === "normal") return value;
-  return "unknown";
-}
-
 export function patientReferenceSex(gender: string | null | undefined): ExamReferenceSex {
   if (gender === "male" || gender === "female") return gender;
   return "unisex";
@@ -309,6 +319,76 @@ export function classifyExamValue(
   return "normal";
 }
 
+function deviationLabel(level: ExamDeviationLevel) {
+  if (level === "normal") return "Dentro da normalidade";
+  if (level === "mild") return "Alteração leve";
+  if (level === "moderate") return "Alteração moderada";
+  if (level === "severe") return "Alteração importante";
+  return "Sem referência";
+}
+
+function deviationTone(level: ExamDeviationLevel): ExamDeviationTone {
+  if (level === "normal") return "green";
+  if (level === "mild") return "yellow";
+  if (level === "moderate") return "orange";
+  if (level === "severe") return "red";
+  return "blue";
+}
+
+function deviationLevel(deviationPct: number): ExamDeviationLevel {
+  if (deviationPct <= 10) return "mild";
+  if (deviationPct <= 25) return "moderate";
+  return "severe";
+}
+
+function deviationFromBoundary(value: number, boundary: number) {
+  if (boundary === 0) return value === boundary ? 0 : 100;
+  return round((Math.abs(value - boundary) / Math.abs(boundary)) * 100, 1);
+}
+
+export function assessExamValue(
+  value: number,
+  reference: Pick<PartnerClientExamReference, "highValue" | "lowValue"> | null,
+): ExamValueAssessment {
+  const status = classifyExamValue(value, reference);
+  if (status === "unknown") {
+    return {
+      deviationLabel: deviationLabel("unknown"),
+      deviationLevel: "unknown",
+      deviationPct: null,
+      deviationTone: deviationTone("unknown"),
+      status,
+      statusLabel: examResultStatusLabels[status],
+    };
+  }
+
+  if (status === "normal") {
+    return {
+      deviationLabel: deviationLabel("normal"),
+      deviationLevel: "normal",
+      deviationPct: 0,
+      deviationTone: deviationTone("normal"),
+      status,
+      statusLabel: examResultStatusLabels[status],
+    };
+  }
+
+  const boundary = status === "high" ? reference?.highValue : reference?.lowValue;
+  const deviationPct = boundary === null || typeof boundary === "undefined"
+    ? null
+    : deviationFromBoundary(value, boundary);
+  const level = deviationPct === null ? "unknown" : deviationLevel(deviationPct);
+
+  return {
+    deviationLabel: deviationLabel(level),
+    deviationLevel: level,
+    deviationPct,
+    deviationTone: deviationTone(level),
+    status,
+    statusLabel: examResultStatusLabels[status],
+  };
+}
+
 export function selectExamReference(
   definition: Pick<PartnerClientExamDefinition, "references">,
   referenceSex: ExamReferenceSex,
@@ -342,12 +422,6 @@ export function convertExamValueToDefault(
 export function calculateExamDeltaPct(current: number, previous: number | null) {
   if (previous === null || previous === 0) return null;
   return round(((current - previous) / previous) * 100, 1);
-}
-
-function statusTone(status: ExamResultStatus): PartnerClientExamResult["statusTone"] {
-  if (status === "normal") return "green";
-  if (status === "high" || status === "low") return "red";
-  return "yellow";
 }
 
 function trendLabel(deltaPct: number | null) {
@@ -407,10 +481,11 @@ function mapDefinition(raw: PartnerClientExamRawDefinition): PartnerClientExamDe
 }
 
 function mapRawResult(raw: PartnerClientExamRawResult, collectedAt: string, previousValue: number | null): PartnerClientExamResult {
-  const status = asResultStatus(raw.status);
   const referenceLow = toNumber(raw.referenceLow);
   const referenceHigh = toNumber(raw.referenceHigh);
   const valueDefault = Number(raw.valueDefault);
+  const assessment = assessExamValue(valueDefault, { highValue: referenceHigh, lowValue: referenceLow });
+  const status = assessment.status;
   const deltaPct = calculateExamDeltaPct(valueDefault, previousValue);
 
   return {
@@ -420,6 +495,10 @@ function mapRawResult(raw: PartnerClientExamRawResult, collectedAt: string, prev
     conversionFactorFromDefault: toNumber(raw.conversionFactorFromDefault),
     defaultUnit: raw.defaultUnit,
     deltaPct,
+    deviationLabel: assessment.deviationLabel,
+    deviationLevel: assessment.deviationLevel,
+    deviationPct: assessment.deviationPct,
+    deviationTone: assessment.deviationTone,
     examId: raw.examId,
     id: raw.id,
     inputUnit: raw.inputUnit,
@@ -435,7 +514,7 @@ function mapRawResult(raw: PartnerClientExamRawResult, collectedAt: string, prev
     snapshotExamSlug: raw.snapshotExamSlug,
     status,
     statusLabel: examResultStatusLabels[status],
-    statusTone: statusTone(status),
+    statusTone: assessment.deviationTone,
     trendLabel: trendLabel(deltaPct),
     valueDefault,
     valueLabel: resultLabel(valueDefault, raw.defaultUnit),

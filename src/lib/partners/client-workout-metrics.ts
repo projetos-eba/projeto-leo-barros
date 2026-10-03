@@ -7,7 +7,21 @@ export type PartnerClientWorkoutSet = {
   intensity: WorkoutIntensity;
   loadKg: number | null;
   reps: number | null;
+  rir: number | null;
   setNumber: number;
+};
+
+export type PartnerWorkoutSessionDefaults = {
+  maximumReps: number | null;
+  maximumRir: number | null;
+  maximumSets: number;
+  moderateReps: number | null;
+  moderateRir: number | null;
+  moderateSets: number;
+  restSeconds: number;
+  warmupReps: number | null;
+  warmupRir: number | null;
+  warmupSets: number;
 };
 
 export type PartnerClientWorkoutExercise = {
@@ -29,6 +43,7 @@ export type PartnerClientWorkoutExercise = {
 };
 
 export type PartnerClientWorkoutSession = {
+  defaults?: PartnerWorkoutSessionDefaults | null;
   durationMinutes: number;
   exercises: PartnerClientWorkoutExercise[];
   frequencyPerWeek: number;
@@ -212,7 +227,7 @@ export const workoutTechniqueLabels: Record<WorkoutTechnique, string> = {
   cluster: "Cluster",
   dropset: "Drop-set",
   isometria: "Isometria",
-  normal: "Cadência",
+  normal: "Padrão",
   rest_pause: "Rest-pause",
   superset: "Super-set",
 };
@@ -231,7 +246,7 @@ export const workoutMuscleLabels: Record<string, string> = {
 export function workoutVolume(exercises: PartnerClientWorkoutExercise[]) {
   return exercises.reduce((total, exercise) =>
     total + exercise.sets.reduce((sum, set) =>
-      sum + (set.reps !== null && set.loadKg !== null ? set.reps * set.loadKg : 0), 0), 0);
+      sum + (set.intensity !== "warmup" && set.reps !== null && set.loadKg !== null ? set.reps * set.loadKg : 0), 0), 0);
 }
 
 export function workoutTrainingTypeLabel(session: Pick<PartnerClientWorkoutSession, "exercises" | "sortOrder" | "title">) {
@@ -322,6 +337,7 @@ function buildExecutionSummary(
 
   const sessionsById = new Map(activeProgram.sessions.map((session) => [session.id, session]));
   const exercisesById = new Map(activeProgram.sessions.flatMap((session) => session.exercises).map((exercise) => [exercise.id, exercise]));
+  const intensityBySetId = new Map(activeProgram.sessions.flatMap((session) => session.exercises.flatMap((exercise) => exercise.sets)).map((set) => [set.id, set.intensity]));
   const relevantSessions = rawSessions.filter((session) => session.programId === activeProgram.id);
   const sessionIds = new Set(relevantSessions.map((session) => session.id));
   const setLogsBySession = new Map<string, PartnerWorkoutExecutionSetLog[]>();
@@ -342,7 +358,7 @@ function buildExecutionSummary(
     const prescribedSets = session?.exercises.reduce((total, exercise) => total + exercise.sets.length, 0) ?? 0;
     const prescribedExercises = session?.exercises.length ?? 0;
     const exercisesDone = exerciseLogs.filter((exerciseLog) => exerciseLog.status === "completed").length;
-    const totalVolumeKg = numberValue(log.totalVolumeKg) || completedSetLogs.reduce((total, setLog) => total + numberValue(setLog.loadKg) * numberValue(setLog.reps), 0);
+    const totalVolumeKg = numberValue(log.totalVolumeKg) || completedSetLogs.reduce((total, setLog) => total + (intensityBySetId.get(setLog.prescribedSetId) !== "warmup" ? numberValue(setLog.loadKg) * numberValue(setLog.reps) : 0), 0);
     const status = executionStatus(log, setsDone);
     const date = new Date(`${log.workoutDate}T12:00:00`);
 

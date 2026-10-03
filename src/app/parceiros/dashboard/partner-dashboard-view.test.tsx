@@ -235,7 +235,7 @@ describe("PartnerDashboardView", () => {
 
     expect(screen.getByRole("heading", { name: "Painel de Performance" })).toBeInTheDocument();
     expect(screen.getByText(/Olá, Dra. Parceira/)).toBeInTheDocument();
-    expect(screen.getByText("Pro Mensal · ativo")).toBeInTheDocument();
+    expect(screen.queryByText("Pro Mensal · ativo")).not.toBeInTheDocument();
     expect(screen.getByText("Clientes ativos")).toBeInTheDocument();
     expect(screen.getAllByText("Receita do Mês").length).toBeGreaterThan(0);
     expect(screen.getByText("Alertas clínicos")).toBeInTheDocument();

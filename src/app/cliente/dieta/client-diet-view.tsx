@@ -390,7 +390,14 @@ function NextMealCard({
 }
 
 function ProgressCard({ diet, meals }: { diet: ClientDietData; meals: ClientDietMeal[] }) {
-  const { consumed, targets } = diet.progress;
+  const { targets } = diet.progress;
+  const consumed = meals.reduce((total, meal) => ({
+    carbs: total.carbs + meal.totals.carbs,
+    fat: total.fat + meal.totals.fat,
+    fiber: total.fiber + meal.totals.fiber,
+    kcal: total.kcal + meal.totals.kcal,
+    protein: total.protein + meal.totals.protein,
+  }), { carbs: 0, fat: 0, fiber: 0, kcal: 0, protein: 0 });
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const adherencePct = dayMealScore(meals);
@@ -569,18 +576,34 @@ function MealTimeline({ meals }: { meals: ClientDietMeal[] }) {
   );
 }
 
+function mealAlternativeLabel(meal: ClientDietMeal) {
+  return meal.alternativeOrder === 1 ? meal.title : `${meal.title} ${meal.alternativeOrder}`;
+}
+
+function groupMealAlternatives(meals: ClientDietMeal[]) {
+  return Array.from(meals.reduce((groups, meal) => {
+    const alternatives = groups.get(meal.mealGroupId) ?? [];
+    alternatives.push(meal);
+    groups.set(meal.mealGroupId, alternatives);
+    return groups;
+  }, new Map<string, ClientDietMeal[]>())).map(([groupId, alternatives]) => ({
+    alternatives: alternatives.slice().sort((a, b) => a.alternativeOrder - b.alternativeOrder),
+    groupId,
+  })).sort((a, b) => a.alternatives[0]!.timeLabel.localeCompare(b.alternatives[0]!.timeLabel));
+}
+
 function MealPlan({
   diet,
-  meals,
+  groups,
   onModal,
-  selectedMenuOption,
-  setSelectedMenuOption,
+  onSelectAlternative,
+  selectedAlternativeByGroup,
 }: {
   diet: ClientDietData;
-  meals: ClientDietMeal[];
+  groups: Array<{ alternatives: ClientDietMeal[]; groupId: string; }>;
   onModal: (state: ModalState) => void;
-  selectedMenuOption: number;
-  setSelectedMenuOption: (value: number) => void;
+  onSelectAlternative: (groupId: string, mealId: string) => void;
+  selectedAlternativeByGroup: Record<string, string>;
 }) {
   return (
     <Panel className="p-4 sm:p-6">
@@ -588,29 +611,17 @@ function MealPlan({
         <div>
           <h2 className="text-[26px] font-extrabold text-white sm:text-[28px]">Plano do dia</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {diet.menuOptions.length > 1 ? (
-            <label className="flex items-center gap-2 text-[12px] font-semibold text-[#9fb1c0]">
-              Opção
-              <select
-                className="h-10 rounded-[9px] border border-[#263949] bg-[#09131c] px-3 text-[13px] font-bold text-white outline-none focus:border-[#2d9cff]"
-                value={selectedMenuOption}
-                onChange={(event) => setSelectedMenuOption(Number(event.target.value))}
-              >
-                {diet.menuOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          <p className="text-[13px] font-semibold text-[#79bff4]">{diet.plan?.statusLabel}</p>
-        </div>
+        <p className="text-[13px] font-semibold text-[#79bff4]">{diet.plan?.statusLabel}</p>
       </div>
 
       <div className="mt-5 grid gap-2">
-        {meals.map((meal) => (
-          <MealRow diet={diet} key={meal.id} meal={meal} onModal={onModal} />
-        ))}
+        {groups.map(({ alternatives, groupId }) => {
+          const selectedMeal = alternatives.find((meal) => meal.id === selectedAlternativeByGroup[groupId]) ?? alternatives[0]!;
+          return <div className="grid gap-2" key={groupId}>
+            {alternatives.length > 1 ? <label className="flex items-center justify-end gap-2 text-[11px] font-semibold text-[#9fb1c0]">Opção de {selectedMeal.title}<select aria-label={`Opção de ${selectedMeal.title}`} className="h-8 rounded-[8px] border border-[#263949] bg-[#09131c] px-2 text-[12px] font-bold text-white outline-none focus:border-[#2d9cff]" value={selectedMeal.id} onChange={(event) => onSelectAlternative(groupId, event.target.value)}>{alternatives.map((meal) => <option key={meal.id} value={meal.id}>{mealAlternativeLabel(meal)}</option>)}</select></label> : null}
+            <MealRow diet={diet} meal={selectedMeal} onModal={onModal} />
+          </div>;
+        })}
       </div>
     </Panel>
   );
@@ -692,6 +703,7 @@ function MealRow({ diet, meal, onModal }: { diet: ClientDietData; meal: ClientDi
             <MealSummaryLine color="#58d78a" label="Proteína" value={`${formatNumber(meal.totals.protein, 1)} g`} />
             <MealSummaryLine color="#f0be23" label="Carboidrato" value={`${formatNumber(meal.totals.carbs, 1)} g`} />
             <MealSummaryLine color="#ff6d7b" label="Gordura" value={`${formatNumber(meal.totals.fat, 1)} g`} />
+            <MealSummaryLine color="#94a3b8" label="Fibra" value={`${formatNumber(meal.totals.fiber, 1)} g`} />
           </div>
         </div>
 
@@ -1200,14 +1212,16 @@ function DateNavigator({ diet }: { diet: ClientDietData }) {
 export function ClientDietView({ diet }: ClientDietViewProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const [focusedMealId, setFocusedMealId] = useState<string | null>(null);
-  const [selectedMenuOption, setSelectedMenuOption] = useState(diet?.menuOptions[0]?.value ?? 1);
+  const [selectedAlternativeByGroup, setSelectedAlternativeByGroup] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setFocusedMealId(null);
-  }, [diet?.selectedDate.iso, selectedMenuOption]);
+    setSelectedAlternativeByGroup({});
+  }, [diet?.plan?.id, diet?.selectedDate.iso]);
 
   if (!diet?.plan) return <EmptyDiet />;
-  const activeMeals = diet.meals.filter((meal) => meal.menuOption === selectedMenuOption);
+  const mealGroups = groupMealAlternatives(diet.meals);
+  const activeMeals = mealGroups.map(({ alternatives, groupId }) => alternatives.find((meal) => meal.id === selectedAlternativeByGroup[groupId]) ?? alternatives[0]!);
   const defaultNextMeal = activeMeals.find((meal) => meal.isNext) ?? activeMeals.find((meal) => meal.status !== "completed") ?? activeMeals[0] ?? null;
   const focusedMeal = focusedMealId ? activeMeals.find((meal) => meal.id === focusedMealId) ?? null : null;
   const activeNextMeal = focusedMeal ?? defaultNextMeal;
@@ -1243,10 +1257,10 @@ export function ClientDietView({ diet }: ClientDietViewProps) {
 
         <MealPlan
           diet={diet}
-          meals={activeMeals}
-          selectedMenuOption={selectedMenuOption}
-          setSelectedMenuOption={setSelectedMenuOption}
+          groups={mealGroups}
           onModal={setModal}
+          selectedAlternativeByGroup={selectedAlternativeByGroup}
+          onSelectAlternative={(groupId, mealId) => setSelectedAlternativeByGroup((current) => ({ ...current, [groupId]: mealId }))}
         />
         <WeekEvolution diet={diet} />
         <ProfessionalGuidance />

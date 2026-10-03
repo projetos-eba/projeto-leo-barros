@@ -1,16 +1,16 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PartnerClientAssessmentsData } from "@/lib/partners/client-assessments-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientAssessmentsData } from "@/lib/partners/client-profile/assessments";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   applyClientCalorieCalculation,
   completePartnerClientProfile,
   saveClientAssessment,
   saveClientCalorieCalculation,
-} from "./actions";
+} from "./_actions/assessments";
 import { PartnerClientAssessmentsView } from "./partner-client-assessments-view";
 
 const refresh = vi.fn();
@@ -20,7 +20,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("recharts", () => ({
+  Bar: () => <g />,
+  BarChart: ({ children }: { children: ReactNode }) => <div data-testid="mock-bar-chart">{children}</div>,
   CartesianGrid: () => <g />,
+  LabelList: () => <g />,
   Line: () => <g />,
   LineChart: ({ children }: { children: ReactNode }) => <div data-testid="mock-line-chart">{children}</div>,
   PolarAngleAxis: () => <g />,
@@ -33,7 +36,7 @@ vi.mock("recharts", () => ({
   YAxis: () => <g />,
 }));
 
-vi.mock("./actions", () => ({
+vi.mock("./_actions/assessments", () => ({
   applyClientCalorieCalculation: vi.fn(),
   completePartnerClientProfile: vi.fn(),
   saveClientAssessment: vi.fn(),
@@ -298,6 +301,10 @@ describe("PartnerClientAssessmentsView", () => {
     expect(screen.getByRole("columnheader", { name: "FFMI" })).toBeInTheDocument();
     expect(screen.queryByText("Prontidão da avaliação")).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Recalcular" })).not.toBeInTheDocument();
+    const skinfoldPanel = screen.getByRole("heading", { name: "Distribuição de Dobras Cutâneas" }).closest("section");
+    expect(skinfoldPanel).not.toBeNull();
+    expect(within(skinfoldPanel as HTMLElement).queryByRole("button", { name: "Por região" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
   });
 

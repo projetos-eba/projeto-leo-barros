@@ -333,10 +333,6 @@ function normalizeSetLogs(logs: ClientWorkoutRawSetLog[]) {
   }));
 }
 
-function setLogVolume(logs: ClientWorkoutSetLog[]) {
-  return logs.reduce((total, log) => total + (log.status === "completed" ? (log.loadKg ?? 0) * (log.reps ?? 0) : 0), 0);
-}
-
 function buildExercises(
   exercises: PartnerClientWorkoutExercise[],
   exerciseLogs: ClientWorkoutRawExerciseLog[],
@@ -465,6 +461,8 @@ export function buildClientWorkout(raw: ClientWorkoutRawData): ClientWorkoutData
     const logs = normalizeSetLogs(setLogsByClientSession.get(log.id) ?? []);
     const setsDone = logs.filter((item) => item.status === "completed").length;
     const bestLoadKg = logs.reduce((best, item) => Math.max(best, item.loadKg ?? 0), 0);
+    const intensityBySetId = new Map(session?.exercises.flatMap((exercise) => exercise.sets).map((set) => [set.id, set.intensity]) ?? []);
+    const loggedVolume = logs.reduce((total, item) => total + (intensityBySetId.get(item.prescribedSetId) !== "warmup" ? (item.loadKg ?? 0) * (item.reps ?? 0) : 0), 0);
     const status = historyStatus(log, setsDone);
     const date = new Date(`${log.workoutDate}T12:00:00`);
 
@@ -480,7 +478,7 @@ export function buildClientWorkout(raw: ClientWorkoutRawData): ClientWorkoutData
       setsDone,
       status,
       statusLabel: status === "completed" ? "Concluído" : status === "skipped" ? "Pulado" : status === "partial" ? "Parcial" : "Planejado",
-      totalVolumeKg: numberValue(log.totalVolumeKg) || setLogVolume(logs),
+      totalVolumeKg: numberValue(log.totalVolumeKg) || loggedVolume,
       workoutDate: log.workoutDate,
     };
   });

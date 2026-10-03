@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PartnerClientWorkoutData } from "@/lib/partners/client-workout-metrics";
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientWorkoutData } from "@/lib/partners/client-profile/workout";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 import {
   addClientWorkoutExercise,
@@ -10,13 +10,14 @@ import {
   combineClientWorkoutBiset,
   deleteClientWorkoutSession,
   reorderClientWorkoutExercises,
+  saveClientWorkoutSessionDefaults,
   updateClientWorkoutSession,
-} from "./actions";
+} from "./_actions/workout";
 import { PartnerClientWorkoutView } from "./partner-client-workout-view";
 
 const refresh = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
-vi.mock("./actions", () => ({
+vi.mock("./_actions/workout", () => ({
   addClientWorkoutExercise: vi.fn(),
   addClientWorkoutSet: vi.fn(),
   applyClientWorkoutTemplate: vi.fn(),
@@ -30,6 +31,7 @@ vi.mock("./actions", () => ({
   removeClientWorkoutSet: vi.fn(),
   reorderClientWorkoutExercises: vi.fn(),
   saveClientWorkoutNotes: vi.fn(),
+  saveClientWorkoutSessionDefaults: vi.fn(),
   saveClientWorkoutTemplate: vi.fn(),
   sendClientWorkoutProgram: vi.fn(),
   updateClientWorkoutExercise: vi.fn(),
@@ -61,14 +63,14 @@ const workout: PartnerClientWorkoutData = {
           bisetGroupId: null, bisetPosition: null, cadence: "2-0-2-0",
           exerciseId: "d1000000-0000-4000-8000-000000000202", id: "e2000000-0000-4000-8000-000000000301",
           muscleGroup: "peito", name: "Supino reto", notes: null, restSeconds: 90,
-          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000401", intensity: "moderate", loadKg: 50, reps: 10, setNumber: 1 }],
+          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000401", intensity: "moderate", loadKg: 50, reps: 10, rir: null, setNumber: 1 }],
           sortOrder: 0, technique: "normal", thumbnailUrl: null, variationName: null,
         },
         {
           bisetGroupId: null, bisetPosition: null, cadence: null,
           exerciseId: "d1000000-0000-4000-8000-000000000205", id: "e2000000-0000-4000-8000-000000000302",
           muscleGroup: "ombros", name: "Desenvolvimento", notes: null, restSeconds: 90,
-          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000402", intensity: "moderate", loadKg: 20, reps: 10, setNumber: 1 }],
+          secondaryMuscleGroups: ["triceps"], sets: [{ id: "e2000000-0000-4000-8000-000000000402", intensity: "moderate", loadKg: 20, reps: 10, rir: null, setNumber: 1 }],
           sortOrder: 1, technique: "normal", thumbnailUrl: null, variationName: null,
         },
       ],
@@ -149,6 +151,7 @@ describe("PartnerClientWorkoutView", () => {
     vi.mocked(combineClientWorkoutBiset).mockResolvedValue({ ok: true });
     vi.mocked(deleteClientWorkoutSession).mockResolvedValue({ ok: true });
     vi.mocked(reorderClientWorkoutExercises).mockResolvedValue({ ok: true });
+    vi.mocked(saveClientWorkoutSessionDefaults).mockResolvedValue({ ok: true });
     vi.mocked(updateClientWorkoutSession).mockResolvedValue({ ok: true });
   });
   afterEach(() => {
@@ -160,6 +163,7 @@ describe("PartnerClientWorkoutView", () => {
     render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
     expect(screen.getByText("Prescrição de Treinos")).toBeInTheDocument();
     expect(screen.getByText("Biblioteca de exercícios")).toBeInTheDocument();
+    expect(screen.getByText("Carga máxima")).toHaveClass("whitespace-nowrap");
     expect(screen.getByText("Acompanhamento real")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Acompanhamento real/i })).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("Volume realizado")).not.toBeInTheDocument();
@@ -168,10 +172,66 @@ describe("PartnerClientWorkoutView", () => {
     expect(screen.getAllByText("Desenvolvimento").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tipo de treino").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Peito e Tríceps").length).toBeGreaterThan(0);
-    expect(screen.getByLabelText("Mapa muscular anterior")).toBeInTheDocument();
+    expect(screen.getAllByRole("img", { name: /Representação muscular/i })).toHaveLength(3);
     expect(screen.queryByRole("checkbox", { name: /Selecionar Supino reto/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Pacientes")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cardio" })).toHaveAttribute("href", expect.stringContaining("tab=cardio"));
+  });
+
+  it("atualiza as prévias do card e do resumo quando os exercícios mudam", () => {
+    const { container, rerender } = render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-front"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="front-chest"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="full-front-chest"]')).toHaveLength(1);
+
+    const workoutWithBackExercise: PartnerClientWorkoutData = {
+      ...workout,
+      activeProgram: workout.activeProgram ? {
+        ...workout.activeProgram,
+        sessions: workout.activeProgram.sessions.map((session) => ({
+          ...session,
+          exercises: [{
+            ...session.exercises[0],
+            id: "back-exercise",
+            muscleGroup: "costas",
+            name: "Remada curvada",
+            secondaryMuscleGroups: ["biceps"],
+          }],
+        })),
+      } : null,
+    };
+    rerender(<PartnerClientWorkoutView overview={overview} workout={workoutWithBackExercise} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="upper-back"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="back-corners"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-layer="full-back-corners"]')).toHaveLength(1);
+
+    const workoutWithoutExercises: PartnerClientWorkoutData = {
+      ...workoutWithBackExercise,
+      activeProgram: workoutWithBackExercise.activeProgram ? {
+        ...workoutWithBackExercise.activeProgram,
+        sessions: workoutWithBackExercise.activeProgram.sessions.map((session) => ({ ...session, exercises: [] })),
+      } : null,
+    };
+    rerender(<PartnerClientWorkoutView overview={overview} workout={workoutWithoutExercises} />);
+    expect(container.querySelectorAll('[data-workout-muscle-preview][data-view="none"]')).toHaveLength(2);
+    expect(container.querySelectorAll("[data-layer]")).toHaveLength(0);
+  });
+
+  it("pagina a biblioteca e mantém digitação sem adicionar exercícios", () => {
+    const library = Array.from({ length: 65 }, (_, id) => ({ ...workout.library[0], id: `library-${id}`, name: `Exercício ${id}` }));
+    render(<PartnerClientWorkoutView overview={overview} workout={{ ...workout, library }} />);
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(30);
+    fireEvent.click(screen.getByRole("button", { name: "Carregar mais" }));
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(60);
+    fireEvent.change(screen.getByLabelText("Buscar exercício"), { target: { value: "exercicio 64" } });
+    expect(screen.getAllByRole("button", { name: /^Editar Exercício / })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar exercício" }));
+    const input = screen.getByLabelText("Buscar exercício para Treino A");
+    fireEvent.change(input, { target: { value: "exercicio" } });
+    expect(screen.getAllByRole("button", { name: /ao Treino A$/ })).toHaveLength(6);
+    expect(addClientWorkoutExercise).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByLabelText("Buscar exercício para Treino A")).not.toBeInTheDocument();
   });
 
   it("adiciona exercício, sugere nova série e combina Bi-set", async () => {
@@ -190,6 +250,21 @@ describe("PartnerClientWorkoutView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Selecionar Desenvolvimento para Bi-set" }));
     fireEvent.click(screen.getByRole("button", { name: /Combinar Bi-set/i }));
     await waitFor(() => expect(combineClientWorkoutBiset).toHaveBeenCalled());
+  });
+
+  it("salva as predefinições da divisão e limita o total a seis séries", async () => {
+    render(<PartnerClientWorkoutView overview={overview} workout={workout} />);
+    fireEvent.click(screen.getByRole("button", { name: "Abrir predefinições de Treino A" }));
+    fireEvent.change(screen.getByLabelText("Aquecimento séries"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Aquecimento repetições"), { target: { value: "12" } });
+    fireEvent.change(screen.getByLabelText("Carga moderada séries"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("Carga moderada repetições"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carga máxima séries"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Carga máxima repetições"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar predefinições" }));
+    await waitFor(() => expect(saveClientWorkoutSessionDefaults).toHaveBeenCalledWith(expect.objectContaining({
+      maximumRir: null, maximumSets: 2, moderateRir: null, moderateSets: 3, restSeconds: 90, warmupRir: null, warmupSets: 1,
+    })));
   });
 
   it("reordena exercícios pelos controles de subir e descer", async () => {

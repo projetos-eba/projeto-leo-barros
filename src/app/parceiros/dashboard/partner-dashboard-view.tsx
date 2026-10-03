@@ -422,15 +422,6 @@ export function PartnerDashboardView({ dashboard }: PartnerDashboardViewProps) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0b1720] px-3 py-4 font-['Rethink_Sans',sans-serif] text-[#f1f6fa] sm:px-5 sm:py-8 lg:px-6 lg:py-[85px]">
       <div className="mx-auto min-w-0 max-w-[1199px]">
-        <div className="fixed right-6 top-5 z-20 hidden items-center gap-3 lg:flex">
-          <div className="size-10 rounded-[10px] bg-[#1b2c37]" />
-          <div>
-            <p className="text-[14px] font-semibold leading-5 text-[#d7dae0]">{dashboard.partnerName}</p>
-            <p className="text-[12px] leading-4 text-[#828a9c]">{dashboard.platformPlanLabel}</p>
-          </div>
-          <ChevronDown className="size-4 text-[#9aa8b5]" />
-        </div>
-
         <TopActions dashboard={dashboard} />
         <MetricsGrid dashboard={dashboard} />
 

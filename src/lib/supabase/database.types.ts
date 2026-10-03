@@ -9,6 +9,99 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_audit_events: {
+        Row: {
+          action_key: string
+          actor_profile_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          outcome: string
+          request_id: string | null
+          resource_id: string | null
+          resource_type: string
+          target_profile_id: string | null
+        }
+        Insert: {
+          action_key: string
+          actor_profile_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          request_id?: string | null
+          resource_id?: string | null
+          resource_type: string
+          target_profile_id?: string | null
+        }
+        Update: {
+          action_key?: string
+          actor_profile_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          request_id?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          target_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_audit_events_target_profile_id_fkey"
+            columns: ["target_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_role_assignments: {
+        Row: {
+          assigned_by_profile_id: string | null
+          created_at: string
+          profile_id: string
+          role_key: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by_profile_id?: string | null
+          created_at?: string
+          profile_id: string
+          role_key: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by_profile_id?: string | null
+          created_at?: string
+          profile_id?: string
+          role_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_role_assignments_assigned_by_profile_id_fkey"
+            columns: ["assigned_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_role_assignments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admins: {
         Row: {
           created_at: string
@@ -1551,6 +1644,60 @@ export type Database = {
           },
         ]
       }
+      exercise_muscle_classifications: {
+        Row: {
+          primary_muscle_group: string | null
+          review_status: string
+          secondary_muscle_groups: string[]
+          source_key: string
+          version: string
+        }
+        Insert: {
+          primary_muscle_group?: string | null
+          review_status: string
+          secondary_muscle_groups?: string[]
+          source_key: string
+          version: string
+        }
+        Update: {
+          primary_muscle_group?: string | null
+          review_status?: string
+          secondary_muscle_groups?: string[]
+          source_key?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      exercise_muscle_repair_audit: {
+        Row: {
+          after_values: Json
+          before_values: Json
+          classification_version: string
+          id: number
+          record_id: string
+          repaired_at: string
+          table_name: string
+        }
+        Insert: {
+          after_values: Json
+          before_values: Json
+          classification_version: string
+          id?: never
+          record_id: string
+          repaired_at?: string
+          table_name: string
+        }
+        Update: {
+          after_values?: Json
+          before_values?: Json
+          classification_version?: string
+          id?: never
+          record_id?: string
+          repaired_at?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       partner_billing_trial_usage: {
         Row: {
           created_at: string
@@ -2515,9 +2662,11 @@ export type Database = {
       }
       partner_client_diet_meals: {
         Row: {
+          alternative_order: number
           created_at: string
           day_of_week: number
           id: string
+          meal_group_id: string
           meal_time: string
           menu_option: number
           option_label: string
@@ -2529,9 +2678,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alternative_order?: number
           created_at?: string
           day_of_week?: number
           id?: string
+          meal_group_id?: string
           meal_time: string
           menu_option?: number
           option_label?: string
@@ -2543,9 +2694,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alternative_order?: number
           created_at?: string
           day_of_week?: number
           id?: string
+          meal_group_id?: string
           meal_time?: string
           menu_option?: number
           option_label?: string
@@ -2581,6 +2734,8 @@ export type Database = {
           status: string
           target_carbs_g: number
           target_fat_g: number
+          target_fiber_max_g: number | null
+          target_fiber_min_g: number | null
           target_kcal: number
           target_protein_g: number
           title: string
@@ -2602,6 +2757,8 @@ export type Database = {
           status?: string
           target_carbs_g?: number
           target_fat_g?: number
+          target_fiber_max_g?: number | null
+          target_fiber_min_g?: number | null
           target_kcal?: number
           target_protein_g?: number
           title: string
@@ -2623,6 +2780,8 @@ export type Database = {
           status?: string
           target_carbs_g?: number
           target_fat_g?: number
+          target_fiber_max_g?: number | null
+          target_fiber_min_g?: number | null
           target_kcal?: number
           target_protein_g?: number
           title?: string
@@ -5541,6 +5700,79 @@ export type Database = {
           },
         ]
       }
+      partner_workout_session_defaults: {
+        Row: {
+          created_at: string
+          maximum_reps: number | null
+          maximum_rir: number | null
+          maximum_sets: number
+          moderate_reps: number | null
+          moderate_rir: number | null
+          moderate_sets: number
+          partner_id: string
+          rest_seconds: number
+          session_id: string
+          updated_at: string
+          warmup_reps: number | null
+          warmup_rir: number | null
+          warmup_sets: number
+        }
+        Insert: {
+          created_at?: string
+          maximum_reps?: number | null
+          maximum_rir?: number | null
+          maximum_sets?: number
+          moderate_reps?: number | null
+          moderate_rir?: number | null
+          moderate_sets?: number
+          partner_id: string
+          rest_seconds: number
+          session_id: string
+          updated_at?: string
+          warmup_reps?: number | null
+          warmup_rir?: number | null
+          warmup_sets?: number
+        }
+        Update: {
+          created_at?: string
+          maximum_reps?: number | null
+          maximum_rir?: number | null
+          maximum_sets?: number
+          moderate_reps?: number | null
+          moderate_rir?: number | null
+          moderate_sets?: number
+          partner_id?: string
+          rest_seconds?: number
+          session_id?: string
+          updated_at?: string
+          warmup_reps?: number | null
+          warmup_rir?: number | null
+          warmup_sets?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_workout_session_defaults_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_session_defaults_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "partner_workout_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_workout_session_defaults_session_partner_fkey"
+            columns: ["session_id", "partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_workout_sessions"
+            referencedColumns: ["id", "partner_id"]
+          },
+        ]
+      }
       partner_workout_sessions: {
         Row: {
           created_at: string
@@ -5611,6 +5843,7 @@ export type Database = {
           partner_id: string
           prescribed_exercise_id: string
           reps: number | null
+          rir: number | null
           set_number: number
           updated_at: string
         }
@@ -5622,6 +5855,7 @@ export type Database = {
           partner_id: string
           prescribed_exercise_id: string
           reps?: number | null
+          rir?: number | null
           set_number: number
           updated_at?: string
         }
@@ -5633,6 +5867,7 @@ export type Database = {
           partner_id?: string
           prescribed_exercise_id?: string
           reps?: number | null
+          rir?: number | null
           set_number?: number
           updated_at?: string
         }
@@ -6717,6 +6952,14 @@ export type Database = {
         Args: { p_actor_profile_id: string }
         Returns: boolean
       }
+      admin_assign_role: {
+        Args: {
+          p_actor_profile_id: string
+          p_role_key: string
+          p_target_profile_id: string
+        }
+        Returns: string
+      }
       admin_create_user_record: {
         Args: {
           p_actor_profile_id: string
@@ -6740,6 +6983,54 @@ export type Database = {
           profile_id: string
           result_status: string
         }[]
+      }
+      admin_has_capability: { Args: { p_capability: string }; Returns: boolean }
+      admin_record_audit_event: {
+        Args: {
+          p_action_key: string
+          p_actor_profile_id: string
+          p_metadata?: Json
+          p_outcome?: string
+          p_request_id?: string
+          p_resource_id?: string
+          p_resource_type: string
+          p_target_profile_id?: string
+        }
+        Returns: string
+      }
+      admin_security_auth_events: {
+        Args: { p_limit?: number; p_target_profile_id?: string }
+        Returns: {
+          action_key: string
+          created_at: string
+          event_id: string
+          ip_hint: string
+          profile_id: string
+          profile_role: string
+        }[]
+      }
+      admin_security_sessions: {
+        Args: { p_limit?: number; p_target_profile_id?: string }
+        Returns: {
+          assurance_level: string
+          created_at: string
+          expires_at: string
+          ip_hint: string
+          mfa_factor_id: string
+          profile_id: string
+          profile_role: string
+          refreshed_at: string
+          session_id: string
+          user_agent_hint: string
+        }[]
+      }
+      admin_set_professional_status: {
+        Args: {
+          p_actor_profile_id: string
+          p_partner_id: string
+          p_status: string
+        }
+        Returns: string
       }
       admin_update_user_record: {
         Args: {
@@ -6848,6 +7139,10 @@ export type Database = {
         Returns: Json
       }
       client_workout_dashboard: { Args: { p_date?: string }; Returns: Json }
+      client_workout_dashboard_legacy: {
+        Args: { p_date?: string }
+        Returns: Json
+      }
       client_workout_finish_session: {
         Args: { p_client_session_id: string }
         Returns: Json
@@ -6890,9 +7185,11 @@ export type Database = {
         Returns: string
       }
       current_active_admin_id: { Args: never; Returns: string }
+      current_active_admin_profile_id: { Args: never; Returns: string }
       current_active_partner_id: { Args: never; Returns: string }
       current_active_patient_id: { Args: never; Returns: string }
       current_active_profile_id: { Args: never; Returns: string }
+      current_admin_role: { Args: never; Returns: string }
       current_client_diet_plan: {
         Args: { target_date?: string }
         Returns: {
@@ -6909,6 +7206,8 @@ export type Database = {
           status: string
           target_carbs_g: number
           target_fat_g: number
+          target_fiber_max_g: number | null
+          target_fiber_min_g: number | null
           target_kcal: number
           target_protein_g: number
           title: string
@@ -6959,6 +7258,11 @@ export type Database = {
         Args: { p_client_session_id: string }
         Returns: undefined
       }
+      get_partner_account_profile: { Args: never; Returns: Json }
+      get_partner_client_profile: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       increment_partner_protocol_usage: {
         Args: { p_item_id: string; p_item_type: string }
         Returns: number
@@ -6973,6 +7277,14 @@ export type Database = {
       }
       partner_client_cardio: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_diet: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_diet_base: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
+      partner_client_diet_fiber_base: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_client_exams: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview: { Args: { p_patient_id: string }; Returns: Json }
       partner_client_overview_legacy_20260727: {
@@ -6989,6 +7301,10 @@ export type Database = {
         Returns: Json
       }
       partner_client_workouts: { Args: { p_patient_id: string }; Returns: Json }
+      partner_client_workouts_legacy: {
+        Args: { p_patient_id: string }
+        Returns: Json
+      }
       partner_clients_list: {
         Args: never
         Returns: {
@@ -7013,6 +7329,14 @@ export type Database = {
         }
         Returns: string
       }
+      partner_create_diet_meal_alternative: {
+        Args: {
+          p_patient_id: string
+          p_plan_id: string
+          p_source_meal_id: string
+        }
+        Returns: string
+      }
       partner_import_system_exercises: {
         Args: {
           p_equipment?: string
@@ -7032,6 +7356,10 @@ export type Database = {
           p_query?: string
         }
         Returns: Json
+      }
+      partner_remove_diet_meal: {
+        Args: { p_meal_id: string; p_patient_id: string; p_plan_id: string }
+        Returns: undefined
       }
       provision_client_for_partner_records:
         | {
@@ -7105,6 +7433,14 @@ export type Database = {
           result_status: string
         }[]
       }
+      remove_partner_client: {
+        Args: { p_patient_id: string }
+        Returns: boolean
+      }
+      repair_exercise_muscle_classifications: {
+        Args: { p_dry_run?: boolean }
+        Returns: Json
+      }
       save_partner_client_anamnesis_entry: {
         Args: {
           p_content: string
@@ -7150,6 +7486,27 @@ export type Database = {
       sync_partner_system_exam_catalog: {
         Args: { p_partner_id: string }
         Returns: undefined
+      }
+      update_partner_account_profile: {
+        Args: {
+          p_display_name: string
+          p_phone: string
+          p_professional_registry_number: string
+          p_professional_registry_type: string
+          p_professional_type: string
+        }
+        Returns: boolean
+      }
+      update_partner_client_profile: {
+        Args: {
+          p_biological_sex: string
+          p_birth_date: string
+          p_display_name: string
+          p_objective: string
+          p_patient_id: string
+          p_phone: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
@@ -7283,4 +7640,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

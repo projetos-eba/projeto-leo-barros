@@ -14,9 +14,11 @@ export type ClientDietRawItem = {
 };
 
 export type ClientDietRawMeal = {
+  alternativeOrder?: number | string;
   id: string;
   items: ClientDietRawItem[];
   mealTime: string;
+  mealGroupId?: string | null;
   menuOption?: number | string;
   optionLabel?: string | null;
   sortOrder: number;
@@ -99,6 +101,7 @@ export type ClientDietRawData = {
 };
 
 export type ClientDietMeal = {
+  alternativeOrder: number;
   completedAtLabel: string | null;
   hasPhoto: boolean;
   id: string;
@@ -118,6 +121,7 @@ export type ClientDietMeal = {
     replacementLabel: string | null;
   }>;
   menuOption: number;
+  mealGroupId: string;
   notes: string | null;
   optionLabel: string;
   photoLabel: string | null;
@@ -345,6 +349,7 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
     const completedAt = log?.completedAt ? new Date(log.completedAt) : null;
 
     return {
+      alternativeOrder: Math.max(1, Math.round(numberValue(meal.alternativeOrder ?? meal.menuOption ?? 1))),
       completedAtLabel: completedAt ? timeFormatter.format(completedAt) : null,
       hasPhoto: Boolean(log?.photoStoragePath),
       id: meal.id,
@@ -373,6 +378,7 @@ export function buildClientDiet(raw: ClientDietRawData, now = new Date()): Clien
           };
         }),
       menuOption: Math.max(1, Math.round(numberValue(meal.menuOption ?? 1))),
+      mealGroupId: meal.mealGroupId ?? `legacy-${meal.title}-${meal.mealTime}`,
       notes: log?.notes ?? null,
       optionLabel: meal.optionLabel || `Cardápio ${Math.max(1, Math.round(numberValue(meal.menuOption ?? 1)))}`,
       photoLabel: log?.photoOriginalFilename ?? (log?.photoStoragePath ? "Foto anexada" : null),

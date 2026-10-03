@@ -34,8 +34,8 @@ select results_eq(
     where schemaname = 'public'
       and tablename in ('platform_settings', 'platform_integrations', 'platform_settings_activity')
   $$,
-  array[9],
-  'configurações possuem policies de leitura/escrita explícitas'
+  array[5],
+  'configurações possuem policies explícitas restritas a Owners'
 );
 
 select results_eq(

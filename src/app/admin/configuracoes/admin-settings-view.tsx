@@ -46,6 +46,7 @@ import {
   testIntegrationAction,
   updateAdminUserAction,
 } from "./actions";
+import { assignAdminRoleAction } from "./permissions-actions";
 import { InfoHint } from "@/components/ui/info-hint";
 import {
   Dialog,
@@ -327,6 +328,15 @@ function UsersTab({ admins, onMessage }: { admins: AdminSettingsData["admins"]; 
   const [pendingAction, setPendingAction] = useState("");
   const [isAdminPending, startAdminTransition] = useTransition();
 
+  function changeRole(admin: AdminUser, role: string) {
+    setPendingAction(`role:${admin.id}`);
+    startAdminTransition(async () => {
+      const result = await assignAdminRoleAction(admin.id, role);
+      finish(result);
+      setPendingAction("");
+    });
+  }
+
   function finish(result: { message: string; ok: boolean }) {
     onMessage(result.message);
     if (result.ok) {
@@ -409,7 +419,7 @@ function UsersTab({ admins, onMessage }: { admins: AdminSettingsData["admins"]; 
             <tr className="border-b border-[#294657]/80 text-[11px] font-semibold text-[#8495a3]">
               <th className="px-2 py-3">Usuário</th>
               <th className="px-2 py-3">E-mail</th>
-              <th className="px-2 py-3">Perfil</th>
+              <th className="px-2 py-3">Função</th>
               <th className="px-2 py-3">Status</th>
               <th className="px-2 py-3 text-right">Ações</th>
             </tr>
@@ -427,7 +437,19 @@ function UsersTab({ admins, onMessage }: { admins: AdminSettingsData["admins"]; 
                     {admin.isCurrentUser ? <span className="ml-2 text-[10px] font-semibold text-[#5ba8ff]">Você</span> : null}
                   </td>
                   <td className="px-2 py-3">{admin.email}</td>
-                  <td className="px-2 py-3">Admin</td>
+                  <td className="px-2 py-3">
+                    <select
+                      aria-label={`Função de ${admin.name}`}
+                      className="rounded border border-[#294657] bg-[#0a2030] px-2 py-1 text-[11px] text-[#dce8ef]"
+                      disabled={isAdminPending || pendingAction === `role:${admin.id}`}
+                      value={admin.role}
+                      onChange={(event) => changeRole(admin, event.target.value)}
+                    >
+                      <option value="owner">Owner</option>
+                      <option value="operator">Operator</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                  </td>
                   <td className="px-2 py-3"><span className={cn("rounded-[4px] border px-2 py-1 text-[10px] font-bold", adminStatusTone(admin.status))}>{admin.statusLabel}</span></td>
                   <td className="px-2 py-3">
                     <div className="flex justify-end gap-2">

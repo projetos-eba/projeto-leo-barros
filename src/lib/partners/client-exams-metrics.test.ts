@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assessExamValue,
   buildPartnerClientExams,
   calculateExamDeltaPct,
   classifyExamValue,
@@ -99,8 +100,10 @@ describe("client exams metrics", () => {
   it("converte unidade alternativa para unidade padrão", () => {
     const data = buildPartnerClientExams(raw);
     const definition = data.definitions[0];
+    const converted = convertExamValueToDefault(2.586, "mmol/L", definition);
 
-    expect(convertExamValueToDefault(2.586, "mmol/L", definition).valueDefault).toBeCloseTo(100);
+    expect(converted.valueDefault).toBeCloseTo(100);
+    expect(assessExamValue(converted.valueDefault, { highValue: 100, lowValue: 0 })).toMatchObject({ deviationLevel: "normal", deviationTone: "green" });
     expect(convertExamValueToDefault(100, "mg/dL", definition).valueDefault).toBe(100);
   });
 
@@ -109,6 +112,23 @@ describe("client exams metrics", () => {
     expect(classifyExamValue(40, { highValue: 100, lowValue: 50 })).toBe("low");
     expect(classifyExamValue(80, { highValue: 100, lowValue: 50 })).toBe("normal");
     expect(classifyExamValue(80, null)).toBe("unknown");
+  });
+
+  it("classifica o nível de desvio pelos limites de 10% e 25%", () => {
+    const reference = { highValue: 100, lowValue: 40 };
+
+    expect(assessExamValue(100, reference)).toMatchObject({ deviationLevel: "normal", deviationPct: 0, deviationTone: "green" });
+    expect(assessExamValue(110, reference)).toMatchObject({ deviationLevel: "mild", deviationPct: 10, deviationTone: "yellow" });
+    expect(assessExamValue(125, reference)).toMatchObject({ deviationLevel: "moderate", deviationPct: 25, deviationTone: "orange" });
+    expect(assessExamValue(126, reference)).toMatchObject({ deviationLevel: "severe", deviationPct: 26, deviationTone: "red" });
+    expect(assessExamValue(36, reference)).toMatchObject({ deviationLevel: "mild", deviationPct: 10, status: "low" });
+    expect(assessExamValue(30, reference)).toMatchObject({ deviationLevel: "moderate", deviationPct: 25, status: "low" });
+    expect(assessExamValue(29, reference)).toMatchObject({ deviationLevel: "severe", deviationPct: 27.5, status: "low" });
+  });
+
+  it("mantém estado neutro sem referência e trata limite zero como desvio importante", () => {
+    expect(assessExamValue(80, null)).toMatchObject({ deviationLevel: "unknown", deviationPct: null, deviationTone: "blue", status: "unknown" });
+    expect(assessExamValue(1, { highValue: 0, lowValue: null })).toMatchObject({ deviationLevel: "severe", deviationPct: 100, deviationTone: "red", status: "high" });
   });
 
   it("seleciona referência por gênero com fallback unissex", () => {
@@ -134,6 +154,7 @@ describe("client exams metrics", () => {
     expect(data.summary.alertCount).toBe(1);
     expect(data.dashboard[0].resultCount).toBe(1);
     expect(data.latestCollection?.results[0].deltaPct).toBe(-10);
+    expect(data.latestCollection?.results[0]).toMatchObject({ deviationLevel: "mild", deviationPct: 8, deviationTone: "yellow" });
     expect(calculateExamDeltaPct(108, 120)).toBe(-10);
   });
 });

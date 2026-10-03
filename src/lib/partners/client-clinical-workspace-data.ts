@@ -46,6 +46,7 @@ export type PartnerClientFormAssignment = {
 };
 
 type ModuleState = "available" | "unavailable";
+export type PartnerClinicalWorkspaceTab = "anamnese" | "formularios" | "prescricoes";
 
 export type PartnerClientClinicalWorkspaceData = {
   anamnesis: {
@@ -106,7 +107,10 @@ async function secondaryRows<T>(query: QueryResult<T>): Promise<{ rows: T[]; sta
   return { rows: data ?? [], state: "available" };
 }
 
-export async function fetchPartnerClientClinicalWorkspace(patientId: string): Promise<PartnerClientClinicalWorkspaceData | null> {
+export async function fetchPartnerClientClinicalWorkspace(
+  patientId: string,
+  activeTab?: PartnerClinicalWorkspaceTab,
+): Promise<PartnerClientClinicalWorkspaceData | null> {
   const supabase = await createClient();
   const { profile } = await getCurrentProfile();
 
@@ -128,6 +132,71 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
     .filter((row) => row.relationship_status === "active")
     .map((row) => ({ email: row.email, id: row.patient_id, name: row.display_name, selected: row.patient_id === patientId, status: row.relationship_status }));
   if (!clients.some((client) => client.id === patientId)) return null;
+
+  const emptyAnamnesis = { current: null, history: [], state: "available" as const };
+  const emptyForms = { assignments: [], clients: [], state: "available" as const, templates: [] };
+  const emptyPrescriptions = { history: [], state: "available" as const };
+
+  if (activeTab === "anamnese") {
+    const result = await secondaryRows(
+      supabase
+        .from("partner_client_anamnesis_entries")
+        .select("id, title, summary, content, version_number, is_current, created_at")
+        .eq("partner_id", partner.id)
+        .eq("patient_id", patientId)
+        .order("version_number", { ascending: false }),
+    );
+    const history = result.rows.map((row) => ({ content: row.content, createdAt: row.created_at, id: row.id, isCurrent: row.is_current, summary: row.summary, title: row.title, version: row.version_number }));
+    return { anamnesis: { current: history.find((entry) => entry.isCurrent) ?? history[0] ?? null, history, state: result.state }, forms: emptyForms, prescriptions: emptyPrescriptions };
+  }
+
+  if (activeTab === "prescricoes") {
+    const result = await secondaryRows(
+      supabase
+        .from("partner_client_prescription_notes")
+        .select("id, title, summary, prescription_type, status, content, version_number, created_at")
+        .eq("partner_id", partner.id)
+        .eq("patient_id", patientId)
+        .order("created_at", { ascending: false }),
+    );
+    const history = result.rows.map((row) => ({ content: row.content, createdAt: row.created_at, id: row.id, status: row.status, summary: row.summary, title: row.title, type: row.prescription_type, version: row.version_number }));
+    return { anamnesis: emptyAnamnesis, forms: emptyForms, prescriptions: { history, state: result.state } };
+  }
+
+  if (activeTab === "formularios") {
+    const [templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult] = await Promise.all([
+      secondaryRows(supabase.from("partner_form_templates").select("id, title, description, status").eq("partner_id", partner.id).order("created_at", { ascending: false })),
+      secondaryRows(supabase.from("partner_form_questions").select("id, template_id, template_version_id, sort_order, question_type, prompt, help_text, required, options").eq("partner_id", partner.id).order("sort_order", { ascending: true })),
+      secondaryRows(supabase.from("partner_form_assignments").select("id, template_id, template_version_id, template_snapshot, title, message, sent_at, due_at, created_at").eq("partner_id", partner.id).order("created_at", { ascending: false })),
+      secondaryRows(supabase.from("partner_form_assignment_clients").select("id, assignment_id, patient_id, status, submitted_at, created_at").eq("partner_id", partner.id).eq("patient_id", patientId).order("created_at", { ascending: false })),
+      secondaryRows(supabase.from("partner_form_responses").select("id, assignment_client_id, status").eq("partner_id", partner.id).eq("patient_id", patientId)),
+      secondaryRows(supabase.from("partner_form_response_answers").select("response_id, question_id, value_json").eq("partner_id", partner.id).eq("patient_id", patientId)),
+    ]);
+    const templateTitleById = new Map(templatesResult.rows.map((template) => [template.id, template.title]));
+    const questionsByTemplate = new Map<string, PartnerClientFormQuestion[]>();
+    const questionsByVersion = new Map<string, PartnerClientFormQuestion[]>();
+    questionsResult.rows.forEach((question) => {
+      const normalized = { helpText: question.help_text, id: question.id, options: optionsFromJson(question.options), prompt: question.prompt, required: question.required, sortOrder: question.sort_order, type: question.question_type };
+      questionsByTemplate.set(question.template_id, [...(questionsByTemplate.get(question.template_id) ?? []), normalized]);
+      if (question.template_version_id) questionsByVersion.set(question.template_version_id, [...(questionsByVersion.get(question.template_version_id) ?? []), normalized]);
+    });
+    const responseByAssignmentClient = new Map(responsesResult.rows.map((response) => [response.assignment_client_id, response]));
+    const answersByResponse = new Map<string, typeof answersResult.rows>();
+    answersResult.rows.forEach((answer) => answersByResponse.set(answer.response_id, [...(answersByResponse.get(answer.response_id) ?? []), answer]));
+    const assignments = assignmentClientsResult.rows.flatMap((assigned) => {
+      const assignment = assignmentsResult.rows.find((item) => item.id === assigned.assignment_id);
+      if (!assignment) return [];
+      const snapshotQuestions = questionsFromSnapshot(assignment.template_snapshot);
+      const questions = snapshotQuestions.length > 0 ? snapshotQuestions : (assignment.template_version_id ? questionsByVersion.get(assignment.template_version_id) : null) ?? questionsByTemplate.get(assignment.template_id) ?? [];
+      const response = responseByAssignmentClient.get(assigned.id);
+      return [{ assignmentClientId: assigned.id, assignmentId: assignment.id, createdAt: assigned.created_at, dueAt: assignment.due_at, message: assignment.message, questions, responseAnswers: (response ? answersByResponse.get(response.id) ?? [] : []).map((answer) => ({ label: questions.find((question) => question.id === answer.question_id)?.prompt ?? "Resposta", questionId: answer.question_id, value: answerValue(answer.value_json) })), sentAt: assignment.sent_at, status: assigned.status, submittedAt: assigned.submitted_at, title: assignment.title || templateTitleById.get(assignment.template_id) || "Formulário" }];
+    });
+    return {
+      anamnesis: emptyAnamnesis,
+      forms: { assignments, clients, state: [templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult].some((result) => result.state === "unavailable") ? "unavailable" : "available", templates: templatesResult.rows.filter((template) => template.status === "active").map((template) => ({ description: template.description, id: template.id, title: template.title })) },
+      prescriptions: emptyPrescriptions,
+    };
+  }
 
   const [anamnesisResult, prescriptionsResult, templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult] = await Promise.all([
     secondaryRows(supabase.from("partner_client_anamnesis_entries").select("id, title, summary, content, version_number, is_current, created_at").eq("partner_id", partner.id).eq("patient_id", patientId).order("version_number", { ascending: false })),
@@ -179,9 +248,31 @@ export async function fetchPartnerClientClinicalWorkspace(patientId: string): Pr
     }];
   });
 
-  return {
+  const workspace: PartnerClientClinicalWorkspaceData = {
     anamnesis: { current: anamnesis.find((entry) => entry.isCurrent) ?? anamnesis[0] ?? null, history: anamnesis, state: anamnesisResult.state },
     forms: { assignments, clients, state: [templatesResult, questionsResult, assignmentsResult, assignmentClientsResult, responsesResult, answersResult].some((result) => result.state === "unavailable") ? "unavailable" : "available", templates: templatesResult.rows.filter((template) => template.status === "active").map((template) => ({ description: template.description, id: template.id, title: template.title })) },
     prescriptions: { history: prescriptions, state: prescriptionsResult.state },
+  };
+
+  if (!activeTab) return workspace;
+  if (activeTab === "anamnese") {
+    return {
+      ...workspace,
+      forms: { assignments: [], clients: [], state: "available", templates: [] },
+      prescriptions: { history: [], state: "available" },
+    };
+  }
+  if (activeTab === "prescricoes") {
+    return {
+      ...workspace,
+      anamnesis: { current: null, history: [], state: "available" },
+      forms: { assignments: [], clients: [], state: "available", templates: [] },
+    };
+  }
+
+  return {
+    ...workspace,
+    anamnesis: { current: null, history: [], state: "available" },
+    prescriptions: { history: [], state: "available" },
   };
 }

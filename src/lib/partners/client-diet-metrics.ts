@@ -65,7 +65,9 @@ export type PartnerClientDietRawData = {
         snapshotSodiumMg: number;
         sortOrder: number;
       }>;
+      alternativeOrder?: number;
       mealTime: string;
+      mealGroupId?: string;
       menuOption?: number;
       optionLabel?: string;
       sortOrder: number;
@@ -79,6 +81,8 @@ export type PartnerClientDietRawData = {
     status: string;
     targetCarbsG: number;
     targetFatG: number;
+    targetFiberMaxG?: number | null;
+    targetFiberMinG?: number | null;
     targetKcal: number;
     targetProteinG: number;
     title: string;
@@ -86,6 +90,13 @@ export type PartnerClientDietRawData = {
     version: number;
     waterLiters: number;
   } | null;
+  plans?: Array<{
+    createdAt: string;
+    id: string;
+    status: string;
+    title: string;
+    updatedAt: string;
+  }>;
   tracking?: {
     dailyLogs: Array<{
       logDate: string;
@@ -153,10 +164,12 @@ export type PartnerClientDietItem = DietNutritionTotals & {
 };
 
 export type PartnerClientDietMeal = {
+  alternativeOrder: number;
   dayOfWeek: number;
   id: string;
   items: PartnerClientDietItem[];
   mealTime: string;
+  mealGroupId: string;
   menuOption: number;
   optionLabel: string;
   sortOrder: number;
@@ -189,6 +202,8 @@ export type PartnerClientDietPlan = {
   statusLabel: string;
   targetCarbs: number;
   targetFat: number;
+  targetFiberMax: number | null;
+  targetFiberMin: number | null;
   targetKcal: number;
   targetProtein: number;
   title: string;
@@ -197,6 +212,15 @@ export type PartnerClientDietPlan = {
   waterLiters: number;
   weekDays: PartnerClientDietDay[];
   weekTotals: DietNutritionTotals;
+};
+
+export type PartnerClientDietPlanSummary = {
+  createdAt: string;
+  id: string;
+  status: DietPlanStatus;
+  statusLabel: string;
+  title: string;
+  updatedAt: string;
 };
 
 export type PartnerClientDietDraft = {
@@ -284,6 +308,9 @@ export type PartnerClientDietTracking = {
 
 export type PartnerClientDietData = {
   drafts: PartnerClientDietDraft[];
+  energy: {
+    getKcal: number | null;
+  };
   events: PartnerClientDietEvent[];
   foods: PartnerClientDietFood[];
   generatedAt: string;
@@ -293,6 +320,7 @@ export type PartnerClientDietData = {
     suggestions: PartnerClientDietFood[];
   };
   plan: PartnerClientDietPlan | null;
+  plans: PartnerClientDietPlanSummary[];
   tracking: PartnerClientDietTracking | null;
 };
 
@@ -511,7 +539,7 @@ function mapItem(row: PartnerClientDietRawData["plan"] extends infer T ? T exten
   };
 }
 
-function sumTotals(items: DietNutritionTotals[]) {
+export function sumDietNutritionTotals(items: DietNutritionTotals[]) {
   return items.reduce((total, item) => addDietTotals(total, item), zeroTotals);
 }
 
@@ -519,15 +547,17 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
   const meals = rawPlan.meals.map((meal): PartnerClientDietMeal => {
     const items = meal.items.map(mapItem).sort((a, b) => a.sortOrder - b.sortOrder);
     return {
+      alternativeOrder: Math.max(1, Math.round(numberValue(meal.alternativeOrder ?? meal.menuOption ?? 1))),
       dayOfWeek: numberValue(meal.dayOfWeek),
       id: meal.id,
       items,
       mealTime: meal.mealTime,
+      mealGroupId: meal.mealGroupId ?? `legacy-${numberValue(meal.dayOfWeek)}-${meal.title}-${meal.mealTime}`,
       menuOption: Math.max(1, Math.round(numberValue(meal.menuOption ?? 1))),
       optionLabel: meal.optionLabel || `Cardápio ${Math.max(1, Math.round(numberValue(meal.menuOption ?? 1)))}`,
       sortOrder: numberValue(meal.sortOrder),
       title: meal.title,
-      totals: sumTotals(items),
+      totals: sumDietNutritionTotals(items),
     };
   });
 
@@ -540,7 +570,7 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
       label,
       meals: dayMeals,
       shortLabel,
-      totals: sumTotals(dayMeals.map((meal) => meal.totals)),
+      totals: sumDietNutritionTotals(dayMeals.map((meal) => meal.totals)),
     };
   });
   const status = normalizeStatus(rawPlan.status);
@@ -563,6 +593,8 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     statusLabel: dietStatusLabel(status),
     targetCarbs: numberValue(rawPlan.targetCarbsG),
     targetFat: numberValue(rawPlan.targetFatG),
+    targetFiberMax: rawPlan.targetFiberMaxG === null || rawPlan.targetFiberMaxG === undefined ? null : numberValue(rawPlan.targetFiberMaxG),
+    targetFiberMin: rawPlan.targetFiberMinG === null || rawPlan.targetFiberMinG === undefined ? null : numberValue(rawPlan.targetFiberMinG),
     targetKcal: numberValue(rawPlan.targetKcal),
     targetProtein: numberValue(rawPlan.targetProteinG),
     title: rawPlan.title,
@@ -570,15 +602,27 @@ function mapPlan(rawPlan: NonNullable<PartnerClientDietRawData["plan"]>): Partne
     version: numberValue(rawPlan.version),
     waterLiters: numberValue(rawPlan.waterLiters),
     weekDays,
-    weekTotals: sumTotals(weekDays.map((day) => day.totals)),
+    weekTotals: sumDietNutritionTotals(weekDays.map((day) => day.totals)),
+  };
+}
+
+function mapPlanSummary(rawPlan: NonNullable<PartnerClientDietRawData["plans"]>[number]): PartnerClientDietPlanSummary {
+  const status = normalizeStatus(rawPlan.status);
+
+  return {
+    createdAt: rawPlan.createdAt,
+    id: rawPlan.id,
+    status,
+    statusLabel: dietStatusLabel(status),
+    title: rawPlan.title,
+    updatedAt: rawPlan.updatedAt,
   };
 }
 
 function plannedMealsForDate(plan: PartnerClientDietPlan, iso: string) {
   const day = plan.weekDays.find((item) => item.dayOfWeek === isoDayOfWeek(iso));
   if (!day) return 0;
-  const menuOptionOne = day.meals.filter((meal) => meal.menuOption === 1);
-  return (menuOptionOne.length ? menuOptionOne : day.meals).length;
+  return new Set(day.meals.map((meal) => meal.mealGroupId)).size;
 }
 
 function buildTrackingCompatibility(
@@ -768,9 +812,17 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
   const suggestions = [...draftFoods, ...popularFoods.filter((food) => !suggestionIds.has(food.id))].slice(0, 8);
 
   const plan = raw.plan ? mapPlan(raw.plan) : null;
+  const plans = (raw.plans ?? (plan ? [{
+    createdAt: plan.createdAt,
+    id: plan.id,
+    status: plan.status,
+    title: plan.title,
+    updatedAt: plan.updatedAt,
+  }] : [])).map(mapPlanSummary);
 
   return {
     drafts,
+    energy: { getKcal: null },
     events: raw.events.map((event) => ({
       actorName: event.actorName,
       createdAt: event.createdAt,
@@ -788,6 +840,7 @@ export function buildPartnerClientDiet(raw: PartnerClientDietRawData): PartnerCl
       suggestions,
     },
     plan,
+    plans,
     tracking: buildTracking(raw, plan),
   };
 }

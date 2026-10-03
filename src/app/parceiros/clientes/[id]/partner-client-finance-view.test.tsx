@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
-import type { PartnerFinanceData } from "@/lib/partners/finance-data";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
+import type { PartnerClientFinanceData } from "@/lib/partners/finance-data";
 
 import { recordReceivablePayment, renewClientPlanContract, revertReceivablePayment } from "../../planos-financeiro/actions";
 import { PartnerClientFinanceView } from "./partner-client-finance-view";
@@ -32,15 +32,7 @@ const overview = {
   },
 } as PartnerClientOverviewData;
 
-const finance: PartnerFinanceData = {
-  clients: [
-    {
-      email: "ana@example.invalid",
-      id: "a1000000-0000-4000-8000-000000000301",
-      name: "Ana Ribeiro",
-      status: "active",
-    },
-  ],
+const finance: PartnerClientFinanceData = {
   contracts: [
     {
       billing_interval_snapshot: "monthly",
@@ -93,14 +85,6 @@ const finance: PartnerFinanceData = {
       status: "paid",
     },
   ],
-  servicePlans: [],
-  summary: {
-    activePlans: 1,
-    clientsWithPlan: 1,
-    overdueCents: 0,
-    pendingCents: 30000,
-    receivedMonthCents: 30000,
-  },
 };
 
 describe("PartnerClientFinanceView", () => {

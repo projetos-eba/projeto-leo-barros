@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { PartnerClientOverviewData } from "@/lib/partners/client-overview-metrics";
+import type { PartnerClientOverviewData } from "@/lib/partners/client-profile/overview";
 
 type ClientOverviewChartProps = {
   data: PartnerClientOverviewData["bodyMeasurements"];

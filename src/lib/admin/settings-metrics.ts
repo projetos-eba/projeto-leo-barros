@@ -44,9 +44,12 @@ export type SettingsAdminProfileRecord = {
   status: string;
 };
 
+export type SettingsAdminRoleRecord = { profile_id: string; role_key: "owner" | "operator" | "viewer" };
+
 export type SettingsRawData = {
   activities: PlatformSettingsActivityRecord[];
   admins: SettingsAdminProfileRecord[];
+  adminRoles?: SettingsAdminRoleRecord[];
   currentProfileId?: string | null;
   integrations: PlatformIntegrationRecord[];
   settings: PlatformSettingRecord[];
@@ -99,6 +102,7 @@ export type SettingsAdminUser = {
   name: string;
   status: string;
   statusLabel: string;
+  role: SettingsAdminRoleRecord["role_key"];
 };
 
 export type AdminSettingsData = {
@@ -247,6 +251,7 @@ export function buildAdminSettingsData(raw: SettingsRawData, now = new Date()): 
   const settingsByKey = new Map(raw.settings.map((setting) => [setting.key, setting.value]));
   const integrationsByKey = new Map(raw.integrations.map((integration) => [integration.integration_key, integration]));
   const activeAdminCount = raw.admins.filter((admin) => admin.status === "active").length;
+  const roleByProfileId = new Map((raw.adminRoles ?? []).map((assignment) => [assignment.profile_id, assignment.role_key]));
 
   const integrations = defaultIntegrations.map((fallback) => {
     const saved = integrationsByKey.get(fallback.integration_key);
@@ -287,6 +292,7 @@ export function buildAdminSettingsData(raw: SettingsRawData, now = new Date()): 
         isCurrentUser: admin.id === raw.currentProfileId,
         isProtectedLastActive: admin.status === "active" && activeAdminCount <= 1,
         name: admin.display_name,
+        role: roleByProfileId.get(admin.id) ?? "owner",
         status: admin.status,
         statusLabel: admin.status === "active"
           ? "Ativo"

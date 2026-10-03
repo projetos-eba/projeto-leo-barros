@@ -16,7 +16,7 @@ type PartnerSettingsShellProps = {
 };
 
 const settingsItems = [
-  { href: "/parceiros/configuracoes/geral", icon: UserRound, label: "Geral" },
+  { href: "/parceiros/configuracoes/geral", icon: UserRound, label: "Minha Conta" },
   { href: "/parceiros/configuracoes/assinatura", icon: CreditCard, label: "Assinatura" },
 ] as const;
 

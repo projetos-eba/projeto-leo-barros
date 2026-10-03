@@ -166,4 +166,29 @@ describe("ClientDietView", () => {
     expect(screen.getByText("Refeição mantida em foco para registrar observação ou ajuste.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ver próxima refeição" })).toBeInTheDocument();
   });
+
+  it("troca somente a alternativa da refeição selecionada", () => {
+    const lunchAlternative = {
+      ...raw.plan!.meals[1]!,
+      alternativeOrder: 2,
+      id: "lunch-alternative",
+      items: [{ ...raw.plan!.meals[1]!.items[0]!, id: "item-lunch-alternative", kcal: 280, name: "Peixe assado", proteinG: 35 }],
+      mealGroupId: "lunch-group",
+    };
+    const diet = buildClientDiet({
+      ...raw,
+      plan: {
+        ...raw.plan!,
+        meals: raw.plan!.meals.map((meal) => meal.id === "lunch" ? { ...meal, alternativeOrder: 1, mealGroupId: "lunch-group" } : meal).concat(lunchAlternative),
+      },
+    }, new Date("2026-07-03T11:00:00.000Z"));
+
+    render(<ClientDietView diet={diet} />);
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Opção de Almoço" }), { target: { value: "lunch-alternative" } });
+
+    expect(screen.getAllByText("Peixe assado").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Frango grelhado")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Café da manhã").length).toBeGreaterThan(0);
+  });
 });

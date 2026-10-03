@@ -1,0 +1,2117 @@
+{
+  "version": "2026-09-09",
+  "items": [
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-BICICLETA",
+      "name": "Abdominal bicicleta",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-COM-ELEVACAO-DE-QUADRIL",
+      "name": "Abdominal com elevação de quadril",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-CRUNCH",
+      "name": "Abdominal crunch",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-DECLINADO",
+      "name": "Abdominal declinado",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-DECLINADO-SIT-UP",
+      "name": "Abdominal declinado (sit-up)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-DECLINADO-COM-PESO",
+      "name": "Abdominal declinado com peso",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-INVERTIDO",
+      "name": "Abdominal invertido",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-NA-MAQUINA",
+      "name": "Abdominal na máquina",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-NA-MAQUINA-AB-COASTER",
+      "name": "Abdominal na máquina ab coaster",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-NA-POLIA",
+      "name": "Abdominal na polia",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-SIT-UP",
+      "name": "Abdominal sit-up",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDOMINAL-V-V-UP",
+      "name": "Abdominal V (v-up)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDUCAO-DE-QUADRIL-DEITADO",
+      "name": "Abdução de quadril deitado",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDUCAO-DE-QUADRIL-NA-MAQUINA",
+      "name": "Abdução de quadril na máquina",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ABDUCAO-DE-QUADRIL-NA-POLIA",
+      "name": "Abdução de quadril na polia",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AFUNDO-LUNGE",
+      "name": "Afundo (lunge)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AFUNDO-COM-HALTERES",
+      "name": "Afundo com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AFUNDO-COM-ROTACAO-E-KETTLEBELL",
+      "name": "Afundo com rotação e kettlebell",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AFUNDO-PARADO-COM-BARRA",
+      "name": "Afundo parado com barra",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-AFUNDO-COM-HALTERES",
+      "name": "Agachamento afundo com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-AFUNDO-NO-SMITH",
+      "name": "Agachamento afundo no Smith",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-BULGARO-COM-BARRA",
+      "name": "Agachamento búlgaro com barra",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-BULGARO-COM-HALTERES",
+      "name": "Agachamento búlgaro com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-COM-HALTERES",
+      "name": "Agachamento com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-COM-PAUSA-BARRA-NAS-COSTAS",
+      "name": "Agachamento com pausa (barra nas costas)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-COM-SALTO",
+      "name": "Agachamento com salto",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-EM-V-INVERTIDO",
+      "name": "Agachamento em V invertido",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-FRONTAL",
+      "name": "Agachamento frontal",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-GOBLET-COM-KETTLEBELL",
+      "name": "Agachamento goblet com kettlebell",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-HACK-NA-MAQUINA",
+      "name": "Agachamento hack na máquina",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-NO-APARELHO-EM-V",
+      "name": "Agachamento no aparelho em V",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-NO-SMITH",
+      "name": "Agachamento no Smith",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-OVERHEAD-COM-BARRA",
+      "name": "Agachamento overhead com barra",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-PISTOL-UNILATERAL",
+      "name": "Agachamento pistol (unilateral)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-PISTOL-NA-CAIXA",
+      "name": "Agachamento pistol na caixa",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-SUMO-COM-HALTERES",
+      "name": "Agachamento sumô com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-SUMO-COM-KETTLEBELL",
+      "name": "Agachamento sumô com kettlebell",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-AGACHAMENTO-SUMO-LIVRE",
+      "name": "Agachamento sumô livre",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ARRANCO-SNATCH",
+      "name": "Arranco (snatch)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ARRANCO-COM-HALTER",
+      "name": "Arranco com halter",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ARRANCO-COM-KETTLEBELL",
+      "name": "Arranco com kettlebell",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ARRANCO-SUSPENSO-HANG-SNATCH",
+      "name": "Arranco suspenso (hang snatch)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ARREMESSO-JERK",
+      "name": "Arremesso (jerk)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-BALANCO-COM-KETTLEBELL-SWING",
+      "name": "Balanço com kettlebell (swing)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-BALANCO-UNILATERAL-COM-KETTLEBELL",
+      "name": "Balanço unilateral com kettlebell",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-BARRA-FIXA-PULL-UP",
+      "name": "Barra fixa (pull-up)",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-BARRA-FIXA-ASSISTIDA-NA-MAQUINA",
+      "name": "Barra fixa assistida na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-BARRA-FIXA-SUPINADA",
+      "name": "Barra fixa supinada",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-BOM-DIA-GOOD-MORNING",
+      "name": "Bom dia (good morning)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CADEIRA-ADUTORA-ADUCAO-DE-COXA",
+      "name": "Cadeira adutora (adução de coxa)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CANIVETE-PILATES-JACKKNIFE",
+      "name": "Canivete (pilates jackknife)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-COICE-DE-GLUTEO",
+      "name": "Coice de glúteo",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-COICE-DE-GLUTEO-NA-MAQUINA",
+      "name": "Coice de glúteo na máquina",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-COICE-DE-GLUTEO-NA-POLIA",
+      "name": "Coice de glúteo na polia",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CONCHA-DEITADO-DE-LADO-CLAM",
+      "name": "Concha deitado de lado (clam)",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-COM-HALTERES",
+      "name": "Crucifixo com halteres",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-DECLINADO-COM-HALTERES",
+      "name": "Crucifixo declinado com halteres",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-EM-PE-NA-POLIA",
+      "name": "Crucifixo em pé na polia",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-INCLINADO-NA-POLIA",
+      "name": "Crucifixo inclinado na polia",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-INVERTIDO-NA-MAQUINA-PECK-DECK",
+      "name": "Crucifixo invertido na máquina (peck deck)",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-INVERTIDO-NA-POLIA",
+      "name": "Crucifixo invertido na polia",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-CRUCIFIXO-NA-POLIA-BAIXA",
+      "name": "Crucifixo na polia baixa",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DEAD-BUG-INSETO-MORTO",
+      "name": "Dead bug (inseto morto)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-ARNOLD-COM-HALTERES",
+      "name": "Desenvolvimento Arnold com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-COM-ANILHA",
+      "name": "Desenvolvimento com anilha",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-COM-HALTERES",
+      "name": "Desenvolvimento com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-LANDMINE",
+      "name": "Desenvolvimento landmine",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-LANDMINE-UNILATERAL",
+      "name": "Desenvolvimento landmine unilateral",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-MILITAR",
+      "name": "Desenvolvimento militar",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-NA-MAQUINA",
+      "name": "Desenvolvimento na máquina",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-POR-TRAS-DA-NUCA",
+      "name": "Desenvolvimento por trás da nuca",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-SENTADO-COM-BARRA",
+      "name": "Desenvolvimento sentado com barra",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-DESENVOLVIMENTO-SENTADO-COM-HALTERES",
+      "name": "Desenvolvimento sentado com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-GLUTEO-E-POSTERIOR-GHR",
+      "name": "Elevação de glúteo e posterior (GHR)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-JOELHOS-NA-CADEIRA-DO-CAPITAO",
+      "name": "Elevação de joelhos na cadeira do capitão",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-JOELHOS-SENTADO",
+      "name": "Elevação de joelhos sentado",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-PANTURRILHA-EM-PE",
+      "name": "Elevação de panturrilha em pé",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-PANTURRILHA-SENTADO",
+      "name": "Elevação de panturrilha sentado",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-PERNAS",
+      "name": "Elevação de pernas",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-PERNAS-NA-BARRA",
+      "name": "Elevação de pernas na barra",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-QUADRIL-HIP-THRUST",
+      "name": "Elevação de quadril (hip thrust)",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-QUADRIL-COM-BARRA-HIP-THRUST",
+      "name": "Elevação de quadril com barra (hip thrust)",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-DE-QUADRIL-NA-MAQUINA",
+      "name": "Elevação de quadril na máquina",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-EM-Y-COM-HALTERES",
+      "name": "Elevação em Y com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-FRONTAL-COM-BARRA-W",
+      "name": "Elevação frontal com barra W",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-FRONTAL-COM-HALTERES",
+      "name": "Elevação frontal com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-FRONTAL-NA-POLIA",
+      "name": "Elevação frontal na polia",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-COM-HALTERES",
+      "name": "Elevação lateral com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-CURVADO-COM-HALTERES",
+      "name": "Elevação lateral curvado com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-NA-MAQUINA",
+      "name": "Elevação lateral na máquina",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-NA-POLIA",
+      "name": "Elevação lateral na polia",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-POSTERIOR-SENTADO-COM-HALTERES",
+      "name": "Elevação lateral posterior sentado com halteres",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELEVACAO-LATERAL-UNILATERAL-NA-POLIA",
+      "name": "Elevação lateral unilateral na polia",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ELIPTICO-MAQUINA",
+      "name": "Elíptico (máquina)",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ENCOLHIMENTO-COM-BARRA",
+      "name": "Encolhimento com barra",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ENCOLHIMENTO-COM-HALTERES",
+      "name": "Encolhimento com halteres",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ENCOLHIMENTO-NA-MAQUINA",
+      "name": "Encolhimento na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ENCOLHIMENTO-NA-POLIA",
+      "name": "Encolhimento na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ENCOLHIMENTO-NO-SMITH",
+      "name": "Encolhimento no Smith",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ESCALADOR-MOUNTAIN-CLIMBER",
+      "name": "Escalador (mountain climber)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ESTEIRA",
+      "name": "Esteira",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-PERNA-CADEIRA-EXTENSORA",
+      "name": "Extensão de perna (cadeira extensora)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-PERNA-UNILATERAL",
+      "name": "Extensão de perna unilateral",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-ACIMA-DA-CABECA-NA-POLIA",
+      "name": "Extensão de tríceps acima da cabeça na polia",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-COM-HALTERES",
+      "name": "Extensão de tríceps com halteres",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-DEITADO-NA-POLIA",
+      "name": "Extensão de tríceps deitado na polia",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-NA-MAQUINA",
+      "name": "Extensão de tríceps na máquina",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-NA-POLIA",
+      "name": "Extensão de tríceps na polia",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-DE-TRICEPS-SENTADO-COM-HALTERES",
+      "name": "Extensão de tríceps sentado com halteres",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-EXTENSAO-LOMBAR",
+      "name": "Extensão lombar",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FACE-PULL-PUXADA-FACIAL",
+      "name": "Face pull (puxada facial)",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "costas"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-ARCHER-ARQUEIRO",
+      "name": "Flexão archer (arqueiro)",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-COM-PEGADA-FECHADA",
+      "name": "Flexão com pegada fechada",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [
+        "peito",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-BRACO",
+      "name": "Flexão de braço",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-PERNA-MESA-FLEXORA",
+      "name": "Flexão de perna (mesa flexora)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-PERNA-COM-HALTER",
+      "name": "Flexão de perna com halter",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-PERNA-SENTADO-CADEIRA-FLEXORA",
+      "name": "Flexão de perna sentado (cadeira flexora)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-PERNA-UNILATERAL",
+      "name": "Flexão de perna unilateral",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-DE-PERNA-UNILATERAL-SENTADO",
+      "name": "Flexão de perna unilateral sentado",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-LATERAL-A-45-GRAUS",
+      "name": "Flexão lateral a 45 graus",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-LATERAL-NA-POLIA",
+      "name": "Flexão lateral na polia",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-FLEXAO-PIKE",
+      "name": "Flexão pike",
+      "primary_muscle_group": "ombros",
+      "secondary_muscle_groups": [
+        "triceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-HIPEREXTENSAO-LOMBAR",
+      "name": "Hiperextensão lombar",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEG-PRESS",
+      "name": "Leg press",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEG-PRESS-HORIZONTAL",
+      "name": "Leg press horizontal",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEG-PRESS-HORIZONTAL-UNILATERAL",
+      "name": "Leg press horizontal unilateral",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEG-PRESS-UNILATERAL",
+      "name": "Leg press unilateral",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEVANTAMENTO-TERRA-COM-TRAP-BAR",
+      "name": "Levantamento terra com trap bar",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEVANTAMENTO-TERRA-NO-SMITH",
+      "name": "Levantamento terra no Smith",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEVANTAMENTO-TERRA-ROMENO-COM-HALTERES",
+      "name": "Levantamento terra romeno com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEVANTAMENTO-TERRA-SUMO-COM-PAUSA",
+      "name": "Levantamento terra sumô com pausa",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-LEVANTAMENTO-TERRA-UNILATERAL-COM-HALTERES",
+      "name": "Levantamento terra unilateral com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-MAQUINA-DE-GLUTEO-MONSTER-GLUTE",
+      "name": "Máquina de glúteo (monster glute)",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-MERGULHO-NAS-PARALELAS",
+      "name": "Mergulho nas paralelas",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-MERGULHO-NO-BANCO",
+      "name": "Mergulho no banco",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-MERGULHO-SENTADO-NA-MAQUINA",
+      "name": "Mergulho sentado na máquina",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-MUSCLE-UP-NA-BARRA",
+      "name": "Muscle-up na barra",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-NADADOR-SWIMMING",
+      "name": "Nadador (swimming)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PARALELAS-ASSISTIDAS-NA-MAQUINA",
+      "name": "Paralelas assistidas na máquina",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PES-NA-BARRA-TOES-TO-BAR",
+      "name": "Pés na barra (toes to bar)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-POLICHINELO",
+      "name": "Polichinelo",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PONTE-DE-GLUTEO",
+      "name": "Ponte de glúteo",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PONTE-DE-GLUTEO-UNILATERAL",
+      "name": "Ponte de glúteo unilateral",
+      "primary_muscle_group": "gluteos",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PRANCHA-LATERAL",
+      "name": "Prancha lateral",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PRANCHA-RKC",
+      "name": "Prancha RKC",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PULAR-CORDA",
+      "name": "Pular corda",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PULL-THROUGH-NA-POLIA",
+      "name": "Pull-through na polia",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PULLOVER-COM-BARRA",
+      "name": "Pullover com barra",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PULLOVER-COM-HALTER",
+      "name": "Pullover com halter",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PUSH-PRESS",
+      "name": "Push press",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-ABERTA",
+      "name": "Puxada aberta",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-ABERTA-UNILATERAL",
+      "name": "Puxada aberta unilateral",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-ALTA-DO-ARRANCO",
+      "name": "Puxada alta do arranco",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-ALTA-DO-TERRA-SUMO",
+      "name": "Puxada alta do terra sumô",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-ALTA-SUMO-COM-KETTLEBELL",
+      "name": "Puxada alta sumô com kettlebell",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-COM-BRACOS-ESTENDIDOS-NA-POLIA",
+      "name": "Puxada com braços estendidos na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-COM-PEGADA-MAG",
+      "name": "Puxada com pegada MAG",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-COM-PEGADA-NEUTRA",
+      "name": "Puxada com pegada neutra",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-FRONTAL-PULLDOWN",
+      "name": "Puxada frontal (pulldown)",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-POR-TRAS-DA-NUCA",
+      "name": "Puxada por trás da nuca",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-SUPINADA",
+      "name": "Puxada supinada",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-PUXADA-UNILATERAL-NA-POLIA",
+      "name": "Puxada unilateral na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-COM-BARRA",
+      "name": "Remada alta com barra",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-COM-BARRA-W",
+      "name": "Remada alta com barra W",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-COM-HALTERES",
+      "name": "Remada alta com halteres",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-NA-MAQUINA",
+      "name": "Remada alta na máquina",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-PEGADA-SUPINADA-NA-MAQUINA",
+      "name": "Remada alta pegada supinada na máquina",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-ALTA-UNILATERAL-NA-MAQUINA",
+      "name": "Remada alta unilateral na máquina",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-BAIXA-NA-MAQUINA",
+      "name": "Remada baixa na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-BAIXA-SENTADO-NA-POLIA",
+      "name": "Remada baixa sentado na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-BAIXA-SENTADO-NO-CHAO-NA-POLIA",
+      "name": "Remada baixa sentado no chão na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-BAIXA-UNILATERAL-NA-MAQUINA",
+      "name": "Remada baixa unilateral na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-CAVALINHO-NA-MAQUINA",
+      "name": "Remada cavalinho na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-COM-BARRA-PEGADA-SUPINADA",
+      "name": "Remada com barra pegada supinada",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-COM-HALTERES",
+      "name": "Remada com halteres",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-DEITADO-COM-BARRA",
+      "name": "Remada deitado com barra",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-INCLINADA-COM-BARRA",
+      "name": "Remada inclinada com barra",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-INCLINADA-COM-HALTERES",
+      "name": "Remada inclinada com halteres",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-INVERTIDA",
+      "name": "Remada invertida",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-NO-SMITH",
+      "name": "Remada no Smith",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-PENDLAY",
+      "name": "Remada Pendlay",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-SENTADO-NA-MAQUINA",
+      "name": "Remada sentado na máquina",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-SENTADO-UNILATERAL-NA-POLIA",
+      "name": "Remada sentado unilateral na polia",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMADA-UNILATERAL-COM-HALTER-SERROTE",
+      "name": "Remada unilateral com halter (serrote)",
+      "primary_muscle_group": "costas",
+      "secondary_muscle_groups": [
+        "biceps"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-REMO-MAQUINA",
+      "name": "Remo (máquina)",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROLO-ABDOMINAL-ROLL-OUT",
+      "name": "Rolo abdominal (roll-out)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-BICEPS-NA-MAQUINA",
+      "name": "Rosca de bíceps na máquina",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-PUNHO-COM-BARRA",
+      "name": "Rosca de punho com barra",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-PUNHO-COM-BARRA-W",
+      "name": "Rosca de punho com barra W",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-PUNHO-COM-HALTERES",
+      "name": "Rosca de punho com halteres",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-PUNHO-INVERSA-COM-BARRA",
+      "name": "Rosca de punho inversa com barra",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DE-PUNHO-INVERSA-COM-HALTERES",
+      "name": "Rosca de punho inversa com halteres",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DIRETA-COM-BARRA-W",
+      "name": "Rosca direta com barra W",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DIRETA-COM-HALTERES",
+      "name": "Rosca direta com halteres",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-DIRETA-NA-POLIA",
+      "name": "Rosca direta na polia",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-INCLINADA-COM-HALTERES",
+      "name": "Rosca inclinada com halteres",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-INVERSA-COM-BARRA",
+      "name": "Rosca inversa com barra",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-MARTELO-COM-HALTERES",
+      "name": "Rosca martelo com halteres",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-MARTELO-NA-POLIA",
+      "name": "Rosca martelo na polia",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-SCOTT-COM-BARRA",
+      "name": "Rosca scott com barra",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-SCOTT-COM-BARRA-W",
+      "name": "Rosca scott com barra W",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-SCOTT-COM-HALTERES",
+      "name": "Rosca scott com halteres",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROSCA-SCOTT-NA-MAQUINA",
+      "name": "Rosca scott na máquina",
+      "primary_muscle_group": "biceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROTACAO-DE-TRONCO-NA-POLIA",
+      "name": "Rotação de tronco na polia",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-ROTACAO-EXTERNA-NA-POLIA",
+      "name": "Rotação externa na polia",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROTACAO-INTERNA-NA-POLIA",
+      "name": "Rotação interna na polia",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-ROTACAO-RUSSA-RUSSIAN-TWIST",
+      "name": "Rotação russa (russian twist)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SIMULADOR-DE-ESCADA-STEPMILL",
+      "name": "Simulador de escada (stepmill)",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SKI-ERG-ERGOMETRO-DE-ESQUI",
+      "name": "Ski erg (ergômetro de esqui)",
+      "primary_muscle_group": "cardio_condicionamento",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SNATCH-BALANCE",
+      "name": "Snatch balance",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-STIFF-TERRA-PERNAS-RIGIDAS",
+      "name": "Stiff (terra pernas rígidas)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-STIFF-COM-HALTERES",
+      "name": "Stiff com halteres",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-STIFF-UNILATERAL-COM-BARRA",
+      "name": "Stiff unilateral com barra",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUBIDA-NO-BANCO-STEP-UP",
+      "name": "Subida no banco (step-up)",
+      "primary_muscle_group": "pernas",
+      "secondary_muscle_groups": [
+        "gluteos"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-COM-PEGADA-FECHADA",
+      "name": "Supino com pegada fechada",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [
+        "peito",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-DECLINADO-NA-MAQUINA",
+      "name": "Supino declinado na máquina",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-COM-BARRA",
+      "name": "Supino inclinado com barra",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-COM-HALTERES",
+      "name": "Supino inclinado com halteres",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-COM-ROTACAO-E-HALTERES",
+      "name": "Supino inclinado com rotação e halteres",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-NA-MAQUINA",
+      "name": "Supino inclinado na máquina",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-NA-MAQUINA-CHEST-PRESS",
+      "name": "Supino inclinado na máquina (chest press)",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-INCLINADO-NO-SMITH",
+      "name": "Supino inclinado no Smith",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-NA-MAQUINA-CHEST-PRESS",
+      "name": "Supino na máquina (chest press)",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-NA-MAQUINA-HAMMER",
+      "name": "Supino na máquina hammer",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-NO-SMITH",
+      "name": "Supino no Smith",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-RETO",
+      "name": "Supino reto",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-SUPINO-RETO-COM-HALTERES",
+      "name": "Supino reto com halteres",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "triceps",
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-THRUSTER-2",
+      "name": "Thruster (2)",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-THRUSTER-COM-HALTERES",
+      "name": "Thruster com halteres",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-TOQUE-NO-OMBRO-PRANCHA",
+      "name": "Toque no ombro (prancha)",
+      "primary_muscle_group": "core",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-TRICEPS-COICE-COM-HALTERES",
+      "name": "Tríceps coice com halteres",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-TRICEPS-PUSHDOWN-NA-POLIA",
+      "name": "Tríceps pushdown na polia",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-TRICEPS-TESTA",
+      "name": "Tríceps testa",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-TRICEPS-TESTA-DEITADO",
+      "name": "Tríceps testa deitado",
+      "primary_muscle_group": "triceps",
+      "secondary_muscle_groups": [],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    },
+    {
+      "source_key": "exercise-library:EX-TURKISH-GET-UP",
+      "name": "Turkish get-up",
+      "primary_muscle_group": null,
+      "secondary_muscle_groups": [],
+      "status": "pending_review",
+      "note": "Requer revisão da execução/variante ou grupo não representado no mapa atual."
+    },
+    {
+      "source_key": "exercise-library:EX-VOADOR-PECK-DECK",
+      "name": "Voador (peck deck)",
+      "primary_muscle_group": "peito",
+      "secondary_muscle_groups": [
+        "ombros"
+      ],
+      "status": "classified",
+      "note": "Correspondência anatômica explícita; revisar variantes antes de alterar."
+    }
+  ]
+}

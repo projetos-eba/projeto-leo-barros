@@ -4,7 +4,7 @@ import {
   buildPartnerClientPhotos,
   formatPhotoNumber,
   type PartnerClientPhotosRawData,
-} from "@/lib/partners/client-photos-metrics";
+} from "@/lib/partners/client-profile/photos";
 import { createClient } from "@/lib/supabase/server";
 
 type PhotoExportRouteProps = {

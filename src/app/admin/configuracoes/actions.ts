@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getCurrentProfile } from "@/lib/auth/next-guards";
+import { requireAdminCapability } from "@/lib/admin/authorization/application/admin-authorization-service";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import {
@@ -86,13 +86,9 @@ const logoMimeTypes = new Map([
 const maxLogoSizeBytes = 2 * 1024 * 1024;
 
 async function requireAdminProfileId() {
-  const { profile, reason } = await getCurrentProfile();
-
-  if (!profile || profile.role !== "admin" || profile.status !== "active") {
-    throw new Error(reason === "missing_session" ? "Sessão expirada." : "Conta sem acesso admin ativo.");
-  }
-
-  return profile.id;
+  const authorization = await requireAdminCapability("settings.manage");
+  if (!authorization) throw new Error("Sua conta não possui permissão para alterar configurações.");
+  return authorization.profileId;
 }
 
 async function writeActivity(

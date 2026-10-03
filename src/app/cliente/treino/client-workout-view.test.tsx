@@ -55,8 +55,8 @@ const raw: ClientWorkoutRawData = {
             restSeconds: 90,
             secondaryMuscleGroups: ["triceps"],
             sets: [
-              { id: "set-1", intensity: "warmup", loadKg: 40, reps: 12, setNumber: 1 },
-              { id: "set-2", intensity: "moderate", loadKg: 60, reps: 10, setNumber: 2 },
+              { id: "set-1", intensity: "warmup", loadKg: 40, reps: 12, rir: null, setNumber: 1 },
+              { id: "set-2", intensity: "moderate", loadKg: 60, reps: 10, rir: 2, setNumber: 2 },
             ],
             sortOrder: 0,
             technique: "normal",
@@ -104,6 +104,9 @@ describe("ClientWorkoutView", () => {
     expect(screen.getByRole("heading", { name: "Exercícios do treino" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Músculos trabalhados" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Histórico de treinos" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^A Peito e Tríceps/i }));
+    expect(screen.getByText("RIR 2")).toBeInTheDocument();
+    expect(screen.queryByText(/Cadência/i)).not.toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: /Dieta/i })).toHaveAttribute("href", "/cliente/dieta");
     expect(screen.getByRole("link", { name: /Treino/i })).toHaveAttribute("href", "/cliente/treino");

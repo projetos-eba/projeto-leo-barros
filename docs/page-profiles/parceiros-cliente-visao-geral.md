@@ -56,6 +56,8 @@ Entregar ao parceiro uma visao operacional individual do Cliente, com dados de a
 - Renovação de plano financeiro é contrato/recebimento. Atualização de plano clínico é publicação de nova dieta ou treino e deve permanecer separada do financeiro.
 - Mobile compacta avatar e identidade em linha, dados cadastrais em duas colunas, acoes padronizadas abaixo do perfil, plano contratado no lugar dos escopos e abas com scroll interno; a aba Planos & Financeiro deve manter tabela com scroll interno e resumo financeiro sem overflow horizontal.
 
+O cabeçalho de todas as abas oferece `Editar bio`, com o mesmo drawer lateral para nascimento, sexo biológico e objetivo. Ao salvar, os dados são atualizados mantendo a aba; atalhos de Avaliações usam o mesmo componente.
+
 ## Estados
 
 - Cliente com dados completos.

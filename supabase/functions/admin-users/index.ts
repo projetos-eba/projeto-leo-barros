@@ -319,6 +319,18 @@ Deno.serve(async (request) => {
     );
   }
 
+  const { data: canManagePermissions, error: capabilityError } = await callerClient
+    .rpc("admin_has_capability", { p_capability: "permissions.manage" });
+
+  if (capabilityError || canManagePermissions !== true) {
+    return errorResponse(
+      403,
+      requestId,
+      { code: "FORBIDDEN", message: "A operação não é permitida." },
+      origin,
+    );
+  }
+
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -549,6 +561,15 @@ Deno.serve(async (request) => {
       );
     }
 
+    await adminClient.rpc("admin_record_audit_event", {
+      p_actor_profile_id: callerProfile.id,
+      p_action_key: "professional.created",
+      p_resource_type: "admin_user",
+      p_target_profile_id: result.profile_id,
+      p_outcome: "succeeded",
+      p_metadata: { status },
+    });
+
     return response(
       202,
       requestId,
@@ -593,6 +614,14 @@ Deno.serve(async (request) => {
     }
 
     const result = data as AdminMutationResult;
+    await adminClient.rpc("admin_record_audit_event", {
+      p_actor_profile_id: callerProfile.id,
+      p_action_key: "admin.user.deleted",
+      p_resource_type: "admin_user",
+      p_target_profile_id: result.profile_id,
+      p_outcome: "succeeded",
+      p_metadata: { status: "disabled" },
+    });
     return response(
       200,
       requestId,
@@ -659,6 +688,14 @@ Deno.serve(async (request) => {
   }
 
   const result = data as AdminMutationResult;
+  await adminClient.rpc("admin_record_audit_event", {
+    p_actor_profile_id: callerProfile.id,
+    p_action_key: action === "activate" || action === "deactivate" ? "admin.user.status.changed" : "admin.user.updated",
+    p_resource_type: "admin_user",
+    p_target_profile_id: result.profile_id,
+    p_outcome: "succeeded",
+    p_metadata: { status },
+  });
   return response(
     200,
     requestId,
